@@ -30,6 +30,8 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="CDebug.h" />
+		<Unit filename="CFile.cpp" />
+		<Unit filename="CFile.h" />
 		<Unit filename="CFont.cpp" />
 		<Unit filename="CFont.h" />
 		<Unit filename="CGame.cpp" />
@@ -43,8 +45,6 @@
 		<Unit filename="CMap.h" />
 		<Unit filename="CMenu.cpp" />
 		<Unit filename="CMenu.h" />
-		<Unit filename="COpen.cpp" />
-		<Unit filename="COpen.h" />
 		<Unit filename="CPicture.cpp">
 			<Option compilerVar="CC" />
 		</Unit>

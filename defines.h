@@ -91,6 +91,14 @@ typedef struct BobtypeMAP
 #define MAP_GREENLAND  0x00
 #define MAP_WASTELAND  0x01
 #define MAP_WINTERLAND 0x02
+//structure to save vertex coordinates
+struct vertexPoint
+{
+    int x;
+    int y;
+    int blit_x;
+    int blit_y;
+};
 
 //IMPORTANT: for enumerating the contents of loaded files put the constants in the right order here.
 //           if the order of file loading changes, so change the constants in the same way!

@@ -18,7 +18,8 @@ class CSurface
         static Uint32 GetPixel(SDL_Surface *surface, int x, int y);
         static void DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap);
         static void DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3);
-        static void get_normVectors(bobMAP *myMap);
+        static void get_nodeVectors(bobMAP *myMap);
+        static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
 
     private:
         static bool gouraud;
@@ -28,6 +29,10 @@ class CSurface
         static struct vector get_flatVector(struct point *P1, struct point *P2, struct point *P3);
         static Sint32 get_LightIntensity(struct vector node);
         static float absf(float a);
+        //update flatVectors around a vertex
+        static void update_flatVectors(bobMAP *myMap, int VertexX, int VertexY);
+        //update nodeVector based on new flatVectors around it
+        static void update_nodeVector(bobMAP *myMap, int VertexX, int VertexY);
 };
 
 #endif

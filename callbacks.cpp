@@ -43,8 +43,8 @@ void callback::mainmenu(int Param)
                     break;
 
         case LOADMAP:
-                    Map = new CMap("BERG_.WLD");
-                    //Map = new CMap("MISS208.WLD");
+                    //Map = new CMap("BERG_.SWD");
+                    Map = new CMap("MISS208.WLD");
                     //Map = new CMap(NULL);
                     global::s2->setMap(Map);
                     MainMenu->setWaste();

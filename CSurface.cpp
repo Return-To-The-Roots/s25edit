@@ -302,16 +302,6 @@ void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bob
         {
             if (j%2 == 0)
             {
-                //first UpSideDown
-                tempP1.x = 0;
-                tempP1.y = vertex[(j+1)*width+width-1].y;
-                tempP1.z = vertex[(j+1)*width+width-1].z;
-                tempP1.i = vertex[(j+1)*width+width-1].i;
-                tempP2.x = TRIANGLE_WIDTH/2;
-                tempP2.y = vertex[(j)*width+width-1].y;
-                tempP2.z = vertex[(j)*width+width-1].z;
-                tempP2.i = vertex[(j)*width+width-1].i;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, tempP2, vertex[j*width+0]);
                 //first RightSideUp
                 tempP2.x = 0;
                 tempP2.y = vertex[(j+1)*width+width-1].y;
@@ -483,7 +473,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
 
         if (!triangle_shown)
             return;
-    }if (P1.x == 27 && P1.y == 0) printf("\n\ni1=%.4f,i2=%.4f,i3=%.4f", P1.i/(pow(2,16)),P2.i/(pow(2,16)),P3.i/(pow(2,16)));
+    }
 
     //find out the texture for the triangle
     unsigned char upperX, upperY, leftX, leftY, rightX, rightY;
@@ -649,7 +639,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
     }
 }
 
-void CSurface::get_normVectors(bobMAP *myMap)
+void CSurface::get_nodeVectors(bobMAP *myMap)
 {
     //prepare triangle field
     int height = myMap->height;
@@ -805,6 +795,126 @@ struct vector CSurface::get_flatVector(struct point *P1, struct point *P2, struc
     cross = get_normVector(cross);
 
     return cross;
+}
+
+void CSurface::update_shading(bobMAP *myMap, int VertexX, int VertexY)
+{
+    //vertex count for the points
+    int X, Y;
+
+    bool even = false;
+    if (VertexY%2 == 0)
+        even = true;
+
+    update_flatVectors(myMap, VertexX, VertexY);
+    update_nodeVector(myMap, VertexX, VertexY);
+
+    //now update all nodeVectors around VertexX and VertexY
+    //update first vertex left upside
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += myMap->width;
+    Y = VertexY-1;                  if (Y < 0) Y += myMap->height;
+    update_nodeVector(myMap, X, Y);
+    //update second vertex right upside
+    X = VertexX + (even ? 0 : 1);   if (X >= myMap->width) X -= myMap->width;
+    Y = VertexY-1;                  if (Y < 0) Y += myMap->height;
+    update_nodeVector(myMap, X, Y);
+    //update third point bottom left
+    X = VertexX-1;                  if (X < 0) X += myMap->width;
+    Y = VertexY;
+    update_nodeVector(myMap, X, Y);
+    //update fourth point bottom right
+    X = VertexX+1;                  if (X >= myMap->width) X -= myMap->width;
+    Y = VertexY;
+    update_nodeVector(myMap, X, Y);
+    //update fifth point down left
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += myMap->width;
+    Y = VertexY+1;                  if (Y >= myMap->height) Y -= myMap->height;
+    update_nodeVector(myMap, X, Y);
+    //update sixth point down right
+    X = VertexX + (even ? 0 : 1);   if (X >= myMap->width) X -= myMap->width;
+    Y = VertexY+1;                  if (Y >= myMap->height) Y -= myMap->height;
+    update_nodeVector(myMap, X, Y);
+}
+
+void CSurface::update_flatVectors(bobMAP *myMap, int VertexX, int VertexY)
+{
+    //point structures for the triangles, Pmiddle is the point in the middle of the hexagon we will update
+    struct point *P1, *P2, *P3, *Pmiddle;
+    //vertex count for the points
+    int P1x, P1y, P2x, P2y, P3x, P3y;
+
+    bool even = false;
+    if (VertexY%2 == 0)
+        even = true;
+
+    Pmiddle = &myMap->vertex[VertexY*myMap->width+VertexX];
+
+    //update first triangle left upside
+    P1x = VertexX - (even ? 1 : 0);   if (P1x < 0) P1x += myMap->width;
+    P1y = VertexY-1;                  if (P1y < 0) P1y += myMap->height;
+    P1 = &myMap->vertex[P1y*myMap->width+P1x];
+    P2x = VertexX-1;                  if (P2x < 0) P2x += myMap->width;
+    P2y = VertexY;
+    P2 = &myMap->vertex[P2y*myMap->width+P2x];
+    P3 = Pmiddle;
+    P1->flatVector = get_flatVector(P1, P2, P3);
+
+    //update second triangle right upside
+    P1x = VertexX + (even ? 0 : 1);   if (P1x >= myMap->width) P1x -= myMap->width;
+    P1y = VertexY-1;                  if (P1y < 0) P1y += myMap->height;
+    P1 = &myMap->vertex[P1y*myMap->width+P1x];
+    P2 = Pmiddle;
+    P3x = VertexX+1;                  if (P3x >= myMap->width) P3x -= myMap->width;
+    P3y = VertexY;
+    P3 = &myMap->vertex[P3y*myMap->width+P3x];
+    P1->flatVector = get_flatVector(P1, P2, P3);
+
+    //update third triangle down middle
+    P1 = Pmiddle;
+    P2x = VertexX - (even ? 1 : 0);   if (P2x < 0) P2x += myMap->width;
+    P2y = VertexY+1;                  if (P2y >= myMap->height) P2y -= myMap->height;
+    P2 = &myMap->vertex[P2y*myMap->width+P2x];
+    P3x = VertexX + (even ? 0 : 1);   if (P3x >= myMap->width) P3x -= myMap->width;
+    P3y = VertexY+1;                  if (P3y >= myMap->height) P3y -= myMap->height;
+    P3 = &myMap->vertex[P3y*myMap->width+P3x];
+    P1->flatVector = get_flatVector(P1, P2, P3);
+}
+
+void CSurface::update_nodeVector(bobMAP *myMap, int VertexX, int VertexY)
+{
+    int j = VertexY;
+    int i = VertexX;
+    int width = myMap->width;
+    int height = myMap->height;
+    struct point *vertex = myMap->vertex;
+
+    //temporary index
+    int index, index2;
+
+    if (j%2 == 0)
+    {
+        index = (i-1 < 0 ? width-1 : i-1);
+        if (j == 0) //first line
+            vertex[j*width+i].normVector = get_nodeVector(vertex[(height-1)*width+index].flatVector, vertex[(height-1)*width+i].flatVector, vertex[j*width+i].flatVector);
+        else
+            vertex[j*width+i].normVector = get_nodeVector(vertex[(j-1)*width+index].flatVector, vertex[(j-1)*width+i].flatVector, vertex[j*width+i].flatVector);
+        vertex[j*width+i].i = get_LightIntensity(vertex[j*width+i].normVector);
+    }
+    else
+    {
+        if (i-1 < 0)
+            index = width-1;
+        else
+            index = i-1;
+
+        if (i+1 >= width)
+            index2 = 0;
+        else
+            index2 = i+1;
+
+        vertex[j*width+i].normVector = get_nodeVector(vertex[(j-1)*width+i].flatVector, vertex[(j-1)*width+index2].flatVector, vertex[j*width+i].flatVector);
+        vertex[j*width+i].i = get_LightIntensity(vertex[j*width+i].normVector);
+    }
 }
 
 float CSurface::absf(float a)

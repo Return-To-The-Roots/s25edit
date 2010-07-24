@@ -524,9 +524,9 @@ bobMAP* CFile::open_wld(void)
                 //TEMPORARY: to prevent drawing point outside the surface (negative points)
                 //if (myMap->vertex[j*myMap->width+i].y < 0)
                     //myMap->vertex[j*myMap->width+i].y = 0;
-                a += 54;
+                a += TRIANGLE_WIDTH;
             }
-            b += 30;
+            b += TRIANGLE_HEIGHT;
         }
 
         //go to texture information for RightSideUp-Triangles
@@ -576,9 +576,9 @@ bobMAP* CFile::open_wld(void)
                 myMap->vertex[j*myMap->width+i].x = a;
                 myMap->vertex[j*myMap->width+i].y = b + (-5)*(heightFactor - 0x0A);
                 myMap->vertex[j*myMap->width+i].z = 5*(heightFactor - 0x0A);
-                a += 54;
+                a += TRIANGLE_WIDTH;
             }
-            b += 30;
+            b += TRIANGLE_HEIGHT;
         }
     }
 
