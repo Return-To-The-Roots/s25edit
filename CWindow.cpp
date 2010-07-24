@@ -572,7 +572,7 @@ bool CWindow::render(void)
         CSurface::Draw(Surf_Window, global::bmpArray[upperframe].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     //write text in the upper frame
     if (title != NULL)
-        CFont::writeText(Surf_Window, title, (int)w/2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h-11)/2), 11, FONT_BLUE, MIDDLE);
+        CFont::writeText(Surf_Window, title, (int)w/2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h-9)/2), 9, FONT_BLUE, MIDDLE);
 
     //now draw the other frames (left, right, down)
     //down

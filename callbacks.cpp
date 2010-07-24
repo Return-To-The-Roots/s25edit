@@ -225,6 +225,57 @@ void callback::GameMenu(int Param)
 //fourth
 
 
+//now the editor callbacks from the menubar will follow (editor mode)
+
+void callback::EditorMenu(int Param)
+{
+    static CWindow *WNDBackToMainMenu = NULL;
+
+    enum
+    {
+        BACKTOMAIN = 1,
+        NOTBACKTOMAIN,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDBackToMainMenu != NULL)
+                        break;
+                    WNDBackToMainMenu = new CWindow(EditorMenu, WINDOWQUIT, global::s2->GameResolutionX/2-106, global::s2->GameResolutionY/2-55, 212, 110, "Beenden?");
+                    if (global::s2->RegisterWindow(WNDBackToMainMenu))
+                    {
+                        WNDBackToMainMenu->addButton(EditorMenu, BACKTOMAIN, 0, 0, 100, 80, BUTTON_GREEN2, NULL, PICTURE_SMALL_TICK);
+                        WNDBackToMainMenu->addButton(EditorMenu, NOTBACKTOMAIN, 100, 0, 100, 80, BUTTON_RED1, NULL, PICTURE_SMALL_CROSS);
+                    }
+                    else
+                    {
+                        delete WNDBackToMainMenu;
+                        WNDBackToMainMenu = NULL;
+                        return;
+                    }
+                    break;
+
+        case BACKTOMAIN:
+                    if (global::s2->getMap() != NULL)
+                        global::s2->delMap();
+                    WNDBackToMainMenu->setWaste();
+                    WNDBackToMainMenu = NULL;
+                    mainmenu(INITIALIZING_CALL);
+                    break;
+
+        case NOTBACKTOMAIN:
+                    if (WNDBackToMainMenu != NULL)
+                    {
+                        WNDBackToMainMenu->setWaste();
+                        WNDBackToMainMenu = NULL;
+                    }
+                    break;
+
+        default:    break;
+    }
+}
 
 #ifdef _ADMINMODE
 //the debugger is an object and a friend class of all other classes

@@ -65,15 +65,22 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
     {
         #ifdef _EDITORMODE
         //find out if user clicked on one of the game menu pictures
-        //TODO
+        if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+203) && button.x <= (displayRect.w/2+240)
+                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the first picture was clicked
+            callback::EditorMenu(INITIALIZING_CALL);
+            return;
+        }
 
         //touch vertex data
         if (button.button == SDL_BUTTON_LEFT)
             modify = true;
         #else
         //find out if user clicked on one of the game menu pictures
-        if (button.button == SDL_BUTTON_LEFT && button.x >= (global::s2->GameResolutionX/2-74) && button.x <= (global::s2->GameResolutionX/2-37)
-                                             && button.y >= (global::s2->GameResolutionY-37) && button.y <= (global::s2->GameResolutionY-4)
+        if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-74) && button.x <= (displayRect.w/2-37)
+                                             && button.y >= (displayRect.h-37) && button.y <= (displayRect.h-4)
            )
         {
             //the first picture was clicked
@@ -273,6 +280,25 @@ bool CMap::render(void)
 
     //draw menubar
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR].surface, displayRect.w/2-global::bmpArray[MENUBAR].w/2, displayRect.h-global::bmpArray[MENUBAR].h);
+
+    //draw pictures to menubar
+#ifdef _EDITORMODE
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-236, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-199, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-162, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-125, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-88, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-51, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-14, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+92, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+129, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+166, displayRect.h-36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+203, displayRect.h-36, 0, 0, 37, 32);
+
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w/2+207, displayRect.h-35, 0, 0, 37, 32);
+#else
+
+#endif
 
     //draw picture to cursor position
 #ifdef _EDITORMODE
