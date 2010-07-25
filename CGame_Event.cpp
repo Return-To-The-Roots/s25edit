@@ -37,20 +37,21 @@ void CGame::EventHandling(SDL_Event *Event)
                                     else
                                         fullscreen = true;
                                     break;
-                case SDLK_F5:       GameResolutionX = 1440;
-                                    GameResolutionY = 900;
-                                    break;
 
-#ifdef _ADMINMODE
-                case SDLK_F12:      //if CTRL and ALT are pressed
-                                    if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
-                                        callback::debugger(INITIALIZING_CALL);
+                #ifdef _ADMINMODE
+                case SDLK_F3:      //if CTRL and ALT are pressed
+                                    //if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
+                                    callback::debugger(INITIALIZING_CALL);
                                     break;
 /*#else
-                case SDLK_F12:
+                case SDLK_F3:
                                     break;
 
 */#endif
+
+                case SDLK_F5:       GameResolutionX = 1440;
+                                    GameResolutionY = 900;
+                                    break;
 
 #ifdef _VIEWERMODE
                 case SDLK_RIGHT:    index++;
