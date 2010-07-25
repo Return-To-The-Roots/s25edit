@@ -45,11 +45,7 @@ void CGame::Render()
 
     //render the map if active
     if (Map != NULL && Map->isActive())
-    {
         CSurface::Draw(Surf_Display, Map->getSurface(), 0, 0);
-        //following can be used to not blit map, but let map draw directly to display instead (see also map class)
-        //Map->render();
-    }
 
     //render active menus
     for (int i = 0; i < MAXMENUS; i++)

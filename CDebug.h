@@ -42,6 +42,10 @@ class CDebug
         CFont *VertexVectorText;
         //text for vector at the triangle below the vertex the cursor is on
         CFont *FlatVectorText;
+        //text for Texture of the RightSideUp-Triangle at the vertex the cursor is on
+        CFont *rsuTextureText;
+        //text for Texture of the UpSideDown-Triangle at the vertex the cursor is on
+        CFont *usdTextureText;
         //button for shading model
         CButton *ShadingButton;
         //some puffers to write texts with sprintf()
@@ -50,6 +54,10 @@ class CDebug
         //char puffer3[100];
         //fontsize for debugging window (remember: only 9, 11 or 14)
         int fontsize;
+        //temporary pointer to Map-Object
+        CMap *MapObj;
+        //temporary pointer to map
+        bobMAP *map;
 
         //enumeration for messages sent to the debugger
         enum

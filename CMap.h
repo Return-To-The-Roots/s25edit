@@ -14,7 +14,9 @@ class CMap
         bool active;
         bool needSurface;
         int VertexX, VertexY;
+        //editor mode variables
         int mode;
+        int modeContent;
         bool modify;
         //get the number of the triangle nearest to cursor and save it to VertexX and VertexY
         void saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
@@ -39,8 +41,11 @@ class CMap
         bool isActive(void) { return active; };
         int getVertexX(void) { return VertexX; };
         int getVertexY(void) { return VertexY; };
-        int getMode(void) { return mode; };
         void setMode(int mode) { this->mode = mode; };
+        int getMode(void) { return mode; };
+        void setModeContent(int modeContent) { this->modeContent = modeContent; };
+        int getModeContent(void) { return modeContent; };
+        bobMAP* getMap(void) { return map; };
         SDL_Surface* getSurface(void) { render(); return Surf_Map; };
         bool render(void);
 
@@ -52,6 +57,8 @@ class CMap
         int correctMouseBlitY(int MouseBlitY, int VertexX, int VertexY);
         void modifyVertex(void);
         void modifyHeight(int VertexX, int VertexY);
+        //this modifies a whole hexagon!
+        void modifyTexture(int VertexX, int VertexY);
 };
 
 #endif

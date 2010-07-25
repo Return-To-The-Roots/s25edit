@@ -452,7 +452,7 @@ bool CFile::open_lbm(char *filename)
     else
         return false;
 
-    //if this is a texture file, we need a 32-bit surface for SGE
+    //if this is a texture file, we need a 32-bit surface for SGE (and we'll create a hardware surface)
     if (    strcmp(filename, "TEX5.LBM")
          || strcmp(filename, "TEX6.LBM")
          || strcmp(filename, "TEX7.LBM")
@@ -462,7 +462,7 @@ bool CFile::open_lbm(char *filename)
     {
         SDL_Surface *tmp = bmpArray->surface;
         bmpArray->surface = NULL;
-        if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 32, 0, 0, 0, 0)) != NULL )
+        if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_HWSURFACE, bmpArray->w, bmpArray->h, 32, 0, 0, 0, 0)) != NULL )
         {
             CSurface::Draw(bmpArray->surface, tmp, 0, 0);
             SDL_FreeSurface(tmp);

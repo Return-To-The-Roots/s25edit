@@ -2,8 +2,6 @@
 
 CMap::CMap(char *filename)
 {
-    //following can be used to not blit map, but let map draw directly to display instead (see also render loop)
-    //Surf_Map = global::s2->Surf_Display;
     Surf_Map = NULL;
     displayRect.x = 0;
     displayRect.y = 0;
@@ -27,6 +25,7 @@ CMap::CMap(char *filename)
         Vertices[i].blit_y = 0;
     }
     mode = EDITOR_MODE_RAISE;
+    modeContent = -1;
     modify = false;
 }
 
@@ -69,8 +68,25 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
                                              && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
         {
-            //the first picture was clicked
-            callback::EditorMenu(INITIALIZING_CALL);
+            //the editor-main-menu picture was clicked
+            callback::EditorQuitMenu(INITIALIZING_CALL); //"quit" menu is temporary, later this will be "main" menu
+            return;
+        }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-232) && button.x <= (displayRect.w/2-195)
+                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the height-mode picture was clicked
+            mode = EDITOR_MODE_RAISE;
+            return;
+        }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-195) && button.x <= (displayRect.w/2-158)
+                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the height-mode picture was clicked
+            mode = EDITOR_MODE_TEXTURE;
+            callback::EditorTextureMenu(INITIALIZING_CALL);
             return;
         }
 
@@ -240,17 +256,15 @@ bool CMap::render(void)
     //if we need a new surface
     if (needSurface)
     {
-        //commenting the following 4 lines out ("SDL_FreeSurface" to "return") can be used
-        //to not blit map to temp surface, but let map draw directly to display instead (see also constructor and render loop)
         SDL_FreeSurface(Surf_Map);
         Surf_Map = NULL;
-        if ( (Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, 32, 0, 0, 0, 0)) == NULL )
+        if ( (Surf_Map = SDL_CreateRGBSurface(SDL_HWSURFACE, displayRect.w, displayRect.h, 32, 0, 0, 0, 0)) == NULL )
             return false;
         needSurface = false;
     }
     else
         //clear the surface before drawing new (in normal case not needed)
-        SDL_FillRect( Surf_Map, NULL, SDL_MapRGB(Surf_Map->format,0,0,0) );
+        //SDL_FillRect( Surf_Map, NULL, SDL_MapRGB(Surf_Map->format,0,0,0) );
 
     //touch vertex data if user modifies it
     if (modify)
@@ -283,6 +297,7 @@ bool CMap::render(void)
 
     //draw pictures to menubar
 #ifdef _EDITORMODE
+    //backgrounds
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-236, displayRect.h-36, 0, 0, 37, 32);
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-199, displayRect.h-36, 0, 0, 37, 32);
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2-162, displayRect.h-36, 0, 0, 37, 32);
@@ -294,8 +309,11 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+129, displayRect.h-36, 0, 0, 37, 32);
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+166, displayRect.h-36, 0, 0, 37, 32);
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w/2+203, displayRect.h-36, 0, 0, 37, 32);
+    //pictures
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, displayRect.w/2-232, displayRect.h-35);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, displayRect.w/2-195, displayRect.h-35);
 
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w/2+207, displayRect.h-35, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w/2+207, displayRect.h-35);
 #else
 
 #endif
@@ -349,6 +367,33 @@ void CMap::modifyVertex(void)
     if (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE)
         for (int i = 0; i < VertexCounter; i++)
             modifyHeight(Vertices[i].x, Vertices[i].y);
+    else if (mode == EDITOR_MODE_CUT)
+    {
+        ;
+    }
+    //if not raise, reduce or cut, we need a content to set, so if there is no content, return
+    else if (modeContent == -1)
+        return;
+    else if (mode == EDITOR_MODE_TEXTURE)
+    {
+        if (ChangeSection == 0)
+        {
+            map->vertex[VertexY*map->width+VertexX].rsuTexture = modeContent;
+            map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
+        }
+        else if (ChangeSection == 1)
+            modifyTexture(Vertices[0].x, Vertices[0].y);
+        else if (ChangeSection == 2)
+        {
+            for (int i = 0; i < 7; i++)
+                modifyTexture(Vertices[i].x, Vertices[i].y);
+        }
+        else if (ChangeSection == 3)
+        {
+            for (int i = 0; i < 19; i++)
+                modifyTexture(Vertices[i].x, Vertices[i].y);
+        }
+    }
 }
 
 void CMap::modifyHeight(int VertexX, int VertexY)
@@ -452,6 +497,34 @@ void CMap::modifyHeight(int VertexX, int VertexY)
         if (map->vertex[Y*map->width+X].z > tempP->z+25)
             modifyHeight(X, Y);
     }
+}
+
+void CMap::modifyTexture(int VertexX, int VertexY)
+{
+    //vertex count for the points
+    int X, Y;
+
+    bool even = false;
+    if (VertexY%2 == 0)
+        even = true;
+
+    map->vertex[VertexY*map->width+VertexX].rsuTexture = modeContent;
+    map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
+
+    //update first vertex left upside
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+    Y = VertexY-1;                  if (Y < 0) Y += map->height;
+    map->vertex[Y*map->width+X].rsuTexture = modeContent;
+    map->vertex[Y*map->width+X].usdTexture = modeContent;
+    //update second vertex right upside
+    X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+    Y = VertexY-1;                  if (Y < 0) Y += map->height;
+    map->vertex[Y*map->width+X].rsuTexture = modeContent;
+    //update third point bottom left
+    X = VertexX-1;                  if (X < 0) X += map->width;
+    Y = VertexY;
+    map->vertex[Y*map->width+X].usdTexture = modeContent;
+    //now we are finished, all six triangles have the new texture
 }
 
 int CMap::getActiveVertices(int ChangeSection)
