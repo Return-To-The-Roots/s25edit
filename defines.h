@@ -14,8 +14,17 @@
 //callback parameters
 enum
 {
+    //NOTE: we don't have a global WINDOW_QUIT_MESSAGE, cause if there were more than one window created by a callback function
+    //      we wouldn't know which window was closed by the user. so we need a specified quit-message for each window.
+
+    //first call of a callback function
     INITIALIZING_CALL = -1,
-    CALL_FROM_GAMELOOP = -2
+    //a callback that is registered at the gameloop will be called from the gameloop with this value
+    CALL_FROM_GAMELOOP = -2,
+    //if user goes to main menu, all menubar callbacks will be called with MAP_QUIT
+    MAP_QUIT = -3,
+    //parameter for closing the debugger window
+    DEBUGGER_QUIT = -4
 };
 
 //BOBTYPES
@@ -85,6 +94,7 @@ typedef struct BobtypeMAP
     Uint8 type;
     Uint8 player;
     char author[21];
+    bool BuildHelp;
     struct point *vertex;
 } bobMAP;
 //map types
@@ -792,6 +802,35 @@ enum
 //BEGIN: /GFX/TEXTURES/TEX7.LBM
     TILESET_WINTERLAND,
 //END: /GFX/TEXTURES/TEX7.LBM
+
+//BEGIN: /DATA/MAP00.LST
+    GREENLAND_ARROWCROSS_YELLOW,
+    GREENLAND_CIRCLE_YELLOW,
+    GREENLAND_ARROWCROSS_RED,
+    GREENLAND_ARROWCROSS_ORANGE,
+    GREENLAND_ARROWCROSS_RED_FLAG,
+    GREENLAND_ARROWCROSS_RED_MINE,
+    GREENLAND_ARROWCROSS_RED_HOUSE_SMALL,
+    GREENLAND_ARROWCROSS_RED_HOUSE_MIDDLE,
+    GREENLAND_ARROWCROSS_RED_HOUSE_BIG,
+    GREENLAND_ARROWCROSS_RED_HOUSE_HARBOUR,
+    GREENLAND_PAPER_RED_CROSS,
+    GREENLAND_FLAG,
+    GREENLAND_HOUSE_SMALL,
+    GREENLAND_HOUSE_MIDDLE,
+    GREENLAND_HOUSE_BIG,
+    GREENLAND_MINE,
+    GREENLAND_HOUSE_HARBOUR,
+//END: /DATA/MAP00.LST
+
+//BEGIN: /DATA/MAP01.LST
+    WASTELAND_ARROWCROSS_YELLOW = GREENLAND_ARROWCROSS_YELLOW+806,
+//END: /DATA/MAP01.LST
+
+//BEGIN: /DATA/MAP02.LST
+    WINTERLAND_ARROWCROSS_YELLOW = WASTELAND_ARROWCROSS_YELLOW+814,
+    MAP02LST_LAST = WINTERLAND_ARROWCROSS_YELLOW+813,
+//END: /DATA/MAP02.LST
 
 //BEGIN: /DATA/MIS*BOBS.LST   * = 0,1,2,3,4,5
 //SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY

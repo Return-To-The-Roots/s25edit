@@ -73,7 +73,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             return;
         }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-232) && button.x <= (displayRect.w/2-195)
-                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
         {
             //the height-mode picture was clicked
@@ -81,12 +81,23 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             return;
         }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-195) && button.x <= (displayRect.w/2-158)
-                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
         {
             //the height-mode picture was clicked
             mode = EDITOR_MODE_TEXTURE;
             callback::EditorTextureMenu(INITIALIZING_CALL);
+            return;
+        }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+96) && button.x <= (displayRect.w/2+133)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the build-help picture was clicked
+            if (map->BuildHelp)
+                map->BuildHelp = false;
+            else
+                map->BuildHelp = true;
             return;
         }
 
@@ -312,6 +323,8 @@ bool CMap::render(void)
     //pictures
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, displayRect.w/2-232, displayRect.h-35);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, displayRect.w/2-195, displayRect.h-35);
+
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.w/2+96, displayRect.h-35);
 
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w/2+207, displayRect.h-35);
 #else

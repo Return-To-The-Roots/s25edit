@@ -525,6 +525,11 @@ bool CWindow::render(void)
     //if not minimized, draw the content now (this stands here to prevent the frames and corners from being overdrawn)
     if (!minimized)
     {
+        for (int i = 0; i < MAXBUTTONS; i++)
+        {
+            if (buttons[i] != NULL && buttons[i]->getX() < Surf_Window->w && buttons[i]->getY() < Surf_Window->h)
+                CSurface::Draw(Surf_Window, buttons[i]->getSurface(), buttons[i]->getX(), buttons[i]->getY());
+        }
         for (int i = 0; i < MAXPICTURES; i++)
         {
             if (static_pictures[i].pic >= 0 && static_pictures[i].x < Surf_Window->w && static_pictures[i].y < Surf_Window->h)
@@ -539,11 +544,6 @@ bool CWindow::render(void)
         {
             if (texts[i] != NULL && texts[i]->getX() < Surf_Window->w && texts[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, texts[i]->getSurface(), texts[i]->getX(), texts[i]->getY());
-        }
-        for (int i = 0; i < MAXBUTTONS; i++)
-        {
-            if (buttons[i] != NULL && buttons[i]->getX() < Surf_Window->w && buttons[i]->getY() < Surf_Window->h)
-                CSurface::Draw(Surf_Window, buttons[i]->getSurface(), buttons[i]->getX(), buttons[i]->getY());
         }
     }
 

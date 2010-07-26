@@ -477,7 +477,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
 
     //find out the texture for the triangle
     unsigned char upperX, upperY, leftX, leftY, rightX, rightY;
-    Uint8 texture;
+    Uint8 texture, texture_raw;
     SDL_Surface *Surf_Tileset;
 
     switch (type)
@@ -496,12 +496,12 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
         texture = P1.rsuTexture;
     else
         texture = P2.usdTexture;
-
-    if (texture >= 0x40)
+    texture_raw = texture;
+    if (texture_raw >= 0x40)
         //it's a harbour
-        texture -= 0x40;
+        texture_raw -= 0x40;
 
-    switch (texture)
+    switch (texture_raw)
     {
         case TRIANGLE_TEXTURE_STEPPE_MEADOW1:   upperX = 17;
                                                 upperY = 96;
@@ -640,6 +640,27 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
             sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P1.i,P1.i);
         else
             sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P2.i,P2.i,P2.i);
+    }
+
+    //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY ON RIGHTSIDEUP-TRIANGLES
+    if (myMap->BuildHelp)
+    {
+        if (P1.y < P2.y)
+        {
+            //if it's possible to set a house
+            if (   texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || texture == TRIANGLE_TEXTURE_MEADOW1 || texture == TRIANGLE_TEXTURE_MEADOW2
+                || texture == TRIANGLE_TEXTURE_MEADOW3 || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || texture == TRIANGLE_TEXTURE_FLOWER
+                || texture == TRIANGLE_TEXTURE_MINING_MEADOW)
+            {
+                Draw(display, global::bmpArray[GREENLAND_HOUSE_BIG].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_BIG].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_BIG].ny));
+            }
+            else if (  texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+                    || texture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || texture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+                    || texture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+            {
+                Draw(display, global::bmpArray[GREENLAND_HOUSE_HARBOUR].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_HARBOUR].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_HARBOUR].ny));
+            }
+        }
     }
 }
 

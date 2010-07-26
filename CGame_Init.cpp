@@ -37,7 +37,7 @@ bool CGame::Init()
      *      load this palette from a file and set
      *      CFile::palActual = CFile::palArray - 1 (--> last loaden palette)
      *      and after loading the images set
-     *      CFile::palActual = palArray (--> first palette)
+     *      CFile::palActual = CFile::palArray (--> first palette)
      */
 
     //load some pictures (after all the splash-screens)
@@ -255,14 +255,16 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
     std::cout << "\nLoading file: /DATA/EDITRES.IDX...";
     if ( CFile::open_file("./DATA/EDITRES.IDX", IDX) == false )
     {
         std::cout << "failure";
         return false;
     }
-
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
     //load only the palette at this time from editio.idx
     std::cout << "\nLoading palette from file: /DATA/IO/EDITIO.IDX...";
     if ( CFile::open_file("./DATA/IO/EDITIO.IDX", IDX, true) == false )
@@ -270,14 +272,16 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
     std::cout << "\nLoading file: /DATA/IO/EDITIO.IDX...";
     if ( CFile::open_file("./DATA/IO/EDITIO.IDX", IDX) == false )
     {
         std::cout << "failure";
         return false;
     }
-
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
     std::cout << "\nLoading file: /DATA/EDITBOB.LST...";
     if ( CFile::open_file("./DATA/EDITBOB.LST", LST) == false )
     {
@@ -292,14 +296,16 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
     std::cout << "\nLoading file: /DATA/RESOURCE.IDX...";
     if ( CFile::open_file("./DATA/RESOURCE.IDX", IDX) == false )
     {
         std::cout << "failure";
         return false;
     }
-
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
     //load only the palette at this time from io.idx
     std::cout << "\nLoading palette from file: /DATA/IO/IO.IDX...";
     if ( CFile::open_file("./DATA/IO/IO.IDX", IDX, true) == false )
@@ -307,13 +313,16 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
     std::cout << "\nLoading file: /DATA/IO/IO.IDX...";
     if ( CFile::open_file("./DATA/IO/IO.IDX", IDX) == false )
     {
         std::cout << "failure";
         return false;
     }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
 #endif
 
     //texture tilesets
@@ -345,6 +354,59 @@ bool CGame::Init()
     }
     */
 
+    //load only the palette at this time from MAP00.LST
+    std::cout << "\nLoading palette from file: /DATA/MAP00.LST...";
+    if ( CFile::open_file("./DATA/MAP00.LST", LST, true) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << "\nLoading file: /DATA/MAP00.LST...";
+    if ( CFile::open_file("./DATA/MAP00.LST", LST) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
+
+    //load only the palette at this time from MAP01.LST
+    std::cout << "\nLoading palette from file: /DATA/MAP01.LST...";
+    if ( CFile::open_file("./DATA/MAP01.LST", LST, true) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << "\nLoading file: /DATA/MAP01.LST...";
+    if ( CFile::open_file("./DATA/MAP01.LST", LST) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
+
+    //load only the palette at this time from MAP02.LST
+    std::cout << "\nLoading palette from file: /DATA/MAP02.LST...";
+    if ( CFile::open_file("./DATA/MAP02.LST", LST, true) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << "\nLoading file: /DATA/MAP02.LST...";
+    if ( CFile::open_file("./DATA/MAP02.LST", LST) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
 
 //EVERY MISSION-FILE SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
     std::cout << "\nLoading file: /DATA/MIS0BOBS.LST...";

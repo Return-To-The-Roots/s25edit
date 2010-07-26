@@ -70,7 +70,10 @@ void* CFile::open_file(char *filename, char filetype, bool only_loadPAL)
     }
 
     if (fp != NULL)
+    {
         fclose(fp);
+        fp = NULL;
+    }
 
     loadPAL = false;
 
@@ -499,9 +502,9 @@ bobMAP* CFile::open_wld(void)
         fread(&myMap->player, 1, 1, fp);
         fread(myMap->author, 20, 1, fp);
         myMap->author[20] = '\0'; //for safety
+        myMap->BuildHelp = false;
 
         fseek(fp, 2368, SEEK_SET);
-
 
         if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
             return myMap;
