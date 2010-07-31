@@ -14,6 +14,7 @@ class CMap
         bool active;
         bool needSurface;
         int VertexX, VertexY;
+        bool BuildHelp;
         //editor mode variables
         int mode;
         int modeContent;
@@ -41,6 +42,7 @@ class CMap
         bool isActive(void) { return active; };
         int getVertexX(void) { return VertexX; };
         int getVertexY(void) { return VertexY; };
+        bool getBuildHelp(void) { return BuildHelp; };
         void setMode(int mode) { this->mode = mode; };
         int getMode(void) { return mode; };
         void setModeContent(int modeContent) { this->modeContent = modeContent; };
@@ -59,6 +61,7 @@ class CMap
         void modifyHeight(int VertexX, int VertexY);
         //this modifies a whole hexagon!
         void modifyTexture(int VertexX, int VertexY);
+        void modifyObject(int VertexX, int VertexY);
 };
 
 #endif

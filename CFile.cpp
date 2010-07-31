@@ -494,20 +494,32 @@ bobMAP* CFile::open_wld(void)
         fseek(fp, 10, SEEK_SET);
         fread(myMap->name, 20, 1, fp);
         myMap->name[20] = '\0'; //for safety
-        fread(&myMap->width, 2, 1, fp);
-        myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
-        fread(&myMap->height, 2, 1, fp);
-        myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
+        fread(&myMap->width_old, 2, 1, fp);
+        fread(&myMap->height_old, 2, 1, fp);
         fread(&myMap->type, 1, 1, fp);
         fread(&myMap->player, 1, 1, fp);
         fread(myMap->author, 20, 1, fp);
         myMap->author[20] = '\0'; //for safety
-        myMap->BuildHelp = false;
+        fread(myMap->HQx, 2, 7, fp);
+        fread(myMap->HQy, 2, 7, fp);
 
-        fseek(fp, 2368, SEEK_SET);
+        //go to real map height and width
+        fseek(fp, 2348, SEEK_SET);
+        fread(&myMap->width, 2, 1, fp);
+        myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
+        fread(&myMap->height, 2, 1, fp);
+        myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
+
 
         if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
-            return myMap;
+        {
+            free(myMap);
+            return NULL;
+        }
+
+
+        //go to altitude information (we skip the 16 bytes long map data header that each block has)
+        fseek(fp, 16, SEEK_CUR);
 
         int a;
         int b = 0;
@@ -541,7 +553,7 @@ bobMAP* CFile::open_wld(void)
                 fread(&myMap->vertex[j*myMap->width+i].rsuTexture, 1, 1, fp);
         }
 
-        //go to texture information for RightSideUp-Triangles
+        //go to texture information for UpSideDown-Triangles
         fseek(fp, 16, SEEK_CUR);
 
         for (int j = 0; j < myMap->height; j++)
@@ -549,20 +561,127 @@ bobMAP* CFile::open_wld(void)
             for (int i = 0; i < myMap->width; i++)
                 fread(&myMap->vertex[j*myMap->width+i].usdTexture, 1, 1, fp);
         }
+
+        //go to road data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].road, 1, 1, fp);
+        }
+
+        //go to object type data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].objectType, 1, 1, fp);
+        }
+
+        //go to object info data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].objectInfo, 1, 1, fp);
+        }
+
+        //go to animal data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].animal, 1, 1, fp);
+        }
+
+        //go to unknown1 data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].unknown1, 1, 1, fp);
+        }
+
+        //go to build data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].build, 1, 1, fp);
+        }
+
+        //go to unknown2 data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].unknown2, 1, 1, fp);
+        }
+
+        //go to unknown3 data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].unknown3, 1, 1, fp);
+        }
+
+        //go to resource data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].resource, 1, 1, fp);
+        }
+
+        //go to unknown4 data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].unknown4, 1, 1, fp);
+        }
+
+        //go to unknown5 data
+        fseek(fp, 16, SEEK_CUR);
+
+        for (int j = 0; j < myMap->height; j++)
+        {
+            for (int i = 0; i < myMap->width; i++)
+                fread(&myMap->vertex[j*myMap->width+i].unknown5, 1, 1, fp);
+        }
     }
     else
     {
         strcpy(myMap->name, "Ohne Namen");
-        myMap->width = 1024;
+        myMap->width = 256;
         myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
-        myMap->height = 1024;
+        myMap->height = 256;
         myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
         myMap->type = 0;
         myMap->player = 4;
         strcpy(myMap->author, "Niemand");
+        for (int i = 0; i < 7; i++)
+        {
+            myMap->HQx[i] = 0xFFFF;
+            myMap->HQy[i] = 0xFFFF;
+        }
 
         if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
-            return myMap;
+        {
+            free(myMap);
+            return NULL;
+        }
 
         int a;
         int b = 0;
@@ -592,6 +711,289 @@ bobMAP* CFile::open_swd(void)
 {
     return open_wld();
 }
+
+bool CFile::save_file(char *filename, char filetype, void *data)
+{
+    bool return_value = false;
+
+    if ( filename == NULL || data == NULL )
+        return return_value;
+
+    if ( (fp = fopen(filename, "wb")) == NULL )
+        return return_value;
+
+    switch (filetype)
+    {
+        case LST:   return_value = save_lst(data);
+                    break;
+
+        case BOB:   return_value = save_bob(data);
+                    break;
+
+        case IDX:   return_value = save_idx(data, filename);
+                    break;
+
+        case BBM:   return_value = save_bbm(data);
+                    break;
+
+        case LBM:   return_value = save_lbm(data);
+                    break;
+
+        case WLD:   return_value = save_wld(data);
+                    break;
+
+        case SWD:   return_value = save_swd(data);
+                    break;
+
+        default:    //no valid data type
+                    return_value = false;
+                    break;
+    }
+
+    if (fp != NULL)
+    {
+        fclose(fp);
+        fp = NULL;
+    }
+
+    return return_value;
+}
+
+bool CFile::save_file(const char *filename, char filetype, void *data)
+{
+    char *file = (char*)filename;
+    return save_file(file, filetype, data);
+}
+
+bool CFile::save_lst(void *data)
+{
+    return true;
+}
+
+bool CFile::save_bob(void *data)
+{
+    return true;
+}
+
+bool CFile::save_idx(void *data, char *filename)
+{
+    return true;
+}
+
+bool CFile::save_bbm(void *data)
+{
+    return true;
+}
+
+bool CFile::save_lbm(void *data)
+{
+    return true;
+}
+
+bool CFile::save_wld(void *data)
+{
+    char zero = 0; //to fill bytes
+    char temp = 0; //to fill bytes
+    bobMAP *myMap = (bobMAP*)data;
+    char map_version[11] = "WORLD_V1.0";
+    char map_data_header[16];
+
+    //prepare map data header
+    map_data_header[0] = 0x10;
+    map_data_header[1] = 0x27;
+    map_data_header[2] = 0x00;
+    map_data_header[3] = 0x00;
+    map_data_header[4] = 0x00;
+    map_data_header[5] = 0x00;
+    *((Uint16*)(map_data_header+6)) = myMap->width;
+    *((Uint16*)(map_data_header+8)) = myMap->height;
+    map_data_header[10] = 0x01;
+    map_data_header[11] = 0x00;
+    *((Uint32*)(map_data_header+12)) = myMap->width*myMap->height;
+
+    //begin writing data to file
+    //first of all the map header
+    //WORLD_V1.0
+    fwrite(map_version, 1, 10, fp);
+    //name
+    fwrite(myMap->name, 1, 20, fp);
+    //old width
+    fwrite(&myMap->width_old, 2, 1, fp);
+    //old height
+    fwrite(&myMap->height_old, 2, 1, fp);
+    //type
+    fwrite(&myMap->type, 1, 1, fp);
+    //players
+    fwrite(&myMap->player, 1, 1, fp);
+    //author
+    fwrite(myMap->author, 1, 20, fp);
+    //headquarters x
+    fwrite(myMap->HQx, 2, 7, fp);
+    //headquarters y
+    fwrite(myMap->HQy, 2, 7, fp);
+    //unknown data (8 Bytes)
+    for (int i = 0; i < 8; i++)
+        fwrite(&zero, 1, 1, fp);
+    //land/water information    (always 2250 Bytes)
+    for (int i = 0; i < 2250; i++)
+        fwrite(&zero, 1, 1, fp);
+    //0x11 0x27
+    temp = 0x11;
+    fwrite(&temp, 1, 1, fp);
+    temp = 0x27;
+    fwrite(&temp, 1, 1, fp);
+    //unknown data (always null, 4 Bytes)
+    for (int i = 0; i < 4; i++)
+        fwrite(&zero, 1, 1, fp);
+    //width
+    fwrite(&myMap->width, 2, 1, fp);
+    //height
+    fwrite(&myMap->height, 2, 1, fp);
+
+
+    //now begin writing the real map data
+
+    //altitude information
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+        {
+            temp = myMap->vertex[j*myMap->width+i].z/5 + 0x0A;
+            fwrite(&temp, 1, 1, fp);
+        }
+    }
+
+    //texture information for RightSideUp-Triangles
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].rsuTexture, 1, 1, fp);
+    }
+
+    //go to texture information for UpSideDown-Triangles
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].usdTexture, 1, 1, fp);
+    }
+
+    //go to road data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].road, 1, 1, fp);
+    }
+
+    //go to object type data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].objectType, 1, 1, fp);
+    }
+
+    //go to object info data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].objectInfo, 1, 1, fp);
+    }
+
+    //go to animal data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].animal, 1, 1, fp);
+    }
+
+    //go to unknown1 data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].unknown1, 1, 1, fp);
+    }
+
+    //go to build data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].build, 1, 1, fp);
+    }
+
+    //go to unknown2 data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].unknown2, 1, 1, fp);
+    }
+
+    //go to unknown3 data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].unknown3, 1, 1, fp);
+    }
+
+    //go to resource data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].resource, 1, 1, fp);
+    }
+
+    //go to unknown4 data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].unknown4, 1, 1, fp);
+    }
+
+    //go to unknown5 data
+    fwrite(&map_data_header, 16, 1, fp);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fwrite(&myMap->vertex[j*myMap->width+i].unknown5, 1, 1, fp);
+    }
+
+    //at least write the map footer (ends in 0xFF)
+    temp = 0xFF;
+    fwrite(&temp, 1, 1, fp);
+
+    return true;
+}
+
+bool CFile::save_swd(void *data)
+{
+    return save_wld(data);
+}
+
 
 bool CFile::read_bob01(void)
 {

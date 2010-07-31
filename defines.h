@@ -8,8 +8,6 @@
 #define _ADMINMODE
 //in editor mode there is the possibility to load, edit and save created maps
 #define _EDITORMODE
-//in multicore mode the program is parallelized
-//#define _MULTICORE
 
 //callback parameters
 enum
@@ -80,21 +78,45 @@ typedef struct BobtypeSHADOW
 
 //Datatypes for the Map
 //vector structure
-struct vector { float x; float y; float z; };
+struct vector { float x, y, z; };
 //point structure ('i' is a 16 bit integer shifted left 16 times --> fixed point math for speed)
-struct point { long int x; long int y; int z; Sint32 i; struct vector flatVector; struct vector normVector; Uint8 rsuTexture; Uint8 usdTexture; };
+struct point
+{
+    long int x;
+    long int y;                 /* calculated with section 1 */
+    int z;                      /* section 1 */
+    Sint32 i;
+    struct vector flatVector;
+    struct vector normVector;
+    Uint8 rsuTexture;           /* section 2 */
+    Uint8 usdTexture;           /* section 3 */
+    Uint8 road;                 /* section 4 */
+    Uint8 objectType;           /* section 5 */
+    Uint8 objectInfo;           /* section 6 */
+    Uint8 animal;               /* section 7 */
+    Uint8 unknown1;             /* section 8 */
+    Uint8 build;                /* section 9 */
+    Uint8 unknown2;             /* section 10 */
+    Uint8 unknown3;             /* section 11 */
+    Uint8 resource;             /* section 12 */
+    Uint8 unknown4;             /* section 13 */
+    Uint8 unknown5;             /* section 14 */
+};
 //map strutcture
 typedef struct BobtypeMAP
 {
     char name[21];
     Uint16 height;
+    Uint16 height_old;
     Uint16 height_pixel;
     Uint16 width;
+    Uint16 width_old;
     Uint16 width_pixel;
     Uint8 type;
     Uint8 player;
+    Uint16 HQx[7];
+    Uint16 HQy[7];
     char author[21];
-    bool BuildHelp;
     struct point *vertex;
 } bobMAP;
 //map types
@@ -979,7 +1001,7 @@ enum
 //maximum number of buttons that can be created WITHIN a menu or window
 #define MAXBUTTONS 50
 //maximum number of texts that can be written WITHIN a menu or window
-#define MAXTEXTS 50
+#define MAXTEXTS 100
 //maximum number of pictures that can be shown WITHIN a menu or window
 #define MAXPICTURES 50
 

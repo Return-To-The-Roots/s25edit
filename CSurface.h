@@ -22,8 +22,6 @@ class CSurface
         static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
 
     private:
-        static bool gouraud;
-
         static struct vector get_nodeVector(struct vector v1, struct vector v2, struct vector v3);
         static struct vector get_normVector(struct vector v);
         static struct vector get_flatVector(struct point *P1, struct point *P2, struct point *P3);

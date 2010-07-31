@@ -7,12 +7,13 @@ CMap::CMap(char *filename)
     displayRect.y = 0;
     displayRect.w = global::s2->GameResolutionX;
     displayRect.h = global::s2->GameResolutionY;
-    map = (bobMAP*)CFile::open_file(filename, WLD);
+    map = (bobMAP*)CFile::open_file(filename, WLD); //TODO: open_file(filename, SWD); if really necessary
     CSurface::get_nodeVectors(map);
     needSurface = true;
     active = true;
     VertexX = 0;
     VertexY = 0;
+    BuildHelp = false;
     MouseBlitX = 0;
     MouseBlitY = 0;
     ChangeSection = 0;
@@ -72,7 +73,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             callback::EditorQuitMenu(INITIALIZING_CALL); //"quit" menu is temporary, later this will be "main" menu
             return;
         }
-        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-232) && button.x <= (displayRect.w/2-195)
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-236) && button.x <= (displayRect.w/2-199)
                                                   && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
         {
@@ -80,11 +81,11 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             mode = EDITOR_MODE_RAISE;
             return;
         }
-        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-195) && button.x <= (displayRect.w/2-158)
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-199) && button.x <= (displayRect.w/2-162)
                                                   && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
         {
-            //the height-mode picture was clicked
+            //the texture-mode picture was clicked
             mode = EDITOR_MODE_TEXTURE;
             callback::EditorTextureMenu(INITIALIZING_CALL);
             return;
@@ -94,10 +95,18 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
            )
         {
             //the build-help picture was clicked
-            if (map->BuildHelp)
-                map->BuildHelp = false;
+            if (BuildHelp)
+                BuildHelp = false;
             else
-                map->BuildHelp = true;
+                BuildHelp = true;
+            return;
+        }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+131) && button.x <= (displayRect.w/2+168)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the temproray save-map picture was clicked
+            CFile::save_file("./WORLDS/NEW_MAP.SWD", SWD, map);
             return;
         }
 
@@ -134,7 +143,10 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
         if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RAISE)
             mode = EDITOR_MODE_REDUCE;
         else if (key.keysym.sym == SDLK_LCTRL)
+        {
             mode = EDITOR_MODE_CUT;
+            modeContent = 0;
+        }
         else if (key.keysym.sym == SDLK_KP_PLUS)
         {
             if ( getActiveVertices(ChangeSection+1) <= 7) //temproary set to seven, cause more is not implemented yet
@@ -156,7 +168,9 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
     }
     else if (key.type == SDL_KEYUP)
     {
-        if (key.keysym.sym == SDLK_LSHIFT || key.keysym.sym == SDLK_LCTRL)
+        if (key.keysym.sym == SDLK_LSHIFT)
+            mode = EDITOR_MODE_RAISE;
+        else if (key.keysym.sym == SDLK_LCTRL)
             mode = EDITOR_MODE_RAISE;
     }
 }
@@ -325,6 +339,8 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, displayRect.w/2-195, displayRect.h-35);
 
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.w/2+96, displayRect.h-35);
+    //temprorary to save a map
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w/2+131, displayRect.h-37);
 
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w/2+207, displayRect.h-35);
 #else
@@ -380,13 +396,14 @@ void CMap::modifyVertex(void)
     if (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE)
         for (int i = 0; i < VertexCounter; i++)
             modifyHeight(Vertices[i].x, Vertices[i].y);
-    else if (mode == EDITOR_MODE_CUT)
-    {
-        ;
-    }
-    //if not raise, reduce or cut, we need a content to set, so if there is no content, return
+    //if not raise or reduce, we need a content to set, so if there is no content, return
     else if (modeContent == -1)
         return;
+    else if (mode == EDITOR_MODE_CUT)
+    {
+        for (int i = 0; i < VertexCounter; i++)
+            modifyObject(Vertices[i].x, Vertices[i].y);
+    }
     else if (mode == EDITOR_MODE_TEXTURE)
     {
         if (ChangeSection == 0)
@@ -538,6 +555,16 @@ void CMap::modifyTexture(int VertexX, int VertexY)
     Y = VertexY;
     map->vertex[Y*map->width+X].usdTexture = modeContent;
     //now we are finished, all six triangles have the new texture
+}
+
+void CMap::modifyObject(int VertexX, int VertexY)
+{
+    if (mode == EDITOR_MODE_CUT)
+    {
+        map->vertex[VertexY*map->width+VertexX].objectType = modeContent;
+        map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent;
+        map->vertex[VertexY*map->width+VertexX].animal = modeContent;
+    }
 }
 
 int CMap::getActiveVertices(int ChangeSection)

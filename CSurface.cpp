@@ -1,7 +1,5 @@
 #include "CSurface.h"
 
-bool CSurface::gouraud = true;
-
 CSurface::CSurface()
 {
 }
@@ -295,9 +293,6 @@ void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bob
                 continue;
         }
 
-        #ifdef _MULTICORE
-            #pragma omp parallel for
-        #endif
         for (Uint16 j = /*0*/ row_start; j < height-1 && j <= row_end; j++)
         {
             if (j%2 == 0)
@@ -350,11 +345,8 @@ void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bob
                 DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[j*width+width-1], tempP3);
             }
         }
-        #ifdef _MULTICORE
-            #pragma omp barrier
-            //draw last line
-            #pragma omp parallel for
-        #endif
+
+        //draw last line
         for (Uint16 i = /*0*/ col_start; i < width-1 && i <= col_end; i++)
         {
             //RightSideUp
@@ -375,9 +367,7 @@ void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bob
             DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+i], vertex[(height-1)*width+i+1]);
         }
     }
-#ifdef _MULTICORE
-    #pragma omp barrier
-#endif
+
     //last RightSideUp
     tempP2.x = vertex[0*width+width-1].x;
     tempP2.y = height*TRIANGLE_HEIGHT + vertex[0*width+width-1].y;
@@ -626,39 +616,39 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
 
 
     //draw the triangle
-    if (gouraud)
-    {
-        //do not shade water
-        if (texture == TRIANGLE_TEXTURE_WATER)
-            sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
-        else
-            sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
-    }
+    //do not shade water
+    if (texture == TRIANGLE_TEXTURE_WATER)
+        sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
     else
-    {
-        if (P1.y < P2.y)
-            sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P1.i,P1.i);
-        else
-            sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P2.i,P2.i,P2.i);
-    }
+        sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
 
-    //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY ON RIGHTSIDEUP-TRIANGLES
-    if (myMap->BuildHelp)
+
+    //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
+    if (global::s2->getMap()->getBuildHelp())
     {
         if (P1.y < P2.y)
         {
-            //if it's possible to set a house
-            if (   texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || texture == TRIANGLE_TEXTURE_MEADOW1 || texture == TRIANGLE_TEXTURE_MEADOW2
-                || texture == TRIANGLE_TEXTURE_MEADOW3 || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || texture == TRIANGLE_TEXTURE_FLOWER
-                || texture == TRIANGLE_TEXTURE_MINING_MEADOW)
+            //bring "build"-value down to a value between 0x00 and 0x07
+            while (P1.build > 0x07)
+                P1.build -= 0x08;
+            switch (P1.build)
             {
-                Draw(display, global::bmpArray[GREENLAND_HOUSE_BIG].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_BIG].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_BIG].ny));
-            }
-            else if (  texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-                    || texture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || texture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                    || texture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-            {
-                Draw(display, global::bmpArray[GREENLAND_HOUSE_HARBOUR].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_HARBOUR].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_HARBOUR].ny));
+                case 0x01:  Draw(display, global::bmpArray[GREENLAND_FLAG].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_FLAG].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_FLAG].ny));
+                            break;
+                case 0x02:  Draw(display, global::bmpArray[GREENLAND_HOUSE_SMALL].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_SMALL].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_SMALL].ny));
+                            break;
+                case 0x03:  Draw(display, global::bmpArray[GREENLAND_HOUSE_MIDDLE].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_MIDDLE].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_MIDDLE].ny));
+                            break;
+                case 0x04:  if (   texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+                                || texture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || texture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+                                || texture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                                Draw(display, global::bmpArray[GREENLAND_HOUSE_HARBOUR].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_HARBOUR].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_HARBOUR].ny));
+                            else
+                                Draw(display, global::bmpArray[GREENLAND_HOUSE_BIG].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_BIG].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_BIG].ny));
+                            break;
+                case 0x05:  Draw(display, global::bmpArray[GREENLAND_MINE].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_MINE].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_MINE].ny));
+                            break;
+                default:    break;
             }
         }
     }

@@ -42,12 +42,20 @@ class CDebug
         CFont *VertexVectorText;
         //text for vector at the triangle below the vertex the cursor is on
         CFont *FlatVectorText;
-        //text for Texture of the RightSideUp-Triangle at the vertex the cursor is on
+        //texts for map data at the vertex the cursor is on
         CFont *rsuTextureText;
-        //text for Texture of the UpSideDown-Triangle at the vertex the cursor is on
         CFont *usdTextureText;
-        //button for shading model
-        CButton *ShadingButton;
+        CFont *roadText;
+        CFont *objectTypeText;
+        CFont *objectInfoText;
+        CFont *animalText;
+        CFont *unknown1Text;
+        CFont *buildText;
+        CFont *unknown2Text;
+        CFont *unknown3Text;
+        CFont *resourceText;
+        CFont *unknown4Text;
+        CFont *unknown5Text;
         //some puffers to write texts with sprintf()
         char puffer1[100];
         //char puffer2[100];
@@ -65,8 +73,7 @@ class CDebug
             WNDQUIT = 1,    //debugger window closed
             INCREMENT_MSWAIT,
             DECREMENT_MSWAIT,
-            SETZERO_MSWAIT,
-            CHANGE_SHADING
+            SETZERO_MSWAIT
         };
 
     public:

@@ -11,11 +11,6 @@
 				<Option object_output="obj\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-fexpensive-optimizations" />
-					<Add option="-O1" />
-					<Add option="-O" />
-				</Compiler>
 				<Linker>
 					<Add option="-s" />
 					<Add option="-lmingw32 -lSDLmain -lSDL -lSGE -mwindows" />
