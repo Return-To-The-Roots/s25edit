@@ -18,6 +18,7 @@ class CMap
         //editor mode variables
         int mode;
         int modeContent;
+        int modeContent2;
         bool modify;
         //get the number of the triangle nearest to cursor and save it to VertexX and VertexY
         void saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
@@ -46,7 +47,9 @@ class CMap
         void setMode(int mode) { this->mode = mode; };
         int getMode(void) { return mode; };
         void setModeContent(int modeContent) { this->modeContent = modeContent; };
+        void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; };
         int getModeContent(void) { return modeContent; };
+        int getModeContent2(void) { return modeContent2; };
         bobMAP* getMap(void) { return map; };
         SDL_Surface* getSurface(void) { render(); return Surf_Map; };
         bool render(void);

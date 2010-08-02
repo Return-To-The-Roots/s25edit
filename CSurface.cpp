@@ -1,5 +1,8 @@
 #include "CSurface.h"
 
+char CSurface::roundCount = 0;
+Uint32 CSurface::roundTime = 0;
+
 CSurface::CSurface()
 {
 }
@@ -388,6 +391,16 @@ void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bob
     tempP3.z = vertex[(height-1)*width+0].z;
     tempP3.i = vertex[(height-1)*width+0].i;
     DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+width-1], tempP3);
+
+    //at least increase the round counter
+    if (SDL_GetTicks() - roundTime > 30)
+    {
+        roundTime = SDL_GetTicks();
+        if (roundCount >= 7)
+            roundCount = 0;
+        else
+            roundCount++;
+    }
 }
 
 void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3)
@@ -605,12 +618,13 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
                                                 rightX = 83;
                                                 rightY = 174;
                                                 break;
-        default :                               upperX = 161;
-                                                upperY = 144;
+        default:                                //TRIANGLE_TEXTURE_FLOWER
+                                                upperX = 161;
+                                                upperY = 0;
                                                 leftX = 144;
-                                                leftY = 174;
+                                                leftY = 30;
                                                 rightX = 179;
-                                                rightY = 174;
+                                                rightY = 30;
                                                 break;
     }
 
@@ -624,6 +638,135 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
 
 
     //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
+
+    //blit objects
+    if (P1.y < P2.y)
+    {
+        int objIdx = 0;
+        switch (P1.objectInfo)
+        {
+            //tree
+            case    0xC4:   if (P1.objectType >= 0x30 && P1.objectType <= 0x37)
+                            {
+                                if (P1.objectType + roundCount > 0x37)
+                                    objIdx = MAPPIC_TREE_PINE + (P1.objectType - 0x30) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_PINE + (P1.objectType - 0x30) + roundCount;
+
+                            }
+                            else if (P1.objectType >= 0x70 && P1.objectType <= 0x77)
+                            {
+                                if (P1.objectType + roundCount > 0x77)
+                                    objIdx = MAPPIC_TREE_BIRCH + (P1.objectType - 0x70) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_BIRCH + (P1.objectType - 0x70) + roundCount;
+                            }
+                            else if (P1.objectType >= 0xB0 && P1.objectType <= 0xB7)
+                            {
+                                if (P1.objectType + roundCount > 0xB7)
+                                    objIdx = MAPPIC_TREE_OAK + (P1.objectType - 0xB0) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_OAK + (P1.objectType - 0xB0) + roundCount;
+                            }
+                            else if (P1.objectType >= 0xF0 && P1.objectType <= 0xF7)
+                            {
+                                if (P1.objectType + roundCount > 0xF7)
+                                    objIdx = MAPPIC_TREE_PALM1 + (P1.objectType - 0xF0) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_PALM1 + (P1.objectType - 0xF0) + roundCount;
+                            }
+                            break;
+            //tree
+            case    0xC5:   if (P1.objectType >= 0x30 && P1.objectType <= 0x37)
+                            {
+                                if (P1.objectType + roundCount > 0x37)
+                                    objIdx = MAPPIC_TREE_PALM2 + (P1.objectType - 0x30) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_PALM2 + (P1.objectType - 0x30) + roundCount;
+
+                            }
+                            else if (P1.objectType >= 0x70 && P1.objectType <= 0x77)
+                            {
+                                if (P1.objectType + roundCount > 0x77)
+                                    objIdx = MAPPIC_TREE_PINEAPPLE + (P1.objectType - 0x70) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_PINEAPPLE + (P1.objectType - 0x70) + roundCount;
+                            }
+                            else if (P1.objectType >= 0xB0 && P1.objectType <= 0xB7)
+                            {
+                                if (P1.objectType + roundCount > 0xB7)
+                                    objIdx = MAPPIC_TREE_CYPRESS + (P1.objectType - 0xB0) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_CYPRESS + (P1.objectType - 0xB0) + roundCount;
+                            }
+                            else if (P1.objectType >= 0xF0 && P1.objectType <= 0xF7)
+                            {
+                                if (P1.objectType + roundCount > 0xF7)
+                                    objIdx = MAPPIC_TREE_CHERRY + (P1.objectType - 0xF0) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_CHERRY + (P1.objectType - 0xF0) + roundCount;
+                            }
+                            break;
+            //tree
+            case    0xC6:   if (P1.objectType >= 0x30 && P1.objectType <= 0x37)
+                            {
+                                if (P1.objectType + roundCount > 0x37)
+                                    objIdx = MAPPIC_TREE_FIR + (P1.objectType - 0x30) + (roundCount - 7);
+                                else
+                                    objIdx = MAPPIC_TREE_FIR + (P1.objectType - 0x30) + roundCount;
+
+                            }
+                            break;
+            //landscape
+            case    0xC8:   switch (P1.objectType)
+                            {
+                                case 0x00:  objIdx = MAPPIC_MUSHROOM1;
+                                            break;
+                                case 0x01:  objIdx = MAPPIC_MUSHROOM2;
+                                            break;
+
+                                case 0x05:  objIdx = MAPPIC_TREE_TRUNK_DEAD;
+                                            break;
+                                case 0x06:  objIdx = MAPPIC_TREE_DEAD;
+                                            break;
+                                case 0x07:  objIdx = MAPPIC_BONE1;
+                                            break;
+                                case 0x08:  objIdx = MAPPIC_BONE2;
+                                            break;
+
+                                case 0x10:  objIdx = MAPPIC_BUSH2;
+                                            break;
+                                case 0x11:  objIdx = MAPPIC_BUSH3;
+                                            break;
+                                case 0x12:  objIdx = MAPPIC_BUSH4;
+                                            break;
+
+                                case 0x0A:  objIdx = MAPPIC_BUSH1;
+                                            break;
+
+                                case 0x0C:  objIdx = MAPPIC_CACTUS1;
+                                            break;
+                                case 0x0D:  objIdx = MAPPIC_CACTUS2;
+                                            break;
+
+                                case 0x22:  objIdx = MAPPIC_MUSHROOM3;
+                                            break;
+                                default:    break;
+                            }
+                            break;
+            //stone
+            case    0xCC:   objIdx = MAPPIC_GRANITE_1_1 + (P1.objectType - 0x01);
+                            break;
+            //stone
+            case    0xCD:   objIdx = MAPPIC_GRANITE_2_1 + (P1.objectType - 0x01);
+                            break;
+            default:        break;
+        }
+        if (objIdx != 0)
+            Draw(display, global::bmpArray[objIdx].surface, (int)(P1.x-displayRect.x-global::bmpArray[objIdx].nx), (int)(P1.y-displayRect.y-global::bmpArray[objIdx].ny));
+    }
+
+    //blit buildings
     if (global::s2->getMap()->getBuildHelp())
     {
         if (P1.y < P2.y)
@@ -633,20 +776,20 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
                 P1.build -= 0x08;
             switch (P1.build)
             {
-                case 0x01:  Draw(display, global::bmpArray[GREENLAND_FLAG].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_FLAG].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_FLAG].ny));
+                case 0x01:  Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_FLAG].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_FLAG].ny));
                             break;
-                case 0x02:  Draw(display, global::bmpArray[GREENLAND_HOUSE_SMALL].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_SMALL].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_SMALL].ny));
+                case 0x02:  Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_SMALL].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
                             break;
-                case 0x03:  Draw(display, global::bmpArray[GREENLAND_HOUSE_MIDDLE].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_MIDDLE].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_MIDDLE].ny));
+                case 0x03:  Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                             break;
                 case 0x04:  if (   texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
                                 || texture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || texture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
                                 || texture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                                Draw(display, global::bmpArray[GREENLAND_HOUSE_HARBOUR].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_HARBOUR].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_HARBOUR].ny));
+                                Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
                             else
-                                Draw(display, global::bmpArray[GREENLAND_HOUSE_BIG].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_HOUSE_BIG].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_HOUSE_BIG].ny));
+                                Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_BIG].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_BIG].ny));
                             break;
-                case 0x05:  Draw(display, global::bmpArray[GREENLAND_MINE].surface, (int)(P1.x-displayRect.x-global::bmpArray[GREENLAND_MINE].nx), (int)(P1.y-displayRect.y-global::bmpArray[GREENLAND_MINE].ny));
+                case 0x05:  Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_MINE].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_MINE].ny));
                             break;
                 default:    break;
             }

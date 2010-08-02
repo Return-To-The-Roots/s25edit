@@ -354,59 +354,6 @@ bool CGame::Init()
     }
     */
 
-    //load only the palette at this time from MAP00.LST
-    std::cout << "\nLoading palette from file: /DATA/MAP00.LST...";
-    if ( CFile::open_file("./DATA/MAP00.LST", LST, true) == false )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << "\nLoading file: /DATA/MAP00.LST...";
-    if ( CFile::open_file("./DATA/MAP00.LST", LST) == false )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
-
-    //load only the palette at this time from MAP01.LST
-    std::cout << "\nLoading palette from file: /DATA/MAP01.LST...";
-    if ( CFile::open_file("./DATA/MAP01.LST", LST, true) == false )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << "\nLoading file: /DATA/MAP01.LST...";
-    if ( CFile::open_file("./DATA/MAP01.LST", LST) == false )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
-
-    //load only the palette at this time from MAP02.LST
-    std::cout << "\nLoading palette from file: /DATA/MAP02.LST...";
-    if ( CFile::open_file("./DATA/MAP02.LST", LST, true) == false )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << "\nLoading file: /DATA/MAP02.LST...";
-    if ( CFile::open_file("./DATA/MAP02.LST", LST) == false )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
 
 //EVERY MISSION-FILE SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
     std::cout << "\nLoading file: /DATA/MIS0BOBS.LST...";

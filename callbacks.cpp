@@ -213,6 +213,7 @@ void callback::EditorQuitMenu(int Param)
                     //now call all EditorMenu callbacks (from the menubar) with MAP_QUIT
                     EditorMainMenu(MAP_QUIT);
                     EditorTextureMenu(MAP_QUIT);
+                    EditorTreeMenu(MAP_QUIT);
                     //go to main menu
                     mainmenu(INITIALIZING_CALL);
                     break;
@@ -305,7 +306,7 @@ void callback::EditorTextureMenu(int Param)
                         WNDTexture->addPicture(EditorTextureMenu, PICLAVA, 104, 70, textureIndex++);
                         //WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, 138, 70, textureIndex);
 
-                        WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, NULL, GREENLAND_HOUSE_HARBOUR);
+                        WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, NULL, MAPPIC_HOUSE_HARBOUR);
                         harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
                     }
                     else
@@ -436,6 +437,149 @@ void callback::EditorTextureMenu(int Param)
                     MapObj = NULL;
                     map = NULL;
                     textureIndex = 0;
+                    break;
+
+        default:    break;
+    }
+}
+
+void callback::EditorTreeMenu(int Param)
+{
+    static CWindow *WNDTree = NULL;
+    static CMap* MapObj = NULL;
+    static bobMAP *map = NULL;
+
+    enum
+    {
+        WINDOWQUIT,
+        PICPINE,
+        PICBIRCH,
+        PICOAK,
+        PICPALM1,
+        PICPALM2,
+        PICPINEAPPLE,
+        PICCYPRESS,
+        PICCHERRY,
+        PICFIR,
+        PICSPIDER,
+        PICFLAPHAT,
+        PICWOOD_MIXED,
+        PICPALM_MIXED
+    };
+
+    if (MapObj != NULL)
+        MapObj->setMode(EDITOR_MODE_TREE);
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDTree != NULL)
+                        break;
+                    WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, 0, 0, 148, 140, "Bäume", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    if (global::s2->RegisterWindow(WNDTree))
+                    {
+                        MapObj = global::s2->getMap();
+                        map = MapObj->getMap();
+                        switch (map->type)
+                        {
+                            case MAP_GREENLAND: WNDTree->addPicture(EditorTreeMenu, PICPINE, 2, 2, PICTURE_TREE_PINE);
+                                                WNDTree->addPicture(EditorTreeMenu, PICBIRCH, 36, 2, PICTURE_TREE_BIRCH);
+                                                WNDTree->addPicture(EditorTreeMenu, PICOAK, 70, 2, PICTURE_TREE_OAK);
+                                                WNDTree->addPicture(EditorTreeMenu, PICPALM1, 104, 2, PICTURE_TREE_PALM1);
+                                                WNDTree->addPicture(EditorTreeMenu, PICPALM2, 2, 36, PICTURE_TREE_PALM2);
+                                                WNDTree->addPicture(EditorTreeMenu, PICPINEAPPLE, 36, 36, PICTURE_TREE_PINEAPPLE);
+                                                WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, 70, 36, PICTURE_TREE_CYPRESS);
+                                                WNDTree->addPicture(EditorTreeMenu, PICCHERRY, 104, 36, PICTURE_TREE_CHERRY);
+                                                WNDTree->addPicture(EditorTreeMenu, PICFIR, 2, 72, PICTURE_TREE_FIR);
+                                                WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, 36, 72, PICTURE_TREE_WOOD_MIXED);
+                                                WNDTree->addPicture(EditorTreeMenu, PICPALM_MIXED, 72, 72, PICTURE_TREE_PALM_MIXED);
+                                                break;
+                            case MAP_WASTELAND: WNDTree->addPicture(EditorTreeMenu, PICFLAPHAT, 2, 2, PICTURE_TREE_FLAPHAT);
+                                                WNDTree->addPicture(EditorTreeMenu, PICSPIDER, 36, 2, PICTURE_TREE_SPIDER);
+                                                WNDTree->addPicture(EditorTreeMenu, PICPINEAPPLE, 70, 2, PICTURE_TREE_PINEAPPLE);
+                                                WNDTree->addPicture(EditorTreeMenu, PICCHERRY, 104, 2, PICTURE_TREE_CHERRY);
+                                                break;
+                            case MAP_WINTERLAND:WNDTree->addPicture(EditorTreeMenu, PICPINE, 2, 2, PICTURE_TREE_PINE);
+                                                WNDTree->addPicture(EditorTreeMenu, PICBIRCH, 36, 2, PICTURE_TREE_BIRCH);
+                                                WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, 70, 2, PICTURE_TREE_CYPRESS);
+                                                WNDTree->addPicture(EditorTreeMenu, PICFIR, 104, 2, PICTURE_TREE_FIR);
+                                                WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, 2, 36, PICTURE_TREE_WOOD_MIXED);
+                                                break;
+                            default:            //should not happen
+                                                break;
+                        }
+                        MapObj->setMode(EDITOR_MODE_TREE);
+                        MapObj->setModeContent(0x30);
+                        MapObj->setModeContent2(0xC4);
+                    }
+                    else
+                    {
+                        delete WNDTree;
+                        WNDTree = NULL;
+                        return;
+                    }
+                    break;
+
+        case PICPINE:           MapObj->setModeContent(0x30);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICBIRCH:          MapObj->setModeContent(0x70);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICOAK:            MapObj->setModeContent(0xB0);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICPALM1:          MapObj->setModeContent(0xF0);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICPALM2:          MapObj->setModeContent(0x30);
+                                MapObj->setModeContent2(0xC5);
+                                break;
+        case PICPINEAPPLE:      MapObj->setModeContent(0x70);
+                                MapObj->setModeContent2(0xC5);
+                                break;
+        case PICCYPRESS:        MapObj->setModeContent(0xB0);
+                                MapObj->setModeContent2(0xC5);
+                                break;
+        case PICCHERRY:         MapObj->setModeContent(0xF0);
+                                MapObj->setModeContent2(0xC5);
+                                break;
+        case PICFIR:            MapObj->setModeContent(0x30);
+                                MapObj->setModeContent2(0xC6);
+                                break;
+        case PICFLAPHAT:        MapObj->setModeContent(0x70);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICSPIDER:         MapObj->setModeContent(0x30);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICWOOD_MIXED:     MapObj->setModeContent(0xFF);
+                                MapObj->setModeContent2(0xC4);
+                                break;
+        case PICPALM_MIXED:     MapObj->setModeContent(0xFF);
+                                MapObj->setModeContent2(0xC5);
+                                break;
+
+        case WINDOWQUIT:
+                    if (WNDTree != NULL)
+                    {
+                        WNDTree->setWaste();
+                        WNDTree = NULL;
+                    }
+                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj = NULL;
+                    map = NULL;
+                    break;
+
+        case MAP_QUIT:
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    if (WNDTree != NULL)
+                    {
+                        WNDTree->setWaste();
+                        WNDTree = NULL;
+                    }
+                    MapObj = NULL;
+                    map = NULL;
                     break;
 
         default:    break;

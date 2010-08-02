@@ -194,6 +194,13 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
 
 void CWindow::setMouseData(SDL_MouseButtonEvent button)
 {
+    //at first check if the right mouse button was pressed, cause in this case we will close the window
+    if (button.button == SDL_BUTTON_RIGHT && button.state == SDL_PRESSED)
+    {
+        callback(callbackQuitMessage);
+        return;
+    }
+
     //save width and height in case we minimize the window (the initializing values are for preventing any mistakes and compilerwarning --- in fact: uninitialized values are only a problem if the window is created minimized, but this will not happen)
     static int maximized_h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
     if (!minimized)
@@ -227,7 +234,10 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
             canClose_clicked = false;
             //if mouse button is released ON the close button (marked = true), then send the quit message to the callback
             if (canClose_marked && callback != NULL)
+            {
                 callback(callbackQuitMessage);
+                return;
+            }
         }
     }
     //check whats happen to the minimize button

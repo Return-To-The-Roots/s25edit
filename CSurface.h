@@ -8,8 +8,6 @@ class CSurface
     friend class CDebug;
     public:
         CSurface();
-
-    public:
         static bool Draw(SDL_Surface *Surf_Dest, SDL_Surface *Surf_Src, int X, int Y);
         static bool Draw(SDL_Surface *Surf_Dest, SDL_Surface *Surf_Src, int X, int Y, int X2, int Y2, int W, int H);
         static void DrawPixel_Color(SDL_Surface *screen, int x, int y, Uint32 color);
@@ -22,6 +20,10 @@ class CSurface
         static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
 
     private:
+        //to count the rounds (round != gameloop) --> important to makes trees and water moving --> walks from 0 to 7
+        static char roundCount;
+        static Uint32 roundTime;
+
         static struct vector get_nodeVector(struct vector v1, struct vector v2, struct vector v3);
         static struct vector get_normVector(struct vector v);
         static struct vector get_flatVector(struct point *P1, struct point *P2, struct point *P3);

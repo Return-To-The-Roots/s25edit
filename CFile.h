@@ -18,6 +18,7 @@ class CFile
         //Access Methods
         static void set_palActual(bobPAL *Actual) { palActual = Actual; };
         static bobPAL* get_palArray(void) { return palArray; };
+        static void set_bmpArray(bobBMP *new_bmpArray) { bmpArray = new_bmpArray; };
 
     private:
         //Methods

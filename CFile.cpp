@@ -664,9 +664,9 @@ bobMAP* CFile::open_wld(void)
     else
     {
         strcpy(myMap->name, "Ohne Namen");
-        myMap->width = 256;
+        myMap->width = 2048;
         myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
-        myMap->height = 256;
+        myMap->height = 2048;
         myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
         myMap->type = 0;
         myMap->player = 4;
