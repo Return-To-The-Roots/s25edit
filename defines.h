@@ -102,6 +102,8 @@ struct point
     Uint8 unknown4;             /* section 13 */
     Uint8 unknown5;             /* section 14 */
 };
+//structure for display, cause SDL_Rect's datatypes are too small
+struct DisplayRectangle { long int x,y; long int w,h; };
 //map strutcture
 typedef struct BobtypeMAP
 {
@@ -765,9 +767,28 @@ enum
     MENUBAR_TEXTURE,
     MENUBAR_HEIGHT,
     MENUBAR_PLAYER,
-    MENUBAR_STONE,
+    MENUBAR_LANDSCAPE,
     MENUBAR_ANIMAL,
     MENUBAR_NEWWORLD,
+    PICTURE_EYE_CROSS,
+    MENUBAR_COMPUTER_DOUBLE_ENTRY,
+    //some bobtype 14 pictures missing here
+    PICTURE_LANDSCAPE_GRANITE = MENUBAR_COMPUTER_DOUBLE_ENTRY + 4,
+    PICTURE_LANDSCAPE_TREE_DEAD,
+    PICTURE_LANDSCAPE_STONE,
+    PICTURE_LANDSCAPE_CACTUS,
+    PICTURE_LANDSCAPE_PEBBLE,
+    PICTURE_LANDSCAPE_BUSH,
+    PICTURE_LANDSCAPE_SHRUB,
+    PICTURE_LANDSCAPE_BONE,
+    PICTURE_LANDSCAPE_MUSHROOM,
+    PICTURE_LANDSCAPE_STALAGMITE,
+    PICTURE_LANDSCAPE_GRANITE_WINTER,
+    PICTURE_LANDSCAPE_TREE_DEAD_WINTER,
+    PICTURE_LANDSCAPE_STONE_WINTER,
+    PICTURE_LANDSCAPE_PEBBLE_WINTER,
+    PICTURE_LANDSCAPE_BONE_WINTER,
+    PICTURE_LANDSCAPE_MUSHROOM_WINTER,
     //some bobtype 14 pictures missing here
     PICTURE_SHEEP = 573,
     PICTURE_SHEEP_DOUBLE_ENTRY = 574,
@@ -779,7 +800,7 @@ enum
     CURSOR_SYMBOL_ARROW_UP,
     CURSOR_SYMBOL_ARROW_DOWN,
     CURSOR_SYMBOL_TEXTURE,
-    CURSOR_SYMBOL_STONE,
+    CURSOR_SYMBOL_LANDSCAPE,
     CURSOR_SYMBOL_FLAG,
     CURSOR_SYMBOL_PICKAXE_MINUS,
     CURSOR_SYMBOL_PICKAXE_PLUS,
@@ -838,7 +859,6 @@ enum
 //END: /GFX/TEXTURES/TEX7.LBM
 
 //BEGIN: /DATA/MIS*BOBS.LST   * = 0,1,2,3,4,5
-//SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
     MIS0BOBS_SHIP,
     MIS0BOBS_TENT,
     MIS1BOBS_STONE1,
@@ -1047,7 +1067,7 @@ enum
     EDITOR_MODE_RAISE,
     EDITOR_MODE_REDUCE,
     EDITOR_MODE_TEXTURE,
-    EDITOR_MODE_STONE,
+    EDITOR_MODE_LANDSCAPE,
     EDITOR_MODE_FLAG,
     EDITOR_MODE_PICKAXE_MINUS,
     EDITOR_MODE_PICKAXE_PLUS,
@@ -1103,6 +1123,7 @@ enum
 #define TRIANGLE_TEXTURE_LAVA                   0x10
 #define TRIANGLE_TEXTURE_MINING_MEADOW          0x12
 #define TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR  0x52
-#define TRIANGLE_TEXTURE_MEADOW_MIXED           0xFF    //this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
+#define TRIANGLE_TEXTURE_MEADOW_MIXED           0xBF    //this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
+#define TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR   0xFF    //this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
 
 #endif

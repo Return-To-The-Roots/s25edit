@@ -14,8 +14,8 @@ class CSurface
         static void DrawPixel_RGB(SDL_Surface *screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
         static void DrawPixel_RGBA(SDL_Surface *screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
         static Uint32 GetPixel(SDL_Surface *surface, int x, int y);
-        static void DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap);
-        static void DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3);
+        static void DrawTriangleField(SDL_Surface *display, struct DisplayRectangle displayRect, bobMAP *myMap);
+        static void DrawTriangle(SDL_Surface *display, struct DisplayRectangle displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3);
         static void get_nodeVectors(bobMAP *myMap);
         static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
 

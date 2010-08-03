@@ -225,7 +225,7 @@ Uint32 CSurface::GetPixel(SDL_Surface *surface, int x, int y)
     }
 }
 
-void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap)
+void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle displayRect, bobMAP *myMap)
 {
     Uint16 width = myMap->width;
     Uint16 height = myMap->height;
@@ -403,7 +403,7 @@ void CSurface::DrawTriangleField(SDL_Surface *display, SDL_Rect displayRect, bob
     }
 }
 
-void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3)
+void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3)
 {
     //prevent drawing triangles that are not shown
     if  ( ( (P1.x < displayRect.x && P2.x < displayRect.x && P3.x < displayRect.x ) || (P1.x > (displayRect.x+displayRect.w) && P2.x > (displayRect.x+displayRect.w) && P3.x > (displayRect.x+displayRect.w)) )
@@ -724,7 +724,12 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
                                             break;
                                 case 0x01:  objIdx = MAPPIC_MUSHROOM2;
                                             break;
-
+                                case 0x02:  objIdx = MAPPIC_STONE1;
+                                            break;
+                                case 0x03:  objIdx = MAPPIC_STONE2;
+                                            break;
+                                case 0x04:  objIdx = MAPPIC_STONE3;
+                                            break;
                                 case 0x05:  objIdx = MAPPIC_TREE_TRUNK_DEAD;
                                             break;
                                 case 0x06:  objIdx = MAPPIC_TREE_DEAD;
@@ -748,8 +753,39 @@ void CSurface::DrawTriangle(SDL_Surface *display, SDL_Rect displayRect, bobMAP *
                                             break;
                                 case 0x0D:  objIdx = MAPPIC_CACTUS2;
                                             break;
+                                case 0x0E:  objIdx = MAPPIC_SHRUB1;
+                                            break;
+                                case 0x0F:  objIdx = MAPPIC_SHRUB2;
+                                            break;
+
+                                case 0x13:  objIdx = MAPPIC_SHRUB3;
+                                            break;
+                                case 0x14:  objIdx = MAPPIC_SHRUB4;
+                                            break;
+
+                                case 0x18:  objIdx = MIS1BOBS_STONE1;
+                                            break;
+                                case 0x19:  objIdx = MIS1BOBS_STONE2;
+                                            break;
+                                case 0x1A:  objIdx = MIS1BOBS_STONE3;
+                                            break;
+                                case 0x1B:  objIdx = MIS1BOBS_STONE4;
+                                            break;
+                                case 0x1C:  objIdx = MIS1BOBS_STONE5;
+                                            break;
+                                case 0x1D:  objIdx = MIS1BOBS_STONE6;
+                                            break;
+                                case 0x1E:  objIdx = MIS1BOBS_STONE7;
+                                            break;
 
                                 case 0x22:  objIdx = MAPPIC_MUSHROOM3;
+                                            break;
+
+                                case 0x25:  objIdx = MAPPIC_PEBBLE1;
+                                            break;
+                                case 0x26:  objIdx = MAPPIC_PEBBLE2;
+                                            break;
+                                case 0x27:  objIdx = MAPPIC_PEBBLE3;
                                             break;
                                 default:    break;
                             }

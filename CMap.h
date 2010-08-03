@@ -10,7 +10,7 @@ class CMap
     private:
         SDL_Surface *Surf_Map;
         bobMAP *map;
-        SDL_Rect displayRect;
+        struct DisplayRectangle displayRect;
         bool active;
         bool needSurface;
         int VertexX, VertexY;
@@ -56,8 +56,8 @@ class CMap
 
     private:
         //returns count of the vertices that are involved in changes (editor mode)
-        int getActiveVertices(int ChangeSection);
-        void actualizeVertices(void);
+        int getActiveVertices(int tempChangeSection);
+        void calculateVertices(struct vertexPoint tempVertices[], int VertexX, int VertexY, int tempChangeSection);
         int correctMouseBlitX(int MouseBlitX, int VertexX, int VertexY);
         int correctMouseBlitY(int MouseBlitY, int VertexX, int VertexY);
         void modifyVertex(void);
@@ -65,6 +65,8 @@ class CMap
         //this modifies a whole hexagon!
         void modifyTexture(int VertexX, int VertexY);
         void modifyObject(int VertexX, int VertexY);
+        //this modifies a whole hexagon!
+        void modifyBuild(int VertexX, int VertexY);
 };
 
 #endif

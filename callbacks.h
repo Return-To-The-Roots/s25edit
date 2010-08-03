@@ -12,6 +12,7 @@ namespace callback
     void EditorQuitMenu(int Param);
     void EditorTextureMenu(int Param);
     void EditorTreeMenu(int Param);
+    void EditorLandscapeMenu(int Param);
 #else
     void GameMenu(int Param);
 #endif

@@ -152,6 +152,15 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             callback::EditorTreeMenu(INITIALIZING_CALL);
             return;
         }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-88) && button.x <= (displayRect.w/2-51)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the landscape-mode picture was clicked
+            mode = EDITOR_MODE_LANDSCAPE;
+            callback::EditorLandscapeMenu(INITIALIZING_CALL);
+            return;
+        }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+96) && button.x <= (displayRect.w/2+133)
                                                   && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
@@ -215,7 +224,7 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             {
                 ChangeSection++;
                 VertexCounter = getActiveVertices(ChangeSection);
-                actualizeVertices();
+                calculateVertices(Vertices, VertexX, VertexY, ChangeSection);
             }
         }
         else if (key.keysym.sym == SDLK_KP_MINUS)
@@ -224,7 +233,7 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             {
                 ChangeSection--;
                 VertexCounter = getActiveVertices(ChangeSection);
-                actualizeVertices();
+                calculateVertices(Vertices, VertexX, VertexY, ChangeSection);
             }
         }
     }
@@ -304,7 +313,7 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
     MouseBlitX = correctMouseBlitX(MouseBlitX, VertexX, VertexY);
     MouseBlitY = correctMouseBlitY(MouseBlitY, VertexX, VertexY);
 
-    actualizeVertices();
+    calculateVertices(Vertices, VertexX, VertexY, ChangeSection);
 }
 
 int CMap::correctMouseBlitX(int MouseBlitX, int VertexX, int VertexY)
@@ -401,6 +410,8 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, displayRect.w/2-195, displayRect.h-35);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TREE].surface, displayRect.w/2-158, displayRect.h-37);
 
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_LANDSCAPE].surface, displayRect.w/2-84, displayRect.h-37);
+
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.w/2+96, displayRect.h-35);
     //temprorary to save a map
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w/2+131, displayRect.h-37);
@@ -425,7 +436,7 @@ bool CMap::render(void)
                                         break;
         case EDITOR_MODE_TEXTURE:       symbol_index = CURSOR_SYMBOL_TEXTURE;
                                         break;
-        case EDITOR_MODE_STONE:         symbol_index = CURSOR_SYMBOL_STONE;
+        case EDITOR_MODE_LANDSCAPE:     symbol_index = CURSOR_SYMBOL_LANDSCAPE;
                                         break;
         case EDITOR_MODE_FLAG:          symbol_index = CURSOR_SYMBOL_FLAG;
                                         break;
@@ -471,8 +482,42 @@ void CMap::modifyVertex(void)
     {
         if (ChangeSection == 0)
         {
-            map->vertex[VertexY*map->width+VertexX].rsuTexture = modeContent;
-            map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED || modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
+            {
+                int newContent = rand()%3;
+                if (newContent == 0)
+                {
+                    if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                        newContent = TRIANGLE_TEXTURE_MEADOW1;
+                    else
+                        newContent = TRIANGLE_TEXTURE_MEADOW1_HARBOUR;
+                }
+                else if (newContent == 1)
+                {
+                    if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                        newContent = TRIANGLE_TEXTURE_MEADOW2;
+                    else
+                        newContent = TRIANGLE_TEXTURE_MEADOW2_HARBOUR;
+                }
+                else
+                {
+                    if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                        newContent = TRIANGLE_TEXTURE_MEADOW3;
+                    else
+                        newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
+                }
+                if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+                    map->vertex[VertexY*map->width+VertexX].rsuTexture = newContent;
+                if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+                    map->vertex[VertexY*map->width+VertexX].usdTexture = newContent;
+            }
+            else
+            {
+                if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+                    map->vertex[VertexY*map->width+VertexX].rsuTexture = modeContent;
+                if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+                    map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
+            }
         }
         else if (ChangeSection == 1)
             modifyTexture(Vertices[0].x, Vertices[0].y);
@@ -488,6 +533,11 @@ void CMap::modifyVertex(void)
         }
     }
     else if (mode == EDITOR_MODE_TREE)
+    {
+        for (int i = 0; i < VertexCounter; i++)
+            modifyObject(Vertices[i].x, Vertices[i].y);
+    }
+    else if (mode == EDITOR_MODE_LANDSCAPE)
     {
         for (int i = 0; i < VertexCounter; i++)
             modifyObject(Vertices[i].x, Vertices[i].y);
@@ -606,22 +656,146 @@ void CMap::modifyTexture(int VertexX, int VertexY)
     if (VertexY%2 == 0)
         even = true;
 
-    map->vertex[VertexY*map->width+VertexX].rsuTexture = modeContent;
-    map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
+    if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED || modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
+    {
+        int newContent;
 
-    //update first vertex left upside
-    X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
-    Y = VertexY-1;                  if (Y < 0) Y += map->height;
-    map->vertex[Y*map->width+X].rsuTexture = modeContent;
-    map->vertex[Y*map->width+X].usdTexture = modeContent;
-    //update second vertex right upside
-    X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
-    Y = VertexY-1;                  if (Y < 0) Y += map->height;
-    map->vertex[Y*map->width+X].rsuTexture = modeContent;
-    //update third point bottom left
-    X = VertexX-1;                  if (X < 0) X += map->width;
-    Y = VertexY;
-    map->vertex[Y*map->width+X].usdTexture = modeContent;
+        newContent = rand()%3;
+        if (newContent == 0)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW1;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW1_HARBOUR;
+        }
+        else if (newContent == 1)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW2;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW2_HARBOUR;
+        }
+        else
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW3;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
+        }
+        if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+            map->vertex[VertexY*map->width+VertexX].rsuTexture = newContent;
+        if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+            map->vertex[VertexY*map->width+VertexX].usdTexture = newContent;
+
+        //update first vertex left upside
+        X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+        Y = VertexY-1;                  if (Y < 0) Y += map->height;
+        newContent = rand()%3;
+        if (newContent == 0)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW1;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW1_HARBOUR;
+        }
+        else if (newContent == 1)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW2;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW2_HARBOUR;
+        }
+        else
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW3;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
+        }
+        if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].rsuTexture = newContent;
+        if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].usdTexture = newContent;
+        //update second vertex right upside
+        X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+        Y = VertexY-1;                  if (Y < 0) Y += map->height;
+        newContent = rand()%3;
+        if (newContent == 0)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW1;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW1_HARBOUR;
+        }
+        else if (newContent == 1)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW2;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW2_HARBOUR;
+        }
+        else
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW3;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
+        }
+        if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].rsuTexture = newContent;
+        //update third point bottom left
+        X = VertexX-1;                  if (X < 0) X += map->width;
+        Y = VertexY;
+        newContent = rand()%3;
+        if (newContent == 0)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW1;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW1_HARBOUR;
+        }
+        else if (newContent == 1)
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW2;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW2_HARBOUR;
+        }
+        else
+        {
+            if (modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED)
+                newContent = TRIANGLE_TEXTURE_MEADOW3;
+            else
+                newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
+        }
+        if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].usdTexture = newContent;
+    }
+    else
+    {
+        if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+            map->vertex[VertexY*map->width+VertexX].rsuTexture = modeContent;
+        if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+            map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
+
+        //update first vertex left upside
+        X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+        Y = VertexY-1;                  if (Y < 0) Y += map->height;
+        if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].rsuTexture = modeContent;
+        if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].usdTexture = modeContent;
+        //update second vertex right upside
+        X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+        Y = VertexY-1;                  if (Y < 0) Y += map->height;
+        if (modeContent2 == 0xFD || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].rsuTexture = modeContent;
+        //update third point bottom left
+        X = VertexX-1;                  if (X < 0) X += map->width;
+        Y = VertexY;
+        if (modeContent2 == 0xFE || modeContent2 == 0xFF)
+            map->vertex[Y*map->width+X].usdTexture = modeContent;
+    }
     //now we are finished, all six triangles have the new texture
 }
 
@@ -635,15 +809,18 @@ void CMap::modifyObject(int VertexX, int VertexY)
     }
     else if (mode == EDITOR_MODE_TREE)
     {
+        //if there is another object at the vertex, return
+        if (map->vertex[VertexY*map->width+VertexX].objectInfo != 0x00)
+                return;
         if (modeContent == 0xFF)
         {
             //mixed wood
             if (modeContent2 == 0xC4)
             {
-                int newContent = rand()%12;
-                if (newContent <= 5)
+                int newContent = rand()%3;
+                if (newContent == 0)
                     newContent = 0x30;
-                else if (newContent > 5 && newContent <= 9)
+                else if (newContent == 1)
                     newContent = 0x70;
                 else
                     newContent = 0xB0;
@@ -654,9 +831,9 @@ void CMap::modifyObject(int VertexX, int VertexY)
             //mixed palm
             else //if (modeContent2 == 0xC5)
             {
-                int newContent = rand()%16;
+                int newContent = rand()%2;
                 int newContent2;
-                if (newContent <= 8)
+                if (newContent == 0)
                 {
                     newContent = 0x30;
                     newContent2 = 0xC5;
@@ -674,111 +851,266 @@ void CMap::modifyObject(int VertexX, int VertexY)
         else
         {
             //we set different start pictures for the tree, cause the trees should move different, so we add a random value that walks from 0 to 7
-            map->vertex[VertexY*map->width+VertexX].objectType = modeContent + SDL_GetTicks()%8;
+            map->vertex[VertexY*map->width+VertexX].objectType = modeContent + rand()%8;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        //now set up the buildings around the tree
+        modifyBuild(VertexX, VertexY);
+    }
+    else if (mode == EDITOR_MODE_LANDSCAPE)
+    {
+        //if there is another object at the vertex, return
+        if (map->vertex[VertexY*map->width+VertexX].objectInfo != 0x00)
+                return;
+
+        if (modeContent == 0x01)
+        {
+            int newContent = modeContent + rand()%6;
+            int newContent2 = 0xCC + rand()%2;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = newContent2;
+
+            //now set up the buildings around the granite
+            modifyBuild(VertexX, VertexY);
+        }
+        else if (modeContent == 0x05)
+        {
+            int newContent = modeContent + rand()%2;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x02)
+        {
+            int newContent = modeContent + rand()%3;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x0C)
+        {
+            int newContent = modeContent + rand()%2;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x25)
+        {
+            int newContent = modeContent + rand()%3;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x10)
+        {
+            int newContent = rand()%4;
+            if (newContent == 0)
+                newContent = 0x10;
+            else if (newContent == 1)
+                newContent = 0x11;
+            else if (newContent == 2)
+                newContent = 0x12;
+            else
+                newContent = 0x0A;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x0E)
+        {
+            int newContent = rand()%4;
+            if (newContent == 0)
+                newContent = 0x0E;
+            else if (newContent == 1)
+                newContent = 0x0F;
+            else if (newContent == 2)
+                newContent = 0x13;
+            else
+                newContent = 0x14;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x07)
+        {
+            int newContent = modeContent + rand()%2;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x00)
+        {
+            int newContent = rand()%3;
+            if (newContent == 0)
+                newContent = 0x00;
+            else if (newContent == 1)
+                newContent = 0x01;
+            else
+                newContent = 0x22;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x18)
+        {
+            int newContent = modeContent + rand()%7;
+
+            map->vertex[VertexY*map->width+VertexX].objectType = newContent;
             map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
         }
     }
 }
 
-int CMap::getActiveVertices(int ChangeSection)
+void CMap::modifyBuild(int VertexX, int VertexY)
+{
+    //at first save all vertices we need to modify
+    struct vertexPoint tempVertices[19];
+    calculateVertices(tempVertices, VertexX, VertexY, 2);
+
+    if (mode == EDITOR_MODE_CUT)
+    {
+        ;
+    }
+    if (mode == EDITOR_MODE_RAISE)
+    {
+        ;
+    }
+    else if (mode == EDITOR_MODE_REDUCE)
+    {
+        ;
+    }
+    else if (mode == EDITOR_MODE_TREE)
+    {
+        //small houses and left up a flag
+        Uint8 building;
+        map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].build = 0x00;
+        for (int i = 1; i <= 6; i++)
+        {
+            building = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build;
+            while (building > 0x07)
+                building -= 0x08;
+            //Before setting tree was it possible to set a middle/great house AND NOT a mine?
+            if (building > 0x02 && building != 0x05)
+                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build = 0x02;
+        }
+        map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].build = 0x01;
+    }
+    else if (mode == EDITOR_MODE_LANDSCAPE)
+    {
+        //flags around the stone
+        Uint8 building;
+        map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].build = 0x00;
+        for (int i = 1; i <= 6; i++)
+        {
+            building = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build;
+            while (building > 0x07)
+                building -= 0x08;
+            //Before setting granite was it possible to set a flag or anything bigger?
+            if (building > 0x01)
+                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build = 0x01;
+        }
+    }
+}
+
+int CMap::getActiveVertices(int tempChangeSection)
 {
     int total = 0;
-    for (int i = ChangeSection; i > 0; i--)
+    for (int i = tempChangeSection; i > 0; i--)
         total += i;
     return ( 6*total + 1);
 }
 
-void CMap::actualizeVertices(void)
+void CMap::calculateVertices(struct vertexPoint tempVertices[], int VertexX, int VertexY, int tempChangeSection)
 {
     bool even = false;
     if (VertexY%2 == 0)
         even = true;
 
-    Vertices[0].x = VertexX;
-    Vertices[0].y = VertexY;
-    Vertices[0].blit_x = MouseBlitX;
-    Vertices[0].blit_y = MouseBlitY;
+    tempVertices[0].x = VertexX;
+    tempVertices[0].y = VertexY;
+    tempVertices[0].blit_x = MouseBlitX;
+    tempVertices[0].blit_y = MouseBlitY;
 
-    if (ChangeSection > 0)
+    if (tempChangeSection > 0)
     {
-        Vertices[1].x = VertexX - (even ? 1 : 0);   if (Vertices[1].x < 0) Vertices[1].x += map->width;
-        Vertices[1].y = VertexY-1;                  if (Vertices[1].y < 0) Vertices[1].y += map->height;
-        Vertices[1].blit_x = correctMouseBlitX(map->vertex[Vertices[1].y*map->width+Vertices[1].x].x, Vertices[1].x, Vertices[1].y);
-        Vertices[1].blit_y = correctMouseBlitY(map->vertex[Vertices[1].y*map->width+Vertices[1].x].y, Vertices[1].x, Vertices[1].y);
-        Vertices[2].x = VertexX + (even ? 0 : 1);   if (Vertices[2].x >= map->width) Vertices[2].x -= map->width;
-        Vertices[2].y = VertexY-1;                  if (Vertices[2].y < 0) Vertices[2].y += map->height;
-        Vertices[2].blit_x = correctMouseBlitX(map->vertex[Vertices[2].y*map->width+Vertices[2].x].x, Vertices[2].x, Vertices[2].y);
-        Vertices[2].blit_y = correctMouseBlitY(map->vertex[Vertices[2].y*map->width+Vertices[2].x].y, Vertices[2].x, Vertices[2].y);
-        Vertices[3].x = VertexX-1;                  if (Vertices[3].x < 0) Vertices[3].x += map->width;
-        Vertices[3].y = VertexY;
-        Vertices[3].blit_x = correctMouseBlitX(map->vertex[Vertices[3].y*map->width+Vertices[3].x].x, Vertices[3].x, Vertices[3].y);
-        Vertices[3].blit_y = correctMouseBlitY(map->vertex[Vertices[3].y*map->width+Vertices[3].x].y, Vertices[3].x, Vertices[3].y);
-        Vertices[4].x = VertexX+1;                  if (Vertices[4].x >= map->width) Vertices[4].x -= map->width;
-        Vertices[4].y = VertexY;
-        Vertices[4].blit_x = correctMouseBlitX(map->vertex[Vertices[4].y*map->width+Vertices[4].x].x, Vertices[4].x, Vertices[4].y);
-        Vertices[4].blit_y = correctMouseBlitY(map->vertex[Vertices[4].y*map->width+Vertices[4].x].y, Vertices[4].x, Vertices[4].y);
-        Vertices[5].x = VertexX - (even ? 1 : 0);   if (Vertices[5].x < 0) Vertices[5].x += map->width;
-        Vertices[5].y = VertexY+1;                  if (Vertices[5].y >= map->height) Vertices[5].y -= map->height;
-        Vertices[5].blit_x = correctMouseBlitX(map->vertex[Vertices[5].y*map->width+Vertices[5].x].x, Vertices[5].x, Vertices[5].y);
-        Vertices[5].blit_y = correctMouseBlitY(map->vertex[Vertices[5].y*map->width+Vertices[5].x].y, Vertices[5].x, Vertices[5].y);
-        Vertices[6].x = VertexX + (even ? 0 : 1);   if (Vertices[6].x >= map->width) Vertices[6].x -= map->width;
-        Vertices[6].y = VertexY+1;                  if (Vertices[6].y >= map->height) Vertices[6].y -= map->height;
-        Vertices[6].blit_x = correctMouseBlitX(map->vertex[Vertices[6].y*map->width+Vertices[6].x].x, Vertices[6].x, Vertices[6].y);
-        Vertices[6].blit_y = correctMouseBlitY(map->vertex[Vertices[6].y*map->width+Vertices[6].x].y, Vertices[6].x, Vertices[6].y);
+        tempVertices[1].x = VertexX - (even ? 1 : 0);   if (tempVertices[1].x < 0) tempVertices[1].x += map->width;
+        tempVertices[1].y = VertexY-1;                  if (tempVertices[1].y < 0) tempVertices[1].y += map->height;
+        tempVertices[1].blit_x = correctMouseBlitX(map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].x, tempVertices[1].x, tempVertices[1].y);
+        tempVertices[1].blit_y = correctMouseBlitY(map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].y, tempVertices[1].x, tempVertices[1].y);
+        tempVertices[2].x = VertexX + (even ? 0 : 1);   if (tempVertices[2].x >= map->width) tempVertices[2].x -= map->width;
+        tempVertices[2].y = VertexY-1;                  if (tempVertices[2].y < 0) tempVertices[2].y += map->height;
+        tempVertices[2].blit_x = correctMouseBlitX(map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].x, tempVertices[2].x, tempVertices[2].y);
+        tempVertices[2].blit_y = correctMouseBlitY(map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].y, tempVertices[2].x, tempVertices[2].y);
+        tempVertices[3].x = VertexX-1;                  if (tempVertices[3].x < 0) tempVertices[3].x += map->width;
+        tempVertices[3].y = VertexY;
+        tempVertices[3].blit_x = correctMouseBlitX(map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].x, tempVertices[3].x, tempVertices[3].y);
+        tempVertices[3].blit_y = correctMouseBlitY(map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].y, tempVertices[3].x, tempVertices[3].y);
+        tempVertices[4].x = VertexX+1;                  if (tempVertices[4].x >= map->width) tempVertices[4].x -= map->width;
+        tempVertices[4].y = VertexY;
+        tempVertices[4].blit_x = correctMouseBlitX(map->vertex[tempVertices[4].y*map->width+tempVertices[4].x].x, tempVertices[4].x, tempVertices[4].y);
+        tempVertices[4].blit_y = correctMouseBlitY(map->vertex[tempVertices[4].y*map->width+tempVertices[4].x].y, tempVertices[4].x, tempVertices[4].y);
+        tempVertices[5].x = VertexX - (even ? 1 : 0);   if (tempVertices[5].x < 0) tempVertices[5].x += map->width;
+        tempVertices[5].y = VertexY+1;                  if (tempVertices[5].y >= map->height) tempVertices[5].y -= map->height;
+        tempVertices[5].blit_x = correctMouseBlitX(map->vertex[tempVertices[5].y*map->width+tempVertices[5].x].x, tempVertices[5].x, tempVertices[5].y);
+        tempVertices[5].blit_y = correctMouseBlitY(map->vertex[tempVertices[5].y*map->width+tempVertices[5].x].y, tempVertices[5].x, tempVertices[5].y);
+        tempVertices[6].x = VertexX + (even ? 0 : 1);   if (tempVertices[6].x >= map->width) tempVertices[6].x -= map->width;
+        tempVertices[6].y = VertexY+1;                  if (tempVertices[6].y >= map->height) tempVertices[6].y -= map->height;
+        tempVertices[6].blit_x = correctMouseBlitX(map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].x, tempVertices[6].x, tempVertices[6].y);
+        tempVertices[6].blit_y = correctMouseBlitY(map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].y, tempVertices[6].x, tempVertices[6].y);
     }
-    if (ChangeSection > 1)
+    if (tempChangeSection > 1)
     {
-        Vertices[7].x = VertexX - 1;                if (Vertices[7].x < 0) Vertices[7].x += map->width;
-        Vertices[7].y = VertexY-2;                  if (Vertices[7].y < 0) Vertices[7].y += map->height;
-        Vertices[7].blit_x = correctMouseBlitX(map->vertex[Vertices[7].y*map->width+Vertices[7].x].x, Vertices[7].x, Vertices[7].y);
-        Vertices[7].blit_y = correctMouseBlitY(map->vertex[Vertices[7].y*map->width+Vertices[7].x].y, Vertices[7].x, Vertices[7].y);
-        Vertices[8].x = VertexX;                    if (Vertices[8].x < 0) Vertices[8].x += map->width;
-        Vertices[8].y = VertexY-2;                  if (Vertices[8].y < 0) Vertices[8].y += map->height;
-        Vertices[8].blit_x = correctMouseBlitX(map->vertex[Vertices[8].y*map->width+Vertices[8].x].x, Vertices[8].x, Vertices[8].y);
-        Vertices[8].blit_y = correctMouseBlitY(map->vertex[Vertices[8].y*map->width+Vertices[8].x].y, Vertices[8].x, Vertices[8].y);
-        Vertices[9].x = VertexX + 1;                if (Vertices[9].x < 0) Vertices[9].x += map->width;
-        Vertices[9].y = VertexY-2;                  if (Vertices[9].y < 0) Vertices[9].y += map->height;
-        Vertices[9].blit_x = correctMouseBlitX(map->vertex[Vertices[9].y*map->width+Vertices[9].x].x, Vertices[9].x, Vertices[9].y);
-        Vertices[9].blit_y = correctMouseBlitY(map->vertex[Vertices[9].y*map->width+Vertices[9].x].y, Vertices[9].x, Vertices[9].y);
-        Vertices[10].x = VertexX - (even ? 2 : 1);   if (Vertices[10].x < 0) Vertices[10].x += map->width;
-        Vertices[10].y = VertexY-1;                  if (Vertices[10].y < 0) Vertices[10].y += map->height;
-        Vertices[10].blit_x = correctMouseBlitX(map->vertex[Vertices[10].y*map->width+Vertices[10].x].x, Vertices[10].x, Vertices[10].y);
-        Vertices[10].blit_y = correctMouseBlitY(map->vertex[Vertices[10].y*map->width+Vertices[10].x].y, Vertices[10].x, Vertices[10].y);
-        Vertices[11].x = VertexX + (even ? 1 : 2);   if (Vertices[11].x >= map->width) Vertices[11].x -= map->width;
-        Vertices[11].y = VertexY-1;                  if (Vertices[11].y < 0) Vertices[11].y += map->height;
-        Vertices[11].blit_x = correctMouseBlitX(map->vertex[Vertices[11].y*map->width+Vertices[11].x].x, Vertices[11].x, Vertices[11].y);
-        Vertices[11].blit_y = correctMouseBlitY(map->vertex[Vertices[11].y*map->width+Vertices[11].x].y, Vertices[11].x, Vertices[11].y);
-        Vertices[12].x = VertexX-2;                  if (Vertices[12].x < 0) Vertices[12].x += map->width;
-        Vertices[12].y = VertexY;
-        Vertices[12].blit_x = correctMouseBlitX(map->vertex[Vertices[12].y*map->width+Vertices[12].x].x, Vertices[12].x, Vertices[12].y);
-        Vertices[12].blit_y = correctMouseBlitY(map->vertex[Vertices[12].y*map->width+Vertices[12].x].y, Vertices[12].x, Vertices[12].y);
-        Vertices[13].x = VertexX+2;                  if (Vertices[13].x >= map->width) Vertices[13].x -= map->width;
-        Vertices[13].y = VertexY;
-        Vertices[13].blit_x = correctMouseBlitX(map->vertex[Vertices[13].y*map->width+Vertices[13].x].x, Vertices[13].x, Vertices[13].y);
-        Vertices[13].blit_y = correctMouseBlitY(map->vertex[Vertices[13].y*map->width+Vertices[13].x].y, Vertices[13].x, Vertices[13].y);
-        Vertices[14].x = VertexX - (even ? 2 : 1);   if (Vertices[14].x < 0) Vertices[14].x += map->width;
-        Vertices[14].y = VertexY+1;                  if (Vertices[14].y < 0) Vertices[14].y += map->height;
-        Vertices[14].blit_x = correctMouseBlitX(map->vertex[Vertices[14].y*map->width+Vertices[14].x].x, Vertices[14].x, Vertices[14].y);
-        Vertices[14].blit_y = correctMouseBlitY(map->vertex[Vertices[14].y*map->width+Vertices[14].x].y, Vertices[14].x, Vertices[14].y);
-        Vertices[15].x = VertexX + (even ? 1 : 2);   if (Vertices[15].x >= map->width) Vertices[15].x -= map->width;
-        Vertices[15].y = VertexY+1;                  if (Vertices[15].y < 0) Vertices[15].y += map->height;
-        Vertices[15].blit_x = correctMouseBlitX(map->vertex[Vertices[15].y*map->width+Vertices[15].x].x, Vertices[15].x, Vertices[15].y);
-        Vertices[15].blit_y = correctMouseBlitY(map->vertex[Vertices[15].y*map->width+Vertices[15].x].y, Vertices[15].x, Vertices[15].y);
-        Vertices[16].x = VertexX - 1;                if (Vertices[16].x < 0) Vertices[16].x += map->width;
-        Vertices[16].y = VertexY+2;                  if (Vertices[16].y < 0) Vertices[16].y += map->height;
-        Vertices[16].blit_x = correctMouseBlitX(map->vertex[Vertices[16].y*map->width+Vertices[16].x].x, Vertices[16].x, Vertices[16].y);
-        Vertices[16].blit_y = correctMouseBlitY(map->vertex[Vertices[16].y*map->width+Vertices[16].x].y, Vertices[16].x, Vertices[16].y);
-        Vertices[17].x = VertexX;                    if (Vertices[17].x < 0) Vertices[17].x += map->width;
-        Vertices[17].y = VertexY+2;                  if (Vertices[17].y < 0) Vertices[17].y += map->height;
-        Vertices[17].blit_x = correctMouseBlitX(map->vertex[Vertices[17].y*map->width+Vertices[17].x].x, Vertices[17].x, Vertices[17].y);
-        Vertices[17].blit_y = correctMouseBlitY(map->vertex[Vertices[17].y*map->width+Vertices[17].x].y, Vertices[17].x, Vertices[17].y);
-        Vertices[18].x = VertexX + 1;                if (Vertices[18].x < 0) Vertices[18].x += map->width;
-        Vertices[18].y = VertexY+2;                  if (Vertices[18].y < 0) Vertices[18].y += map->height;
-        Vertices[18].blit_x = correctMouseBlitX(map->vertex[Vertices[18].y*map->width+Vertices[18].x].x, Vertices[18].x, Vertices[18].y);
-        Vertices[18].blit_y = correctMouseBlitY(map->vertex[Vertices[18].y*map->width+Vertices[18].x].y, Vertices[18].x, Vertices[18].y);
-        ;//remember setting up setKeyboardData
+        tempVertices[7].x = VertexX - 1;                 if (tempVertices[7].x < 0) tempVertices[7].x += map->width;
+        tempVertices[7].y = VertexY-2;                   if (tempVertices[7].y < 0) tempVertices[7].y += map->height;
+        tempVertices[7].blit_x = correctMouseBlitX(map->vertex[tempVertices[7].y*map->width+tempVertices[7].x].x, tempVertices[7].x, tempVertices[7].y);
+        tempVertices[7].blit_y = correctMouseBlitY(map->vertex[tempVertices[7].y*map->width+tempVertices[7].x].y, tempVertices[7].x, tempVertices[7].y);
+        tempVertices[8].x = VertexX;
+        tempVertices[8].y = VertexY-2;                   if (tempVertices[8].y < 0) tempVertices[8].y += map->height;
+        tempVertices[8].blit_x = correctMouseBlitX(map->vertex[tempVertices[8].y*map->width+tempVertices[8].x].x, tempVertices[8].x, tempVertices[8].y);
+        tempVertices[8].blit_y = correctMouseBlitY(map->vertex[tempVertices[8].y*map->width+tempVertices[8].x].y, tempVertices[8].x, tempVertices[8].y);
+        tempVertices[9].x = VertexX + 1;                 if (tempVertices[9].x < 0) tempVertices[9].x += map->width;
+        tempVertices[9].y = VertexY-2;                   if (tempVertices[9].y < 0) tempVertices[9].y += map->height;
+        tempVertices[9].blit_x = correctMouseBlitX(map->vertex[tempVertices[9].y*map->width+tempVertices[9].x].x, tempVertices[9].x, tempVertices[9].y);
+        tempVertices[9].blit_y = correctMouseBlitY(map->vertex[tempVertices[9].y*map->width+tempVertices[9].x].y, tempVertices[9].x, tempVertices[9].y);
+        tempVertices[10].x = VertexX - (even ? 2 : 1);   if (tempVertices[10].x < 0) tempVertices[10].x += map->width;
+        tempVertices[10].y = VertexY-1;                  if (tempVertices[10].y < 0) tempVertices[10].y += map->height;
+        tempVertices[10].blit_x = correctMouseBlitX(map->vertex[tempVertices[10].y*map->width+tempVertices[10].x].x, tempVertices[10].x, tempVertices[10].y);
+        tempVertices[10].blit_y = correctMouseBlitY(map->vertex[tempVertices[10].y*map->width+tempVertices[10].x].y, tempVertices[10].x, tempVertices[10].y);
+        tempVertices[11].x = VertexX + (even ? 1 : 2);   if (tempVertices[11].x >= map->width) tempVertices[11].x -= map->width;
+        tempVertices[11].y = VertexY-1;                  if (tempVertices[11].y < 0) tempVertices[11].y += map->height;
+        tempVertices[11].blit_x = correctMouseBlitX(map->vertex[tempVertices[11].y*map->width+tempVertices[11].x].x, tempVertices[11].x, tempVertices[11].y);
+        tempVertices[11].blit_y = correctMouseBlitY(map->vertex[tempVertices[11].y*map->width+tempVertices[11].x].y, tempVertices[11].x, tempVertices[11].y);
+        tempVertices[12].x = VertexX-2;                  if (tempVertices[12].x < 0) tempVertices[12].x += map->width;
+        tempVertices[12].y = VertexY;
+        tempVertices[12].blit_x = correctMouseBlitX(map->vertex[tempVertices[12].y*map->width+tempVertices[12].x].x, tempVertices[12].x, tempVertices[12].y);
+        tempVertices[12].blit_y = correctMouseBlitY(map->vertex[tempVertices[12].y*map->width+tempVertices[12].x].y, tempVertices[12].x, tempVertices[12].y);
+        tempVertices[13].x = VertexX+2;                  if (tempVertices[13].x >= map->width) tempVertices[13].x -= map->width;
+        tempVertices[13].y = VertexY;
+        tempVertices[13].blit_x = correctMouseBlitX(map->vertex[tempVertices[13].y*map->width+tempVertices[13].x].x, tempVertices[13].x, tempVertices[13].y);
+        tempVertices[13].blit_y = correctMouseBlitY(map->vertex[tempVertices[13].y*map->width+tempVertices[13].x].y, tempVertices[13].x, tempVertices[13].y);
+        tempVertices[14].x = VertexX - (even ? 2 : 1);   if (tempVertices[14].x < 0) tempVertices[14].x += map->width;
+        tempVertices[14].y = VertexY+1;                  if (tempVertices[14].y < 0) tempVertices[14].y += map->height;
+        tempVertices[14].blit_x = correctMouseBlitX(map->vertex[tempVertices[14].y*map->width+tempVertices[14].x].x, tempVertices[14].x, tempVertices[14].y);
+        tempVertices[14].blit_y = correctMouseBlitY(map->vertex[tempVertices[14].y*map->width+tempVertices[14].x].y, tempVertices[14].x, tempVertices[14].y);
+        tempVertices[15].x = VertexX + (even ? 1 : 2);   if (tempVertices[15].x >= map->width) tempVertices[15].x -= map->width;
+        tempVertices[15].y = VertexY+1;                  if (tempVertices[15].y < 0) tempVertices[15].y += map->height;
+        tempVertices[15].blit_x = correctMouseBlitX(map->vertex[tempVertices[15].y*map->width+tempVertices[15].x].x, tempVertices[15].x, tempVertices[15].y);
+        tempVertices[15].blit_y = correctMouseBlitY(map->vertex[tempVertices[15].y*map->width+tempVertices[15].x].y, tempVertices[15].x, tempVertices[15].y);
+        tempVertices[16].x = VertexX - 1;                if (tempVertices[16].x < 0) tempVertices[16].x += map->width;
+        tempVertices[16].y = VertexY+2;                  if (tempVertices[16].y < 0) tempVertices[16].y += map->height;
+        tempVertices[16].blit_x = correctMouseBlitX(map->vertex[tempVertices[16].y*map->width+tempVertices[16].x].x, tempVertices[16].x, tempVertices[16].y);
+        tempVertices[16].blit_y = correctMouseBlitY(map->vertex[tempVertices[16].y*map->width+tempVertices[16].x].y, tempVertices[16].x, tempVertices[16].y);
+        tempVertices[17].x = VertexX;
+        tempVertices[17].y = VertexY+2;                  if (tempVertices[17].y < 0) tempVertices[17].y += map->height;
+        tempVertices[17].blit_x = correctMouseBlitX(map->vertex[tempVertices[17].y*map->width+tempVertices[17].x].x, tempVertices[17].x, tempVertices[17].y);
+        tempVertices[17].blit_y = correctMouseBlitY(map->vertex[tempVertices[17].y*map->width+tempVertices[17].x].y, tempVertices[17].x, tempVertices[17].y);
+        tempVertices[18].x = VertexX + 1;                if (tempVertices[18].x < 0) tempVertices[18].x += map->width;
+        tempVertices[18].y = VertexY+2;                  if (tempVertices[18].y < 0) tempVertices[18].y += map->height;
+        tempVertices[18].blit_x = correctMouseBlitX(map->vertex[tempVertices[18].y*map->width+tempVertices[18].x].x, tempVertices[18].x, tempVertices[18].y);
+        tempVertices[18].blit_y = correctMouseBlitY(map->vertex[tempVertices[18].y*map->width+tempVertices[18].x].y, tempVertices[18].x, tempVertices[18].y);
     }
-    if (ChangeSection > 2)
+    if (tempChangeSection > 2)
     {
         ;//remember setting up setKeyboardData
     }

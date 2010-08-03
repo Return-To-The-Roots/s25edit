@@ -214,6 +214,7 @@ void callback::EditorQuitMenu(int Param)
                     EditorMainMenu(MAP_QUIT);
                     EditorTextureMenu(MAP_QUIT);
                     EditorTreeMenu(MAP_QUIT);
+                    EditorLandscapeMenu(MAP_QUIT);
                     //go to main menu
                     mainmenu(INITIALIZING_CALL);
                     break;
@@ -237,11 +238,14 @@ void callback::EditorTextureMenu(int Param)
     static bobMAP *map = NULL;
     static int textureIndex = 0;
     static int harbourPictureCross = -1;
+    static int trianglePictureArrowUp = -1;
+    static int trianglePictureArrowDown = -1;
 
     enum
     {
         WINDOWQUIT,
         HARBOUR,
+        TRIANGLE,
         PICSNOW,
         PICSTEPPE,
         PICSWAMP,
@@ -269,7 +273,7 @@ void callback::EditorTextureMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDTexture != NULL)
                         break;
-                    WNDTexture = new CWindow(EditorTextureMenu, WINDOWQUIT, 0, 0, 220, 135, "Terrain", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDTexture = new CWindow(EditorTextureMenu, WINDOWQUIT, 0, 0, 220, 167, "Terrain", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDTexture))
                     {
                         MapObj = global::s2->getMap();
@@ -287,6 +291,7 @@ void callback::EditorTextureMenu(int Param)
                         }
                         MapObj->setMode(EDITOR_MODE_TEXTURE);
                         MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW);
+                        MapObj->setModeContent2(0xFF);
 
                         WNDTexture->addPicture(EditorTextureMenu, PICSNOW, 2, 2, textureIndex++);
                         WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE, 36, 2, textureIndex++);
@@ -304,10 +309,15 @@ void callback::EditorTextureMenu(int Param)
                         WNDTexture->addPicture(EditorTextureMenu, PICMINING_MEADOW, 36, 70, textureIndex++);
                         WNDTexture->addPicture(EditorTextureMenu, PICWATER, 70, 70, textureIndex++);
                         WNDTexture->addPicture(EditorTextureMenu, PICLAVA, 104, 70, textureIndex++);
-                        //WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, 138, 70, textureIndex);
+                        if (map->type != MAP_WASTELAND)
+                            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, 138, 70, textureIndex);
 
-                        WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, NULL, MAPPIC_HOUSE_HARBOUR);
-                        harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                        WNDTexture->addButton(EditorTextureMenu, HARBOUR, 36, 104, 32, 32, BUTTON_GREY, NULL, MAPPIC_HOUSE_HARBOUR);
+                        harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
+
+                        WNDTexture->addButton(EditorTextureMenu, TRIANGLE, 2, 104, 32, 32, BUTTON_GREY, NULL);
+                        trianglePictureArrowUp = WNDTexture->addStaticPicture(8, 112, CURSOR_SYMBOL_ARROW_UP);
+                        trianglePictureArrowDown = WNDTexture->addStaticPicture(17, 115, CURSOR_SYMBOL_ARROW_DOWN);
                     }
                     else
                     {
@@ -322,9 +332,9 @@ void callback::EditorTextureMenu(int Param)
                                 {
                                     if (   MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
                                         || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || MapObj->getModeContent() == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                                        || MapObj->getModeContent() == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                                        || MapObj->getModeContent() == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
                                     {
-                                        harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                        harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                         MapObj->setModeContent(MapObj->getModeContent()-0x40);
                                     }
                                 }
@@ -333,7 +343,7 @@ void callback::EditorTextureMenu(int Param)
                                 {
                                     if (   MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW1 || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW2
                                         || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW3 || MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || MapObj->getModeContent() == TRIANGLE_TEXTURE_FLOWER
-                                        || MapObj->getModeContent() == TRIANGLE_TEXTURE_MINING_MEADOW)
+                                        || MapObj->getModeContent() == TRIANGLE_TEXTURE_MINING_MEADOW || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW_MIXED)
                                     {
                                         WNDTexture->delStaticPicture(harbourPictureCross);
                                         harbourPictureCross = -1;
@@ -341,17 +351,49 @@ void callback::EditorTextureMenu(int Param)
                                     }
                                 }
                                 break;
+        case TRIANGLE:          if (trianglePictureArrowUp == -1)
+                                {
+                                    //only arrow down is shown, so upgrade to both arrows
+                                    trianglePictureArrowUp = WNDTexture->addStaticPicture(8, 112, CURSOR_SYMBOL_ARROW_UP);
+                                    if (trianglePictureArrowDown == -1)
+                                        trianglePictureArrowDown = WNDTexture->addStaticPicture(17, 115, CURSOR_SYMBOL_ARROW_DOWN);
+                                    MapObj->setModeContent2(0xFF);
+                                }
+                                else if (trianglePictureArrowDown == -1)
+                                {
+                                    //only arrow up is shown, so delete arrow up and add arrow down
+                                    if (trianglePictureArrowUp != -1)
+                                    {
+                                        WNDTexture->delStaticPicture(trianglePictureArrowUp);
+                                        trianglePictureArrowUp = -1;
+                                    }
+                                    trianglePictureArrowDown = WNDTexture->addStaticPicture(17, 115, CURSOR_SYMBOL_ARROW_DOWN);
+                                    MapObj->setModeContent2(0xFE);
+                                }
+                                else
+                                {
+                                    //both arrows are shown, so downgrade to arrow up
+                                    if (trianglePictureArrowUp == -1)
+                                        trianglePictureArrowUp = WNDTexture->addStaticPicture(8, 112, CURSOR_SYMBOL_ARROW_UP);
+                                    if (trianglePictureArrowDown != -1)
+                                    {
+                                        WNDTexture->delStaticPicture(trianglePictureArrowDown);
+                                        trianglePictureArrowDown = -1;
+                                    }
+                                    MapObj->setModeContent2(0xFD);
+                                }
+                                break;
         case PICSNOW:           MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICSTEPPE:         MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICSWAMP:          MapObj->setModeContent(TRIANGLE_TEXTURE_SWAMP);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICFLOWER:         if (harbourPictureCross == -1)
                                     MapObj->setModeContent(TRIANGLE_TEXTURE_FLOWER_HARBOUR);
@@ -360,19 +402,19 @@ void callback::EditorTextureMenu(int Param)
                                 break;
         case PICMINING1:        MapObj->setModeContent(TRIANGLE_TEXTURE_MINING1);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICMINING2:        MapObj->setModeContent(TRIANGLE_TEXTURE_MINING2);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICMINING3:        MapObj->setModeContent(TRIANGLE_TEXTURE_MINING3);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICMINING4:        MapObj->setModeContent(TRIANGLE_TEXTURE_MINING4);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICSTEPPE_MEADOW1: if (harbourPictureCross == -1)
                                     MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR);
@@ -406,14 +448,17 @@ void callback::EditorTextureMenu(int Param)
                                 break;
         case PICWATER:          MapObj->setModeContent(TRIANGLE_TEXTURE_WATER);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
         case PICLAVA:           MapObj->setModeContent(TRIANGLE_TEXTURE_LAVA);
                                 if (harbourPictureCross == -1)
-                                    harbourPictureCross = WNDTexture->addStaticPicture(183, 80, PICTURE_SMALL_CROSS);
+                                    harbourPictureCross = WNDTexture->addStaticPicture(47, 114, PICTURE_SMALL_CROSS);
                                 break;
-        //case PICMEADOW_MIXED:   MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW_MIXED);
-        //                        break;
+        case PICMEADOW_MIXED:   if (harbourPictureCross == -1)
+                                    MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR);
+                                else
+                                    MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW_MIXED);
+                                break;
 
         case WINDOWQUIT:
                     if (WNDTexture != NULL)
@@ -422,9 +467,14 @@ void callback::EditorTextureMenu(int Param)
                         WNDTexture = NULL;
                     }
                     MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setModeContent(0x00);
+                    MapObj->setModeContent2(0x00);
                     MapObj = NULL;
                     map = NULL;
                     textureIndex = 0;
+                    harbourPictureCross = -1;
+                    trianglePictureArrowUp = -1;
+                    trianglePictureArrowDown = -1;
                     break;
 
         case MAP_QUIT:
@@ -437,6 +487,9 @@ void callback::EditorTextureMenu(int Param)
                     MapObj = NULL;
                     map = NULL;
                     textureIndex = 0;
+                    harbourPictureCross = -1;
+                    trianglePictureArrowUp = -1;
+                    trianglePictureArrowDown = -1;
                     break;
 
         default:    break;
@@ -491,8 +544,8 @@ void callback::EditorTreeMenu(int Param)
                                                 WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, 70, 36, PICTURE_TREE_CYPRESS);
                                                 WNDTree->addPicture(EditorTreeMenu, PICCHERRY, 104, 36, PICTURE_TREE_CHERRY);
                                                 WNDTree->addPicture(EditorTreeMenu, PICFIR, 2, 72, PICTURE_TREE_FIR);
-                                                WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, 36, 72, PICTURE_TREE_WOOD_MIXED);
-                                                WNDTree->addPicture(EditorTreeMenu, PICPALM_MIXED, 72, 72, PICTURE_TREE_PALM_MIXED);
+                                                WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, 36, 70, PICTURE_TREE_WOOD_MIXED);
+                                                WNDTree->addPicture(EditorTreeMenu, PICPALM_MIXED, 70, 70, PICTURE_TREE_PALM_MIXED);
                                                 break;
                             case MAP_WASTELAND: WNDTree->addPicture(EditorTreeMenu, PICFLAPHAT, 2, 2, PICTURE_TREE_FLAPHAT);
                                                 WNDTree->addPicture(EditorTreeMenu, PICSPIDER, 36, 2, PICTURE_TREE_SPIDER);
@@ -567,6 +620,8 @@ void callback::EditorTreeMenu(int Param)
                         WNDTree = NULL;
                     }
                     MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setModeContent(0x00);
+                    MapObj->setModeContent2(0x00);
                     MapObj = NULL;
                     map = NULL;
                     break;
@@ -577,6 +632,143 @@ void callback::EditorTreeMenu(int Param)
                     {
                         WNDTree->setWaste();
                         WNDTree = NULL;
+                    }
+                    MapObj = NULL;
+                    map = NULL;
+                    break;
+
+        default:    break;
+    }
+}
+
+void callback::EditorLandscapeMenu(int Param)
+{
+    static CWindow *WNDLandscape = NULL;
+    static CMap* MapObj = NULL;
+    static bobMAP *map = NULL;
+
+    enum
+    {
+        WINDOWQUIT,
+        PICGRANITE,
+        PICTREEDEAD,
+        PICSTONE,
+        PICCACTUS,
+        PICPEBBLE,
+        PICBUSH,
+        PICSHRUB,
+        PICBONE,
+        PICMUSHROOM,
+        PICSTALAGMITE
+    };
+
+    if (MapObj != NULL)
+        MapObj->setMode(EDITOR_MODE_LANDSCAPE);
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDLandscape != NULL)
+                        break;
+                    WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, 0, 0, 112, 140, "Landschaft", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    if (global::s2->RegisterWindow(WNDLandscape))
+                    {
+                        MapObj = global::s2->getMap();
+                        map = MapObj->getMap();
+                        switch (map->type)
+                        {
+                            case MAP_GREENLAND: WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, 2, 2, PICTURE_LANDSCAPE_GRANITE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, 36, 2, PICTURE_LANDSCAPE_TREE_DEAD);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, 70, 2, PICTURE_LANDSCAPE_STONE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICCACTUS, 2, 36, PICTURE_LANDSCAPE_CACTUS);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, 36, 36, PICTURE_LANDSCAPE_PEBBLE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, 70, 36, PICTURE_LANDSCAPE_BUSH);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, 2, 70, PICTURE_LANDSCAPE_SHRUB);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, 36, 70, PICTURE_LANDSCAPE_BONE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, 70, 70, PICTURE_LANDSCAPE_MUSHROOM);
+                                                break;
+                            case MAP_WASTELAND: WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, 2, 2, PICTURE_LANDSCAPE_GRANITE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, 36, 2, PICTURE_LANDSCAPE_TREE_DEAD);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, 70, 2, PICTURE_LANDSCAPE_STONE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICSTALAGMITE, 2, 36, PICTURE_LANDSCAPE_STALAGMITE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, 36, 36, PICTURE_LANDSCAPE_PEBBLE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, 70, 36, PICTURE_LANDSCAPE_BUSH);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, 2, 70, PICTURE_LANDSCAPE_SHRUB);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, 36, 70, PICTURE_LANDSCAPE_BONE);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, 70, 70, PICTURE_LANDSCAPE_MUSHROOM);
+                                                break;
+                            case MAP_WINTERLAND:WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, 2, 2, PICTURE_LANDSCAPE_GRANITE_WINTER);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, 36, 2, PICTURE_LANDSCAPE_TREE_DEAD_WINTER);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, 70, 2, PICTURE_LANDSCAPE_STONE_WINTER);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, 2, 36, PICTURE_LANDSCAPE_PEBBLE_WINTER);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, 36, 36, PICTURE_LANDSCAPE_BONE_WINTER);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, 70, 36, PICTURE_LANDSCAPE_MUSHROOM_WINTER);
+                                                break;
+                            default:            //should not happen
+                                                break;
+                        }
+                        MapObj->setMode(EDITOR_MODE_LANDSCAPE);
+                        MapObj->setModeContent(0x01);
+                        MapObj->setModeContent2(0xCC);
+                    }
+                    else
+                    {
+                        delete WNDLandscape;
+                        WNDLandscape = NULL;
+                        return;
+                    }
+                    break;
+
+        case PICGRANITE:        MapObj->setModeContent(0x01);
+                                MapObj->setModeContent2(0xCC);
+                                break;
+        case PICTREEDEAD:       MapObj->setModeContent(0x05);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICSTONE:          MapObj->setModeContent(0x02);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICCACTUS:         MapObj->setModeContent(0x0C);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICPEBBLE:         MapObj->setModeContent(0x25);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICBUSH:           MapObj->setModeContent(0x10);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICSHRUB:          MapObj->setModeContent(0x0E);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICBONE:           MapObj->setModeContent(0x07);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICMUSHROOM:       MapObj->setModeContent(0x00);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+        case PICSTALAGMITE:     MapObj->setModeContent(0x18);
+                                MapObj->setModeContent2(0xC8);
+                                break;
+
+        case WINDOWQUIT:
+                    if (WNDLandscape != NULL)
+                    {
+                        WNDLandscape->setWaste();
+                        WNDLandscape = NULL;
+                    }
+                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setModeContent(0x00);
+                    MapObj->setModeContent2(0x00);
+                    MapObj = NULL;
+                    map = NULL;
+                    break;
+
+        case MAP_QUIT:
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    if (WNDLandscape != NULL)
+                    {
+                        WNDLandscape->setWaste();
+                        WNDLandscape = NULL;
                     }
                     MapObj = NULL;
                     map = NULL;
