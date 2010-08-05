@@ -90,12 +90,21 @@ CMap::~CMap()
 
 void CMap::setMouseData(SDL_MouseMotionEvent motion)
 {
-    //important for blitting the right field of the map
+    //following code important for blitting the right field of the map
+    static bool warping = false;
     //is right mouse button pressed?
     if ((motion.state&SDL_BUTTON(SDL_BUTTON_RIGHT))!=0)
     {
-        displayRect.x += motion.xrel;
-        displayRect.y += motion.yrel;
+        //this whole "warping-thing" is to prevent cursor-moving WITHIN the window while user moves over the map
+        if (warping == false)
+        {
+            displayRect.x += motion.xrel;
+            displayRect.y += motion.yrel;
+            warping = true;
+            SDL_WarpMouse(motion.x-motion.xrel, motion.y-motion.yrel);
+        }
+        else
+            warping = false;
 
         //reset coords of displayRects when end of map is reached
         if (displayRect.x >= map->width*TRIANGLE_WIDTH)
@@ -235,6 +244,13 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
                 VertexCounter = getActiveVertices(ChangeSection);
                 calculateVertices(Vertices, VertexX, VertexY, ChangeSection);
             }
+        }
+        else if (key.keysym.sym == SDLK_SPACE)
+        {
+            if (BuildHelp)
+                BuildHelp = false;
+            else
+                BuildHelp = true;
         }
     }
     else if (key.type == SDL_KEYUP)
@@ -549,6 +565,9 @@ void CMap::modifyHeight(int VertexX, int VertexY)
     //vertex count for the points
     int X, Y;
     struct point *tempP = &map->vertex[VertexY*map->width+VertexX];
+    //this is to setup the buldings around the vertex (2 sections from the cursor)
+    struct vertexPoint tempVertices[19];
+    calculateVertices(tempVertices, VertexX, VertexY, 2);
 
     bool even = false;
     if (VertexY%2 == 0)
@@ -560,6 +579,7 @@ void CMap::modifyHeight(int VertexX, int VertexY)
             return;
         tempP->y -= 5;
         tempP->z += 5;
+        tempP->h += 0x01;
         CSurface::update_shading(map, VertexX, VertexY);
 
         //after 25 pixel all vertices around will be raised too
@@ -606,6 +626,7 @@ void CMap::modifyHeight(int VertexX, int VertexY)
             return;
         tempP->y += 5;
         tempP->z -= 5;
+        tempP->h -= 0x01;
         CSurface::update_shading(map, VertexX, VertexY);
         //after 25 pixel all vertices around will be reduced too
         //update first vertex left upside
@@ -645,6 +666,9 @@ void CMap::modifyHeight(int VertexX, int VertexY)
         if (map->vertex[Y*map->width+X].z > tempP->z+25)
             modifyHeight(X, Y);
     }
+    //at least setup the possible building at the vertex and 2 sections around
+    for (int i = 0; i < 19; i++)
+        modifyBuild(tempVertices[i].x, tempVertices[i].y);
 }
 
 void CMap::modifyTexture(int VertexX, int VertexY)
@@ -972,13 +996,48 @@ void CMap::modifyBuild(int VertexX, int VertexY)
     {
         ;
     }
-    if (mode == EDITOR_MODE_RAISE)
+    if (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE)
     {
-        ;
-    }
-    else if (mode == EDITOR_MODE_REDUCE)
-    {
-        ;
+        Uint8 building = 0x04;
+        Uint8 height = map->vertex[VertexY*map->width+VertexX].h, temp;
+
+        //at first let's take a look at the first section around the vertex
+        //test the whole section
+        //for (int i = 0; i < 7; i++)
+        //{
+        //    temp = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].z;
+        //    if (height - temp >= 0x03)
+        //        building = 0x04;
+        //}
+        //test the whole section
+        for (int i = 0; i < 6; i++)
+        {
+            temp = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h;
+            //if ((height - temp <= 0x04 && height - temp >= 0x01) || temp - height >= 0x04)
+            if (height - temp >= 0x04 || temp - height >= 0x04)
+                building = 0x01;
+        }
+
+        //test vertex lower right
+        temp = map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].h;
+        //if ( (height - temp <= 0x02 && height - temp >= 0x01) || temp - height >= 0x02 )
+        if (height - temp >= 0x02 || temp - height >= 0x02 )
+            building = 0x01;
+
+        //now test the second section around the vertex
+        if (building > 0x01)
+        {
+            //test the whole section
+            for (int i = 7; i < 18; i++)
+            {
+                temp = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h;
+                //if ((height - temp <= 0x03 && height - temp >= 0x01) || temp - height >= 0x03)
+                if (height - temp >= 0x03 || temp - height >= 0x03)
+                    building = 0x02;
+            }
+        }
+
+        map->vertex[VertexY*map->width+VertexX].build = building;
     }
     else if (mode == EDITOR_MODE_TREE)
     {
@@ -988,13 +1047,13 @@ void CMap::modifyBuild(int VertexX, int VertexY)
         for (int i = 1; i <= 6; i++)
         {
             building = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build;
-            while (building > 0x07)
-                building -= 0x08;
             //Before setting tree was it possible to set a middle/great house AND NOT a mine?
-            if (building > 0x02 && building != 0x05)
-                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build = 0x02;
+            if (building%8 > 0x02 && building%8 != 0x05)
+                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build -= (building%8 - 0x02);
         }
-        map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].build = 0x01;
+        building = map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].build;
+        if (building%8 > 0x01)
+            map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].build -= (building%8 - 0x01);
     }
     else if (mode == EDITOR_MODE_LANDSCAPE)
     {
@@ -1004,11 +1063,9 @@ void CMap::modifyBuild(int VertexX, int VertexY)
         for (int i = 1; i <= 6; i++)
         {
             building = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build;
-            while (building > 0x07)
-                building -= 0x08;
             //Before setting granite was it possible to set a flag or anything bigger?
-            if (building > 0x01)
-                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build = 0x01;
+            if (building%8 > 0x01)
+                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build -= (building%8 - 0x01);
         }
     }
 }

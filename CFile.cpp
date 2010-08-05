@@ -533,6 +533,7 @@ bobMAP* CFile::open_wld(void)
             for (int i = 0; i < myMap->width; i++)
             {
                 fread(&heightFactor, 1, 1, fp);
+                myMap->vertex[j*myMap->width+i].h = heightFactor;
                 myMap->vertex[j*myMap->width+i].x = a;
                 myMap->vertex[j*myMap->width+i].y = b + (-5)*(heightFactor - 0x0A);
                 myMap->vertex[j*myMap->width+i].z = 5*(heightFactor - 0x0A);
@@ -695,6 +696,7 @@ bobMAP* CFile::open_wld(void)
             for (int i = 0; i < myMap->width; i++)
             {
                 heightFactor = 0x0A;
+                myMap->vertex[j*myMap->width+i].h = heightFactor;
                 myMap->vertex[j*myMap->width+i].x = a;
                 myMap->vertex[j*myMap->width+i].y = b + (-5)*(heightFactor - 0x0A);
                 myMap->vertex[j*myMap->width+i].z = 5*(heightFactor - 0x0A);

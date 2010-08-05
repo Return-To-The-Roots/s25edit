@@ -542,10 +542,10 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 rightY = 30;
                                                 break;
         case TRIANGLE_TEXTURE_WATER:            upperX = 219;
-                                                upperY = 49;//48;
-                                                leftX = 193;//192;
+                                                upperY = 51;//48;
+                                                leftX = 195;//192;
                                                 leftY = 75;
-                                                rightX = 245;//246;
+                                                rightX = 243;//246;
                                                 rightY = 75;
                                                 break;
         case TRIANGLE_TEXTURE_MEADOW1:          upperX = 65;
@@ -807,10 +807,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     {
         if (P1.y < P2.y)
         {
-            //bring "build"-value down to a value between 0x00 and 0x07
-            while (P1.build > 0x07)
-                P1.build -= 0x08;
-            switch (P1.build)
+            switch (P1.build%8)
             {
                 case 0x01:  Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_FLAG].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_FLAG].ny));
                             break;

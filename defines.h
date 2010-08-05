@@ -84,7 +84,8 @@ struct point
 {
     long int x;
     long int y;                 /* calculated with section 1 */
-    int z;                      /* section 1 */
+    int z;                      /* calculated with section 1 */
+    Uint8 h;                    /* section 1 */
     Sint32 i;
     struct vector flatVector;
     struct vector normVector;
