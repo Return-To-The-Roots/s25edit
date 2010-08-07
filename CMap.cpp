@@ -534,6 +534,11 @@ void CMap::modifyVertex(void)
                 if (modeContent2 == 0xFE || modeContent2 == 0xFF)
                     map->vertex[VertexY*map->width+VertexX].usdTexture = modeContent;
             }
+            //at least setup the possible building at the vertex and 2 sections around
+            struct vertexPoint tempVertices[7];
+            calculateVertices(tempVertices, VertexX, VertexY, 1);
+            for (int i = 0; i < 7; i++)
+                modifyBuild(tempVertices[i].x, tempVertices[i].y);
         }
         else if (ChangeSection == 1)
             modifyTexture(Vertices[0].x, Vertices[0].y);
@@ -821,6 +826,11 @@ void CMap::modifyTexture(int VertexX, int VertexY)
             map->vertex[Y*map->width+X].usdTexture = modeContent;
     }
     //now we are finished, all six triangles have the new texture
+    //at least setup the possible building at the vertex and 2 sections around
+    struct vertexPoint tempVertices[19];
+    calculateVertices(tempVertices, VertexX, VertexY, 2);
+    for (int i = 0; i < 19; i++)
+        modifyBuild(tempVertices[i].x, tempVertices[i].y);
 }
 
 void CMap::modifyObject(int VertexX, int VertexY)
@@ -878,8 +888,6 @@ void CMap::modifyObject(int VertexX, int VertexY)
             map->vertex[VertexY*map->width+VertexX].objectType = modeContent + rand()%8;
             map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
         }
-        //now set up the buildings around the tree
-        modifyBuild(VertexX, VertexY);
     }
     else if (mode == EDITOR_MODE_LANDSCAPE)
     {
@@ -984,6 +992,11 @@ void CMap::modifyObject(int VertexX, int VertexY)
             map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
         }
     }
+    //at least setup the possible building at the vertex and 1 section around
+    struct vertexPoint tempVertices[7];
+    calculateVertices(tempVertices, VertexX, VertexY, 1);
+    for (int i = 0; i < 7; i++)
+        modifyBuild(tempVertices[i].x, tempVertices[i].y);
 }
 
 void CMap::modifyBuild(int VertexX, int VertexY)
@@ -992,82 +1005,272 @@ void CMap::modifyBuild(int VertexX, int VertexY)
     struct vertexPoint tempVertices[19];
     calculateVertices(tempVertices, VertexX, VertexY, 2);
 
-    if (mode == EDITOR_MODE_CUT)
-    {
-        ;
-    }
-    if (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE)
-    {
-        Uint8 building = 0x04;
-        Uint8 height = map->vertex[VertexY*map->width+VertexX].h, temp;
+    //evtl. keine festen werte sonder addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine 0x00 sondern 0x68)
 
-        //at first let's take a look at the first section around the vertex
-        //test the whole section
-        //for (int i = 0; i < 7; i++)
-        //{
-        //    temp = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].z;
-        //    if (height - temp >= 0x03)
-        //        building = 0x04;
-        //}
+
+    Uint8 building;
+    Uint8 height = map->vertex[VertexY*map->width+VertexX].h, temp;
+
+    //calculate the building using the height of the vertices
+    //this building is a mine
+    if (    map->vertex[VertexY*map->width+VertexX].rsuTexture == TRIANGLE_TEXTURE_MINING1
+        ||  map->vertex[VertexY*map->width+VertexX].rsuTexture == TRIANGLE_TEXTURE_MINING2
+        ||  map->vertex[VertexY*map->width+VertexX].rsuTexture == TRIANGLE_TEXTURE_MINING3
+        ||  map->vertex[VertexY*map->width+VertexX].rsuTexture == TRIANGLE_TEXTURE_MINING4
+       )
+    {
+        building = 0x05;
+        //test vertex lower right
+        temp = map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].h;
+        if ( temp - height >= 0x04 )
+            building = 0x01;
+    }
+    //not a mine
+    else
+    {
+        building = 0x04;
         //test the whole section
         for (int i = 0; i < 6; i++)
         {
             temp = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h;
-            //if ((height - temp <= 0x04 && height - temp >= 0x01) || temp - height >= 0x04)
             if (height - temp >= 0x04 || temp - height >= 0x04)
                 building = 0x01;
         }
 
         //test vertex lower right
         temp = map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].h;
-        //if ( (height - temp <= 0x02 && height - temp >= 0x01) || temp - height >= 0x02 )
-        if (height - temp >= 0x02 || temp - height >= 0x02 )
+        if (height - temp >= 0x04 || temp - height >= 0x02 )
             building = 0x01;
 
         //now test the second section around the vertex
         if (building > 0x01)
         {
             //test the whole section
-            for (int i = 7; i < 18; i++)
+            for (int i = 7; i < 19; i++)
             {
                 temp = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h;
-                //if ((height - temp <= 0x03 && height - temp >= 0x01) || temp - height >= 0x03)
                 if (height - temp >= 0x03 || temp - height >= 0x03)
                     building = 0x02;
             }
         }
+    }
 
-        map->vertex[VertexY*map->width+VertexX].build = building;
-    }
-    else if (mode == EDITOR_MODE_TREE)
+    //test if there is an object AROUND the vertex (trees or granite)
+    if (building > 0x01)
     {
-        //small houses and left up a flag
-        Uint8 building;
-        map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].build = 0x00;
-        for (int i = 1; i <= 6; i++)
+        for (int i = 1; i < 7; i++)
         {
-            building = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build;
-            //Before setting tree was it possible to set a middle/great house AND NOT a mine?
-            if (building%8 > 0x02 && building%8 != 0x05)
-                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build -= (building%8 - 0x02);
-        }
-        building = map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].build;
-        if (building%8 > 0x01)
-            map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].build -= (building%8 - 0x01);
-    }
-    else if (mode == EDITOR_MODE_LANDSCAPE)
-    {
-        //flags around the stone
-        Uint8 building;
-        map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].build = 0x00;
-        for (int i = 1; i <= 6; i++)
-        {
-            building = map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build;
-            //Before setting granite was it possible to set a flag or anything bigger?
-            if (building%8 > 0x01)
-                map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].build -= (building%8 - 0x01);
+            if (    map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].objectInfo == 0xC4  //tree
+                ||  map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].objectInfo == 0xC5  //tree
+                ||  map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].objectInfo == 0xC6  //tree
+               )
+            {
+                //if lower right
+                if (i == 6)
+                {
+                    building = 0x01;
+                    break;
+                }
+                else
+                    building = 0x02;
+            }
+            else if (   map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].objectInfo == 0xCC  //granite
+                    ||  map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].objectInfo == 0xCD //granite
+                    )
+            {
+                building = 0x01;
+                break;
+            }
         }
     }
+
+    //test if there is an object AT the vertex (trees or granite)
+    if (building > 0x00)
+    {
+        if (    map->vertex[VertexY*map->width+VertexX].objectInfo == 0xC4  //tree
+            ||  map->vertex[VertexY*map->width+VertexX].objectInfo == 0xC5  //tree
+            ||  map->vertex[VertexY*map->width+VertexX].objectInfo == 0xC6  //tree
+            ||  map->vertex[VertexY*map->width+VertexX].objectInfo == 0xCC  //granite
+            ||  map->vertex[VertexY*map->width+VertexX].objectInfo == 0xCD  //granite
+           )
+        {
+            building = 0x00;
+        }
+    }
+
+    //test if there is snow or lava at the vertex or around the vertex and touching the vertex (first section)
+    if (building > 0x00)
+    {
+        if (    map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_LAVA
+            ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_LAVA
+            ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_LAVA
+            ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_LAVA
+            ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_LAVA
+            ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_LAVA
+           )
+        {
+            building = 0x00;
+        }
+    }
+
+    //test if there is snow or lava in lower right (first section)
+    if (building > 0x01)
+    {
+        if (    map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].rsuTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].usdTexture == TRIANGLE_TEXTURE_SNOW
+            ||  map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].rsuTexture == TRIANGLE_TEXTURE_LAVA
+            ||  map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].usdTexture == TRIANGLE_TEXTURE_LAVA
+           )
+        {
+            building = 0x01;
+        }
+    }
+
+    //test if vertex is surrounded by water or swamp
+    if (building > 0x00)
+    {
+        if (    (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_WATER
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_SWAMP
+                )
+            &&  (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_WATER
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_SWAMP
+                )
+            &&  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_WATER
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_SWAMP
+                )
+            &&  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_WATER
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_SWAMP
+                )
+            &&  (   map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_WATER
+                ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_SWAMP
+                )
+            &&  (   map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_WATER
+                ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_SWAMP
+                )
+           )
+        {
+            building = 0x00;
+        }
+        else if (   (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_WATER
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_SWAMP
+                    )
+                ||  (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_WATER
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_SWAMP
+                    )
+                ||  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_WATER
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_SWAMP
+                    )
+                ||  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_WATER
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_SWAMP
+                    )
+                ||  (   map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_WATER
+                    ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_SWAMP
+                    )
+                ||  (   map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_WATER
+                    ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_SWAMP
+                    )
+                )
+        {
+            building = 0x01;
+        }
+    }
+
+    //test if there is steppe at the vertex or touching the vertex
+    if (building > 0x01)
+    {
+        if (    map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_STEPPE
+            ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_STEPPE
+            ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_STEPPE
+            ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_STEPPE
+            ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_STEPPE
+            ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_STEPPE
+           )
+        {
+            building = 0x01;
+        }
+    }
+
+    //test is vertex is surrounded by mining-textures
+    if (building > 0x01)
+    {
+        if (    (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING1
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING2
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING3
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING4
+                )
+            &&  (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING1
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING2
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING3
+                ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING4
+                )
+            &&  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING1
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING2
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING3
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING4
+                )
+            &&  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING1
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING2
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING3
+                ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING4
+                )
+            &&  (   map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING1
+                ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING2
+                ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING3
+                ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING4
+                )
+            &&  (   map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING1
+                ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING2
+                ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING3
+                ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING4
+                )
+           )
+        {
+            building = 0x05;
+        }
+        else if (   (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING1
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING2
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING3
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].rsuTexture == TRIANGLE_TEXTURE_MINING4
+                    )
+                ||  (   map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING1
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING2
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING3
+                    ||  map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].usdTexture == TRIANGLE_TEXTURE_MINING4
+                    )
+                ||  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING1
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING2
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING3
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].rsuTexture == TRIANGLE_TEXTURE_MINING4
+                    )
+                ||  (   map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING1
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING2
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING3
+                    ||  map->vertex[tempVertices[1].y*map->width+tempVertices[1].x].usdTexture == TRIANGLE_TEXTURE_MINING4
+                    )
+                ||  (   map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING1
+                    ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING2
+                    ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING3
+                    ||  map->vertex[tempVertices[2].y*map->width+tempVertices[2].x].rsuTexture == TRIANGLE_TEXTURE_MINING4
+                    )
+                ||  (   map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING1
+                    ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING2
+                    ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING3
+                    ||  map->vertex[tempVertices[3].y*map->width+tempVertices[3].x].usdTexture == TRIANGLE_TEXTURE_MINING4
+                    )
+               )
+        {
+            building = 0x01;
+        }
+    }
+
+
+    map->vertex[VertexY*map->width+VertexX].build = building;
 }
 
 int CMap::getActiveVertices(int tempChangeSection)
