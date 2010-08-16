@@ -37,8 +37,9 @@ CDebug::CDebug(void dbgCallback(int), int quitParam)
     resourceText = NULL;
     unknown4Text = NULL;
     unknown5Text = NULL;
+    editorModeText = NULL;
     fontsize = 9;
-    MapObj = global::s2->Map;
+    MapObj = global::s2->MapObj;
     map = NULL;
     global::s2->RegisterCallback(dbgCallback);
 
@@ -161,7 +162,7 @@ void CDebug::actualizeData(void)
     RegisteredCallbacksText = dbgWnd->addText(puffer1, 0, 80, fontsize);
 
     //we will now write the map data if a map is active
-    MapObj = global::s2->Map;
+    MapObj = global::s2->MapObj;
     if (MapObj != NULL)
     {
         map = MapObj->map;
@@ -386,6 +387,16 @@ void CDebug::actualizeData(void)
             sprintf(puffer1, "unknown5: %#04x", map->vertex[MapObj->VertexY*map->width+MapObj->VertexX].unknown5);
             unknown5Text = dbgWnd->addText(puffer1, 260, 220, fontsize);
         }
+        if (editorModeText != NULL)
+        {
+            if (dbgWnd->delText(editorModeText))
+                editorModeText = NULL;
+        }
+        if (editorModeText == NULL)
+        {
+            sprintf(puffer1, "Editor --> Mode: %d Content: %#04x Content2: %#04x", MapObj->mode, MapObj->modeContent, MapObj->modeContent2);
+            editorModeText = dbgWnd->addText(puffer1, 260, 230, fontsize);
+        }
     }
     else
     {
@@ -505,6 +516,11 @@ void CDebug::actualizeData(void)
         {
             if (dbgWnd->delText(unknown5Text))
                 unknown5Text = NULL;
+        }
+        if (editorModeText != NULL)
+        {
+            if (dbgWnd->delText(editorModeText))
+                editorModeText = NULL;
         }
     }
 }

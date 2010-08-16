@@ -22,7 +22,9 @@ enum
     //if user goes to main menu, all menubar callbacks will be called with MAP_QUIT
     MAP_QUIT = -3,
     //parameter for closing the debugger window
-    DEBUGGER_QUIT = -4
+    DEBUGGER_QUIT = -4,
+    //this will happen every time the user clicks anywhere on the window
+    WINDOW_CLICKED_CALL = -5
 };
 
 //BOBTYPES
@@ -133,6 +135,9 @@ struct vertexPoint
     int y;
     int blit_x;
     int blit_y;
+    bool active;
+    bool fill_rsu;
+    bool fill_usd;
 };
 
 //IMPORTANT: for enumerating the contents of loaded files put the constants in the right order here.
@@ -1002,6 +1007,13 @@ enum
     MIS5BOBS_VIKING_SHADOW
 };
 
+//enumeration for BobtypePAL (palettes for the pics)
+enum
+{
+    PAL_RESOURCE = 0,
+    PAL_IO
+};
+
 //Button-Colors (after all used by CButton and other Objects using CButton)
 enum
 {
@@ -1031,6 +1043,7 @@ enum
 //background color
 enum
 {
+    WINDOW_NOTHING = -1,
     WINDOW_GREEN1 = WINDOW_BACKGROUND,
     WINDOW_GREEN2 = BUTTON_GREEN1_DARK,
     WINDOW_GREEN3 = BUTTON_GREEN1_BRIGHT,
@@ -1074,6 +1087,9 @@ enum
     EDITOR_MODE_PICKAXE_PLUS,
     EDITOR_MODE_ANIMAL
 };
+
+//maximum range for the cursor in editor mode (user can increase or decrease by pressing '+' or '-') --> Must be >= 0.
+#define MAX_CHANGE_SECTION 10
 
 //maximum values for global arrays
 //maximum pics

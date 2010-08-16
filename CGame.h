@@ -47,7 +47,7 @@ class CGame
         //Object for Callbacks
         void (*Callbacks[MAXCALLBACKS])(int);
         //Object for the Map
-        CMap *Map;
+        CMap *MapObj;
 
 #ifdef _VIEWERMODE
 		//counter for surfing through pics
@@ -79,9 +79,10 @@ class CGame
 		bool UnregisterWindow(CWindow *Window);
 		bool RegisterCallback(void (*callback)(int));
 		bool UnregisterCallback(void (*callback)(int));
-		void setMap(CMap *Map) { this->Map = Map; };
-		CMap *getMap(void) { return Map; };
-		void delMap(void);
+		void setMapObj(CMap *MapObj) { this->MapObj = MapObj; };
+		CMap *getMapObj(void) { return MapObj; };
+		void delMapObj(void);
+		SDL_Surface* getDisplaySurface(void) { return Surf_Display; };
 };
 
 #endif

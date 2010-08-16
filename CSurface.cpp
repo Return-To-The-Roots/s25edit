@@ -22,6 +22,32 @@ bool CSurface::Draw(SDL_Surface *Surf_Dest, SDL_Surface *Surf_Src, int X, int Y)
     return true;
 }
 
+bool CSurface::Draw(SDL_Surface *Surf_Dest, SDL_Surface *Surf_Src, int X, int Y, int angle)
+{
+    if (Surf_Dest == NULL || Surf_Src == NULL)
+        return false;
+
+    Uint16 px, py;
+
+    switch (angle)
+    {
+        case    90: px = 0;
+                    py = Surf_Src->h-1;
+                    break;
+        case   180: px = Surf_Src->w-1;
+                    py = Surf_Src->h-1;
+                    break;
+        case   270: px = Surf_Src->w-1;
+                    py = 0;
+                    break;
+        default:    return false;
+    }
+
+    sge_transform(Surf_Src, Surf_Dest, (float)angle, 1.0, 1.0, px, py, X, Y, SGE_TSAFE);
+
+    return true;
+}
+
 bool CSurface::Draw(SDL_Surface *Surf_Dest, SDL_Surface *Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
 {
     if (Surf_Dest == NULL || Surf_Src == NULL)
@@ -630,8 +656,8 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
 
 
     //draw the triangle
-    //do not shade water
-    if (texture == TRIANGLE_TEXTURE_WATER)
+    //do not shade water and lava
+    if (texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
         sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
     else
         sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
@@ -803,7 +829,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     }
 
     //blit buildings
-    if (global::s2->getMap()->getBuildHelp())
+    if (global::s2->getMapObj()->getBuildHelp())
     {
         if (P1.y < P2.y)
         {
@@ -925,7 +951,7 @@ void CSurface::get_nodeVectors(bobMAP *myMap)
 Sint32 CSurface::get_LightIntensity(struct vector node)
 {
     //we calculate the light intensity right now
-    float I, Ip = 0.8, kd = 1, light_const = 0.7;
+    float I, Ip = 1.1, kd = 1, light_const = 1.0;
     struct vector L = { -10, 5, 0.5 };
     L = get_normVector(L);
     I = Ip*kd*(node.x*L.x+node.y*L.y+node.z*L.z)+light_const;

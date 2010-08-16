@@ -27,8 +27,8 @@ void CGame::EventHandling(SDL_Event *Event)
         case SDL_KEYDOWN: {
 
             //deliver keyboard data to map
-            if (Map != NULL)
-                Map->setKeyboardData(Event->key);
+            if (MapObj != NULL)
+                MapObj->setKeyboardData(Event->key);
 
             switch (Event->key.keysym.sym)
             {
@@ -88,8 +88,8 @@ void CGame::EventHandling(SDL_Event *Event)
         case SDL_KEYUP: {
 
             //deliver keyboard data to map
-            if (Map != NULL)
-                Map->setKeyboardData(Event->key);
+            if (MapObj != NULL)
+                MapObj->setKeyboardData(Event->key);
 
             break;
         }
@@ -138,12 +138,14 @@ void CGame::EventHandling(SDL_Event *Event)
                 {
                     if (Windows[i] != NULL && !Windows[i]->isWaste() && Windows[i]->getPriority() == actualPriority)
                     {
+                        //is the cursor INSIDE the window or does the user move or resize the window?
+                        if ( ( (Event->motion.x >= Windows[i]->getX()) && (Event->motion.x < Windows[i]->getX() + Windows[i]->getW()) && (Event->motion.y >= Windows[i]->getY()) && (Event->motion.y < Windows[i]->getY() + Windows[i]->getH()) )
+                            ||  Windows[i]->isMoving() || Windows[i]->isResizing()
+                           )
+                        {
                             //Windows[i]->setActive();
                             //Windows[i]->setPriority(highestPriority+1);
                             Windows[i]->setMouseData(Event->motion);
-                            //is the cursor INSIDE the window?
-                        if ( (Event->motion.x >= Windows[i]->getX()) && (Event->motion.x < Windows[i]->getX() + Windows[i]->getW()) && (Event->motion.y >= Windows[i]->getY()) && (Event->motion.y < Windows[i]->getY() + Windows[i]->getH()) )
-                        {
                             delivered = true;
                             break;
                         }
@@ -157,9 +159,9 @@ void CGame::EventHandling(SDL_Event *Event)
                 break;
 
             //deliver mouse motion data to map if active
-            if (Map != NULL && Map->isActive())
+            if (MapObj != NULL && MapObj->isActive())
             {
-                Map->setMouseData(Event->motion);
+                MapObj->setMouseData(Event->motion);
                 //data has been delivered to map, so no menu is in the foreground --> stop delivering
                 break;
             }
@@ -238,9 +240,9 @@ void CGame::EventHandling(SDL_Event *Event)
                 break;
 
             //deliver mouse button data to map if active
-            if (Map != NULL && Map->isActive())
+            if (MapObj != NULL && MapObj->isActive())
             {
-                Map->setMouseData(Event->button);
+                MapObj->setMouseData(Event->button);
                 //data has been delivered to map, so no menu is in the foreground --> stop delivering
                 break;
             }
@@ -321,9 +323,9 @@ void CGame::EventHandling(SDL_Event *Event)
             //if still not delivered, keep delivering to secondary elements like menu or map
 
             //deliver mouse button data to map if active
-            if (Map != NULL && Map->isActive())
+            if (MapObj != NULL && MapObj->isActive())
             {
-                Map->setMouseData(Event->button);
+                MapObj->setMouseData(Event->button);
                 //data has been delivered to map, so no menu is in the foreground --> stop delivering
                 break;
             }

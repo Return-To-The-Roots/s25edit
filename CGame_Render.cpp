@@ -7,7 +7,7 @@ void CGame::Render()
     //SDL_FillRect( Surf_Display, NULL, SDL_MapRGB(Surf_Display->format,0,0,0) );
 
     //check resolution
-    if (Map == NULL || !Map->isActive())
+    if (MapObj == NULL || !MapObj->isActive())
     {
         //we are in menu
         if ( (Surf_Display->w != MenuResolutionX || Surf_Display->h != MenuResolutionY) ||
@@ -44,8 +44,8 @@ void CGame::Render()
     //CFont::write_text(Surf_Display, "!@#$%&*()-_=+,<.>/?;:'\"\\1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ©ÄÇÖÜßàáâäçèéêëìíîïñòóôöùúûü", 10, 150, 9);
 
     //render the map if active
-    if (Map != NULL && Map->isActive())
-        CSurface::Draw(Surf_Display, Map->getSurface(), 0, 0);
+    if (MapObj != NULL && MapObj->isActive())
+        CSurface::Draw(Surf_Display, MapObj->getSurface(), 0, 0);
 
     //render active menus
     for (int i = 0; i < MAXMENUS; i++)

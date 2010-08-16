@@ -56,6 +56,7 @@ class CDebug
         CFont *resourceText;
         CFont *unknown4Text;
         CFont *unknown5Text;
+        CFont *editorModeText;
         //some puffers to write texts with sprintf()
         char puffer1[100];
         //char puffer2[100];

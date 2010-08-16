@@ -15,8 +15,8 @@ class CWindow
         SDL_Surface *Surf_Window;
         bool needSurface;
         bool needRender;
-        Uint16 x;
-        Uint16 y;
+        Sint16 x;
+        Sint16 y;
         Uint16 w;
         Uint16 h;
         int pic_background;
@@ -38,6 +38,8 @@ class CWindow
         bool canResize_marked;
         bool canResize_clicked;
         bool minimized;
+        bool moving;
+        bool resizing;
         int priority; //for register, blit, event
         void (*callback)(int);
         int callbackQuitMessage;
@@ -63,6 +65,8 @@ class CWindow
         bool isActive(void) { return active; };
         void setWaste(void) { waste = true; };
         bool isWaste(void) { return waste; };
+        bool isMoving(void) { return moving; };
+        bool isResizing(void) { return resizing; };
         void setColor(int color);
         //Methods
         CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20, int color = BUTTON_GREY, const char *text = NULL, int picture = -1);

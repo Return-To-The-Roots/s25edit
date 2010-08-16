@@ -37,7 +37,7 @@ CGame::CGame()
         Windows[i] = NULL;
     for (int i = 0; i < MAXCALLBACKS; i++)
         Callbacks[i] = NULL;
-    Map = NULL;
+    MapObj = NULL;
 }
 
 CGame::~CGame()
@@ -210,10 +210,10 @@ bool CGame::UnregisterCallback(void (*callback)(int))
     return false;
 }
 
-void CGame::delMap(void)
+void CGame::delMapObj(void)
 {
-    delete Map;
-    Map = NULL;
+    delete MapObj;
+    MapObj = NULL;
 }
 
 int main(int argc, char* argv[])
