@@ -11,6 +11,7 @@ CButton::CButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint1
     setColor(color);
     this->button_picture = button_picture;
     button_text = (unsigned char*) text;
+    button_text_color = FONT_YELLOW;
     this->callback = callback;
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
@@ -310,7 +311,7 @@ bool CButton::render(void)
         }
     }
     else if (button_text != NULL)
-        CFont::writeText(Surf_Button, button_text, (int)w/2, (int)((h-11)/2), 11, FONT_BLUE, MIDDLE);
+        CFont::writeText(Surf_Button, button_text, (int)w/2, (int)((h-11)/2), 11, button_text_color, ALIGN_MIDDLE);
 
     return true;
 }

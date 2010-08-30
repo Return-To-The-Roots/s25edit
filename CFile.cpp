@@ -535,8 +535,8 @@ bobMAP* CFile::open_wld(void)
                 fread(&heightFactor, 1, 1, fp);
                 myMap->vertex[j*myMap->width+i].h = heightFactor;
                 myMap->vertex[j*myMap->width+i].x = a;
-                myMap->vertex[j*myMap->width+i].y = b + (-5)*(heightFactor - 0x0A);
-                myMap->vertex[j*myMap->width+i].z = 5*(heightFactor - 0x0A);
+                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
                 //TEMPORARY: to prevent drawing point outside the surface (negative points)
                 //if (myMap->vertex[j*myMap->width+i].y < 0)
                     //myMap->vertex[j*myMap->width+i].y = 0;
@@ -644,13 +644,13 @@ bobMAP* CFile::open_wld(void)
                 fread(&myMap->vertex[j*myMap->width+i].resource, 1, 1, fp);
         }
 
-        //go to unknown4 data
+        //go to shading data
         fseek(fp, 16, SEEK_CUR);
 
         for (int j = 0; j < myMap->height; j++)
         {
             for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].unknown4, 1, 1, fp);
+                fread(&myMap->vertex[j*myMap->width+i].shading, 1, 1, fp);
         }
 
         //go to unknown5 data
@@ -698,8 +698,8 @@ bobMAP* CFile::open_wld(void)
                 heightFactor = 0x0A;
                 myMap->vertex[j*myMap->width+i].h = heightFactor;
                 myMap->vertex[j*myMap->width+i].x = a;
-                myMap->vertex[j*myMap->width+i].y = b + (-5)*(heightFactor - 0x0A);
-                myMap->vertex[j*myMap->width+i].z = 5*(heightFactor - 0x0A);
+                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
                 a += TRIANGLE_WIDTH;
             }
             b += TRIANGLE_HEIGHT;
@@ -966,13 +966,13 @@ bool CFile::save_wld(void *data)
             fwrite(&myMap->vertex[j*myMap->width+i].resource, 1, 1, fp);
     }
 
-    //go to unknown4 data
+    //go to shading data
     fwrite(&map_data_header, 16, 1, fp);
 
     for (int j = 0; j < myMap->height; j++)
     {
         for (int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j*myMap->width+i].unknown4, 1, 1, fp);
+            fwrite(&myMap->vertex[j*myMap->width+i].shading, 1, 1, fp);
     }
 
     //go to unknown5 data
@@ -1126,6 +1126,10 @@ bool CFile::read_bob03(void)
 {
     //bobtype of the entry
     Uint16 bobtype;
+    //player color
+    int player_color;
+    //save position of the filepointer to read the character again with another color
+    long int offset;
 
     //temporary skip x- and y-spacing (2x 1 Byte) --> we will handle this later
     fseek(fp, 2, SEEK_CUR);
@@ -1148,15 +1152,40 @@ bool CFile::read_bob03(void)
                 return false;
         }
 
-        if ( read_bob04() == false )
-            return false;
+        //now read the picture for each player color
+        offset = ftell(fp);
+        for (int i = 0; i < 7; i++)
+        {
+            switch (i)
+            {
+                case 0: player_color = PLAYER_BLUE;
+                        break;
+                case 1: player_color = PLAYER_RED;
+                        break;
+                case 2: player_color = PLAYER_ORANGE;
+                        break;
+                case 3: player_color = PLAYER_GREEN;
+                        break;
+                case 4: player_color = PLAYER_MINTGREEN;
+                        break;
+                case 5: player_color = PLAYER_YELLOW;
+                        break;
+                case 6: player_color = PLAYER_RED_BRIGHT;
+                        break;
+                default:player_color = PLAYER_YELLOW;
+                        break;
+            }
+            fseek(fp, offset, SEEK_SET);
+            if ( read_bob04(player_color) == false )
+                return false;
+        }
     }
 
     return true;
 }
 
 
-bool CFile::read_bob04(void)
+bool CFile::read_bob04(int player_color)
 {
     //length of data block
     Uint32 length;
@@ -1240,7 +1269,7 @@ bool CFile::read_bob04(void)
 
                 for (int i = 1; i <= shift - 0x40; i++, x++)
                 {
-                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, 0x80 - 0x40 + (Uint32)color_value);
+                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, /*0x80 - 0x40*/ + (Uint32)color_value);
                 }
             }
             else if (shift >= 0x81 && shift < 0xC1)
@@ -1249,7 +1278,7 @@ bool CFile::read_bob04(void)
 
                 for (int i = 1; i <= shift - 0x80; i++, x++)
                 {
-                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, 0x80 + (Uint32)color_value);
+                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, player_color + (Uint32)color_value);
                 }
             }
             else //if (shift > 0xC0)

@@ -29,6 +29,8 @@ void CGame::Cleanup()
     }
 
     SDL_FreeSurface(Surf_Display);
+    if (Surf_DisplayGL != NULL)
+        SDL_FreeSurface(Surf_DisplayGL);
 
     SDL_Quit();
 }

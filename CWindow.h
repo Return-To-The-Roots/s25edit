@@ -71,8 +71,8 @@ class CWindow
         //Methods
         CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20, int color = BUTTON_GREY, const char *text = NULL, int picture = -1);
         bool delButton(CButton *ButtonToDelete);
-        CFont* addText(const char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_BLUE);
-        CFont* addText(unsigned char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_BLUE);
+        CFont* addText(const char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
+        CFont* addText(unsigned char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
         bool delText(CFont *TextToDelete);
         CPicture* addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture);
         bool delPicture(CPicture *PictureToDelete);

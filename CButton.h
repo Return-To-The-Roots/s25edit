@@ -20,6 +20,7 @@ class CButton
         int pic_background;
         int button_picture;
         unsigned char *button_text;
+        int button_text_color;
         bool marked;
         bool clicked;
         void (*callback)(int);
@@ -46,6 +47,7 @@ class CButton
         bool render(void);
         SDL_Surface* getSurface(void) { render(); return Surf_Button; };
         void setColor(int color);
+        void setTextColor(int color) { button_text_color = color; needRender = true;};
         void setMotionParams(int entry, int leave) { motionEntryParam = entry; motionLeaveParam = leave; };
 };
 

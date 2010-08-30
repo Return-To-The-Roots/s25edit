@@ -39,7 +39,7 @@ class CFile
         static bool read_bob01(void);                       //not implemented yet
         static bool read_bob02(void);
         static bool read_bob03(void);
-        static bool read_bob04(void);
+        static bool read_bob04(int player_color = PLAYER_BLUE);
         static bool read_bob05(void);
         static bool read_bob07(void);
         static bool read_bob14(void);

@@ -2,6 +2,7 @@
 
 char CSurface::roundCount = 0;
 Uint32 CSurface::roundTime = 0;
+bool CSurface::useOpenGL = false;
 
 CSurface::CSurface()
 {
@@ -265,6 +266,12 @@ void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle d
     Uint16 col_end;
     bool view_outside_edges;
 
+    if (useOpenGL)
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBegin(GL_TRIANGLES);
+    }
+
     //draw triangle field
     for (int k = 0; k < 4; k++)
     {
@@ -417,6 +424,9 @@ void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle d
     tempP3.z = vertex[(height-1)*width+0].z;
     tempP3.i = vertex[(height-1)*width+0].i;
     DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+width-1], tempP3);
+
+    if (useOpenGL)
+        glEnd();
 
     //at least increase the round counter
     if (SDL_GetTicks() - roundTime > 30)
@@ -656,95 +666,111 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
 
 
     //draw the triangle
-    //do not shade water and lava
-    if (texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
-        sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
+    if (useOpenGL)
+    {
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glNormal3f(P1.normVector.x, P1.normVector.y, P1.normVector.z);
+        glVertex3f(P1.x-displayRect.x, P1.y-displayRect.y, 0.0f);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glNormal3f(P2.normVector.x, P2.normVector.y, P2.normVector.z);
+        glVertex3f(P2.x-displayRect.x, P2.y-displayRect.y, 0.0f);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glNormal3f(P3.normVector.x, P3.normVector.y, P3.normVector.z);
+        glVertex3f(P3.x-displayRect.x, P3.y-displayRect.y, 0.0f);
+    }
     else
-        sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+    {
+        //do not shade water and lava
+        if (texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
+            sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
+        else
+            sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+    }
+
 
 
     //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
 
     //blit objects
-    if (P1.y < P2.y)
+    if (P2.y < P1.y)
     {
         int objIdx = 0;
-        switch (P1.objectInfo)
+        switch (P2.objectInfo)
         {
             //tree
-            case    0xC4:   if (P1.objectType >= 0x30 && P1.objectType <= 0x37)
+            case    0xC4:   if (P2.objectType >= 0x30 && P2.objectType <= 0x37)
                             {
-                                if (P1.objectType + roundCount > 0x37)
-                                    objIdx = MAPPIC_TREE_PINE + (P1.objectType - 0x30) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0x37)
+                                    objIdx = MAPPIC_TREE_PINE + (P2.objectType - 0x30) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_PINE + (P1.objectType - 0x30) + roundCount;
+                                    objIdx = MAPPIC_TREE_PINE + (P2.objectType - 0x30) + roundCount;
 
                             }
-                            else if (P1.objectType >= 0x70 && P1.objectType <= 0x77)
+                            else if (P2.objectType >= 0x70 && P2.objectType <= 0x77)
                             {
-                                if (P1.objectType + roundCount > 0x77)
-                                    objIdx = MAPPIC_TREE_BIRCH + (P1.objectType - 0x70) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0x77)
+                                    objIdx = MAPPIC_TREE_BIRCH + (P2.objectType - 0x70) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_BIRCH + (P1.objectType - 0x70) + roundCount;
+                                    objIdx = MAPPIC_TREE_BIRCH + (P2.objectType - 0x70) + roundCount;
                             }
-                            else if (P1.objectType >= 0xB0 && P1.objectType <= 0xB7)
+                            else if (P2.objectType >= 0xB0 && P2.objectType <= 0xB7)
                             {
-                                if (P1.objectType + roundCount > 0xB7)
-                                    objIdx = MAPPIC_TREE_OAK + (P1.objectType - 0xB0) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0xB7)
+                                    objIdx = MAPPIC_TREE_OAK + (P2.objectType - 0xB0) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_OAK + (P1.objectType - 0xB0) + roundCount;
+                                    objIdx = MAPPIC_TREE_OAK + (P2.objectType - 0xB0) + roundCount;
                             }
-                            else if (P1.objectType >= 0xF0 && P1.objectType <= 0xF7)
+                            else if (P2.objectType >= 0xF0 && P2.objectType <= 0xF7)
                             {
-                                if (P1.objectType + roundCount > 0xF7)
-                                    objIdx = MAPPIC_TREE_PALM1 + (P1.objectType - 0xF0) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0xF7)
+                                    objIdx = MAPPIC_TREE_PALM1 + (P2.objectType - 0xF0) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_PALM1 + (P1.objectType - 0xF0) + roundCount;
+                                    objIdx = MAPPIC_TREE_PALM1 + (P2.objectType - 0xF0) + roundCount;
                             }
                             break;
             //tree
-            case    0xC5:   if (P1.objectType >= 0x30 && P1.objectType <= 0x37)
+            case    0xC5:   if (P2.objectType >= 0x30 && P2.objectType <= 0x37)
                             {
-                                if (P1.objectType + roundCount > 0x37)
-                                    objIdx = MAPPIC_TREE_PALM2 + (P1.objectType - 0x30) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0x37)
+                                    objIdx = MAPPIC_TREE_PALM2 + (P2.objectType - 0x30) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_PALM2 + (P1.objectType - 0x30) + roundCount;
+                                    objIdx = MAPPIC_TREE_PALM2 + (P2.objectType - 0x30) + roundCount;
 
                             }
-                            else if (P1.objectType >= 0x70 && P1.objectType <= 0x77)
+                            else if (P2.objectType >= 0x70 && P2.objectType <= 0x77)
                             {
-                                if (P1.objectType + roundCount > 0x77)
-                                    objIdx = MAPPIC_TREE_PINEAPPLE + (P1.objectType - 0x70) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0x77)
+                                    objIdx = MAPPIC_TREE_PINEAPPLE + (P2.objectType - 0x70) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_PINEAPPLE + (P1.objectType - 0x70) + roundCount;
+                                    objIdx = MAPPIC_TREE_PINEAPPLE + (P2.objectType - 0x70) + roundCount;
                             }
-                            else if (P1.objectType >= 0xB0 && P1.objectType <= 0xB7)
+                            else if (P2.objectType >= 0xB0 && P2.objectType <= 0xB7)
                             {
-                                if (P1.objectType + roundCount > 0xB7)
-                                    objIdx = MAPPIC_TREE_CYPRESS + (P1.objectType - 0xB0) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0xB7)
+                                    objIdx = MAPPIC_TREE_CYPRESS + (P2.objectType - 0xB0) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_CYPRESS + (P1.objectType - 0xB0) + roundCount;
+                                    objIdx = MAPPIC_TREE_CYPRESS + (P2.objectType - 0xB0) + roundCount;
                             }
-                            else if (P1.objectType >= 0xF0 && P1.objectType <= 0xF7)
+                            else if (P2.objectType >= 0xF0 &&  P2.objectType <= 0xF7)
                             {
-                                if (P1.objectType + roundCount > 0xF7)
-                                    objIdx = MAPPIC_TREE_CHERRY + (P1.objectType - 0xF0) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0xF7)
+                                    objIdx = MAPPIC_TREE_CHERRY + ( P2.objectType - 0xF0) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_CHERRY + (P1.objectType - 0xF0) + roundCount;
+                                    objIdx = MAPPIC_TREE_CHERRY + (P2.objectType - 0xF0) + roundCount;
                             }
                             break;
             //tree
-            case    0xC6:   if (P1.objectType >= 0x30 && P1.objectType <= 0x37)
+            case    0xC6:   if (P2.objectType >= 0x30 && P2.objectType <= 0x37)
                             {
-                                if (P1.objectType + roundCount > 0x37)
-                                    objIdx = MAPPIC_TREE_FIR + (P1.objectType - 0x30) + (roundCount - 7);
+                                if (P2.objectType + roundCount > 0x37)
+                                    objIdx = MAPPIC_TREE_FIR + (P2.objectType - 0x30) + (roundCount - 7);
                                 else
-                                    objIdx = MAPPIC_TREE_FIR + (P1.objectType - 0x30) + roundCount;
+                                    objIdx = MAPPIC_TREE_FIR + (P2.objectType - 0x30) + roundCount;
 
                             }
                             break;
             //landscape
-            case    0xC8:   switch (P1.objectType)
+            case    0xC8:   switch (P2.objectType)
                             {
                                 case 0x00:  objIdx = MAPPIC_MUSHROOM1;
                                             break;
@@ -817,38 +843,63 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                             }
                             break;
             //stone
-            case    0xCC:   objIdx = MAPPIC_GRANITE_1_1 + (P1.objectType - 0x01);
+            case    0xCC:   objIdx = MAPPIC_GRANITE_1_1 + (P2.objectType - 0x01);
                             break;
             //stone
-            case    0xCD:   objIdx = MAPPIC_GRANITE_2_1 + (P1.objectType - 0x01);
+            case    0xCD:   objIdx = MAPPIC_GRANITE_2_1 + (P2.objectType - 0x01);
                             break;
             default:        break;
         }
         if (objIdx != 0)
-            Draw(display, global::bmpArray[objIdx].surface, (int)(P1.x-displayRect.x-global::bmpArray[objIdx].nx), (int)(P1.y-displayRect.y-global::bmpArray[objIdx].ny));
+            Draw(display, global::bmpArray[objIdx].surface, (int)(P2.x-displayRect.x-global::bmpArray[objIdx].nx), (int)(P2.y-displayRect.y-global::bmpArray[objIdx].ny));
+    }
+
+    //blit resources
+    if (P2.y < P1.y)
+    {
+        if (P2.resource >= 0x41 && P2.resource <= 0x47)
+        {
+            for (char i = 0x41; i <= P2.resource; i++)
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_RESOURCE_COAL].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_RESOURCE_COAL].ny-(4*(i-0x40))));
+        }
+        else if (P2.resource >= 0x49 && P2.resource <= 0x4F)
+        {
+            for (char i = 0x49; i <= P2.resource; i++)
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_RESOURCE_ORE].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_RESOURCE_ORE].ny-(4*(i-0x48))));
+        }
+        if (P2.resource >= 0x51 && P2.resource <= 0x57)
+        {
+            for (char i = 0x51; i <= P2.resource; i++)
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_RESOURCE_GOLD].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_RESOURCE_GOLD].ny-(4*(i-0x50))));
+        }
+        if (P2.resource >= 0x59 && P2.resource <= 0x5F)
+        {
+            for (char i = 0x59; i <= P2.resource; i++)
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_RESOURCE_GRANITE].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_RESOURCE_GRANITE].ny-(4*(i-0x58))));
+        }
     }
 
     //blit buildings
     if (global::s2->getMapObj()->getBuildHelp())
     {
-        if (P1.y < P2.y)
+        if (P2.y < P1.y)
         {
-            switch (P1.build%8)
+            switch (P2.build%8)
             {
-                case 0x01:  Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_FLAG].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_FLAG].ny));
+                case 0x01:  Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(P2.x-displayRect.x-global::bmpArray[MAPPIC_FLAG].nx), (int)(P2.y-displayRect.y-global::bmpArray[MAPPIC_FLAG].ny));
                             break;
-                case 0x02:  Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_SMALL].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
+                case 0x02:  Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface, (int)(P2.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_SMALL].nx), (int)(P2.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
                             break;
-                case 0x03:  Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
+                case 0x03:  Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface, (int)(P2.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx), (int)(P2.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                             break;
-                case 0x04:  if (   texture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || texture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-                                || texture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || texture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || texture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                                || texture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                                Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
+                case 0x04:  if (   P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+                                || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+                                || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                                Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface, (int)(P2.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx), (int)(P2.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
                             else
-                                Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_BIG].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_BIG].ny));
+                                Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface, (int)(P2.x-displayRect.x-global::bmpArray[MAPPIC_HOUSE_BIG].nx), (int)(P2.y-displayRect.y-global::bmpArray[MAPPIC_HOUSE_BIG].ny));
                             break;
-                case 0x05:  Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(P1.x-displayRect.x-global::bmpArray[MAPPIC_MINE].nx), (int)(P1.y-displayRect.y-global::bmpArray[MAPPIC_MINE].ny));
+                case 0x05:  Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(P2.x-displayRect.x-global::bmpArray[MAPPIC_MINE].nx), (int)(P2.y-displayRect.y-global::bmpArray[MAPPIC_MINE].ny));
                             break;
                 default:    break;
             }
@@ -1142,3 +1193,36 @@ float CSurface::absf(float a)
         return a*(-1);
 }
 
+void CSurface::BlitSDL_to_GL(SDL_Surface *dest, SDL_Surface *src)
+{
+    ;
+}
+
+//opengl functions
+void CSurface::initOpenGL(int resX, int resY)
+{
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glShadeModel(GL_SMOOTH);
+
+    //glEnable( GL_TEXTURE_2D );
+
+    glViewport( 0, resY-1, resX, resY );
+
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+
+    glOrtho(0.0f, resX, resY, 0.0f, 0, 128);//-1.0f, 1.0f);
+
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+
+    static GLfloat pos[4] = {5.0, 5.0, 10.0, 0.0};
+    //static GLfloat color[4] = {0.5, 0.5, 0.5, 0.5};
+    glLightfv(GL_LIGHT0, GL_POSITION, pos);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_DEPTH_TEST);
+    //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color);
+}

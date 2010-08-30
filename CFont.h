@@ -18,8 +18,8 @@ class CFont
 
     public:
         //Constructor - Destructor
-        CFont(const char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_BLUE);
-        CFont(unsigned char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_BLUE);
+        CFont(const char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
+        CFont(unsigned char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
         ~CFont();
         //Access
         int getX(void) { return x; };
@@ -36,8 +36,8 @@ class CFont
         bool writeText(const char *string);
         bool writeText(unsigned char *string);
         //this functions can used as CFont::writeText to write text directly to a surface without creating an object
-        static bool writeText(SDL_Surface *Surf_Dest, const char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_BLUE, int align = LEFT);
-        static bool writeText(SDL_Surface *Surf_Dest, unsigned char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_BLUE, int align = LEFT);
+        static bool writeText(SDL_Surface *Surf_Dest, const char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW, int align = ALIGN_LEFT);
+        static bool writeText(SDL_Surface *Surf_Dest, unsigned char *string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW, int align = ALIGN_LEFT);
 };
 
 #endif

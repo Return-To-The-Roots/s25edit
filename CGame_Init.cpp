@@ -19,16 +19,28 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "\nCreate Window...";
-    if ( (Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0))) == NULL )
+    if (CSurface::useOpenGL)
     {
-        std::cout << "failure";
-        return false;
+        Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, MenuResolutionX, MenuResolutionY, 32, 0, 0, 0, 0);
+        Surf_DisplayGL = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
+        if (Surf_Display == NULL || Surf_DisplayGL == NULL)
+        {
+            std::cout << "failure";
+            return false;
+        }
+        CSurface::initOpenGL(MenuResolutionX, MenuResolutionY);
     }
-#ifdef _MULTICORE
-    SDL_WM_SetCaption("Siedler 2 re-engineered, powered by SDL/SGE(modified) and GOMP(OpenMP)",0);
-#else
+    else
+    {
+        Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+        if ( Surf_Display == NULL )
+        {
+            std::cout << "failure";
+            return false;
+        }
+    }
+
     SDL_WM_SetCaption("Siedler 2 re-engineered, powered by SDL/SGE(modified)",0);
-#endif
 
     /*NOTE: its important to load a palette at first,
      *      otherwise all images will be black (in exception of the LBM-Files, they have their own palette).

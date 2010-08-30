@@ -3,6 +3,66 @@
 
 #include "callbacks.h"
 
+void callback::PleaseWait(int Param)
+{
+    //NOTE: This "Please wait"-window is shown until the PleaseWait-callback is called with 'WINDOW_QUIT_MESSAGE'.
+    //      The window will be registered by the game. To do it the other way (create and then let it automatically
+    //      destroy by the gameloop), you don't need to register the window, but register the callback.
+
+    static CWindow *WNDWait;
+
+    enum
+    {
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL: if (WNDWait != NULL)
+                                    break;
+                                WNDWait = new CWindow(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w/2-106, global::s2->getDisplaySurface()->h/2-35, 212, 70, "Bitte warten");
+                                if (global::s2->RegisterWindow(WNDWait))
+                                {
+                                    //we don't register this window cause we will destroy it manually if we need
+                                    //global::s2->RegisterCallback(PleaseWait);
+
+                                    WNDWait->addText("Bitte warten ...", 10, 10, 14);
+                                    //we need to render this window NOW, cause the render loop will do it too late (when the operation
+                                    //is done and we don't need the "Please wait"-window anymore)
+                                    CSurface::Draw(global::s2->getDisplaySurface(), WNDWait->getSurface(), global::s2->getDisplaySurface()->w/2-106, global::s2->getDisplaySurface()->h/2-35);
+                                    SDL_Flip(global::s2->getDisplaySurface());
+                                }
+                                else
+                                {
+                                    delete WNDWait;
+                                    WNDWait = NULL;
+                                    return;
+                                }
+                                break;
+
+        case CALL_FROM_GAMELOOP:    //This windows gives a "Please Wait"-string, so it is shown while there is an intensive operation
+                                    //during ONE gameloop. Therefore it is only shown DURING this ONE operation. If the next gameloop
+                                    //appears, the operation MUST have been finished and we can destroy this window.
+                                    if (WNDWait != NULL)
+                                    {
+                                        global::s2->UnregisterCallback(PleaseWait);
+                                        WNDWait->setWaste();
+                                        WNDWait = NULL;
+                                    }
+                                    break;
+
+        case WINDOW_QUIT_MESSAGE:   //this is the global window quit message, callback is explicit called with this value, so destroy the window
+                                    if (WNDWait != NULL)
+                                    {
+                                        WNDWait->setWaste();
+                                        WNDWait = NULL;
+                                    }
+                                    break;
+
+        default:                break;
+    }
+}
+
 void callback::mainmenu(int Param)
 {
     static CMenu *MainMenu = NULL;
@@ -43,12 +103,14 @@ void callback::mainmenu(int Param)
                     break;
 
         case LOADMAP:
+                    callback::PleaseWait(INITIALIZING_CALL);
                     //Map = new CMap("BERG_.SWD");
                     Map = new CMap("MISS208.WLD");
                     //Map = new CMap(NULL);
                     global::s2->setMapObj(Map);
                     MainMenu->setWaste();
                     MainMenu = NULL;
+                    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     break;
 
         default:    break;
@@ -217,6 +279,7 @@ void callback::EditorQuitMenu(int Param)
                     EditorLandscapeMenu(MAP_QUIT);
                     EditorMinimapMenu(MAP_QUIT);
                     EditorCursorMenu(MAP_QUIT);
+                    EditorResourceMenu(MAP_QUIT);
                     //go to main menu
                     mainmenu(INITIALIZING_CALL);
                     break;
@@ -704,6 +767,95 @@ void callback::EditorTreeMenu(int Param)
     }
 }
 
+void callback::EditorResourceMenu(int Param)
+{
+    static CWindow *WNDResource = NULL;
+    static CMap* MapObj = NULL;
+    static int lastContent = 0x00;
+
+    enum
+    {
+        WINDOWQUIT,
+        PICGOLD,
+        PICORE,
+        PICCOAL,
+        PICGRANITE
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDResource != NULL)
+                        break;
+                    WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, 0, 0, 148, 55, "Rohstoffe", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    if (global::s2->RegisterWindow(WNDResource))
+                    {
+                        MapObj = global::s2->getMapObj();
+
+                        WNDResource->addPicture(EditorResourceMenu, PICGOLD, 2, 2, PICTURE_RESOURCE_GOLD);
+                        WNDResource->addPicture(EditorResourceMenu, PICORE, 36, 2, PICTURE_RESOURCE_ORE);
+                        WNDResource->addPicture(EditorResourceMenu, PICCOAL, 70, 2, PICTURE_RESOURCE_COAL);
+                        WNDResource->addPicture(EditorResourceMenu, PICGRANITE, 104, 2, PICTURE_RESOURCE_GRANITE);
+
+                        MapObj->setMode(EDITOR_MODE_RESOURCE_RAISE);
+                        MapObj->setModeContent(0x51);
+                        lastContent = 0x51;
+                    }
+                    else
+                    {
+                        delete WNDResource;
+                        WNDResource = NULL;
+                        return;
+                    }
+                    break;
+
+        case PICGOLD:           MapObj->setModeContent(0x51);
+                                lastContent = 0x51;
+                                break;
+        case PICORE:            MapObj->setModeContent(0x49);
+                                lastContent = 0x49;
+                                break;
+        case PICCOAL:           MapObj->setModeContent(0x41);
+                                lastContent = 0x41;
+                                break;
+        case PICGRANITE:        MapObj->setModeContent(0x59);
+                                lastContent = 0x59;
+                                break;
+
+        case WINDOW_CLICKED_CALL:   if (MapObj != NULL)
+                                    {
+                                        MapObj->setMode(EDITOR_MODE_RESOURCE_RAISE);
+                                        MapObj->setModeContent(lastContent);
+                                    }
+                                    break;
+
+        case WINDOWQUIT:
+                    if (WNDResource != NULL)
+                    {
+                        WNDResource->setWaste();
+                        WNDResource = NULL;
+                    }
+                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setModeContent(0x00);
+                    lastContent = 0x00;
+                    MapObj = NULL;
+                    break;
+
+        case MAP_QUIT:
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    if (WNDResource != NULL)
+                    {
+                        WNDResource->setWaste();
+                        WNDResource = NULL;
+                    }
+                    lastContent = 0x00;
+                    MapObj = NULL;
+                    break;
+
+        default:    break;
+    }
+}
+
 void callback::EditorLandscapeMenu(int Param)
 {
     static CWindow *WNDLandscape = NULL;
@@ -1021,7 +1173,7 @@ void callback::EditorCursorMenu(int Param)
                                     trianglePictureArrowDown = -1;
                                     //add random if necessary
                                     if (trianglePictureRandom == -1)
-                                        trianglePictureRandom = WNDCursor->addStaticPicture(14, 76, FONT14_INTERROGATION_POINT);
+                                        trianglePictureRandom = WNDCursor->addStaticPicture(14, 76, FONT14_SPACE + 31*7+5); //Interrogation point
                                     MapObj->setVertexFillRSU(false);
                                     MapObj->setVertexFillUSD(false);
                                     MapObj->setVertexFillRandom(true);

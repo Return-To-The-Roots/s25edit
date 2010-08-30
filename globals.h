@@ -15,4 +15,8 @@ namespace global
     extern CGame *s2;
 }
 
+extern unsigned char TRIANGLE_HEIGHT;
+extern unsigned char TRIANGLE_WIDTH;
+extern unsigned char TRIANGLE_INCREASE;
+
 #endif

@@ -5,6 +5,8 @@
 
 namespace callback
 {
+    //PleaseWait creates a small window (not moveable, not resizeable, not minimizable, not closeable) with the String "Please wait..."
+    void PleaseWait(int Param);
     void mainmenu(int Param);
     void submenuOptions(int Param);
 #ifdef _EDITORMODE
@@ -12,6 +14,7 @@ namespace callback
     void EditorQuitMenu(int Param);
     void EditorTextureMenu(int Param);
     void EditorTreeMenu(int Param);
+    void EditorResourceMenu(int Param);
     void EditorLandscapeMenu(int Param);
     void EditorMinimapMenu(int Param);
     void EditorCursorMenu(int Param);

@@ -35,7 +35,7 @@ CDebug::CDebug(void dbgCallback(int), int quitParam)
     unknown2Text = NULL;
     unknown3Text = NULL;
     resourceText = NULL;
-    unknown4Text = NULL;
+    shadingText = NULL;
     unknown5Text = NULL;
     editorModeText = NULL;
     fontsize = 9;
@@ -367,15 +367,15 @@ void CDebug::actualizeData(void)
             sprintf(puffer1, "resource: %#04x", map->vertex[MapObj->VertexY*map->width+MapObj->VertexX].resource);
             resourceText = dbgWnd->addText(puffer1, 260, 200, fontsize);
         }
-        if (unknown4Text != NULL)
+        if (shadingText != NULL)
         {
-            if (dbgWnd->delText(unknown4Text))
-                unknown4Text = NULL;
+            if (dbgWnd->delText(shadingText))
+                shadingText = NULL;
         }
-        if (unknown4Text == NULL)
+        if (shadingText == NULL)
         {
-            sprintf(puffer1, "unknown4: %#04x", map->vertex[MapObj->VertexY*map->width+MapObj->VertexX].unknown4);
-            unknown4Text = dbgWnd->addText(puffer1, 260, 210, fontsize);
+            sprintf(puffer1, "shading: %#04x", map->vertex[MapObj->VertexY*map->width+MapObj->VertexX].shading);
+            shadingText = dbgWnd->addText(puffer1, 260, 210, fontsize);
         }
         if (unknown5Text != NULL)
         {
@@ -507,10 +507,10 @@ void CDebug::actualizeData(void)
             if (dbgWnd->delText(resourceText))
                 resourceText = NULL;
         }
-        if (unknown4Text != NULL)
+        if (shadingText != NULL)
         {
-            if (dbgWnd->delText(unknown4Text))
-                unknown4Text = NULL;
+            if (dbgWnd->delText(shadingText))
+                shadingText = NULL;
         }
         if (unknown5Text != NULL)
         {

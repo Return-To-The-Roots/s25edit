@@ -24,7 +24,9 @@ enum
     //parameter for closing the debugger window
     DEBUGGER_QUIT = -4,
     //this will happen every time the user clicks anywhere on the window
-    WINDOW_CLICKED_CALL = -5
+    WINDOW_CLICKED_CALL = -5,
+    //this window quit message is ONLY useable to call a callback function explicit with this value
+    WINDOW_QUIT_MESSAGE = -6
 };
 
 //BOBTYPES
@@ -102,7 +104,7 @@ struct point
     Uint8 unknown2;             /* section 10 */
     Uint8 unknown3;             /* section 11 */
     Uint8 resource;             /* section 12 */
-    Uint8 unknown4;             /* section 13 */
+    Uint8 shading;              /* section 13 */
     Uint8 unknown5;             /* section 14 */
 };
 //structure for display, cause SDL_Rect's datatypes are too small
@@ -129,7 +131,7 @@ typedef struct BobtypeMAP
 #define MAP_WASTELAND  0x01
 #define MAP_WINTERLAND 0x02
 //structure to save vertex coordinates
-struct vertexPoint
+struct cursorPoint
 {
     int x;
     int y;
@@ -149,6 +151,39 @@ enum
 {
     RESOURCE_PALETTE = 0,
     IO_PALETTE
+};
+
+//i put some color values here, cause we need FONT_COLOR_COUNT in the next enumeration
+//font alignment (after all used by CFont and other objects using CFont)
+enum
+{
+    ALIGN_LEFT = 0,
+    ALIGN_MIDDLE,
+    ALIGN_RIGHT
+};
+//font color (after all used by CFont and other objects using CFont)
+enum
+{
+    FONT_BLUE = 0,
+    FONT_RED,
+    FONT_ORANGE,
+    FONT_GREEN,
+    FONT_MINTGREEN,
+    FONT_YELLOW,
+    FONT_RED_BRIGHT,
+
+    FONT_COLOR_COUNT
+};
+//player colors, necessary for the read_bob03- and read_bob04-function
+enum
+{
+    PLAYER_BLUE = 0x80,
+    PLAYER_RED = 0x88,
+    PLAYER_ORANGE = 0x04,
+    PLAYER_GREEN = 0x85,
+    PLAYER_MINTGREEN = 0x94,
+    PLAYER_YELLOW = 0x01,
+    PLAYER_RED_BRIGHT = 0x10
 };
 
 //enumeration for BobtypeBMP (pics)
@@ -260,6 +295,10 @@ enum
 
 //BEGIN: /DATA/RESOURCE.IDX (AND /DATA/RESOURCE.DAT) OR /DATA/EDITRES.IDX (AND /DATA/EDITRES.DAT)
     //BEGIN: FONT
+
+    ///IMPORTANT:   BECAUSE OF MULTIPLE COLORS FOR EACH CHARACTER THIS FONT-ENUMERATION IS NO LONGER CONSISTENT.
+    ///             ONLY THE START-VALUES (FONT9_SPACE, FONT11_SPACE, FONT14_SPACE) HAVE THE RIGHT INDEX!
+
     //fontsize 11
     FONT11_SPACE,           //spacebar
     FONT11_EXCLAMATION_POINT,   // !
@@ -377,7 +416,7 @@ enum
     FONT11_ANSI_223,            // ß
     FONT11_ANSI_169,            // ©
     //fontsize 9
-    FONT9_SPACE,               //spacebar
+    FONT9_SPACE = FONT11_SPACE + FONT_COLOR_COUNT*115,               //spacebar
     FONT9_EXCLAMATION_POINT,   // !
     FONT9_DOUBLE_QUOTES,       // "
     FONT9_SHARP,               // #
@@ -493,7 +532,7 @@ enum
     FONT9_ANSI_223,            // ß
     FONT9_ANSI_169,            // ©
     //fontsize 14
-    FONT14_SPACE,               //spacebar
+    FONT14_SPACE = FONT9_SPACE + FONT_COLOR_COUNT*115,               //spacebar
     FONT14_EXCLAMATION_POINT,   // !
     FONT14_DOUBLE_QUOTES,       // "
     FONT14_SHARP,               // #
@@ -612,7 +651,7 @@ enum
 
     //now the main resources will follow (frames, cursor, ...)
     //resolution behind means not resolution of the pic but window resolution the pic belongs to
-    MAINFRAME_640_480,
+    MAINFRAME_640_480 = 2441,
     SPLITFRAME_LEFT_640_480,
     SPLITFRAME_RIGHT_640_480,
     MAINFRAME_800_600,
@@ -767,8 +806,16 @@ enum
     PICTURE_TREE_SPIDER,
     PICTURE_TREE_WOOD_MIXED,
     PICTURE_TREE_PALM_MIXED,
+    PICTURE_SQUARE_CIRCLE1,
+    PICTURE_SQUARE_CIRCLE2,
+    PICTURE_SQUARE_CIRCLE3,
+    PICTURE_SQUARE_CIRCLE4,
+    PICTURE_RESOURCE_GOLD,
+    PICTURE_RESOURCE_ORE,
+    PICTURE_RESOURCE_COAL,
+    PICTURE_RESOURCE_GRANITE,
     //some bobtype 14 pictures missing here
-    MENUBAR_TREE = 538,
+    MENUBAR_TREE = 538 + 2070,
     MENUBAR_RESOURCE,
     MENUBAR_TEXTURE,
     MENUBAR_HEIGHT,
@@ -796,8 +843,8 @@ enum
     PICTURE_LANDSCAPE_BONE_WINTER,
     PICTURE_LANDSCAPE_MUSHROOM_WINTER,
     //some bobtype 14 pictures missing here
-    PICTURE_SHEEP = 573,
-    PICTURE_SHEEP_DOUBLE_ENTRY = 574,
+    PICTURE_SHEEP = 573 + 2070,
+    PICTURE_SHEEP_DOUBLE_ENTRY = 574 + 2070,
 //END: /DATA/IO/EDITIO.IDX (AND /DATA/IO/EDITIO.DAT)
 
 //BEGIN: /DATA/EDITBOB.LST
@@ -847,8 +894,8 @@ enum
     BUTTON_RED2_BACKGROUND,
     BUTTON_STONE_BACKGROUND,
     //some bobtype 14 pictures missing here
-    AVATAR_OCTAVIANUS_SMALL = 688,
-    AVATAR_OCTAVIANUS_SMALL_DOUBLE_ENTRY = 689,
+    AVATAR_OCTAVIANUS_SMALL = 688 + 2070,
+    AVATAR_OCTAVIANUS_SMALL_DOUBLE_ENTRY = 689 + 2070,
 //END: /DATA/IO/IO.IDX (AND /DATA/IO/IO.DAT)
 #endif
 
@@ -909,7 +956,7 @@ enum
     MAPPIC_MINE,
     MAPPIC_HOUSE_HARBOUR,
     //some pictures missing here
-    MAPPIC_TREE_PINE = 651,
+    MAPPIC_TREE_PINE = 651 + 2070,
     MAPPIC_TREE_BIRCH = MAPPIC_TREE_PINE + 15,
     MAPPIC_TREE_OAK = MAPPIC_TREE_PINE + 30,
     MAPPIC_TREE_PALM1 = MAPPIC_TREE_PINE + 45,
@@ -975,7 +1022,7 @@ enum
     MAPPIC_SHRUB7,
     MAPPIC_SNOWMAN,
     //some pictures missing here
-    MAPPIC_LAST_ENTRY = 1430
+    MAPPIC_LAST_ENTRY = 1430 + 2070
 //END: /DATA/MAP00.LST
 };
 
@@ -1025,20 +1072,6 @@ enum
     BUTTON_STONE = BUTTON_STONE_BRIGHT
 };
 
-//font alignment (after all used by CFont and other objects using CFont)
-enum
-{
-    LEFT = 0,
-    MIDDLE,
-    RIGHT
-};
-
-//font color (after all used by CFont and other objects using CFont)
-enum
-{
-    FONT_BLUE = 0
-};
-
 //some necessary data for CWindow
 //background color
 enum
@@ -1083,8 +1116,9 @@ enum
     EDITOR_MODE_TEXTURE,
     EDITOR_MODE_LANDSCAPE,
     EDITOR_MODE_FLAG,
-    EDITOR_MODE_PICKAXE_MINUS,
-    EDITOR_MODE_PICKAXE_PLUS,
+    EDITOR_MODE_RESOURCE_REDUCE,
+    EDITOR_MODE_RESOURCE_RAISE,
+    EDITOR_MODE_MAKE_BIG_HOUSE,
     EDITOR_MODE_ANIMAL
 };
 
@@ -1114,8 +1148,11 @@ enum
 #define MAXPICTURES 50
 
 //triangle values
-#define TRIANGLE_HEIGHT 30
-#define TRIANGLE_WIDTH 54
+//these values are now handled in globals.h and globals.cpp, cause they must be changeable
+//#define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
+//#define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
+//#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be greater than 5
+
 
 #define TRIANGLE_TEXTURE_STEPPE_MEADOW1         0x00
 #define TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR 0x40

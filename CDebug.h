@@ -54,7 +54,7 @@ class CDebug
         CFont *unknown2Text;
         CFont *unknown3Text;
         CFont *resourceText;
-        CFont *unknown4Text;
+        CFont *shadingText;
         CFont *unknown5Text;
         CFont *editorModeText;
         //some puffers to write texts with sprintf()

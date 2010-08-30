@@ -38,20 +38,110 @@ void CGame::EventHandling(SDL_Event *Event)
                                         fullscreen = true;
                                     break;
 
-                #ifdef _ADMINMODE
+#ifdef _ADMINMODE
                 case SDLK_F3:      //if CTRL and ALT are pressed
                                     //if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
                                     callback::debugger(INITIALIZING_CALL);
+                                    break;
+
+                //F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
+                case SDLK_F5:       if (TRIANGLE_INCREASE < 10)
+                                    {
+                                        callback::PleaseWait(INITIALIZING_CALL);
+                                        TRIANGLE_HEIGHT += 5;
+                                        TRIANGLE_WIDTH += 11;
+                                        TRIANGLE_INCREASE += 1;
+                                        bobMAP *myMap = MapObj->getMap();
+                                        int a;
+                                        int b = 0;
+                                        int heightFactor;
+                                        for (int j = 0; j < myMap->height; j++)
+                                        {
+                                            if (j%2 == 0)
+                                                a = TRIANGLE_WIDTH/2;
+                                            else
+                                                a = TRIANGLE_WIDTH;
+
+                                            for (int i = 0; i < myMap->width; i++)
+                                            {
+                                                heightFactor = myMap->vertex[j*myMap->width+i].h;
+                                                myMap->vertex[j*myMap->width+i].x = a;
+                                                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+                                                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
+                                                a += TRIANGLE_WIDTH;
+                                            }
+                                            b += TRIANGLE_HEIGHT;
+                                        }
+                                        CSurface::get_nodeVectors(myMap);
+                                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                                    }
+                                    break;
+                case SDLK_F6:       {
+                                        callback::PleaseWait(INITIALIZING_CALL);
+                                        TRIANGLE_HEIGHT = 28;
+                                        TRIANGLE_WIDTH = 56;
+                                        TRIANGLE_INCREASE = 5;
+                                        bobMAP *myMap = MapObj->getMap();
+                                        int a;
+                                        int b = 0;
+                                        int heightFactor;
+                                        for (int j = 0; j < myMap->height; j++)
+                                        {
+                                            if (j%2 == 0)
+                                                a = TRIANGLE_WIDTH/2;
+                                            else
+                                                a = TRIANGLE_WIDTH;
+
+                                            for (int i = 0; i < myMap->width; i++)
+                                            {
+                                                heightFactor = myMap->vertex[j*myMap->width+i].h;
+                                                myMap->vertex[j*myMap->width+i].x = a;
+                                                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+                                                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
+                                                a += TRIANGLE_WIDTH;
+                                            }
+                                            b += TRIANGLE_HEIGHT;
+                                        }
+                                        CSurface::get_nodeVectors(myMap);
+                                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                                    }
+                                    break;
+                case SDLK_F7:       if (TRIANGLE_INCREASE > 1)
+                                    {
+                                        callback::PleaseWait(INITIALIZING_CALL);
+                                        TRIANGLE_HEIGHT -= 5;
+                                        TRIANGLE_WIDTH -= 11;
+                                        TRIANGLE_INCREASE -= 1;
+                                        bobMAP *myMap = MapObj->getMap();
+                                        int a;
+                                        int b = 0;
+                                        int heightFactor;
+                                        for (int j = 0; j < myMap->height; j++)
+                                        {
+                                            if (j%2 == 0)
+                                                a = TRIANGLE_WIDTH/2;
+                                            else
+                                                a = TRIANGLE_WIDTH;
+
+                                            for (int i = 0; i < myMap->width; i++)
+                                            {
+                                                heightFactor = myMap->vertex[j*myMap->width+i].h;
+                                                myMap->vertex[j*myMap->width+i].x = a;
+                                                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+                                                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
+                                                a += TRIANGLE_WIDTH;
+                                            }
+                                            b += TRIANGLE_HEIGHT;
+                                        }
+                                        CSurface::get_nodeVectors(myMap);
+                                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                                    }
                                     break;
 /*#else
                 case SDLK_F3:
                                     break;
 
 */#endif
-
-                case SDLK_F5:       GameResolutionX = 1440;
-                                    GameResolutionY = 900;
-                                    break;
 
 #ifdef _VIEWERMODE
                 case SDLK_RIGHT:    index++;

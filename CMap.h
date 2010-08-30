@@ -43,7 +43,7 @@ class CMap
         //counts how many vertices we have around the cursor (and including the cursor)
         int VertexCounter;
         //array to store all vertices (editor mode) --> after constructing class CMap this will have 'VertexCounter' elements
-        struct vertexPoint *Vertices;
+        struct cursorPoint *Vertices;
         //buffer for texts we maybe need to write
         char textBuffer[50];
 
@@ -95,18 +95,19 @@ class CMap
         //      X=12    X=3     X=0     X=4     X=13
         //          X=14    X=5     X=6     X=15
         //              X=16    X=17    X=18
-        void calculateVerticesAround(struct vertexPoint Vertices[], int VertexX, int VertexY, int ChangeSection);
+        void calculateVerticesAround(struct cursorPoint Vertices[], int VertexX, int VertexY, int ChangeSection);
         //this will setup the 'active' variable of each vertices depending on 'ChangeSection'
         void setupVerticesActivity(void);
         int correctMouseBlitX(int VertexX, int VertexY);
         int correctMouseBlitY(int VertexX, int VertexY);
         void modifyVertex(void);
         void modifyHeight(int VertexX, int VertexY);
-        //this modifies a whole hexagon!
+        void modifyHeightMakeBigHouse(int VertexX, int VertexY);
+        void modifyShading(int VertexX, int VertexY);
         void modifyTexture(int VertexX, int VertexY, bool rsu, bool usd);
         void modifyObject(int VertexX, int VertexY);
-        //this modifies a whole hexagon!
         void modifyBuild(int VertexX, int VertexY);
+        void modifyResource(int VertexX, int VertexY);
 };
 
 #endif
