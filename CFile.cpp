@@ -455,7 +455,7 @@ bool CFile::open_lbm(char *filename)
     else
         return false;
 
-    //if this is a texture file, we need a 32-bit surface for SGE (and we'll create a hardware surface)
+    //if this is a texture file, we need a 32-bit surface for SGE and we set a color key
     if (    strcmp(filename, "TEX5.LBM")
          || strcmp(filename, "TEX6.LBM")
          || strcmp(filename, "TEX7.LBM")
@@ -465,8 +465,9 @@ bool CFile::open_lbm(char *filename)
     {
         SDL_Surface *tmp = bmpArray->surface;
         bmpArray->surface = NULL;
-        if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_HWSURFACE, bmpArray->w, bmpArray->h, 32, 0, 0, 0, 0)) != NULL )
+        if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 32, 0, 0, 0, 0)) != NULL )
         {
+            SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 90, 134));
             CSurface::Draw(bmpArray->surface, tmp, 0, 0);
             SDL_FreeSurface(tmp);
         }
@@ -532,6 +533,8 @@ bobMAP* CFile::open_wld(void)
 
             for (int i = 0; i < myMap->width; i++)
             {
+                myMap->vertex[j*myMap->width+i].VertexX = i;
+                myMap->vertex[j*myMap->width+i].VertexY = j;
                 fread(&heightFactor, 1, 1, fp);
                 myMap->vertex[j*myMap->width+i].h = heightFactor;
                 myMap->vertex[j*myMap->width+i].x = a;
@@ -665,12 +668,12 @@ bobMAP* CFile::open_wld(void)
     else
     {
         strcpy(myMap->name, "Ohne Namen");
-        myMap->width = 1152;
+        myMap->width = 1024;     //1152 is maximum without graphic failures
         myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
-        myMap->height = 1152;
+        myMap->height = 1024;    //1152 is maximum without graphic failures
         myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
         myMap->type = 0;
-        myMap->player = 4;
+        myMap->player = 0;
         strcpy(myMap->author, "Niemand");
         for (int i = 0; i < 7; i++)
         {
@@ -695,6 +698,8 @@ bobMAP* CFile::open_wld(void)
 
             for (int i = 0; i < myMap->width; i++)
             {
+                myMap->vertex[j*myMap->width+i].VertexX = i;
+                myMap->vertex[j*myMap->width+i].VertexY = j;
                 heightFactor = 0x0A;
                 myMap->vertex[j*myMap->width+i].h = heightFactor;
                 myMap->vertex[j*myMap->width+i].x = a;

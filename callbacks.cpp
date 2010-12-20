@@ -105,7 +105,8 @@ void callback::mainmenu(int Param)
         case LOADMAP:
                     callback::PleaseWait(INITIALIZING_CALL);
                     //Map = new CMap("BERG_.SWD");
-                    Map = new CMap("MISS208.WLD");
+                    //Map = new CMap("MISS208.WLD");
+                    Map = new CMap("NEW_MAP.SWD");
                     //Map = new CMap(NULL);
                     global::s2->setMapObj(Map);
                     MainMenu->setWaste();
@@ -280,6 +281,7 @@ void callback::EditorQuitMenu(int Param)
                     EditorMinimapMenu(MAP_QUIT);
                     EditorCursorMenu(MAP_QUIT);
                     EditorResourceMenu(MAP_QUIT);
+                    EditorPlayerMenu(MAP_QUIT);
                     //go to main menu
                     mainmenu(INITIALIZING_CALL);
                     break;
@@ -302,7 +304,7 @@ void callback::EditorTextureMenu(int Param)
     static CMap* MapObj = NULL;
     static bobMAP *map = NULL;
     static int textureIndex = 0;
-    static int harbourPictureCross = -1;
+    static int harbourPictureCross = 0; //this have to be -1 if we use the harbour button
     static int lastContent = 0x00;
 
     enum
@@ -372,8 +374,8 @@ void callback::EditorTextureMenu(int Param)
                         if (map->type != MAP_WASTELAND)
                             WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, 138, 70, textureIndex);
 
-                        WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, NULL, MAPPIC_HOUSE_HARBOUR);
-                        harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
+                        //WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, NULL, MAPPIC_HOUSE_HARBOUR);
+                        //harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
                     }
                     else
                     {
@@ -562,7 +564,7 @@ void callback::EditorTextureMenu(int Param)
                     MapObj = NULL;
                     map = NULL;
                     textureIndex = 0;
-                    harbourPictureCross = -1;
+                    harbourPictureCross = 0; //this have to be -1 if we use the harbour button
                     break;
 
         case MAP_QUIT:
@@ -576,7 +578,7 @@ void callback::EditorTextureMenu(int Param)
                     MapObj = NULL;
                     map = NULL;
                     textureIndex = 0;
-                    harbourPictureCross = -1;
+                    harbourPictureCross = 0; //this have to be -1 if we use the harbour button
                     break;
 
         default:    break;
@@ -1026,11 +1028,136 @@ void callback::EditorLandscapeMenu(int Param)
     }
 }
 
+void callback::EditorPlayerMenu(int Param)
+{
+    static CWindow *WNDPlayer = NULL;
+    static CMap* MapObj = NULL;
+    static bobMAP *map = NULL;
+    static int PlayerNumber = 0x00;
+    static CFont *PlayerNumberText = NULL;
+    char puffer[30];
+    static DisplayRectangle tempRect;
+    static Uint16* PlayerHQx = NULL;
+    static Uint16* PlayerHQy = NULL;
+
+    enum
+    {
+        PLAYER_REDUCE = 0,
+        PLAYER_RAISE,
+        GOTO_PLAYER,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDPlayer != NULL)
+                        break;
+                    WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, 0, 0, 100, 80, "Spieler", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    if (global::s2->RegisterWindow(WNDPlayer))
+                    {
+                        MapObj = global::s2->getMapObj();
+                        map = MapObj->getMap();
+                        tempRect = MapObj->getDisplayRect();
+                        PlayerHQx = MapObj->getPlayerHQx();
+                        PlayerHQy = MapObj->getPlayerHQy();
+
+                        MapObj->setMode(EDITOR_MODE_FLAG);
+                        MapObj->setModeContent(PlayerNumber);
+
+                        WNDPlayer->addButton(EditorPlayerMenu, PLAYER_REDUCE, 0, 0, 20, 20, BUTTON_GREY, "-");
+                        sprintf(puffer, "%d", PlayerNumber+1);
+                        PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
+                        WNDPlayer->addButton(EditorPlayerMenu, PLAYER_RAISE, 40, 0, 20, 20, BUTTON_GREY, "+");
+                        WNDPlayer->addButton(EditorPlayerMenu, GOTO_PLAYER, 0, 20, 60, 20, BUTTON_GREY, "Gehe zu");
+                    }
+                    else
+                    {
+                        delete WNDPlayer;
+                        WNDPlayer = NULL;
+                        return;
+                    }
+                    break;
+
+        case PLAYER_REDUCE:         if (PlayerNumber > 0)
+                                    {
+                                        PlayerNumber--;
+                                        MapObj->setModeContent(PlayerNumber);
+                                        WNDPlayer->delText(PlayerNumberText);
+                                        sprintf(puffer, "%d", PlayerNumber+1);
+                                        PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
+                                    }
+                                    break;
+
+        case PLAYER_RAISE:          if (PlayerNumber < MAXPLAYERS-1)
+                                    {
+                                        PlayerNumber++;
+                                        MapObj->setModeContent(PlayerNumber);
+                                        WNDPlayer->delText(PlayerNumberText);
+                                        sprintf(puffer, "%d", PlayerNumber+1);
+                                        PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
+                                    }
+                                    break;
+
+        case GOTO_PLAYER:           //test if player exists on map
+                                    if (PlayerHQx[PlayerNumber] != 0xFFFF && PlayerHQy[PlayerNumber] != 0xFFFF)
+                                    {
+                                        tempRect = MapObj->getDisplayRect();
+                                        tempRect.x = PlayerHQx[PlayerNumber]*TRIANGLE_WIDTH - tempRect.w/2;
+                                        tempRect.y = PlayerHQy[PlayerNumber]*TRIANGLE_HEIGHT - tempRect.h/2;
+                                        MapObj->setDisplayRect(tempRect);
+                                    }
+                                    break;
+
+        case WINDOW_CLICKED_CALL:   if (MapObj != NULL)
+                                    {
+                                        MapObj->setMode(EDITOR_MODE_FLAG);
+                                        MapObj->setModeContent(PlayerNumber);
+                                    }
+                                    break;
+
+        case WINDOWQUIT:
+                    if (WNDPlayer != NULL)
+                    {
+                        WNDPlayer->setWaste();
+                        WNDPlayer = NULL;
+                    }
+                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setModeContent(0x00);
+                    MapObj->setModeContent2(0x00);
+                    MapObj = NULL;
+                    map = NULL;
+                    PlayerNumber = 0x01;
+                    PlayerNumberText = NULL;
+                    PlayerHQx = NULL;
+                    PlayerHQy = NULL;
+                    break;
+
+        case MAP_QUIT:
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    if (WNDPlayer != NULL)
+                    {
+                        WNDPlayer->setWaste();
+                        WNDPlayer = NULL;
+                    }
+                    MapObj = NULL;
+                    map = NULL;
+                    PlayerNumber = 0x01;
+                    PlayerNumberText = NULL;
+                    PlayerHQx = NULL;
+                    PlayerHQy = NULL;
+                    break;
+
+        default:    break;
+    }
+}
+
 void callback::EditorMinimapMenu(int Param)
 {
     static CWindow *WNDMinimap = NULL;
     static CMap* MapObj = NULL;
     static SDL_Surface *WndSurface = NULL;
+    static int num_x = 1, num_y = 1;
 
     enum
     {
@@ -1042,10 +1169,17 @@ void callback::EditorMinimapMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDMinimap != NULL)
                         break;
+
+                    //this variables are needed to reduce the size of minimap-windows of big maps
+                    num_x = (global::s2->getMapObj()->getMap()->width > 256 ? global::s2->getMapObj()->getMap()->width/256 : 1);
+                    num_y = (global::s2->getMapObj()->getMap()->height > 256 ? global::s2->getMapObj()->getMap()->height/256 : 1);
+
+                    int width = global::s2->getMapObj()->getMap()->width/num_x;
+                    int height = global::s2->getMapObj()->getMap()->height/num_y;
                     //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
-                    if ( (global::s2->getDisplaySurface()->w-12 < global::s2->getMapObj()->getMap()->width) || (global::s2->getDisplaySurface()->h-30 < global::s2->getMapObj()->getMap()->height))
+                    if ( (global::s2->getDisplaySurface()->w-12 < width) || (global::s2->getDisplaySurface()->h-30 < height) )
                         break;
-                    WNDMinimap = new CWindow(EditorMinimapMenu, WINDOWQUIT, global::s2->GameResolutionX/2-global::s2->getMapObj()->getMap()->width/2-6, global::s2->GameResolutionY/2-global::s2->getMapObj()->getMap()->height/2-15, global::s2->getMapObj()->getMap()->width+12, global::s2->getMapObj()->getMap()->height+30, "Übersicht", WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDMinimap = new CWindow(EditorMinimapMenu, WINDOWQUIT, global::s2->GameResolutionX/2-width/2-6, global::s2->GameResolutionY/2-height/2-15, width+12, height+30, "Übersicht", WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(EditorMinimapMenu))
                     {
                         WndSurface = WNDMinimap->getSurface();
@@ -1075,8 +1209,8 @@ void callback::EditorMinimapMenu(int Param)
                                )
                             {
                                 DisplayRectangle displayRect = MapObj->getDisplayRect();
-                                displayRect.x = (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx)*TRIANGLE_WIDTH;
-                                displayRect.y = (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny)*TRIANGLE_HEIGHT;
+                                displayRect.x = (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx)*TRIANGLE_WIDTH*num_x;
+                                displayRect.y = (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny)*TRIANGLE_HEIGHT*num_y;
                                 MapObj->setDisplayRect(displayRect);
                             }
                         }

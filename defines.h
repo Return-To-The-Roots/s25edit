@@ -86,6 +86,8 @@ struct vector { float x, y, z; };
 //point structure ('i' is a 16 bit integer shifted left 16 times --> fixed point math for speed)
 struct point
 {
+    Uint16 VertexX;             /* number of the vertex on x-axis */
+    Uint16 VertexY;             /* number of the vertex on y-axis */
     long int x;
     long int y;                 /* calculated with section 1 */
     int z;                      /* calculated with section 1 */
@@ -121,6 +123,7 @@ typedef struct BobtypeMAP
     Uint16 width_pixel;
     Uint8 type;
     Uint8 player;
+    //these are the original values
     Uint16 HQx[7];
     Uint16 HQy[7];
     char author[21];
@@ -153,7 +156,6 @@ enum
     IO_PALETTE
 };
 
-//i put some color values here, cause we need FONT_COLOR_COUNT in the next enumeration
 //font alignment (after all used by CFont and other objects using CFont)
 enum
 {
@@ -161,6 +163,7 @@ enum
     ALIGN_MIDDLE,
     ALIGN_RIGHT
 };
+//i put some color values here, cause we need FONT_COLOR_COUNT in the next enumeration
 //font color (after all used by CFont and other objects using CFont)
 enum
 {
@@ -1116,9 +1119,11 @@ enum
     EDITOR_MODE_TEXTURE,
     EDITOR_MODE_LANDSCAPE,
     EDITOR_MODE_FLAG,
+    EDITOR_MODE_FLAG_DELETE,
     EDITOR_MODE_RESOURCE_REDUCE,
     EDITOR_MODE_RESOURCE_RAISE,
     EDITOR_MODE_MAKE_BIG_HOUSE,
+    EDITOR_MODE_MAKE_HARBOUR,
     EDITOR_MODE_ANIMAL
 };
 
@@ -1146,6 +1151,9 @@ enum
 #define MAXTEXTS 100
 //maximum number of pictures that can be shown WITHIN a menu or window
 #define MAXPICTURES 50
+
+//maximum players for a map
+#define MAXPLAYERS 16
 
 //triangle values
 //these values are now handled in globals.h and globals.cpp, cause they must be changeable

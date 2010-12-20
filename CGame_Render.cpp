@@ -14,19 +14,8 @@ void CGame::Render()
             ( (fullscreen && !(Surf_Display->flags&SDL_FULLSCREEN)) || (!fullscreen && (Surf_Display->flags&SDL_FULLSCREEN)) )
            )
         {
-            if (CSurface::useOpenGL)
-            {
-                SDL_FreeSurface(Surf_Display);
-                SDL_FreeSurface(Surf_DisplayGL);
-                Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, MenuResolutionX, MenuResolutionY, 32, 0, 0, 0, 0);
-                Surf_DisplayGL = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
-                CSurface::initOpenGL(MenuResolutionX, MenuResolutionY);
-            }
-            else
-            {
-                SDL_FreeSurface(Surf_Display);
-                Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-            }
+            SDL_FreeSurface(Surf_Display);
+            Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
         }
     }
     else
@@ -36,19 +25,8 @@ void CGame::Render()
             ( (fullscreen && !(Surf_Display->flags&SDL_FULLSCREEN)) || (!fullscreen && (Surf_Display->flags&SDL_FULLSCREEN)) )
            )
         {
-            if (CSurface::useOpenGL)
-            {
-                SDL_FreeSurface(Surf_Display);
-                SDL_FreeSurface(Surf_DisplayGL);
-                Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
-                Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
-                CSurface::initOpenGL(GameResolutionX, GameResolutionY);
-            }
-            else
-            {
-                SDL_FreeSurface(Surf_Display);
-                Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-            }
+            SDL_FreeSurface(Surf_Display);
+            Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
         }
     }
 
@@ -120,15 +98,7 @@ void CGame::Render()
     //char text[] = "hasdfsdf34!!!!";
     //CFont::writeText(Surf_Display, (unsigned char*)text, 10, 150, 14, FONT_BLUE+1);
 
-    SDL_Delay(msWait);
+    SDL_Flip(Surf_Display);
 
-    if (CSurface::useOpenGL)
-    {
-        SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
-        SDL_Flip(Surf_DisplayGL);
-        //CSurface::BlitSDL_to_GL(Surf_DisplayGL, Surf_Display);
-        SDL_GL_SwapBuffers();
-    }
-    else
-        SDL_Flip(Surf_Display);
+    SDL_Delay(msWait);
 }

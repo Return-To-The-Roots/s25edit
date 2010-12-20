@@ -24,16 +24,13 @@ class CSurface
         static void DrawTriangle(SDL_Surface *display, struct DisplayRectangle displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3);
         static void get_nodeVectors(bobMAP *myMap);
         static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
-        //opengl functions and variables
-        static bool useOpenGL;
-        static void setOpenGL(bool use) { useOpenGL = use; };
-        static void initOpenGL(int resX, int resY);
-        static void BlitSDL_to_GL(SDL_Surface *dest, SDL_Surface *src);
 
     private:
         //to count the rounds (round != gameloop) --> important to make trees and water moving --> walks from 0 to 7
         static char roundCount;
         static Uint32 roundTime;
+        //to decide what to draw, triangle-textures or objects and texture-borders
+        static bool drawTextures;
 
         static struct vector get_nodeVector(struct vector v1, struct vector v2, struct vector v3);
         static struct vector get_normVector(struct vector v);

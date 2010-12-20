@@ -2,7 +2,7 @@
 
 char CSurface::roundCount = 0;
 Uint32 CSurface::roundTime = 0;
-bool CSurface::useOpenGL = false;
+bool CSurface::drawTextures = false;
 
 CSurface::CSurface()
 {
@@ -266,167 +266,167 @@ void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle d
     Uint16 col_end;
     bool view_outside_edges;
 
-    if (useOpenGL)
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBegin(GL_TRIANGLES);
-    }
-
     //draw triangle field
-    for (int k = 0; k < 4; k++)
+    //NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
+    for (int i = 0; i < 2; i++)
     {
-        //beware calling DrawTriangle for each triangle
+        if (i == 0)
+            drawTextures = true;
+        else /*if (i == 1)*/
+            drawTextures = false;
 
-        //IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
-
-        //at first call DrawTriangle for all triangles inside the map edges
-        row_start = (displayRect.y > 2*TRIANGLE_HEIGHT ? displayRect.y : 2*TRIANGLE_HEIGHT)/TRIANGLE_HEIGHT - 2;
-        row_end = (displayRect.y+displayRect.h)/TRIANGLE_HEIGHT + 8;
-        col_start = (displayRect.x > TRIANGLE_WIDTH ? displayRect.x : TRIANGLE_WIDTH)/TRIANGLE_WIDTH - 1;
-        col_end = (displayRect.x+displayRect.w)/TRIANGLE_WIDTH + 1;
-
-        if (k > 0)
+        for (int k = 0; k < 4; k++)
         {
-            //now call DrawTriangle for all triangles outside the map edges
-            view_outside_edges = false;
+            //beware calling DrawTriangle for each triangle
 
-            if (k == 1 || k == 3)
+            //IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
+
+            //at first call DrawTriangle for all triangles inside the map edges
+            row_start = (displayRect.y > 2*TRIANGLE_HEIGHT ? displayRect.y : 2*TRIANGLE_HEIGHT)/TRIANGLE_HEIGHT - 2;
+            row_end = (displayRect.y+displayRect.h)/TRIANGLE_HEIGHT + 8;
+            col_start = (displayRect.x > TRIANGLE_WIDTH ? displayRect.x : TRIANGLE_WIDTH)/TRIANGLE_WIDTH - 1;
+            col_end = (displayRect.x+displayRect.w)/TRIANGLE_WIDTH + 1;
+
+            if (k > 0)
             {
-                //at first call DrawTriangle for all triangles up or down outside
-                if (displayRect.y < 0)
+                //now call DrawTriangle for all triangles outside the map edges
+                view_outside_edges = false;
+
+                if (k == 1 || k == 3)
                 {
-                    row_start = height-1 - (-displayRect.y/TRIANGLE_HEIGHT) - 1;
-                    row_end = height-1;
-                    view_outside_edges = true;
+                    //at first call DrawTriangle for all triangles up or down outside
+                    if (displayRect.y < 0)
+                    {
+                        row_start = height-1 - (-displayRect.y/TRIANGLE_HEIGHT) - 1;
+                        row_end = height-1;
+                        view_outside_edges = true;
+                    }
+                    else if ( (displayRect.y + displayRect.h) > myMap->height_pixel )
+                    {
+                        row_start = 0;
+                        row_end = ((displayRect.y + displayRect.h) - myMap->height_pixel)/TRIANGLE_HEIGHT + 8;
+                        view_outside_edges = true;
+                    }
                 }
-                else if ( (displayRect.y + displayRect.h) > myMap->height_pixel )
+
+                if (k == 2 || k == 3)
                 {
-                    row_start = 0;
-                    row_end = ((displayRect.y + displayRect.h) - myMap->height_pixel)/TRIANGLE_HEIGHT + 8;
-                    view_outside_edges = true;
+                    //now call DrawTriangle for all triangles left or right outside
+                    if (displayRect.x < 0)
+                    {
+                        col_start = width-1 - (-displayRect.x/TRIANGLE_WIDTH) - 1;
+                        col_end = width-1;
+                        view_outside_edges = true;
+                    }
+                    else if ( (displayRect.x + displayRect.w) > myMap->width_pixel )
+                    {
+                        col_start = 0;
+                        col_end = ((displayRect.x + displayRect.w) - myMap->width_pixel)/TRIANGLE_WIDTH + 1;
+                        view_outside_edges = true;
+                    }
+                }
+
+                //if displayRect is not outside the map edges, there is nothing to do
+                if (!view_outside_edges)
+                    continue;
+            }
+
+            for (Uint16 j = /*0*/ row_start; j < height-1 && j <= row_end; j++)
+            {
+                if (j%2 == 0)
+                {
+                    //first RightSideUp
+                    tempP2.x = 0;
+                    tempP2.y = vertex[(j+1)*width+width-1].y;
+                    tempP2.z = vertex[(j+1)*width+width-1].z;
+                    tempP2.i = vertex[(j+1)*width+width-1].i;
+                    DrawTriangle(display, displayRect, myMap, type, vertex[j*width+0], tempP2, vertex[(j+1)*width+0]);
+                    for (Uint16 i = /*1*/ (col_start>0?col_start:1); i < width && i <= col_end; i++)
+                    {
+                        //RightSideUp
+                        DrawTriangle(display, displayRect, myMap, type, vertex[j*width+i], vertex[(j+1)*width+i-1], vertex[(j+1)*width+i]);
+                        //UpSideDown
+                        if (i < width)
+                            DrawTriangle(display, displayRect, myMap, type, vertex[(j+1)*width+i-1], vertex[j*width+i-1], vertex[j*width+i]);
+                    }
+                    //last UpSideDown
+                    tempP3.x = vertex[j*width+width-1].x+TRIANGLE_WIDTH;
+                    tempP3.y = vertex[j*width+0].y;
+                    tempP3.z = vertex[j*width+0].z;
+                    tempP3.i = vertex[j*width+0].i;
+                    DrawTriangle(display, displayRect, myMap, type, vertex[(j+1)*width+width-1], vertex[j*width+width-1], tempP3);
+                }
+                else
+                {
+                    for (Uint16 i = /*0*/ col_start; i < width-1 && i <= col_end; i++)
+                    {
+                        //RightSideUp
+                        DrawTriangle(display, displayRect, myMap, type, vertex[j*width+i], vertex[(j+1)*width+i], vertex[(j+1)*width+i+1]);
+                        //UpSideDown
+                        DrawTriangle(display, displayRect, myMap, type, vertex[(j+1)*width+i+1], vertex[j*width+i], vertex[j*width+i+1]);
+                    }
+                    //last RightSideUp
+                    tempP3.x = vertex[(j+1)*width+width-1].x+TRIANGLE_WIDTH;
+                    tempP3.y = vertex[(j+1)*width+0].y;
+                    tempP3.z = vertex[(j+1)*width+0].z;
+                    tempP3.i = vertex[(j+1)*width+0].i;
+                    DrawTriangle(display, displayRect, myMap, type, vertex[j*width+width-1], vertex[(j+1)*width+width-1], tempP3);
+                    //last UpSideDown
+                    tempP1.x = vertex[(j+1)*width+width-1].x+TRIANGLE_WIDTH;
+                    tempP1.y = vertex[(j+1)*width+0].y;
+                    tempP1.z = vertex[(j+1)*width+0].z;
+                    tempP1.i = vertex[(j+1)*width+0].i;
+                    tempP3.x = vertex[j*width+width-1].x+TRIANGLE_WIDTH;
+                    tempP3.y = vertex[j*width+0].y;
+                    tempP3.z = vertex[j*width+0].z;
+                    tempP3.i = vertex[j*width+0].i;
+                    DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[j*width+width-1], tempP3);
                 }
             }
 
-            if (k == 2 || k == 3)
+            //draw last line
+            for (Uint16 i = /*0*/ col_start; i < width-1 && i <= col_end; i++)
             {
-                //now call DrawTriangle for all triangles left or right outside
-                if (displayRect.x < 0)
-                {
-                    col_start = width-1 - (-displayRect.x/TRIANGLE_WIDTH) - 1;
-                    col_end = width-1;
-                    view_outside_edges = true;
-                }
-                else if ( (displayRect.x + displayRect.w) > myMap->width_pixel )
-                {
-                    col_start = 0;
-                    col_end = ((displayRect.x + displayRect.w) - myMap->width_pixel)/TRIANGLE_WIDTH + 1;
-                    view_outside_edges = true;
-                }
+                //RightSideUp
+                tempP2.x = vertex[0*width+i].x;
+                tempP2.y = height*TRIANGLE_HEIGHT + vertex[0*width+i].y;
+                tempP2.z = vertex[0*width+i].z;
+                tempP2.i = vertex[0*width+i].i;
+                tempP3.x = vertex[0*width+i+1].x;
+                tempP3.y = height*TRIANGLE_HEIGHT + vertex[0*width+i+1].y;
+                tempP3.z = vertex[0*width+i+1].z;
+                tempP3.i = vertex[0*width+i+1].i;
+                DrawTriangle(display, displayRect, myMap, type, vertex[(height-1)*width+i], tempP2, tempP3);
+                //UpSideDown
+                tempP1.x = vertex[0*width+i+1].x;
+                tempP1.y = height*TRIANGLE_HEIGHT + vertex[0*width+i+1].y;
+                tempP1.z = vertex[0*width+i+1].z;
+                tempP1.i = vertex[0*width+i+1].i;
+                DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+i], vertex[(height-1)*width+i+1]);
             }
-
-            //if displayRect is not outside the map edges, there is nothing to do
-            if (!view_outside_edges)
-                continue;
         }
 
-        for (Uint16 j = /*0*/ row_start; j < height-1 && j <= row_end; j++)
-        {
-            if (j%2 == 0)
-            {
-                //first RightSideUp
-                tempP2.x = 0;
-                tempP2.y = vertex[(j+1)*width+width-1].y;
-                tempP2.z = vertex[(j+1)*width+width-1].z;
-                tempP2.i = vertex[(j+1)*width+width-1].i;
-                DrawTriangle(display, displayRect, myMap, type, vertex[j*width+0], tempP2, vertex[(j+1)*width+0]);
-                for (Uint16 i = /*1*/ (col_start>0?col_start:1); i < width && i <= col_end; i++)
-                {
-                    //RightSideUp
-                    DrawTriangle(display, displayRect, myMap, type, vertex[j*width+i], vertex[(j+1)*width+i-1], vertex[(j+1)*width+i]);
-                    //UpSideDown
-                    if (i < width)
-                        DrawTriangle(display, displayRect, myMap, type, vertex[(j+1)*width+i-1], vertex[j*width+i-1], vertex[j*width+i]);
-                }
-                //last UpSideDown
-                tempP3.x = vertex[j*width+width-1].x+TRIANGLE_WIDTH;
-                tempP3.y = vertex[j*width+0].y;
-                tempP3.z = vertex[j*width+0].z;
-                tempP3.i = vertex[j*width+0].i;
-                DrawTriangle(display, displayRect, myMap, type, vertex[(j+1)*width+width-1], vertex[j*width+width-1], tempP3);
-            }
-            else
-            {
-                for (Uint16 i = /*0*/ col_start; i < width-1 && i <= col_end; i++)
-                {
-                    //RightSideUp
-                    DrawTriangle(display, displayRect, myMap, type, vertex[j*width+i], vertex[(j+1)*width+i], vertex[(j+1)*width+i+1]);
-                    //UpSideDown
-                    DrawTriangle(display, displayRect, myMap, type, vertex[(j+1)*width+i+1], vertex[j*width+i], vertex[j*width+i+1]);
-                }
-                //last RightSideUp
-                tempP3.x = vertex[(j+1)*width+width-1].x+TRIANGLE_WIDTH;
-                tempP3.y = vertex[(j+1)*width+0].y;
-                tempP3.z = vertex[(j+1)*width+0].z;
-                tempP3.i = vertex[(j+1)*width+0].i;
-                DrawTriangle(display, displayRect, myMap, type, vertex[j*width+width-1], vertex[(j+1)*width+width-1], tempP3);
-                //last UpSideDown
-                tempP1.x = vertex[(j+1)*width+width-1].x+TRIANGLE_WIDTH;
-                tempP1.y = vertex[(j+1)*width+0].y;
-                tempP1.z = vertex[(j+1)*width+0].z;
-                tempP1.i = vertex[(j+1)*width+0].i;
-                tempP3.x = vertex[j*width+width-1].x+TRIANGLE_WIDTH;
-                tempP3.y = vertex[j*width+0].y;
-                tempP3.z = vertex[j*width+0].z;
-                tempP3.i = vertex[j*width+0].i;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[j*width+width-1], tempP3);
-            }
-        }
-
-        //draw last line
-        for (Uint16 i = /*0*/ col_start; i < width-1 && i <= col_end; i++)
-        {
-            //RightSideUp
-            tempP2.x = vertex[0*width+i].x;
-            tempP2.y = height*TRIANGLE_HEIGHT + vertex[0*width+i].y;
-            tempP2.z = vertex[0*width+i].z;
-            tempP2.i = vertex[0*width+i].i;
-            tempP3.x = vertex[0*width+i+1].x;
-            tempP3.y = height*TRIANGLE_HEIGHT + vertex[0*width+i+1].y;
-            tempP3.z = vertex[0*width+i+1].z;
-            tempP3.i = vertex[0*width+i+1].i;
-            DrawTriangle(display, displayRect, myMap, type, vertex[(height-1)*width+i], tempP2, tempP3);
-            //UpSideDown
-            tempP1.x = vertex[0*width+i+1].x;
-            tempP1.y = height*TRIANGLE_HEIGHT + vertex[0*width+i+1].y;
-            tempP1.z = vertex[0*width+i+1].z;
-            tempP1.i = vertex[0*width+i+1].i;
-            DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+i], vertex[(height-1)*width+i+1]);
-        }
+        //last RightSideUp
+        tempP2.x = vertex[0*width+width-1].x;
+        tempP2.y = height*TRIANGLE_HEIGHT + vertex[0*width+width-1].y;
+        tempP2.z = vertex[0*width+width-1].z;
+        tempP2.i = vertex[0*width+width-1].i;
+        tempP3.x = vertex[0*width+width-1].x+TRIANGLE_WIDTH;
+        tempP3.y = height*TRIANGLE_HEIGHT + vertex[0*width+0].y;
+        tempP3.z = vertex[0*width+0].z;
+        tempP3.i = vertex[0*width+0].i;
+        DrawTriangle(display, displayRect, myMap, type, vertex[(height-1)*width+width-1], tempP2, tempP3);
+        //last UpSideDown
+        tempP1.x = vertex[0*width+width-1].x+TRIANGLE_WIDTH;
+        tempP1.y = height*TRIANGLE_HEIGHT + vertex[0*width+0].y;
+        tempP1.z = vertex[0*width+0].z;
+        tempP1.i = vertex[0*width+0].i;
+        tempP3.x = vertex[(height-1)*width+width-1].x+TRIANGLE_WIDTH;
+        tempP3.y = vertex[(height-1)*width+0].y;
+        tempP3.z = vertex[(height-1)*width+0].z;
+        tempP3.i = vertex[(height-1)*width+0].i;
+        DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+width-1], tempP3);
     }
-
-    //last RightSideUp
-    tempP2.x = vertex[0*width+width-1].x;
-    tempP2.y = height*TRIANGLE_HEIGHT + vertex[0*width+width-1].y;
-    tempP2.z = vertex[0*width+width-1].z;
-    tempP2.i = vertex[0*width+width-1].i;
-    tempP3.x = vertex[0*width+width-1].x+TRIANGLE_WIDTH;
-    tempP3.y = height*TRIANGLE_HEIGHT + vertex[0*width+0].y;
-    tempP3.z = vertex[0*width+0].z;
-    tempP3.i = vertex[0*width+0].i;
-    DrawTriangle(display, displayRect, myMap, type, vertex[(height-1)*width+width-1], tempP2, tempP3);
-    //last UpSideDown
-    tempP1.x = vertex[0*width+width-1].x+TRIANGLE_WIDTH;
-    tempP1.y = height*TRIANGLE_HEIGHT + vertex[0*width+0].y;
-    tempP1.z = vertex[0*width+0].z;
-    tempP1.i = vertex[0*width+0].i;
-    tempP3.x = vertex[(height-1)*width+width-1].x+TRIANGLE_WIDTH;
-    tempP3.y = vertex[(height-1)*width+0].y;
-    tempP3.z = vertex[(height-1)*width+0].z;
-    tempP3.i = vertex[(height-1)*width+0].i;
-    DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+width-1], tempP3);
-
-    if (useOpenGL)
-        glEnd();
 
     //at least increase the round counter
     if (SDL_GetTicks() - roundTime > 30)
@@ -516,6 +516,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
 
     //find out the texture for the triangle
     unsigned char upperX, upperY, leftX, leftY, rightX, rightY;
+    SDL_Rect BorderRect;
     Uint8 texture, texture_raw;
     SDL_Surface *Surf_Tileset;
 
@@ -576,6 +577,10 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 leftY = 30;
                                                 rightX = 83;
                                                 rightY = 30;
+                                                BorderRect.x = 210;
+                                                BorderRect.y = 208;
+                                                BorderRect.w = 31;
+                                                BorderRect.h = 9;
                                                 break;
         case TRIANGLE_TEXTURE_WATER:            upperX = 219;
                                                 upperY = 51;//48;
@@ -665,29 +670,20 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     }
 
 
-    //draw the triangle
-    if (useOpenGL)
+    if (drawTextures)
     {
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glNormal3f(P1.normVector.x, P1.normVector.y, P1.normVector.z);
-        glVertex3f(P1.x-displayRect.x, P1.y-displayRect.y, 0.0f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glNormal3f(P2.normVector.x, P2.normVector.y, P2.normVector.z);
-        glVertex3f(P2.x-displayRect.x, P2.y-displayRect.y, 0.0f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glNormal3f(P3.normVector.x, P3.normVector.y, P3.normVector.z);
-        glVertex3f(P3.x-displayRect.x, P3.y-displayRect.y, 0.0f);
-    }
-    else
-    {
+        //draw the triangle
         //do not shade water and lava
         if (texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
             sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
         else
             sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+        return;
     }
 
-
+    //blit border
+    //if (P2.y == P3.y && texture_raw == TRIANGLE_TEXTURE_STEPPE)
+        //Draw(display, Surf_Tileset, P2.x-displayRect.x, P2.y-displayRect.y, BorderRect.x, BorderRect.y, BorderRect.w, BorderRect.h);
 
     //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
 
@@ -848,6 +844,12 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
             //stone
             case    0xCD:   objIdx = MAPPIC_GRANITE_2_1 + (P2.objectType - 0x01);
                             break;
+            //headquarter
+            case    0x80:   //P2.objectType is the number of the player beginning with 0x00
+                            //%7 cause in the original game there are only 7 players and 7 different flags
+                            objIdx = FLAG_BLUE_DARK + P2.objectType % 7;
+                            break;
+
             default:        break;
         }
         if (objIdx != 0)
@@ -1012,7 +1014,7 @@ Sint32 CSurface::get_LightIntensity(struct vector node)
 struct vector CSurface::get_nodeVector(struct vector v1, struct vector v2, struct vector v3)
 {
     struct vector node;
-    //deviding through 6 is not necessary cause normal vector would be the same
+    //deviding through 3 is not necessary cause normal vector would be the same
     node.x = v1.x + v2.x + v3.x;
     node.y = v1.y + v2.y + v3.y;
     node.z = v1.z + v2.z + v3.z;
@@ -1191,38 +1193,4 @@ float CSurface::absf(float a)
         return a;
     else
         return a*(-1);
-}
-
-void CSurface::BlitSDL_to_GL(SDL_Surface *dest, SDL_Surface *src)
-{
-    ;
-}
-
-//opengl functions
-void CSurface::initOpenGL(int resX, int resY)
-{
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glShadeModel(GL_SMOOTH);
-
-    //glEnable( GL_TEXTURE_2D );
-
-    glViewport( 0, resY-1, resX, resY );
-
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity();
-
-    glOrtho(0.0f, resX, resY, 0.0f, 0, 128);//-1.0f, 1.0f);
-
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity();
-
-    static GLfloat pos[4] = {5.0, 5.0, 10.0, 0.0};
-    //static GLfloat color[4] = {0.5, 0.5, 0.5, 0.5};
-    glLightfv(GL_LIGHT0, GL_POSITION, pos);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_DEPTH_TEST);
-    //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color);
 }

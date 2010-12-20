@@ -20,9 +20,25 @@ class CMap
         int mode;
         //necessary for release the EDITOR_MODE_CUT (set back to last used mode)
         int lastMode;
+        //these variables are used by the callback functions to define what new data should go into the vertex
         int modeContent;
         int modeContent2;
+        //is the user currently modifying?
         bool modify;
+        //necessary for "undo"- and "do"-function
+        bool saveCurrentVertices;
+        struct savedVertices
+        {
+            bool empty;
+            int VertexX, VertexY;
+            //MAX_CHANGE_SECTION * 2 + 1 = number of vertices in one row or col
+            //+ 10 because if we raise a vertex then the other vertices will be raised too after 5 times
+            //this ranges up to 10 vertices
+            //+ 2 because modifications on a vertex will touch building and shading around
+            struct point PointsArroundVertex[ ( (MAX_CHANGE_SECTION+10+2)*2+1 ) * ( (MAX_CHANGE_SECTION+10+2)*2+1 ) ];
+            struct savedVertices *prev;
+            struct savedVertices *next;
+        } *CurrPtr_savedVertices;
         //get the number of the triangle nearest to cursor and save it to VertexX and VertexY
         void saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
         //blitting coords for the mouse cursor
@@ -30,6 +46,8 @@ class CMap
         int MouseBlitY;
         //counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor vertex, 1 - six vertices around the cursor vertex ....) (editor mode)
         int ChangeSection;
+        //in some cases we change the ChangeSection manually but want to reset it (this is user friendly)
+        int lastChangeSection;
         //decides what to do if user presses '+' or '-', if true, then cursor will increase like an hexagon, otherwise like a square
         bool ChangeSectionHexagonMode;
         //user can decide that only RSU-Triangles will be filled (within the cursor field)
@@ -46,7 +64,9 @@ class CMap
         struct cursorPoint *Vertices;
         //buffer for texts we maybe need to write
         char textBuffer[50];
-
+        //these are the new (internal) values for player positions (otherwise we had to walk through the objectXXXX-Blocks step by step)
+        Uint16 PlayerHQx[MAXPLAYERS];
+        Uint16 PlayerHQy[MAXPLAYERS];
     public:
         CMap(char *filename);
         ~CMap();
@@ -69,6 +89,8 @@ class CMap
         SDL_Surface* getSurface(void) { render(); return Surf_Map; };
         DisplayRectangle getDisplayRect(void) { return displayRect; };
         void setDisplayRect(DisplayRectangle displayRect) { this->displayRect = displayRect; };
+        Uint16* getPlayerHQx(void) { return PlayerHQx; };
+        Uint16* getPlayerHQy(void) { return PlayerHQy; };
         void drawMinimap(SDL_Surface *Window);
         bool render(void);
         //get and set some variables necessary for cursor behavior
@@ -105,9 +127,11 @@ class CMap
         void modifyHeightMakeBigHouse(int VertexX, int VertexY);
         void modifyShading(int VertexX, int VertexY);
         void modifyTexture(int VertexX, int VertexY, bool rsu, bool usd);
+        void modifyTextureMakeHarbour(int VertexX, int VertexY);
         void modifyObject(int VertexX, int VertexY);
         void modifyBuild(int VertexX, int VertexY);
         void modifyResource(int VertexX, int VertexY);
+        void modifyPlayer(int VertexX, int VertexY);
 };
 
 #endif

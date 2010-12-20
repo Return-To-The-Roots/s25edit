@@ -16,10 +16,9 @@ CGame::CGame()
 #ifdef _VIEWERMODE
     msWait = 40;
 #else
-    msWait = 0;
+    msWait = 20;
 #endif
     Surf_Display = NULL;
-    Surf_DisplayGL = NULL;
 	Running = true;
 	//mouse cursor data
 	Cursor.x = 0;

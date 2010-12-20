@@ -2,11 +2,8 @@
 
 bool CGame::Init()
 {
-#ifdef _MULTICORE
-    std::cout << "Welcome to a re-engineered version of Bluebytes \"Siedler 2 Gold\" powered by SDL/SGE(modified) and GOMP(OpenMP)\n";
-#else
     std::cout << "Welcome to a re-engineered version of Bluebytes \"Siedler 2 Gold\" powered by SDL/SGE(modified)\n";
-#endif
+
 
     std::cout << "\nInitializing SDL...";
     if ( SDL_Init(SDL_INIT_EVERYTHING ) < 0)
@@ -19,25 +16,11 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "\nCreate Window...";
-    if (CSurface::useOpenGL)
+    Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+    if ( Surf_Display == NULL )
     {
-        Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, MenuResolutionX, MenuResolutionY, 32, 0, 0, 0, 0);
-        Surf_DisplayGL = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
-        if (Surf_Display == NULL || Surf_DisplayGL == NULL)
-        {
-            std::cout << "failure";
-            return false;
-        }
-        CSurface::initOpenGL(MenuResolutionX, MenuResolutionY);
-    }
-    else
-    {
-        Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-        if ( Surf_Display == NULL )
-        {
-            std::cout << "failure";
-            return false;
-        }
+        std::cout << "failure";
+        return false;
     }
 
     SDL_WM_SetCaption("Siedler 2 re-engineered, powered by SDL/SGE(modified)",0);
@@ -409,6 +392,58 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
+
+#ifdef _VIEWERMODE
+    //load the MAP0x.LST's for all pictures --> in normal mode this is done on map load
+
+    //load only the palette at this time from MAP00.LST
+    std::cout << "\nLoading palette from file: /DATA/MAP00.LST...";
+    if ( CFile::open_file("./DATA/MAP00.LST", LST, true) == false )
+    {
+        std::cout << "failure";
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << "\nLoading file: /DATA/MAP00.LST...";
+    if ( CFile::open_file("./DATA/MAP00.LST", LST) == false )
+    {
+        std::cout << "failure";
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
+
+    //load only the palette at this time from MAP01.LST
+    std::cout << "\nLoading palette from file: /DATA/MAP01.LST...";
+    if ( CFile::open_file("./DATA/MAP01.LST", LST, true) == false )
+    {
+        std::cout << "failure";
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << "\nLoading file: /DATA/MAP01.LST...";
+    if ( CFile::open_file("./DATA/MAP01.LST", LST) == false )
+    {
+        std::cout << "failure";
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
+
+    //load only the palette at this time from MAP02.LST
+    std::cout << "\nLoading palette from file: /DATA/MAP02.LST...";
+    if ( CFile::open_file("./DATA/MAP02.LST", LST, true) == false )
+    {
+        std::cout << "failure";
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << "\nLoading file: /DATA/MAP02.LST...";
+    if ( CFile::open_file("./DATA/MAP02.LST", LST) == false )
+    {
+        std::cout << "failure";
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
+#endif
 
 #ifndef _VIEWERMODE
     //create the mainmenu
