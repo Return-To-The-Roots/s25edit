@@ -46,6 +46,13 @@ CMap::CMap(char *filename)
         std::cout << "failure";
     }
     //set back palette
+    //CFile::set_palActual(CFile::get_palArray());
+    std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
+    if ( CFile::open_file("./DATA/MBOB/ROM_BOBS.LST", LST) == false )
+    {
+        std::cout << "failure";
+    }
+    //set back palette
     CFile::set_palActual(CFile::get_palArray());
 
     CSurface::get_nodeVectors(map);
@@ -179,6 +186,7 @@ CMap::~CMap()
 
 void CMap::setMouseData(SDL_MouseMotionEvent motion)
 {
+#ifdef _WIN32
     //following code important for blitting the right field of the map
     static bool warping = false;
     //is right mouse button pressed?
@@ -206,6 +214,24 @@ void CMap::setMouseData(SDL_MouseMotionEvent motion)
         else if (displayRect.y <= -displayRect.h)
             displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
     }
+#else
+    if (SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(3))
+    {
+        displayRect.x += motion.xrel;
+        displayRect.y += motion.yrel;
+
+        //reset coords of displayRects when end of map is reached
+        if (displayRect.x >= map->width*TRIANGLE_WIDTH)
+            displayRect.x = 0;
+        else if (displayRect.x <= -displayRect.w)
+            displayRect.x = map->width*TRIANGLE_WIDTH - displayRect.w;
+
+        if (displayRect.y >= map->height*TRIANGLE_HEIGHT)
+            displayRect.y = 0;
+        else if (displayRect.y <= -displayRect.h)
+            displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
+    }
+#endif
 
     saveVertex(motion.x, motion.y, motion.state);
 }
@@ -463,6 +489,23 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
                 }
             }
         }*/
+        else if (key.keysym.sym == SDLK_UP || key.keysym.sym == SDLK_DOWN || key.keysym.sym == SDLK_LEFT || key.keysym.sym == SDLK_RIGHT)
+        {
+            //move displayRect
+            displayRect.x += (key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0));
+            displayRect.y += (key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0));
+
+            //reset coords of displayRects when end of map is reached
+            if (displayRect.x >= map->width*TRIANGLE_WIDTH)
+                displayRect.x = 0;
+            else if (displayRect.x <= -displayRect.w)
+                displayRect.x = map->width*TRIANGLE_WIDTH - displayRect.w;
+
+            if (displayRect.y >= map->height*TRIANGLE_HEIGHT)
+                displayRect.y = 0;
+            else if (displayRect.y <= -displayRect.h)
+                displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
+        }
     }
     else if (key.type == SDL_KEYUP)
     {
@@ -618,6 +661,53 @@ bool CMap::render(void)
     //if (map->vertex != NULL)
         CSurface::DrawTriangleField(Surf_Map, displayRect, map);
 
+
+    //draw pictures to cursor position
+#ifdef _EDITORMODE
+    int symbol_index;
+    switch (mode)
+    {
+        case EDITOR_MODE_CUT:               symbol_index = CURSOR_SYMBOL_SCISSORS;
+                                            break;
+        case EDITOR_MODE_TREE:              symbol_index = CURSOR_SYMBOL_TREE;
+                                            break;
+        case EDITOR_MODE_RAISE:             symbol_index = CURSOR_SYMBOL_ARROW_UP;
+                                            break;
+        case EDITOR_MODE_REDUCE:            symbol_index = CURSOR_SYMBOL_ARROW_DOWN;
+                                            break;
+        case EDITOR_MODE_TEXTURE:           symbol_index = CURSOR_SYMBOL_TEXTURE;
+                                            break;
+        case EDITOR_MODE_LANDSCAPE:         symbol_index = CURSOR_SYMBOL_LANDSCAPE;
+                                            break;
+        case EDITOR_MODE_FLAG:              symbol_index = CURSOR_SYMBOL_FLAG;
+                                            break;
+        case EDITOR_MODE_FLAG_DELETE:       symbol_index = CURSOR_SYMBOL_FLAG;
+                                            break;
+        case EDITOR_MODE_RESOURCE_REDUCE:   symbol_index = CURSOR_SYMBOL_PICKAXE_MINUS;
+                                            break;
+        case EDITOR_MODE_RESOURCE_RAISE:    symbol_index = CURSOR_SYMBOL_PICKAXE_PLUS;
+                                            break;
+        case EDITOR_MODE_MAKE_BIG_HOUSE:    symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_BIG;
+                                            break;
+        case EDITOR_MODE_MAKE_HARBOUR:      symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_HARBOUR;
+                                            break;
+        case EDITOR_MODE_ANIMAL:            symbol_index = CURSOR_SYMBOL_ANIMAL;
+                                            break;
+        default:                            symbol_index = CURSOR_SYMBOL_ARROW_UP;
+                                            break;
+    }
+    for (int i = 0; i < VertexCounter; i++)
+        if (Vertices[i].active)
+            CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, Vertices[i].blit_x-10, Vertices[i].blit_y-10);
+
+    //text for x and y of vertex (shown in upper left corner)
+    sprintf(textBuffer, "%d    %d", VertexX, VertexY);
+    CFont::writeText(Surf_Map, textBuffer, 20, 20);
+#else
+    CSurface::Draw(Surf_Map, global::bmpArray[CIRCLE_FLAT_GREY].surface, MouseBlitX-10, MouseBlitY-10);
+#endif
+
+
     //draw the frame
     if (displayRect.w == 640 && displayRect.h == 480)
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0);
@@ -732,51 +822,6 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.w-33, displayRect.h/2-220);
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.w-20, displayRect.h/2-220);
 
-#endif
-
-    //draw picture to cursor position
-#ifdef _EDITORMODE
-    int symbol_index;
-    switch (mode)
-    {
-        case EDITOR_MODE_CUT:               symbol_index = CURSOR_SYMBOL_SCISSORS;
-                                            break;
-        case EDITOR_MODE_TREE:              symbol_index = CURSOR_SYMBOL_TREE;
-                                            break;
-        case EDITOR_MODE_RAISE:             symbol_index = CURSOR_SYMBOL_ARROW_UP;
-                                            break;
-        case EDITOR_MODE_REDUCE:            symbol_index = CURSOR_SYMBOL_ARROW_DOWN;
-                                            break;
-        case EDITOR_MODE_TEXTURE:           symbol_index = CURSOR_SYMBOL_TEXTURE;
-                                            break;
-        case EDITOR_MODE_LANDSCAPE:         symbol_index = CURSOR_SYMBOL_LANDSCAPE;
-                                            break;
-        case EDITOR_MODE_FLAG:              symbol_index = CURSOR_SYMBOL_FLAG;
-                                            break;
-        case EDITOR_MODE_FLAG_DELETE:       symbol_index = CURSOR_SYMBOL_FLAG;
-                                            break;
-        case EDITOR_MODE_RESOURCE_REDUCE:   symbol_index = CURSOR_SYMBOL_PICKAXE_MINUS;
-                                            break;
-        case EDITOR_MODE_RESOURCE_RAISE:    symbol_index = CURSOR_SYMBOL_PICKAXE_PLUS;
-                                            break;
-        case EDITOR_MODE_MAKE_BIG_HOUSE:    symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_BIG;
-                                            break;
-        case EDITOR_MODE_MAKE_HARBOUR:      symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_HARBOUR;
-                                            break;
-        case EDITOR_MODE_ANIMAL:            symbol_index = CURSOR_SYMBOL_ANIMAL;
-                                            break;
-        default:                            symbol_index = CURSOR_SYMBOL_ARROW_UP;
-                                            break;
-    }
-    for (int i = 0; i < VertexCounter; i++)
-        if (Vertices[i].active)
-            CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, Vertices[i].blit_x-10, Vertices[i].blit_y-10);
-
-    //text for x and y of vertex (shown in upper left corner)
-    sprintf(textBuffer, "%d    %d", VertexX, VertexY);
-    CFont::writeText(Surf_Map, textBuffer, 20, 20);
-#else
-    CSurface::Draw(Surf_Map, global::bmpArray[CIRCLE_FLAT_GREY].surface, MouseBlitX-10, MouseBlitY-10);
 #endif
 
     return true;

@@ -318,12 +318,6 @@ bool CGame::Init()
     }
     //set back palette
     CFile::set_palActual(CFile::get_palArray());
-    //std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
-    //if ( CFile::open_file("./DATA/MBOB/ROM_BOBS.LST", LST) == false )
-    //{
-    //    std::cout << "failure";
-    //    return false;
-    //}
 #endif
 
     //texture tilesets
