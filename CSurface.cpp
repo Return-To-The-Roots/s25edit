@@ -684,6 +684,8 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     //blit border
     //if (P2.y == P3.y && texture_raw == TRIANGLE_TEXTURE_STEPPE)
         //Draw(display, Surf_Tileset, P2.x-displayRect.x, P2.y-displayRect.y, BorderRect.x, BorderRect.y, BorderRect.w, BorderRect.h);
+        //sge_TexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y, P3.x-displayRect.x, P3.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+9, P3.x-displayRect.x, P3.y-displayRect.y+9, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+        //sge_TexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y, P3.x-displayRect.x, P3.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+9, P3.x-displayRect.x, P3.y-displayRect.y+9, Surf_Tileset, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y);
 
     //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
 
@@ -847,7 +849,9 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
             //headquarter
             case    0x80:   //P2.objectType is the number of the player beginning with 0x00
                             //%7 cause in the original game there are only 7 players and 7 different flags
+                            #ifdef _EDITORMODE
                             objIdx = FLAG_BLUE_DARK + P2.objectType % 7;
+                            #endif
                             break;
 
             default:        break;
@@ -856,6 +860,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
             Draw(display, global::bmpArray[objIdx].surface, (int)(P2.x-displayRect.x-global::bmpArray[objIdx].nx), (int)(P2.y-displayRect.y-global::bmpArray[objIdx].ny));
     }
 
+    #ifdef _EDITORMODE
     //blit resources
     if (P2.y < P1.y)
     {
@@ -880,6 +885,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_RESOURCE_GRANITE].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_RESOURCE_GRANITE].ny-(4*(i-0x58))));
         }
     }
+    #endif
 
     //blit buildings
     if (global::s2->getMapObj()->getBuildHelp())

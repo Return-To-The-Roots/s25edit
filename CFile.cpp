@@ -125,7 +125,7 @@ bool CFile::open_lst(void)
                                     return false;
                                 break;
 
-            case BOBTYPE04:     if ( read_bob04() == false )
+            case BOBTYPE04:     if ( read_bob04(PLAYER_BLUE) == false )
                                     return false;
                                 break;
 
@@ -467,7 +467,7 @@ bool CFile::open_lbm(char *filename)
         bmpArray->surface = NULL;
         if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 32, 0, 0, 0, 0)) != NULL )
         {
-            SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 90, 134));
+            SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));//0, 90, 134));
             CSurface::Draw(bmpArray->surface, tmp, 0, 0);
             SDL_FreeSurface(tmp);
         }

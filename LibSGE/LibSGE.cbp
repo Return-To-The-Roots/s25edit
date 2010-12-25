@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="LibSGE" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="bin\Release\SGE" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Release\" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-DBUILD_DLL" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lSDLmain -lSDL" />
+				</Linker>
+			</Target>
+		</Build>
+		<Unit filename="sge.h" />
+		<Unit filename="sge_blib.cpp" />
+		<Unit filename="sge_blib.h" />
+		<Unit filename="sge_bm_text.cpp" />
+		<Unit filename="sge_bm_text.h" />
+		<Unit filename="sge_collision.cpp" />
+		<Unit filename="sge_collision.h" />
+		<Unit filename="sge_config.h" />
+		<Unit filename="sge_internal.h" />
+		<Unit filename="sge_misc.cpp" />
+		<Unit filename="sge_misc.h" />
+		<Unit filename="sge_primitives.cpp" />
+		<Unit filename="sge_primitives.h" />
+		<Unit filename="sge_rotation.cpp" />
+		<Unit filename="sge_rotation.h" />
+		<Unit filename="sge_shape.cpp" />
+		<Unit filename="sge_shape.h" />
+		<Unit filename="sge_surface.cpp" />
+		<Unit filename="sge_surface.h" />
+		<Unit filename="sge_textpp.cpp" />
+		<Unit filename="sge_textpp.h" />
+		<Unit filename="sge_tt_text.cpp" />
+		<Unit filename="sge_tt_text.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

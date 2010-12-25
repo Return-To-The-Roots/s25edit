@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release" />
+	<File name="sge_blib.cpp" open="1" top="0" tabpos="8">
+		<Cursor position="7871" topLine="264" />
+	</File>
+	<File name="sge_blib.h" open="0" top="0" tabpos="8">
+		<Cursor position="2719" topLine="15" />
+	</File>
+	<File name="sge_collision.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="1693" topLine="40" />
+	</File>
+</CodeBlocks_layout_file>

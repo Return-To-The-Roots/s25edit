@@ -43,7 +43,11 @@ void CGame::EventHandling(SDL_Event *Event)
                                     //if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
                                     callback::debugger(INITIALIZING_CALL);
                                     break;
-
+                case SDLK_F4:      //if CTRL and ALT are pressed
+                                    //if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
+                                    callback::viewer(INITIALIZING_CALL);
+                                    break;
+#endif
                 //F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
                 case SDLK_F5:       if (TRIANGLE_INCREASE < 10)
                                     {
@@ -137,6 +141,7 @@ void CGame::EventHandling(SDL_Event *Event)
                                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                                     }
                                     break;
+#ifdef _ADMINMODE
 /*#else
                 case SDLK_F3:
                                     break;
@@ -154,6 +159,12 @@ void CGame::EventHandling(SDL_Event *Event)
                                     break;
 
                 case SDLK_DOWN:     (index >= 10 ? index-=10 : index = 0);
+                                    break;
+
+                case SDLK_q:        index+=100;
+                                    break;
+
+                case SDLK_w:        (index >= 100 ? index-=100 : index = 0);
                                     break;
 /*#else
                 case SDLK_RIGHT:

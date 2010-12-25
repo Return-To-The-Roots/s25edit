@@ -959,7 +959,11 @@ enum
     MAPPIC_MINE,
     MAPPIC_HOUSE_HARBOUR,
     //some pictures missing here
+#ifdef _EDITORMODE
     MAPPIC_TREE_PINE = 651 + 2070,
+#else
+    MAPPIC_TREE_PINE = 742 + 2070,
+#endif
     MAPPIC_TREE_BIRCH = MAPPIC_TREE_PINE + 15,
     MAPPIC_TREE_OAK = MAPPIC_TREE_PINE + 30,
     MAPPIC_TREE_PALM1 = MAPPIC_TREE_PINE + 45,
@@ -1025,7 +1029,11 @@ enum
     MAPPIC_SHRUB7,
     MAPPIC_SNOWMAN,
     //some pictures missing here
+#ifdef _EDITORMODE
     MAPPIC_LAST_ENTRY = 1430 + 2070
+#else
+    MAPPIC_LAST_ENTRY = 1521 + 2070
+#endif
 //END: /DATA/MAP00.LST
 };
 
@@ -1154,6 +1162,9 @@ enum
 
 //maximum players for a map
 #define MAXPLAYERS 16
+//maximum map size
+#define MAXMAPWIDTH  1152
+#define MAXMAPHEIGHT 1152
 
 //triangle values
 //these values are now handled in globals.h and globals.cpp, cause they must be changeable

@@ -49,7 +49,8 @@ CMap::CMap(char *filename)
     CFile::set_palActual(CFile::get_palArray());
 
     CSurface::get_nodeVectors(map);
-    //for safety recalculate build and shadow data
+    #ifdef _EDITORMODE
+    //for safety recalculate build and shadow data and test if fishes and water is correct
     for (int i = 0; i < map->height; i++)
     {
         for (int j = 0; j < map->width; j++)
@@ -59,6 +60,7 @@ CMap::CMap(char *filename)
             modifyResource(j, i);
         }
     }
+    #endif
     needSurface = true;
     active = true;
     VertexX = 10;
@@ -100,6 +102,8 @@ CMap::CMap(char *filename)
         CurrPtr_savedVertices->next = NULL;
     }
 
+    //we count the players, cause the original editor writes number of players to header no matter if they are set or not
+    int CountPlayers = 0;
     //now for internal reasons save all players to a new array, also players with number greater than 7
     //initalize the internal array
     for (int i = 0; i < MAXPLAYERS; i++)
@@ -114,6 +118,7 @@ CMap::CMap(char *filename)
         {
             if (map->vertex[y*map->width+x].objectInfo == 0x80)
             {
+                CountPlayers++;
                 //objectType is the number of the player
                 if (map->vertex[y*map->width+x].objectType < MAXPLAYERS)
                 {
@@ -131,6 +136,7 @@ CMap::CMap(char *filename)
             }
         }
     }
+    map->player = CountPlayers;
 }
 
 CMap::~CMap()
@@ -287,7 +293,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
            )
         {
             //the minimap picture was clicked
-            callback::EditorMinimapMenu(INITIALIZING_CALL);
+            callback::MinimapMenu(INITIALIZING_CALL);
             return;
         }
         //now we check the right menubar
@@ -609,7 +615,7 @@ bool CMap::render(void)
     if (modify)
         modifyVertex();
 
-    if (map->vertex != NULL)
+    //if (map->vertex != NULL)
         CSurface::DrawTriangleField(Surf_Map, displayRect, map);
 
     //draw the frame
@@ -623,6 +629,28 @@ bool CMap::render(void)
     {
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_LEFT_1280_1024].surface, 0, 0);
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_RIGHT_1280_1024].surface, 640, 0);
+    }
+    else
+    {
+        int x=150, y=150;
+        //draw the corners
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0, 0, 0, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.h-150, 0, 480-150, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.w-150, 0, 640-150, 0, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.w-150, displayRect.h-150, 640-150, 480-150, 150, 150);
+        //draw the edges
+        while (x < displayRect.w-150)
+        {
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, 0, 150, 0, 150, 12);
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.h-12, 150, 0, 150, 12);
+            x+=150;
+        }
+        while (y < displayRect.h-150)
+        {
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, y, 0, 150, 12, 150);
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.w-12, y, 0, 150, 12, 150);
+            y+=150;
+        }
     }
 
     //draw the statues at the frame
@@ -762,8 +790,6 @@ void CMap::drawMinimap(SDL_Surface *Window)
     Uint8 r8,g8,b8;
     Sint16 r,g,b;
 
-    char playerNumber[2];
-
     //this variables are needed to reduce the size of minimap-windows of big maps
     int num_x = (map->width > 256 ? map->width/256 : 1);
     int num_y = (map->height > 256 ? map->height/256 : 1);
@@ -869,7 +895,9 @@ void CMap::drawMinimap(SDL_Surface *Window)
         }
     }
 
+#ifdef _EDITORMODE
     //draw the player flags
+    char playerNumber[2];
     for (int i = 0; i < MAXPLAYERS; i++)
     {
         if (PlayerHQx[i] != 0xFFFF && PlayerHQx[i] != 0xFFFF)
@@ -883,6 +911,7 @@ void CMap::drawMinimap(SDL_Surface *Window)
         }
 
     }
+#endif
 
     //draw the arrow --> 6px is width of left window frame and 20px is the height of the upper window frame
     CSurface::Draw(Window, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].surface, 6+(displayRect.x+displayRect.w/2)/TRIANGLE_WIDTH/num_x-global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx, 20+(displayRect.y+displayRect.h/2)/TRIANGLE_HEIGHT/num_y-global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
@@ -1711,7 +1740,7 @@ void CMap::modifyBuild(int VertexX, int VertexY)
     }
 
     //test for headquarters around the point
-    //NOTE: don't test AT the point, cause in Original game we need a big house AT the point, otherwise the game wouldn't set a player there
+    //NOTE: In EDITORMODE don't test AT the point, cause in Original game we need a big house AT the point, otherwise the game wouldn't set a player there
     if ( building > 0x00)
     {
         for (int i = 1; i < 7; i++)
@@ -1720,6 +1749,13 @@ void CMap::modifyBuild(int VertexX, int VertexY)
                 building = 0x00;
         }
     }
+    #ifndef _EDITORMODE
+    if ( building > 0x00)
+    {
+        if ( map->vertex[tempVertices[0].y*map->width+tempVertices[0].x].objectInfo == 0x80 )
+            building = 0x00;
+    }
+    #endif
 
     //test for headquarters around (second section)
     if ( building > 0x01)
@@ -1976,6 +2012,7 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
         if (   /*map->vertex[VertexY*map->width+VertexX].objectType == 0x00
             && map->vertex[VertexY*map->width+VertexX].objectInfo == 0x00
             &&*/ map->vertex[VertexY*map->width+VertexX].build%8 == 0x04
+            && map->vertex[VertexY*map->width+VertexX].objectInfo != 0x80
            )
         {
             map->vertex[VertexY*map->width+VertexX].objectType = modeContent;

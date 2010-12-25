@@ -278,7 +278,7 @@ void callback::EditorQuitMenu(int Param)
                     EditorTextureMenu(MAP_QUIT);
                     EditorTreeMenu(MAP_QUIT);
                     EditorLandscapeMenu(MAP_QUIT);
-                    EditorMinimapMenu(MAP_QUIT);
+                    MinimapMenu(MAP_QUIT);
                     EditorCursorMenu(MAP_QUIT);
                     EditorResourceMenu(MAP_QUIT);
                     EditorPlayerMenu(MAP_QUIT);
@@ -1152,98 +1152,6 @@ void callback::EditorPlayerMenu(int Param)
     }
 }
 
-void callback::EditorMinimapMenu(int Param)
-{
-    static CWindow *WNDMinimap = NULL;
-    static CMap* MapObj = NULL;
-    static SDL_Surface *WndSurface = NULL;
-    static int num_x = 1, num_y = 1;
-
-    enum
-    {
-        WINDOWQUIT
-    };
-
-    switch (Param)
-    {
-        case INITIALIZING_CALL:
-                    if (WNDMinimap != NULL)
-                        break;
-
-                    //this variables are needed to reduce the size of minimap-windows of big maps
-                    num_x = (global::s2->getMapObj()->getMap()->width > 256 ? global::s2->getMapObj()->getMap()->width/256 : 1);
-                    num_y = (global::s2->getMapObj()->getMap()->height > 256 ? global::s2->getMapObj()->getMap()->height/256 : 1);
-
-                    int width = global::s2->getMapObj()->getMap()->width/num_x;
-                    int height = global::s2->getMapObj()->getMap()->height/num_y;
-                    //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
-                    if ( (global::s2->getDisplaySurface()->w-12 < width) || (global::s2->getDisplaySurface()->h-30 < height) )
-                        break;
-                    WNDMinimap = new CWindow(EditorMinimapMenu, WINDOWQUIT, global::s2->GameResolutionX/2-width/2-6, global::s2->GameResolutionY/2-height/2-15, width+12, height+30, "Übersicht", WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
-                    if (global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(EditorMinimapMenu))
-                    {
-                        WndSurface = WNDMinimap->getSurface();
-                        MapObj = global::s2->getMapObj();
-                    }
-                    else
-                    {
-                        delete WNDMinimap;
-                        WNDMinimap = NULL;
-                        return;
-                    }
-                    break;
-
-        case CALL_FROM_GAMELOOP:
-                    if (MapObj != NULL && WndSurface != NULL)
-                        MapObj->drawMinimap(WndSurface);
-                    break;
-
-        case WINDOW_CLICKED_CALL:
-                    if (MapObj != NULL)
-                    {
-                        int MouseX, MouseY;
-                        if (SDL_GetMouseState(&MouseX, &MouseY)&SDL_BUTTON(1))
-                        {
-                            if (    MouseX > (WNDMinimap->getX() + 6) && MouseX < (WNDMinimap->getX() + WNDMinimap->getW() - 6)
-                                &&  MouseY > (WNDMinimap->getY() + 20) && MouseY < (WNDMinimap->getY() + WNDMinimap->getH() - 10)
-                               )
-                            {
-                                DisplayRectangle displayRect = MapObj->getDisplayRect();
-                                displayRect.x = (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx)*TRIANGLE_WIDTH*num_x;
-                                displayRect.y = (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny)*TRIANGLE_HEIGHT*num_y;
-                                MapObj->setDisplayRect(displayRect);
-                            }
-                        }
-                    }
-                    break;
-
-        case WINDOWQUIT:
-                    if (WNDMinimap != NULL)
-                    {
-                        WNDMinimap->setWaste();
-                        WNDMinimap = NULL;
-                    }
-                    MapObj = NULL;
-                    WndSurface = NULL;
-                    global::s2->UnregisterCallback(EditorMinimapMenu);
-                    break;
-
-        case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT
-                    if (WNDMinimap != NULL)
-                    {
-                        WNDMinimap->setWaste();
-                        WNDMinimap = NULL;
-                    }
-                    MapObj = NULL;
-                    WndSurface = NULL;
-                    global::s2->UnregisterCallback(EditorMinimapMenu);
-                    break;
-
-        default:    break;
-    }
-}
-
 void callback::EditorCursorMenu(int Param)
 {
     static CWindow *WNDCursor = NULL;
@@ -1459,8 +1367,8 @@ void callback::GameMenu(int Param)
                     break;
 
         case BACKTOMAIN:
-                    if (global::s2->getMap() != NULL)
-                        global::s2->delMap();
+                    if (global::s2->getMapObj() != NULL)
+                        global::s2->delMapObj();
                     WNDBackToMainMenu->setWaste();
                     WNDBackToMainMenu = NULL;
                     mainmenu(INITIALIZING_CALL);
@@ -1479,11 +1387,103 @@ void callback::GameMenu(int Param)
 }
 #endif
 
+void callback::MinimapMenu(int Param)
+{
+    static CWindow *WNDMinimap = NULL;
+    static CMap* MapObj = NULL;
+    static SDL_Surface *WndSurface = NULL;
+    static int num_x = 1, num_y = 1;
+
+    enum
+    {
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDMinimap != NULL)
+                        break;
+
+                    //this variables are needed to reduce the size of minimap-windows of big maps
+                    num_x = (global::s2->getMapObj()->getMap()->width > 256 ? global::s2->getMapObj()->getMap()->width/256 : 1);
+                    num_y = (global::s2->getMapObj()->getMap()->height > 256 ? global::s2->getMapObj()->getMap()->height/256 : 1);
+
+                    int width = global::s2->getMapObj()->getMap()->width/num_x;
+                    int height = global::s2->getMapObj()->getMap()->height/num_y;
+                    //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
+                    if ( (global::s2->getDisplaySurface()->w-12 < width) || (global::s2->getDisplaySurface()->h-30 < height) )
+                        break;
+                    WNDMinimap = new CWindow(MinimapMenu, WINDOWQUIT, global::s2->GameResolutionX/2-width/2-6, global::s2->GameResolutionY/2-height/2-15, width+12, height+30, "Übersicht", WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE);
+                    if (global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(MinimapMenu))
+                    {
+                        WndSurface = WNDMinimap->getSurface();
+                        MapObj = global::s2->getMapObj();
+                    }
+                    else
+                    {
+                        delete WNDMinimap;
+                        WNDMinimap = NULL;
+                        return;
+                    }
+                    break;
+
+        case CALL_FROM_GAMELOOP:
+                    if (MapObj != NULL && WndSurface != NULL)
+                        MapObj->drawMinimap(WndSurface);
+                    break;
+
+        case WINDOW_CLICKED_CALL:
+                    if (MapObj != NULL)
+                    {
+                        int MouseX, MouseY;
+                        if (SDL_GetMouseState(&MouseX, &MouseY)&SDL_BUTTON(1))
+                        {
+                            if (    MouseX > (WNDMinimap->getX() + 6) && MouseX < (WNDMinimap->getX() + WNDMinimap->getW() - 6)
+                                &&  MouseY > (WNDMinimap->getY() + 20) && MouseY < (WNDMinimap->getY() + WNDMinimap->getH() - 10)
+                               )
+                            {
+                                DisplayRectangle displayRect = MapObj->getDisplayRect();
+                                displayRect.x = (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx)*TRIANGLE_WIDTH*num_x;
+                                displayRect.y = (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny)*TRIANGLE_HEIGHT*num_y;
+                                MapObj->setDisplayRect(displayRect);
+                            }
+                        }
+                    }
+                    break;
+
+        case WINDOWQUIT:
+                    if (WNDMinimap != NULL)
+                    {
+                        WNDMinimap->setWaste();
+                        WNDMinimap = NULL;
+                    }
+                    MapObj = NULL;
+                    WndSurface = NULL;
+                    global::s2->UnregisterCallback(MinimapMenu);
+                    break;
+
+        case MAP_QUIT:
+                    //we do the same like in case WINDOWQUIT
+                    if (WNDMinimap != NULL)
+                    {
+                        WNDMinimap->setWaste();
+                        WNDMinimap = NULL;
+                    }
+                    MapObj = NULL;
+                    WndSurface = NULL;
+                    global::s2->UnregisterCallback(MinimapMenu);
+                    break;
+
+        default:    break;
+    }
+}
+
+
 #ifdef _ADMINMODE
 //the debugger is an object and a friend class of all other classes
 //debugger-function only will construct a new debugger and if debugger-function gets a window-quit-message
 //then the debugger-function will destruct the object
-
 void callback::debugger(int Param)
 {
     static CDebug* Debugger = NULL;
@@ -1492,7 +1492,7 @@ void callback::debugger(int Param)
     {
         case INITIALIZING_CALL: if (Debugger != NULL)
                                     break;
-                                Debugger = new CDebug(debugger, DEBUGGER_QUIT);    //-3 is parameter for closing the debugger window
+                                Debugger = new CDebug(debugger, DEBUGGER_QUIT);
                                 break;
 
         case DEBUGGER_QUIT:     delete Debugger;
@@ -1504,6 +1504,109 @@ void callback::debugger(int Param)
                                 break;
     }
 }
+
+//this is the picture-viewer
+void callback::viewer(int Param)
+{
+    static CWindow *WNDViewer = NULL;
+    static int index = 0;
+    static SDL_Surface *Surf_Window;
+    static int PicInWndIndex = -1;
+    static char PicInfos[50];
+    static CFont *PicInfosText = NULL;
+
+    enum
+    {
+        BACKWARD_1,
+        BACKWARD_10,
+        BACKWARD_100,
+        FORWARD_1,
+        FORWARD_10,
+        FORWARD_100,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDViewer != NULL)
+                        break;
+                    WNDViewer = new CWindow(viewer, WINDOWQUIT, 0, 0, 250, 140, "Viewer", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE);
+                    if (global::s2->RegisterWindow(WNDViewer))
+                    {
+                        global::s2->RegisterCallback(viewer);
+                        WNDViewer->addButton(viewer, BACKWARD_100, 0, 0, 35, 20, BUTTON_GREY, "100<-");
+                        WNDViewer->addButton(viewer, BACKWARD_10,  35, 0, 35, 20, BUTTON_GREY, "10<-");
+                        WNDViewer->addButton(viewer, BACKWARD_1,   70, 0, 35, 20, BUTTON_GREY, "1<-");
+                        WNDViewer->addButton(viewer, FORWARD_1,    105, 0, 35, 20, BUTTON_GREY, "->1");
+                        WNDViewer->addButton(viewer, FORWARD_10,   140, 0, 35, 20, BUTTON_GREY, "->10");
+                        WNDViewer->addButton(viewer, FORWARD_100,  175, 0, 35, 20, BUTTON_GREY, "->100");
+                        Surf_Window = WNDViewer->getSurface();
+                    }
+                    else
+                    {
+                        delete WNDViewer;
+                        WNDViewer = NULL;
+                        return;
+                    }
+                    break;
+
+        case CALL_FROM_GAMELOOP:
+                    if (PicInWndIndex >= 0)
+                        WNDViewer->delStaticPicture(PicInWndIndex);
+                    PicInWndIndex = WNDViewer->addStaticPicture(5, 30, index);
+
+                    if (PicInfosText != NULL)
+                    {
+                        WNDViewer->delText(PicInfosText);
+                        PicInfosText = NULL;
+                    }
+                    if (PicInfosText == NULL)
+                    {
+                        sprintf(PicInfos, "index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w, global::bmpArray[index].h, global::bmpArray[index].nx, global::bmpArray[index].ny);
+                        PicInfosText = WNDViewer->addText(PicInfos, 220, 3, 14, FONT_RED);
+                    }
+
+                    break;
+
+        case BACKWARD_100:  if (index-100 >= 0)
+                                index -= 100;
+                            else
+                                index = 0;
+                            break;
+        case BACKWARD_10:   if (index-10 >= 0)
+                                index -= 10;
+                            else
+                                index = 0;
+                            break;
+        case BACKWARD_1:    if (index-1 >= 0)
+                                index -= 1;
+                            else
+                                index = 0;
+                            break;
+        case FORWARD_1:     index++;
+                            break;
+        case FORWARD_10:    index += 10;
+                            break;
+        case FORWARD_100:   index += 100;
+                            break;
+
+        case WINDOWQUIT:
+                    if (WNDViewer != NULL)
+                    {
+                        WNDViewer->setWaste();
+                        WNDViewer = NULL;
+                        global::s2->UnregisterCallback(viewer);
+                        Surf_Window = NULL;
+                        index = 0;
+                        PicInWndIndex = -1;
+                    }
+                    break;
+
+        default:    break;
+    }
+}
+
 //this is a submenu for testing
 void callback::submenu1(int Param)
 {

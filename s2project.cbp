@@ -13,7 +13,7 @@
 				<Option compiler="gcc" />
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lmingw32 -lSDLmain -lSDL -lSGE -lopengl32 -mwindows" />
+					<Add option="-lmingw32 -lSDLmain -lSDL -lSGE -mwindows" />
 				</Linker>
 			</Target>
 		</Build>

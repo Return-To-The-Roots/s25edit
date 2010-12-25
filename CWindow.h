@@ -67,6 +67,8 @@ class CWindow
         bool isWaste(void) { return waste; };
         bool isMoving(void) { return moving; };
         bool isResizing(void) { return resizing; };
+        //we can not trust this information, cause if minimized is false, it is possible, that we still have the old minimized surface
+        //bool isMinimized(void) { return minimized; };
         void setColor(int color);
         //Methods
         CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20, int color = BUTTON_GREY, const char *text = NULL, int picture = -1);

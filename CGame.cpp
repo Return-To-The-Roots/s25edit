@@ -16,7 +16,7 @@ CGame::CGame()
 #ifdef _VIEWERMODE
     msWait = 40;
 #else
-    msWait = 20;
+    msWait = 0;
 #endif
     Surf_Display = NULL;
 	Running = true;
