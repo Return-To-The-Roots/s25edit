@@ -8,7 +8,7 @@
 	"CEvent.h"
 	"CSurface.h"
 
-1293295383 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
+1293295698 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
 
 1267822972 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cevent.h
 	<SDL/SDL.h>
@@ -66,7 +66,7 @@
 1268587239 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_gameloop.cpp
 	"CGame.h"
 
-1293045301 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
+1293295698 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
 	"CGame.h"
 
 1291646983 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
@@ -106,12 +106,12 @@
 1293049905 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
 	"callbacks.h"
 
-1282230109 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
+1293298459 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
 	<iostream>
 	<cmath>
 	<SDL/SDL.h>
 	<SDL/SDL_opengl.h>
-	<SGE/sge.h>
+	"SGE/sge.h"
 	"defines.h"
 	"classes.h"
 	"globals.h"
@@ -156,6 +156,71 @@
 1282203437 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.h
 	"includes.h"
 
-1293294536 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.cpp
+1293297728 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.cpp
 	"CFile.h"
+
+1059907474 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge.h
+	"sge_surface.h"
+	"sge_primitives.h"
+	"sge_misc.h"
+	"sge_tt_text.h"
+	"sge_bm_text.h"
+	"sge_textpp.h"
+	"sge_blib.h"
+	"sge_shape.h"
+	"sge_collision.h"
+	"sge_rotation.h"
+
+1277822896 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_surface.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1059907460 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_internal.h
+	"sge_config.h"
+
+1277823140 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_config.h
+
+1277822907 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_primitives.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1277823020 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_misc.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1277822955 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_tt_text.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1277822943 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_bm_text.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1277822958 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_textpp.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+	<string>
+	<stdio.h>
+	"sge_tt_text.h"
+	"sge_bm_text.h"
+	"sge_shape.h"
+
+1277822961 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_shape.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+	<list>
+	"sge_surface.h"
+	"sge_collision.h"
+
+1277822967 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_collision.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1293298334 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
+	<SDL/SDL.h>
+	"sge_internal.h"
+
+1277823034 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_rotation.h
+	<SDL/SDL.h>
+	"sge_internal.h"
 

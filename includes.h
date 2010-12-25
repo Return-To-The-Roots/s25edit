@@ -5,7 +5,7 @@
 #include <cmath>
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
-#include <SGE/sge.h>
+#include "SGE/sge.h"
 
 #include "defines.h"
 #include "classes.h"

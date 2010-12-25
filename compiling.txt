@@ -1,0 +1,19 @@
+benoetigte libs:
+-SDL
+-angepasste SGE
+
+SDL in codeblocks-verzeichnis->compiler-verzeichnis->include->SDL kopieren.
+SGE in codeblocks-verzeichnis->compiler-verzeichnis->include->SGE kopieren.
+Bibliotheksdateien einfach in den lib-ordner.
+
+In Code::Blocks ein leeres Projekt erstellen und alle Quellcode-Dateien hinzufuegen.
+
+
+Unter Project->Build Options->Release->Linker Settings->Other Linker Options folgendes einfuegen:
+
+-lSDLmain -lSDL -lSGE
+
+Eventuell noch ein Kommando um die Anwendung als Fenster-Anwendung (und nicht Konsole) zu klassifizieren.
+
+Kompilieren und hoffen, dass alles gut geht :-D.
+

@@ -20,12 +20,12 @@ void* CFile::open_file(char *filename, char filetype, bool only_loadPAL)
     void *return_value = (int*)(-1);
 
     if ( (filename == NULL && (filetype != WLD && filetype != SWD)) || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL )
-        return return_value;
+        return NULL;
 
     if (filename == NULL && (filetype == WLD || filetype == SWD))
         fp = NULL;
     else if ( (fp = fopen(filename, "rb")) == NULL )
-        return return_value;
+        return NULL;
 
     if (only_loadPAL)
         loadPAL = true;
@@ -126,7 +126,10 @@ bool CFile::open_lst(void)
                                 break;
 
             case BOBTYPE04:     if ( read_bob04(PLAYER_BLUE) == false )
+                                {
+                                    puts("\njo alter was geht\n");
                                     return false;
+                                }
                                 break;
 
             case BOBTYPE05:     if ( read_bob05() == false )
@@ -1116,8 +1119,10 @@ bool CFile::read_bob02(void)
     //we are finished, the surface is filled
     //fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT position
     if ( ftell(fp) != (long int) next_entry )
+    {
+        fseek(fp, (long int) next_entry, SEEK_SET);
         return false;
-    //we could also do a fseek(fp, (long int) next_entry, SEEK_SET);
+    }
 
     //increment bmpArray for the next picture
     bmpArray++;
@@ -1244,6 +1249,7 @@ bool CFile::read_bob04(int player_color)
     //now we are ready to read the picture lines and fill the surface, so lets create one
     if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL )
         return false;
+
     SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
     SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
@@ -1301,8 +1307,10 @@ bool CFile::read_bob04(int player_color)
     //we are finished, the surface is filled
     //fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT position
     if ( ftell(fp) != (long int) next_entry )
-        return false;
-    //we could also do a fseek(fp, (long int) next_entry, SEEK_SET);
+    {
+        fseek(fp, (long int) next_entry, SEEK_SET);
+        //return false;
+    }
 
     //increment bmpArray for the next picture
     bmpArray++;
@@ -1435,8 +1443,11 @@ bool CFile::read_bob07(void)
     //we are finished, the surface is filled
     //fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT position
     if ( ftell(fp) != (long int) next_entry )
+    {
+        fseek(fp, (long int) next_entry, SEEK_SET);
         return false;
-    //we could also do a fseek(fp, (long int) next_entry, SEEK_SET);
+    }
+
 
 /**FOLLOWING COMMENTS ARE ABSOLUTLY TEMPORARY, UNTIL I KNOW HOW TO HANDLE SHADOWS WITH ALPHA-BLENDING AND THEN BLITTING
 ***---THIS CODE IS NOT USEFUL.**/
