@@ -281,6 +281,7 @@ void callback::EditorQuitMenu(int Param)
                     MinimapMenu(MAP_QUIT);
                     EditorCursorMenu(MAP_QUIT);
                     EditorResourceMenu(MAP_QUIT);
+                    EditorAnimalMenu(MAP_QUIT);
                     EditorPlayerMenu(MAP_QUIT);
                     //go to main menu
                     mainmenu(INITIALIZING_CALL);
@@ -1022,6 +1023,104 @@ void callback::EditorLandscapeMenu(int Param)
                     lastContent2 = 0x00;
                     MapObj = NULL;
                     map = NULL;
+                    break;
+
+        default:    break;
+    }
+}
+
+void callback::EditorAnimalMenu(int Param)
+{
+    static CWindow *WNDAnimal = NULL;
+    static CMap* MapObj = NULL;
+    static int lastContent = 0x00;
+
+    enum
+    {
+        WINDOWQUIT,
+        PICRABBIT,
+        PICFOX,
+        PICSTAG,
+        PICROE,
+        PICDUCK,
+        PICSHEEP
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDAnimal != NULL)
+                        break;
+                    WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, 0, 0, 116, 106, "Tiere", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    if (global::s2->RegisterWindow(WNDAnimal))
+                    {
+                        WNDAnimal->addPicture(EditorAnimalMenu, PICRABBIT, 2, 2, PICTURE_ANIMAL_RABBIT);
+                        WNDAnimal->addPicture(EditorAnimalMenu, PICFOX, 36, 2, PICTURE_ANIMAL_FOX);
+                        WNDAnimal->addPicture(EditorAnimalMenu, PICSTAG, 70, 2, PICTURE_ANIMAL_STAG);
+                        WNDAnimal->addPicture(EditorAnimalMenu, PICROE, 2, 36, PICTURE_ANIMAL_ROE);
+                        WNDAnimal->addPicture(EditorAnimalMenu, PICDUCK, 36, 36, PICTURE_ANIMAL_DUCK);
+                        WNDAnimal->addPicture(EditorAnimalMenu, PICSHEEP, 70, 36, PICTURE_ANIMAL_SHEEP);
+
+                        MapObj = global::s2->getMapObj();
+                        MapObj->setMode(EDITOR_MODE_ANIMAL);
+                        MapObj->setModeContent(0x01);
+                        lastContent = 0x01;
+                    }
+                    else
+                    {
+                        delete WNDAnimal;
+                        WNDAnimal = NULL;
+                        return;
+                    }
+                    break;
+
+        case PICRABBIT:         MapObj->setModeContent(0x01);
+                                lastContent = 0x01;
+                                break;
+        case PICFOX:            MapObj->setModeContent(0x02);
+                                lastContent = 0x02;
+                                break;
+        case PICSTAG:           MapObj->setModeContent(0x03);
+                                lastContent = 0x03;
+                                break;
+        case PICROE:            MapObj->setModeContent(0x04);
+                                lastContent = 0x04;
+                                break;
+        case PICDUCK:           MapObj->setModeContent(0x05);
+                                lastContent = 0x05;
+                                break;
+        case PICSHEEP:          MapObj->setModeContent(0x06);
+                                lastContent = 0x06;
+                                break;
+
+        case WINDOW_CLICKED_CALL:   if (MapObj != NULL)
+                                    {
+                                        MapObj->setMode(EDITOR_MODE_ANIMAL);
+                                        MapObj->setModeContent(lastContent);
+                                    }
+                                    break;
+
+        case WINDOWQUIT:
+                    if (WNDAnimal != NULL)
+                    {
+                        WNDAnimal->setWaste();
+                        WNDAnimal = NULL;
+                    }
+                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setModeContent(0x00);
+                    lastContent = 0x00;
+                    MapObj = NULL;
+                    break;
+
+        case MAP_QUIT:
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    if (WNDAnimal != NULL)
+                    {
+                        WNDAnimal->setWaste();
+                        WNDAnimal = NULL;
+                    }
+                    lastContent = 0x00;
+                    MapObj = NULL;
                     break;
 
         default:    break;

@@ -295,6 +295,15 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             callback::EditorLandscapeMenu(INITIALIZING_CALL);
             return;
         }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-51) && button.x <= (displayRect.w/2-14)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the animal-mode picture was clicked
+            mode = EDITOR_MODE_ANIMAL;
+            callback::EditorAnimalMenu(INITIALIZING_CALL);
+            return;
+        }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-14) && button.x <= (displayRect.w/2+23)
                                                   && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
@@ -773,8 +782,8 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TREE].surface, displayRect.w/2-158, displayRect.h-37);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_RESOURCE].surface, displayRect.w/2-121, displayRect.h-32);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_LANDSCAPE].surface, displayRect.w/2-84, displayRect.h-37);
-
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_PLAYER].surface, displayRect.w/2-10, displayRect.h-35);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_ANIMAL].surface, displayRect.w/2-48, displayRect.h-36);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_PLAYER].surface, displayRect.w/2-10, displayRect.h-34);
 
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.w/2+96, displayRect.h-35);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, displayRect.w/2+131, displayRect.h-37);
@@ -1030,8 +1039,13 @@ void CMap::modifyVertex(void)
     else if (mode == EDITOR_MODE_CUT)
     {
         for (int i = 0; i < VertexCounter; i++)
+        {
             if (Vertices[i].active)
+            {
                 modifyObject(Vertices[i].x, Vertices[i].y);
+                modifyAnimal(Vertices[i].x, Vertices[i].y);
+            }
+        }
     }
     else if (mode == EDITOR_MODE_TEXTURE)
     {
@@ -1056,6 +1070,12 @@ void CMap::modifyVertex(void)
         for (int i = 0; i < VertexCounter; i++)
             if (Vertices[i].active)
                 modifyResource(Vertices[i].x, Vertices[i].y);
+    }
+    else if (mode == EDITOR_MODE_ANIMAL)
+    {
+        for (int i = 0; i < VertexCounter; i++)
+            if (Vertices[i].active)
+                modifyAnimal(Vertices[i].x, Vertices[i].y);
     }
     else if (mode == EDITOR_MODE_FLAG || mode == EDITOR_MODE_FLAG_DELETE)
     {
@@ -1350,7 +1370,6 @@ void CMap::modifyObject(int VertexX, int VertexY)
     {
         map->vertex[VertexY*map->width+VertexX].objectType = 0x00;
         map->vertex[VertexY*map->width+VertexX].objectInfo = 0x00;
-        map->vertex[VertexY*map->width+VertexX].animal = 0x00;
     }
     else if (mode == EDITOR_MODE_TREE)
     {
@@ -1508,6 +1527,23 @@ void CMap::modifyObject(int VertexX, int VertexY)
     calculateVerticesAround(tempVertices, VertexX, VertexY, 1);
     for (int i = 0; i < 7; i++)
         modifyBuild(tempVertices[i].x, tempVertices[i].y);
+}
+
+void CMap::modifyAnimal(int VertexX, int VertexY)
+{
+    if (mode == EDITOR_MODE_CUT)
+    {
+        map->vertex[VertexY*map->width+VertexX].animal = 0x00;
+    }
+    else if (mode == EDITOR_MODE_ANIMAL)
+    {
+        //if there is another object at the vertex, return
+        if (map->vertex[VertexY*map->width+VertexX].animal != 0x00)
+                return;
+
+        if (modeContent > 0x00 && modeContent <= 0x06)
+            map->vertex[VertexY*map->width+VertexX].animal = modeContent;
+    }
 }
 
 void CMap::modifyBuild(int VertexX, int VertexY)

@@ -129,6 +129,7 @@ class CMap
         void modifyTexture(int VertexX, int VertexY, bool rsu, bool usd);
         void modifyTextureMakeHarbour(int VertexX, int VertexY);
         void modifyObject(int VertexX, int VertexY);
+        void modifyAnimal(int VertexX, int VertexY);
         void modifyBuild(int VertexX, int VertexY);
         void modifyResource(int VertexX, int VertexY);
         void modifyPlayer(int VertexX, int VertexY);

@@ -885,6 +885,14 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_RESOURCE_GRANITE].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_RESOURCE_GRANITE].ny-(4*(i-0x58))));
         }
     }
+    //blit animals
+    if (P2.y < P1.y)
+    {
+        if (P2.animal > 0x00 && P2.animal <= 0x06)
+        {
+            Draw(display, global::bmpArray[PICTURE_SMALL_BEAR+P2.animal].surface, (int)(P2.x-displayRect.x-global::bmpArray[PICTURE_SMALL_BEAR+P2.animal].nx), (int)(P2.y-displayRect.y-global::bmpArray[PICTURE_SMALL_BEAR+P2.animal].ny));
+        }
+    }
     #endif
 
     //blit buildings
