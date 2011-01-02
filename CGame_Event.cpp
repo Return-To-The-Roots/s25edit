@@ -418,8 +418,11 @@ void CGame::EventHandling(SDL_Event *Event)
                     break;
             }
             //if mouse data has been deliverd, stop delivering anymore
-            if (delivered)
-                break;
+            ///We can't stop here cause of problems with the map. If user has the left mouse button pressed and modifies the vertices,
+            ///it will cause a problem if he walks over a window with pressed mouse button and releases it in the window.
+            ///So the MapObj needs the "release-event" of the mouse button.
+            //if (delivered)
+                //break;
 
             //if still not delivered, keep delivering to secondary elements like menu or map
 
@@ -430,6 +433,10 @@ void CGame::EventHandling(SDL_Event *Event)
                 //data has been delivered to map, so no menu is in the foreground --> stop delivering
                 break;
             }
+
+            ///now we do what we commented out a few lines before
+            if (delivered)
+                break;
 
             //deliver mouse button data to active menus
             for (int i = 0; i < MAXMENUS; i++)

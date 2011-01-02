@@ -1,7 +1,5 @@
 #include "CSurface.h"
 
-char CSurface::roundCount = 0;
-Uint32 CSurface::roundTime = 0;
 bool CSurface::drawTextures = false;
 
 CSurface::CSurface()
@@ -427,16 +425,6 @@ void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle d
         tempP3.i = vertex[(height-1)*width+0].i;
         DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height-1)*width+width-1], tempP3);
     }
-
-    //at least increase the round counter
-    if (SDL_GetTicks() - roundTime > 30)
-    {
-        roundTime = SDL_GetTicks();
-        if (roundCount >= 7)
-            roundCount = 0;
-        else
-            roundCount++;
-    }
 }
 
 void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displayRect, bobMAP *myMap, Uint8 type, struct point P1, struct point P2, struct point P3)
@@ -515,10 +503,40 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     }
 
     //find out the texture for the triangle
-    unsigned char upperX, upperY, leftX, leftY, rightX, rightY;
+    //upperX2, ..... are for special use in winterland.
+    unsigned char upperX, upperY, leftX, leftY, rightX, rightY, upperX2, upperY2, leftX2, leftY2, rightX2, rightY2;
     SDL_Rect BorderRect;
     Uint8 texture, texture_raw;
     SDL_Surface *Surf_Tileset;
+
+    //for moving water, lava, objects and so on
+        //This is very tricky: there are ice floes in the winterland and the water under this floes is moving.
+        //I don't know how this works in original settlers 2 but i solved it this way:
+        //i texture the triangle with normal water and then draw the floe over it. To Extract the floe
+        //from it's surrounded water, i use this color keys below. These are the color values for the water texture.
+        //I wrote a special SGE-Function that uses these color keys and ignores them in the Surf_Tileset.
+        static Uint32 colorkeys[5] = { 14191, 14195, 13167, 13159, 11119 };
+        static int keycount = 5;
+    static int texture_move = 0;
+    static int roundCount = 0;
+    static Uint32 roundTimeObjects = SDL_GetTicks();
+    static Uint32 roundTimeTextures = SDL_GetTicks();
+    if (SDL_GetTicks() - roundTimeObjects > 30)
+    {
+        roundTimeObjects = SDL_GetTicks();
+        if (roundCount >= 7)
+            roundCount = 0;
+        else
+            roundCount++;
+    }
+    if (SDL_GetTicks() - roundTimeTextures > 170)
+    {
+        roundTimeTextures = SDL_GetTicks();
+        texture_move++;
+        if (texture_move > 14)
+            texture_move = 0;
+    }
+
 
     switch (type)
     {
@@ -543,6 +561,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
 
     switch (texture_raw)
     {
+        //in case of USD-Triangle "upperX" and "upperY" means "lowerX" and "lowerY"
         case TRIANGLE_TEXTURE_STEPPE_MEADOW1:   upperX = 17;
                                                 upperY = 96;
                                                 leftX = 0;
@@ -557,12 +576,45 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 rightX = 35;
                                                 rightY = 78;
                                                 break;
-        case TRIANGLE_TEXTURE_SNOW:             upperX = 17;
-                                                upperY = 0;
-                                                leftX = 0;
-                                                leftY = 30;
-                                                rightX = 35;
-                                                rightY = 30;
+        case TRIANGLE_TEXTURE_SNOW:             if (P1.y < P2.y)
+                                                {
+                                                    upperX = 17;
+                                                    upperY = 0;
+                                                    leftX = 0;
+                                                    leftY = 30;
+                                                    rightX = 35;
+                                                    rightY = 30;
+                                                }
+                                                else
+                                                {
+                                                    upperX = 17;
+                                                    upperY = 28;
+                                                    leftX = 0;
+                                                    leftY = 0;
+                                                    rightX = 37;
+                                                    rightY = 0;
+                                                }
+                                                if (type == MAP_WINTERLAND)
+                                                {
+                                                    if (P1.y < P2.y)
+                                                    {
+                                                        upperX2 = 231-texture_move;
+                                                        upperY2 = 61+texture_move;
+                                                        leftX2 = 207-texture_move;
+                                                        leftY2 = 62+texture_move;
+                                                        rightX2 = 223-texture_move;
+                                                        rightY2 = 78+texture_move;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX2 = 224-texture_move;
+                                                        upperY2 = 79+texture_move;
+                                                        leftX2 = 232-texture_move;
+                                                        leftY2 = 62+texture_move;
+                                                        rightX2 = 245-texture_move;
+                                                        rightY2 = 76+texture_move;
+                                                    }
+                                                }
                                                 break;
         case TRIANGLE_TEXTURE_SWAMP:            upperX = 113;
                                                 upperY = 0;
@@ -570,6 +622,27 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 leftY = 30;
                                                 rightX = 131;
                                                 rightY = 30;
+                                                if (type == MAP_WINTERLAND)
+                                                {
+                                                    if (P1.y < P2.y)
+                                                    {
+                                                        upperX2 = 231-texture_move;
+                                                        upperY2 = 61+texture_move;
+                                                        leftX2 = 207-texture_move;
+                                                        leftY2 = 62+texture_move;
+                                                        rightX2 = 223-texture_move;
+                                                        rightY2 = 78+texture_move;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX2 = 224-texture_move;
+                                                        upperY2 = 79+texture_move;
+                                                        leftX2 = 232-texture_move;
+                                                        leftY2 = 62+texture_move;
+                                                        rightX2 = 245-texture_move;
+                                                        rightY2 = 76+texture_move;
+                                                    }
+                                                }
                                                 break;
         case TRIANGLE_TEXTURE_STEPPE:           upperX = 65;
                                                 upperY = 0;
@@ -582,12 +655,24 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 BorderRect.w = 31;
                                                 BorderRect.h = 9;
                                                 break;
-        case TRIANGLE_TEXTURE_WATER:            upperX = 219;
-                                                upperY = 51;//48;
-                                                leftX = 195;//192;
-                                                leftY = 75;
-                                                rightX = 243;//246;
-                                                rightY = 75;
+        case TRIANGLE_TEXTURE_WATER:            if (P1.y < P2.y)
+                                                {
+                                                    upperX = 231-texture_move;
+                                                    upperY = 61+texture_move;
+                                                    leftX = 207-texture_move;
+                                                    leftY = 62+texture_move;
+                                                    rightX = 223-texture_move;
+                                                    rightY = 78+texture_move;
+                                                }
+                                                else
+                                                {
+                                                    upperX = 224-texture_move;
+                                                    upperY = 79+texture_move;
+                                                    leftX = 232-texture_move;
+                                                    leftY = 62+texture_move;
+                                                    rightX = 245-texture_move;
+                                                    rightY = 76+texture_move;
+                                                }
                                                 break;
         case TRIANGLE_TEXTURE_MEADOW1:          upperX = 65;
                                                 upperY = 96;
@@ -645,12 +730,24 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 rightX = 179;
                                                 rightY = 30;
                                                 break;
-        case TRIANGLE_TEXTURE_LAVA:             upperX = 219;
-                                                upperY = 105;//104;
-                                                leftX = 193;//192;
-                                                leftY = 131;
-                                                rightX = 245;//246;
-                                                rightY = 131;
+        case TRIANGLE_TEXTURE_LAVA:             if (P1.y < P2.y)
+                                                {
+                                                    upperX = 231-texture_move;
+                                                    upperY = 117+texture_move;
+                                                    leftX = 207-texture_move;
+                                                    leftY = 118+texture_move;
+                                                    rightX = 223-texture_move;
+                                                    rightY = 134+texture_move;
+                                                }
+                                                else
+                                                {
+                                                    upperX = 224-texture_move;
+                                                    upperY = 135+texture_move;
+                                                    leftX = 232-texture_move;
+                                                    leftY = 118+texture_move;
+                                                    rightX = 245-texture_move;
+                                                    rightY = 132+texture_move;
+                                                }
                                                 break;
         case TRIANGLE_TEXTURE_MINING_MEADOW:    upperX = 65;
                                                 upperY = 144;
@@ -677,7 +774,16 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
         if (texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
             sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
         else
-            sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+        {
+            //draw special winterland textures with moving water (ice floe textures)
+            if (type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
+            {
+                sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX2, upperY2, leftX2, leftY2, rightX2, rightY2);
+                sge_FadedTexturedTrigonColorKeys(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i, colorkeys, keycount);
+            }
+            else
+                sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+        }
         return;
     }
 
@@ -788,7 +894,8 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                             break;
                                 case 0x08:  objIdx = MAPPIC_BONE2;
                                             break;
-
+                                case 0x09:  objIdx = MAPPIC_FLOWERS;
+                                            break;
                                 case 0x10:  objIdx = MAPPIC_BUSH2;
                                             break;
                                 case 0x11:  objIdx = MAPPIC_BUSH3;

@@ -19,11 +19,9 @@ void* CFile::open_file(char *filename, char filetype, bool only_loadPAL)
 {
     void *return_value = (int*)(-1);
 
-    if ( (filename == NULL && (filetype != WLD && filetype != SWD)) || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL )
+    if ( filename == NULL || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL )
         return NULL;
 
-    if (filename == NULL && (filetype == WLD || filetype == SWD))
-        fp = NULL;
     else if ( (fp = fopen(filename, "rb")) == NULL )
         return NULL;
 
@@ -493,225 +491,175 @@ bobMAP* CFile::open_wld(void)
     if (myMap == NULL)
         return myMap;
 
-    if (fp != NULL)
+    fseek(fp, 10, SEEK_SET);
+    fread(myMap->name, 20, 1, fp);
+    myMap->name[20] = '\0'; //for safety
+    fread(&myMap->width_old, 2, 1, fp);
+    fread(&myMap->height_old, 2, 1, fp);
+    fread(&myMap->type, 1, 1, fp);
+    fread(&myMap->player, 1, 1, fp);
+    fread(myMap->author, 20, 1, fp);
+    myMap->author[20] = '\0'; //for safety
+    fread(myMap->HQx, 2, 7, fp);
+    fread(myMap->HQy, 2, 7, fp);
+
+    //go to real map height and width
+    fseek(fp, 2348, SEEK_SET);
+    fread(&myMap->width, 2, 1, fp);
+    myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
+    fread(&myMap->height, 2, 1, fp);
+    myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
+
+    if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
     {
-        fseek(fp, 10, SEEK_SET);
-        fread(myMap->name, 20, 1, fp);
-        myMap->name[20] = '\0'; //for safety
-        fread(&myMap->width_old, 2, 1, fp);
-        fread(&myMap->height_old, 2, 1, fp);
-        fread(&myMap->type, 1, 1, fp);
-        fread(&myMap->player, 1, 1, fp);
-        fread(myMap->author, 20, 1, fp);
-        myMap->author[20] = '\0'; //for safety
-        fread(myMap->HQx, 2, 7, fp);
-        fread(myMap->HQy, 2, 7, fp);
-
-        //go to real map height and width
-        fseek(fp, 2348, SEEK_SET);
-        fread(&myMap->width, 2, 1, fp);
-        myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
-        fread(&myMap->height, 2, 1, fp);
-        myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
-
-
-        if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
-        {
-            free(myMap);
-            return NULL;
-        }
-
-
-        //go to altitude information (we skip the 16 bytes long map data header that each block has)
-        fseek(fp, 16, SEEK_CUR);
-
-        int a;
-        int b = 0;
-        for (int j = 0; j < myMap->height; j++)
-        {
-            if (j%2 == 0)
-                a = TRIANGLE_WIDTH/2;
-            else
-                a = TRIANGLE_WIDTH;
-
-            for (int i = 0; i < myMap->width; i++)
-            {
-                myMap->vertex[j*myMap->width+i].VertexX = i;
-                myMap->vertex[j*myMap->width+i].VertexY = j;
-                fread(&heightFactor, 1, 1, fp);
-                myMap->vertex[j*myMap->width+i].h = heightFactor;
-                myMap->vertex[j*myMap->width+i].x = a;
-                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
-                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
-                //TEMPORARY: to prevent drawing point outside the surface (negative points)
-                //if (myMap->vertex[j*myMap->width+i].y < 0)
-                    //myMap->vertex[j*myMap->width+i].y = 0;
-                a += TRIANGLE_WIDTH;
-            }
-            b += TRIANGLE_HEIGHT;
-        }
-
-        //go to texture information for RightSideUp-Triangles
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].rsuTexture, 1, 1, fp);
-        }
-
-        //go to texture information for UpSideDown-Triangles
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].usdTexture, 1, 1, fp);
-        }
-
-        //go to road data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].road, 1, 1, fp);
-        }
-
-        //go to object type data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].objectType, 1, 1, fp);
-        }
-
-        //go to object info data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].objectInfo, 1, 1, fp);
-        }
-
-        //go to animal data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].animal, 1, 1, fp);
-        }
-
-        //go to unknown1 data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].unknown1, 1, 1, fp);
-        }
-
-        //go to build data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].build, 1, 1, fp);
-        }
-
-        //go to unknown2 data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].unknown2, 1, 1, fp);
-        }
-
-        //go to unknown3 data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].unknown3, 1, 1, fp);
-        }
-
-        //go to resource data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].resource, 1, 1, fp);
-        }
-
-        //go to shading data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].shading, 1, 1, fp);
-        }
-
-        //go to unknown5 data
-        fseek(fp, 16, SEEK_CUR);
-
-        for (int j = 0; j < myMap->height; j++)
-        {
-            for (int i = 0; i < myMap->width; i++)
-                fread(&myMap->vertex[j*myMap->width+i].unknown5, 1, 1, fp);
-        }
+        free(myMap);
+        return NULL;
     }
-    else
+
+    //go to altitude information (we skip the 16 bytes long map data header that each block has)
+    fseek(fp, 16, SEEK_CUR);
+
+    int a;
+    int b = 0;
+    for (int j = 0; j < myMap->height; j++)
     {
-        strcpy(myMap->name, "Ohne Namen");
-        myMap->width = 1024;     //1152 is maximum without graphic failures
-        myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
-        myMap->height = 1024;    //1152 is maximum without graphic failures
-        myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
-        myMap->type = 0;
-        myMap->player = 0;
-        strcpy(myMap->author, "Niemand");
-        for (int i = 0; i < 7; i++)
-        {
-            myMap->HQx[i] = 0xFFFF;
-            myMap->HQy[i] = 0xFFFF;
-        }
+        if (j%2 == 0)
+            a = TRIANGLE_WIDTH/2;
+        else
+            a = TRIANGLE_WIDTH;
 
-        if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
+        for (int i = 0; i < myMap->width; i++)
         {
-            free(myMap);
-            return NULL;
+            myMap->vertex[j*myMap->width+i].VertexX = i;
+            myMap->vertex[j*myMap->width+i].VertexY = j;
+            fread(&heightFactor, 1, 1, fp);
+            myMap->vertex[j*myMap->width+i].h = heightFactor;
+            myMap->vertex[j*myMap->width+i].x = a;
+            myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+            myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
+            //TEMPORARY: to prevent drawing point outside the surface (negative points)
+            //if (myMap->vertex[j*myMap->width+i].y < 0)
+                //myMap->vertex[j*myMap->width+i].y = 0;
+            a += TRIANGLE_WIDTH;
         }
+        b += TRIANGLE_HEIGHT;
+    }
 
-        int a;
-        int b = 0;
-        for (int j = 0; j < myMap->height; j++)
-        {
-            if (j%2 == 0)
-                a = TRIANGLE_WIDTH/2;
-            else
-                a = TRIANGLE_WIDTH;
+    //go to texture information for RightSideUp-Triangles
+    fseek(fp, 16, SEEK_CUR);
 
-            for (int i = 0; i < myMap->width; i++)
-            {
-                myMap->vertex[j*myMap->width+i].VertexX = i;
-                myMap->vertex[j*myMap->width+i].VertexY = j;
-                heightFactor = 0x0A;
-                myMap->vertex[j*myMap->width+i].h = heightFactor;
-                myMap->vertex[j*myMap->width+i].x = a;
-                myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
-                myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
-                a += TRIANGLE_WIDTH;
-            }
-            b += TRIANGLE_HEIGHT;
-        }
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].rsuTexture, 1, 1, fp);
+    }
+
+    //go to texture information for UpSideDown-Triangles
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].usdTexture, 1, 1, fp);
+    }
+
+    //go to road data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].road, 1, 1, fp);
+    }
+
+    //go to object type data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].objectType, 1, 1, fp);
+    }
+
+    //go to object info data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].objectInfo, 1, 1, fp);
+    }
+
+    //go to animal data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].animal, 1, 1, fp);
+    }
+
+    //go to unknown1 data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].unknown1, 1, 1, fp);
+    }
+
+    //go to build data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].build, 1, 1, fp);
+    }
+
+    //go to unknown2 data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].unknown2, 1, 1, fp);
+    }
+
+    //go to unknown3 data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].unknown3, 1, 1, fp);
+    }
+
+    //go to resource data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].resource, 1, 1, fp);
+    }
+
+    //go to shading data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].shading, 1, 1, fp);
+    }
+
+    //go to unknown5 data
+    fseek(fp, 16, SEEK_CUR);
+
+    for (int j = 0; j < myMap->height; j++)
+    {
+        for (int i = 0; i < myMap->width; i++)
+            fread(&myMap->vertex[j*myMap->width+i].unknown5, 1, 1, fp);
     }
 
     return myMap;

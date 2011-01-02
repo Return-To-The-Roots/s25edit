@@ -26,9 +26,6 @@ class CSurface
         static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
 
     private:
-        //to count the rounds (round != gameloop) --> important to make trees and water moving --> walks from 0 to 7
-        static char roundCount;
-        static Uint32 roundTime;
         //to decide what to draw, triangle-textures or objects and texture-borders
         static bool drawTextures;
 

@@ -28,6 +28,8 @@ extern "C" {
 DECLSPEC void sge_FadedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,Uint8 r1,Uint8 g1,Uint8 b1,Uint8 r2,Uint8 g2,Uint8 b2);
 //if destination and source surface have both 32bpp then the colorkey will be respected
 DECLSPEC void sge_TexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2);
+//if destination and source surface have both 32bpp then a few colorkeys will be respected
+DECLSPEC void sge_FadedTexturedLineColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i1,Sint32 i2, Uint32 keys[], int keycount);
 //works at the moment only if destination and source surface have both 32bpp
 DECLSPEC void sge_FadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i1,Sint32 i2);
 
@@ -43,6 +45,8 @@ DECLSPEC void sge_FadedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Si
 DECLSPEC void sge_TexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3);
 //works at the moment only if destination and source surface have both 32bpp
 DECLSPEC void sge_FadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint32 I1,Sint32 I2,Sint32 I3);
+//if destination and source surface have both 32bpp then a few colorkeys will be respected
+DECLSPEC void sge_FadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint32 I1,Sint32 I2,Sint32 I3, Uint32 keys[], int keycount);
 
 DECLSPEC void sge_TexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,Sint16 x4,Sint16 y4,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 sx4,Sint16 sy4);
 

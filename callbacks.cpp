@@ -105,8 +105,8 @@ void callback::mainmenu(int Param)
         case LOADMAP:
                     callback::PleaseWait(INITIALIZING_CALL);
                     //Map = new CMap("BERG_.SWD");
-                    //Map = new CMap("MISS208.WLD");
-                    Map = new CMap("NEW_MAP.SWD");
+                    Map = new CMap("MISS208.WLD");
+                    //Map = new CMap("NEW_MAP.SWD");
                     //Map = new CMap(NULL);
                     global::s2->setMapObj(Map);
                     MainMenu->setWaste();
@@ -283,6 +283,7 @@ void callback::EditorQuitMenu(int Param)
                     EditorResourceMenu(MAP_QUIT);
                     EditorAnimalMenu(MAP_QUIT);
                     EditorPlayerMenu(MAP_QUIT);
+                    EditorCreateMenu(MAP_QUIT);
                     //go to main menu
                     mainmenu(INITIALIZING_CALL);
                     break;
@@ -307,6 +308,7 @@ void callback::EditorTextureMenu(int Param)
     static int textureIndex = 0;
     static int harbourPictureCross = 0; //this have to be -1 if we use the harbour button
     static int lastContent = 0x00;
+    static int PosX = 0, PosY = 0;
 
     enum
     {
@@ -336,7 +338,7 @@ void callback::EditorTextureMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDTexture != NULL)
                         break;
-                    WNDTexture = new CWindow(EditorTextureMenu, WINDOWQUIT, 0, 0, 220, 133, "Terrain", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDTexture = new CWindow(EditorTextureMenu, WINDOWQUIT, PosX, PosY, 220, 133, "Terrain", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDTexture))
                     {
                         MapObj = global::s2->getMapObj();
@@ -556,6 +558,8 @@ void callback::EditorTextureMenu(int Param)
         case WINDOWQUIT:
                     if (WNDTexture != NULL)
                     {
+                        PosX = WNDTexture->getX();
+                        PosY = WNDTexture->getY();
                         WNDTexture->setWaste();
                         WNDTexture = NULL;
                     }
@@ -572,6 +576,8 @@ void callback::EditorTextureMenu(int Param)
                     //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
                     if (WNDTexture != NULL)
                     {
+                        PosX = WNDTexture->getX();
+                        PosY = WNDTexture->getY();
                         WNDTexture->setWaste();
                         WNDTexture = NULL;
                     }
@@ -593,6 +599,7 @@ void callback::EditorTreeMenu(int Param)
     static bobMAP *map = NULL;
     static int lastContent = 0x00;
     static int lastContent2 = 0x00;
+    static int PosX = 230, PosY = 0;
 
     enum
     {
@@ -617,7 +624,7 @@ void callback::EditorTreeMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDTree != NULL)
                         break;
-                    WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, 0, 0, 148, 140, "Bäume", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, PosX, PosY, 148, 140, "Bäume", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDTree))
                     {
                         MapObj = global::s2->getMapObj();
@@ -741,6 +748,8 @@ void callback::EditorTreeMenu(int Param)
         case WINDOWQUIT:
                     if (WNDTree != NULL)
                     {
+                        PosX = WNDTree->getX();
+                        PosY = WNDTree->getY();
                         WNDTree->setWaste();
                         WNDTree = NULL;
                     }
@@ -757,6 +766,8 @@ void callback::EditorTreeMenu(int Param)
                     //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
                     if (WNDTree != NULL)
                     {
+                        PosX = WNDTree->getX();
+                        PosY = WNDTree->getY();
                         WNDTree->setWaste();
                         WNDTree = NULL;
                     }
@@ -775,6 +786,7 @@ void callback::EditorResourceMenu(int Param)
     static CWindow *WNDResource = NULL;
     static CMap* MapObj = NULL;
     static int lastContent = 0x00;
+    static int PosX = 0, PosY = 140;
 
     enum
     {
@@ -790,7 +802,7 @@ void callback::EditorResourceMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDResource != NULL)
                         break;
-                    WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, 0, 0, 148, 55, "Rohstoffe", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, PosX, PosY, 148, 55, "Rohstoffe", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDResource))
                     {
                         MapObj = global::s2->getMapObj();
@@ -835,6 +847,8 @@ void callback::EditorResourceMenu(int Param)
         case WINDOWQUIT:
                     if (WNDResource != NULL)
                     {
+                        PosX = WNDResource->getX();
+                        PosY = WNDResource->getY();
                         WNDResource->setWaste();
                         WNDResource = NULL;
                     }
@@ -848,6 +862,8 @@ void callback::EditorResourceMenu(int Param)
                     //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
                     if (WNDResource != NULL)
                     {
+                        PosX = WNDResource->getX();
+                        PosY = WNDResource->getY();
                         WNDResource->setWaste();
                         WNDResource = NULL;
                     }
@@ -866,6 +882,7 @@ void callback::EditorLandscapeMenu(int Param)
     static bobMAP *map = NULL;
     static int lastContent = 0x00;
     static int lastContent2 = 0x00;
+    static int PosX = 390, PosY = 0;
 
     enum
     {
@@ -879,7 +896,8 @@ void callback::EditorLandscapeMenu(int Param)
         PICSHRUB,
         PICBONE,
         PICMUSHROOM,
-        PICSTALAGMITE
+        PICSTALAGMITE,
+        PICFLOWERS
     };
 
     switch (Param)
@@ -887,7 +905,7 @@ void callback::EditorLandscapeMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDLandscape != NULL)
                         break;
-                    WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, 0, 0, 112, 140, "Landschaft", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, PosX, PosY, 112, 174, "Landschaft", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDLandscape))
                     {
                         MapObj = global::s2->getMapObj();
@@ -903,6 +921,7 @@ void callback::EditorLandscapeMenu(int Param)
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, 2, 70, PICTURE_LANDSCAPE_SHRUB);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, 36, 70, PICTURE_LANDSCAPE_BONE);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, 70, 70, PICTURE_LANDSCAPE_MUSHROOM);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, 5, 107, MAPPIC_FLOWERS);
                                                 break;
                             case MAP_WASTELAND: WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, 2, 2, PICTURE_LANDSCAPE_GRANITE);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, 36, 2, PICTURE_LANDSCAPE_TREE_DEAD);
@@ -913,6 +932,7 @@ void callback::EditorLandscapeMenu(int Param)
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, 2, 70, PICTURE_LANDSCAPE_SHRUB);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, 36, 70, PICTURE_LANDSCAPE_BONE);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, 70, 70, PICTURE_LANDSCAPE_MUSHROOM);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, 5, 107, MAPPIC_FLOWERS);
                                                 break;
                             case MAP_WINTERLAND:WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, 2, 2, PICTURE_LANDSCAPE_GRANITE_WINTER);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, 36, 2, PICTURE_LANDSCAPE_TREE_DEAD_WINTER);
@@ -920,6 +940,7 @@ void callback::EditorLandscapeMenu(int Param)
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, 2, 36, PICTURE_LANDSCAPE_PEBBLE_WINTER);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, 36, 36, PICTURE_LANDSCAPE_BONE_WINTER);
                                                 WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, 70, 36, PICTURE_LANDSCAPE_MUSHROOM_WINTER);
+                                                WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, 73, 73, MAPPIC_FLOWERS);
                                                 break;
                             default:            //should not happen
                                                 break;
@@ -988,6 +1009,11 @@ void callback::EditorLandscapeMenu(int Param)
                                 lastContent = 0x18;
                                 lastContent2 = 0xC8;
                                 break;
+        case PICFLOWERS:        MapObj->setModeContent(0x09);
+                                MapObj->setModeContent2(0xC8);
+                                lastContent = 0x09;
+                                lastContent2 = 0xC8;
+                                break;
 
         case WINDOW_CLICKED_CALL:   if (MapObj != NULL)
                                     {
@@ -1000,6 +1026,8 @@ void callback::EditorLandscapeMenu(int Param)
         case WINDOWQUIT:
                     if (WNDLandscape != NULL)
                     {
+                        PosX = WNDLandscape->getX();
+                        PosY = WNDLandscape->getY();
                         WNDLandscape->setWaste();
                         WNDLandscape = NULL;
                     }
@@ -1016,6 +1044,8 @@ void callback::EditorLandscapeMenu(int Param)
                     //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
                     if (WNDLandscape != NULL)
                     {
+                        PosX = WNDLandscape->getX();
+                        PosY = WNDLandscape->getY();
                         WNDLandscape->setWaste();
                         WNDLandscape = NULL;
                     }
@@ -1034,6 +1064,7 @@ void callback::EditorAnimalMenu(int Param)
     static CWindow *WNDAnimal = NULL;
     static CMap* MapObj = NULL;
     static int lastContent = 0x00;
+    static int PosX = 510, PosY = 0;
 
     enum
     {
@@ -1051,7 +1082,7 @@ void callback::EditorAnimalMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDAnimal != NULL)
                         break;
-                    WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, 0, 0, 116, 106, "Tiere", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, PosX, PosY, 116, 106, "Tiere", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDAnimal))
                     {
                         WNDAnimal->addPicture(EditorAnimalMenu, PICRABBIT, 2, 2, PICTURE_ANIMAL_RABBIT);
@@ -1103,6 +1134,8 @@ void callback::EditorAnimalMenu(int Param)
         case WINDOWQUIT:
                     if (WNDAnimal != NULL)
                     {
+                        PosX = WNDAnimal->getX();
+                        PosY = WNDAnimal->getY();
                         WNDAnimal->setWaste();
                         WNDAnimal = NULL;
                     }
@@ -1116,6 +1149,8 @@ void callback::EditorAnimalMenu(int Param)
                     //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
                     if (WNDAnimal != NULL)
                     {
+                        PosX = WNDAnimal->getX();
+                        PosY = WNDAnimal->getY();
                         WNDAnimal->setWaste();
                         WNDAnimal = NULL;
                     }
@@ -1138,6 +1173,7 @@ void callback::EditorPlayerMenu(int Param)
     static DisplayRectangle tempRect;
     static Uint16* PlayerHQx = NULL;
     static Uint16* PlayerHQy = NULL;
+    static int PosX = 0, PosY = 200;
 
     enum
     {
@@ -1152,7 +1188,7 @@ void callback::EditorPlayerMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDPlayer != NULL)
                         break;
-                    WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, 0, 0, 100, 80, "Spieler", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, PosX, PosY, 100, 80, "Spieler", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDPlayer))
                     {
                         MapObj = global::s2->getMapObj();
@@ -1218,6 +1254,8 @@ void callback::EditorPlayerMenu(int Param)
         case WINDOWQUIT:
                     if (WNDPlayer != NULL)
                     {
+                        PosX = WNDPlayer->getX();
+                        PosY = WNDPlayer->getY();
                         WNDPlayer->setWaste();
                         WNDPlayer = NULL;
                     }
@@ -1236,6 +1274,8 @@ void callback::EditorPlayerMenu(int Param)
                     //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
                     if (WNDPlayer != NULL)
                     {
+                        PosX = WNDPlayer->getX();
+                        PosY = WNDPlayer->getY();
                         WNDPlayer->setWaste();
                         WNDPlayer = NULL;
                     }
@@ -1261,6 +1301,7 @@ void callback::EditorCursorMenu(int Param)
     static int trianglePictureRandom = -1;
     static CButton *CursorModeButton = NULL;
     static CButton *CursorRandomButton = NULL;
+    static int PosX = 0, PosY = 0;
 
     enum
     {
@@ -1275,7 +1316,7 @@ void callback::EditorCursorMenu(int Param)
         case INITIALIZING_CALL:
                     if (WNDCursor != NULL)
                         break;
-                    WNDCursor = new CWindow(EditorCursorMenu, WINDOWQUIT, 0, 0, 210, 130, "Cursor", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+                    WNDCursor = new CWindow(EditorCursorMenu, WINDOWQUIT, PosX, PosY, 210, 130, "Cursor", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
                     if (global::s2->RegisterWindow(WNDCursor))
                     {
                         MapObj = global::s2->getMapObj();
@@ -1403,6 +1444,8 @@ void callback::EditorCursorMenu(int Param)
         case WINDOWQUIT:
                     if (WNDCursor != NULL)
                     {
+                        PosX = WNDCursor->getX();
+                        PosY = WNDCursor->getY();
                         WNDCursor->setWaste();
                         WNDCursor = NULL;
                     }
@@ -1419,6 +1462,8 @@ void callback::EditorCursorMenu(int Param)
                     //we do the same like in case WINDOWQUIT
                     if (WNDCursor != NULL)
                     {
+                        PosX = WNDCursor->getX();
+                        PosY = WNDCursor->getY();
                         WNDCursor->setWaste();
                         WNDCursor = NULL;
                     }
@@ -1434,6 +1479,833 @@ void callback::EditorCursorMenu(int Param)
         default:    break;
     }
 }
+
+//"create world" menu
+void callback::EditorCreateMenu(int Param)
+{
+    static CWindow *WNDCreate = NULL;
+    static CMap* MapObj = NULL;
+    static CFont *TextWidth = NULL;
+    static int width = 32;
+    static CFont *TextHeight = NULL;
+    static int height = 32;
+    static CButton *ButtonLandscape = NULL;
+    static int LandscapeType = 0; //0 = Greenland, 1 = Wasteland, 2 = Winterland
+    static int PicTextureIndex = -1;
+    static int PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+    static int texture = TRIANGLE_TEXTURE_SNOW;
+    static int PicBorderTextureIndex = -1;
+    static int PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+    static CFont *TextBorder = NULL;
+    static int border = 0;
+    static int border_texture = TRIANGLE_TEXTURE_SNOW;
+    static char puffer[5];
+    static int PosX = global::s2->GameResolutionX/2-125, PosY = global::s2->GameResolutionY/2-175;
+
+    enum
+    {
+        REDUCE_WIDTH_128,
+        REDUCE_WIDTH_12,
+        RAISE_WIDTH_12,
+        RAISE_WIDTH_128,
+        REDUCE_HEIGHT_128,
+        REDUCE_HEIGHT_12,
+        RAISE_HEIGHT_12,
+        RAISE_HEIGHT_128,
+        CHANGE_LANDSCAPE,
+        TEXTURE_PREVIOUS,
+        TEXTURE_NEXT,
+        BORDER_TEXTURE_PREVIOUS,
+        BORDER_TEXTURE_NEXT,
+        REDUCE_BORDER,
+        RAISE_BORDER,
+        CREATE_WORLD,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDCreate != NULL)
+                        break;
+                    WNDCreate = new CWindow(EditorCreateMenu, WINDOWQUIT, PosX, PosY, 250, 350, "Welt erschaffen", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE);
+                    if (global::s2->RegisterWindow(WNDCreate))
+                    {
+                        MapObj = global::s2->getMapObj();
+
+                        WNDCreate->addText("Breite", 95, 4, 9, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_128, 10, 15, 35, 20, BUTTON_GREY, "128<-");
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_12, 45, 15, 35, 20, BUTTON_GREY, "12<-");
+                        sprintf(puffer, "%d", width);
+                        TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_12, 158, 15, 35, 20, BUTTON_GREY, "->12");
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_128, 193, 15, 35, 20, BUTTON_GREY, "->128");
+
+                        WNDCreate->addText("Höhe", 100, 40, 9, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_128, 10, 49, 35, 20, BUTTON_GREY, "128<-");
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_12, 45, 49, 35, 20, BUTTON_GREY, "12<-");
+                        sprintf(puffer, "%d", height);
+                        TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_12, 158, 49, 35, 20, BUTTON_GREY, "->12");
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_128, 193, 49, 35, 20, BUTTON_GREY, "->128");
+
+                        WNDCreate->addText("Landschaft", 85, 80, 9, FONT_YELLOW);
+                        ButtonLandscape = WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, 64, 93, 110, 20, BUTTON_GREY, (LandscapeType == 0 ? "Grünland" : (LandscapeType == 1 ? "Ödland" : "Winterwelt")));
+
+                        WNDCreate->addText("Grundfläche", 82, 120, 9, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, TEXTURE_PREVIOUS, 45, 139, 35, 20, BUTTON_GREY, "-");
+                        PicTextureIndex = WNDCreate->addStaticPicture(102, 133, PicTextureIndexGlobal);
+                        WNDCreate->addButton(EditorCreateMenu, TEXTURE_NEXT, 158, 139, 35, 20, BUTTON_GREY, "+");
+
+                        WNDCreate->addText("Rand", 103, 175, 9, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_BORDER, 45, 186, 35, 20, BUTTON_GREY, "-");
+                        sprintf(puffer, "%d", border);
+                        TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_BORDER, 158, 186, 35, 20, BUTTON_GREY, "+");
+
+                        WNDCreate->addText("Rand-Grundfläche", 65, 215, 9, FONT_YELLOW);
+                        WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_PREVIOUS,  45, 234, 35, 20, BUTTON_GREY, "-");
+                        PicBorderTextureIndex = WNDCreate->addStaticPicture(102, 228, PicBorderTextureIndexGlobal);
+                        WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_NEXT, 158, 234, 35, 20, BUTTON_GREY, "+");
+
+                        WNDCreate->addButton(EditorCreateMenu, CREATE_WORLD, 44, 275, 150, 40, BUTTON_GREY, "Welt erschaffen");
+                    }
+                    else
+                    {
+                        delete WNDCreate;
+                        WNDCreate = NULL;
+                        return;
+                    }
+                    break;
+
+        case CALL_FROM_GAMELOOP:
+                    break;
+
+        case REDUCE_WIDTH_128:
+                    if (width - 128 >= 32)
+                        width -= 128;
+                    else
+                        width = 32;
+                    WNDCreate->delText(TextWidth);
+                    sprintf(puffer, "%d", width);
+                    TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+                    break;
+        case REDUCE_WIDTH_12:
+                    if (width - 12 >= 32)
+                        width -= 12;
+                    else
+                        width = 32;
+                    WNDCreate->delText(TextWidth);
+                    sprintf(puffer, "%d", width);
+                    TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+                    break;
+        case RAISE_WIDTH_12:
+                    if (width + 12 <= MAXMAPWIDTH)
+                        width += 12;
+                    else
+                        width = MAXMAPWIDTH;
+                    WNDCreate->delText(TextWidth);
+                    sprintf(puffer, "%d", width);
+                    TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+                    break;
+        case RAISE_WIDTH_128:
+                    if (width + 128 <= MAXMAPWIDTH)
+                        width += 128;
+                    else
+                        width = MAXMAPWIDTH;
+                    WNDCreate->delText(TextWidth);
+                    sprintf(puffer, "%d", width);
+                    TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+                    break;
+        case REDUCE_HEIGHT_128:
+                    if (height - 128 >= 32)
+                        height -= 128;
+                    else
+                        height = 32;
+                    WNDCreate->delText(TextHeight);
+                    sprintf(puffer, "%d", height);
+                    TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+                    break;
+        case REDUCE_HEIGHT_12:
+                    if (height - 12 >= 32)
+                        height -= 12;
+                    else
+                        height = 32;
+                    WNDCreate->delText(TextHeight);
+                    sprintf(puffer, "%d", height);
+                    TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+                    break;
+        case RAISE_HEIGHT_12:
+                    if (height + 12 <= MAXMAPHEIGHT)
+                        height += 12;
+                    else
+                        height = MAXMAPHEIGHT;
+                    WNDCreate->delText(TextHeight);
+                    sprintf(puffer, "%d", height);
+                    TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+                    break;
+        case RAISE_HEIGHT_128:
+                    if (height + 128 <= MAXMAPHEIGHT)
+                        height += 128;
+                    else
+                        height = MAXMAPHEIGHT;
+                    WNDCreate->delText(TextHeight);
+                    sprintf(puffer, "%d", height);
+                    TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+                    break;
+
+        case CHANGE_LANDSCAPE:
+                    LandscapeType++;
+                    if (LandscapeType > 2)
+                        LandscapeType = 0;
+                    WNDCreate->delButton(ButtonLandscape);
+                    ButtonLandscape = WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, 64, 93, 110, 20, BUTTON_GREY, (LandscapeType == 0 ? "Grünland" : (LandscapeType == 1 ? "Ödland" : "Winterwelt")));
+                    switch (LandscapeType)
+                    {
+                        case 0: PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                                PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                                break;
+                        case 1: PicTextureIndexGlobal = PICTURE_WASTELAND_TEXTURE_SNOW;
+                                PicBorderTextureIndexGlobal = PICTURE_WASTELAND_TEXTURE_SNOW;
+                                break;
+                        case 2: PicTextureIndexGlobal = PICTURE_WINTERLAND_TEXTURE_SNOW;
+                                PicBorderTextureIndexGlobal = PICTURE_WINTERLAND_TEXTURE_SNOW;
+                                break;
+                        default:break;
+                    }
+                    WNDCreate->delStaticPicture(PicTextureIndex);
+                    WNDCreate->delStaticPicture(PicBorderTextureIndex);
+                    PicTextureIndex = WNDCreate->addStaticPicture(102, 133, PicTextureIndexGlobal);
+                    PicBorderTextureIndex = WNDCreate->addStaticPicture(102, 228, PicBorderTextureIndexGlobal);
+                    break;
+
+        case TEXTURE_PREVIOUS:
+                    PicTextureIndexGlobal--;
+                    switch (LandscapeType)
+                    {
+                        case 0: if (PicTextureIndexGlobal < PICTURE_GREENLAND_TEXTURE_SNOW)
+                                    PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                                break;
+                        case 1: if (PicTextureIndexGlobal < PICTURE_WASTELAND_TEXTURE_SNOW)
+                                    PicTextureIndexGlobal = PICTURE_WASTELAND_TEXTURE_SNOW;
+                                break;
+                        case 2: if (PicTextureIndexGlobal < PICTURE_WINTERLAND_TEXTURE_SNOW)
+                                    PicTextureIndexGlobal = PICTURE_WINTERLAND_TEXTURE_SNOW;
+                                break;
+                        default:break;
+                    }
+                    if      (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SNOW
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SNOW
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SNOW
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_SNOW;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_STEPPE;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SWAMP
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SWAMP
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SWAMP
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_SWAMP;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_FLOWER
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_FLOWER
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_FLOWER
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_FLOWER;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING1
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING1
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING1
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING1;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING2
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING2
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING2
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING2;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING3
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING3
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING3
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING3;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING4
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING4
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING4
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING4;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW1
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_STEPPE_MEADOW1;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW1
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MEADOW1;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW2
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MEADOW2;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW3
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW3
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW3
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MEADOW3;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW2
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_STEPPE_MEADOW2;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING_MEADOW
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING_MEADOW
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING_MEADOW
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING_MEADOW;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_WATER
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_WATER
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_WATER
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_WATER;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_LAVA
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_LAVA
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_LAVA
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_LAVA;
+                    }
+                    WNDCreate->delStaticPicture(PicTextureIndex);
+                    PicTextureIndex = WNDCreate->addStaticPicture(102, 133, PicTextureIndexGlobal);
+                    break;
+        case TEXTURE_NEXT:
+                    PicTextureIndexGlobal++;
+                    switch (LandscapeType)
+                    {
+                        case 0: if (PicTextureIndexGlobal > PICTURE_GREENLAND_TEXTURE_LAVA)
+                                    PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_LAVA;
+                                break;
+                        case 1: if (PicTextureIndexGlobal > PICTURE_WASTELAND_TEXTURE_LAVA)
+                                    PicTextureIndexGlobal = PICTURE_WASTELAND_TEXTURE_LAVA;
+                                break;
+                        case 2: if (PicTextureIndexGlobal > PICTURE_WINTERLAND_TEXTURE_LAVA)
+                                    PicTextureIndexGlobal = PICTURE_WINTERLAND_TEXTURE_LAVA;
+                                break;
+                        default:break;
+                    }
+                    if      (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SNOW
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SNOW
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SNOW
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_SNOW;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_STEPPE;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SWAMP
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SWAMP
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SWAMP
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_SWAMP;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_FLOWER
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_FLOWER
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_FLOWER
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_FLOWER;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING1
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING1
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING1
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING1;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING2
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING2
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING2
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING2;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING3
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING3
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING3
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING3;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING4
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING4
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING4
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING4;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW1
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_STEPPE_MEADOW1;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW1
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW1
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MEADOW1;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW2
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MEADOW2;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW3
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW3
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW3
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MEADOW3;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW2
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_STEPPE_MEADOW2;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING_MEADOW
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING_MEADOW
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING_MEADOW
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_MINING_MEADOW;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_WATER
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_WATER
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_WATER
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_WATER;
+                    }
+                    else if (   PicTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_LAVA
+                            ||  PicTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_LAVA
+                            ||  PicTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_LAVA
+                            )
+                    {
+                        texture = TRIANGLE_TEXTURE_LAVA;
+                    }
+                    WNDCreate->delStaticPicture(PicTextureIndex);
+                    PicTextureIndex = WNDCreate->addStaticPicture(102, 133, PicTextureIndexGlobal);
+                    break;
+
+        case REDUCE_BORDER:
+                    if (border - 1 >= 0)
+                        border -= 1;
+                    else
+                        border = 0;
+                    WNDCreate->delText(TextBorder);
+                    sprintf(puffer, "%d", border);
+                    TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
+                    break;
+        case RAISE_BORDER:
+                    if (border + 1 <= 12)
+                        border += 1;
+                    else
+                        border = 12;
+                    WNDCreate->delText(TextBorder);
+                    sprintf(puffer, "%d", border);
+                    TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
+                    break;
+
+        case BORDER_TEXTURE_PREVIOUS:
+                    PicBorderTextureIndexGlobal--;
+                    switch (LandscapeType)
+                    {
+                        case 0: if (PicBorderTextureIndexGlobal < PICTURE_GREENLAND_TEXTURE_SNOW)
+                                    PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                                break;
+                        case 1: if (PicBorderTextureIndexGlobal < PICTURE_WASTELAND_TEXTURE_SNOW)
+                                    PicBorderTextureIndexGlobal = PICTURE_WASTELAND_TEXTURE_SNOW;
+                                break;
+                        case 2: if (PicBorderTextureIndexGlobal < PICTURE_WINTERLAND_TEXTURE_SNOW)
+                                    PicBorderTextureIndexGlobal = PICTURE_WINTERLAND_TEXTURE_SNOW;
+                                break;
+                        default:break;
+                    }
+                    if      (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SNOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SNOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SNOW
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_SNOW;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_STEPPE;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SWAMP
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SWAMP
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SWAMP
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_SWAMP;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_FLOWER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_FLOWER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_FLOWER
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_FLOWER;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING1
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING1;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING2
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING2;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING3
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING3;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING4
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING4
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING4
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING4;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW1
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_STEPPE_MEADOW1;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW1
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MEADOW1;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW2
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MEADOW2;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW3
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MEADOW3;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW2
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_STEPPE_MEADOW2;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING_MEADOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING_MEADOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING_MEADOW
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING_MEADOW;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_WATER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_WATER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_WATER
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_WATER;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_LAVA
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_LAVA
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_LAVA
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_LAVA;
+                    }
+                    WNDCreate->delStaticPicture(PicBorderTextureIndex);
+                    PicBorderTextureIndex = WNDCreate->addStaticPicture(102, 228, PicBorderTextureIndexGlobal);
+                    break;
+        case BORDER_TEXTURE_NEXT:
+                    PicBorderTextureIndexGlobal++;
+                    switch (LandscapeType)
+                    {
+                        case 0: if (PicBorderTextureIndexGlobal > PICTURE_GREENLAND_TEXTURE_LAVA)
+                                    PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_LAVA;
+                                break;
+                        case 1: if (PicBorderTextureIndexGlobal > PICTURE_WASTELAND_TEXTURE_LAVA)
+                                    PicBorderTextureIndexGlobal = PICTURE_WASTELAND_TEXTURE_LAVA;
+                                break;
+                        case 2: if (PicBorderTextureIndexGlobal > PICTURE_WINTERLAND_TEXTURE_LAVA)
+                                    PicBorderTextureIndexGlobal = PICTURE_WINTERLAND_TEXTURE_LAVA;
+                                break;
+                        default:break;
+                    }
+                    if      (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SNOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SNOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SNOW
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_SNOW;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_STEPPE;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_SWAMP
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_SWAMP
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_SWAMP
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_SWAMP;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_FLOWER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_FLOWER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_FLOWER
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_FLOWER;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING1
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING1;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING2
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING2;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING3
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING3;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING4
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING4
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING4
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING4;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW1
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_STEPPE_MEADOW1;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW1
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW1
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MEADOW1;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW2
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MEADOW2;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MEADOW3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MEADOW3
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MEADOW3
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MEADOW3;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_STEPPE_MEADOW2
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_STEPPE_MEADOW2
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_STEPPE_MEADOW2;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_MINING_MEADOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_MINING_MEADOW
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_MINING_MEADOW
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_MINING_MEADOW;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_WATER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_WATER
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_WATER
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_WATER;
+                    }
+                    else if (   PicBorderTextureIndexGlobal == PICTURE_GREENLAND_TEXTURE_LAVA
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WASTELAND_TEXTURE_LAVA
+                            ||  PicBorderTextureIndexGlobal == PICTURE_WINTERLAND_TEXTURE_LAVA
+                            )
+                    {
+                        border_texture = TRIANGLE_TEXTURE_LAVA;
+                    }
+                    WNDCreate->delStaticPicture(PicBorderTextureIndex);
+                    PicBorderTextureIndex = WNDCreate->addStaticPicture(102, 228, PicBorderTextureIndexGlobal);
+                    break;
+
+        case CREATE_WORLD:
+                    callback::PleaseWait(INITIALIZING_CALL);
+
+                    //we have to close the windows and initialize them again to prevent failures
+                    EditorCursorMenu(MAP_QUIT);
+                    EditorTextureMenu(MAP_QUIT);
+                    EditorTreeMenu(MAP_QUIT);
+                    EditorLandscapeMenu(MAP_QUIT);
+                    MinimapMenu(MAP_QUIT);
+                    EditorResourceMenu(MAP_QUIT);
+                    EditorAnimalMenu(MAP_QUIT);
+                    EditorPlayerMenu(MAP_QUIT);
+
+                    MapObj->destructMap();
+                    MapObj->constructMap(NULL, width, height, LandscapeType, texture, border, border_texture);
+
+                    //we need to check which of these windows was active before
+                    /*
+                    EditorCursorMenu(INITIALIZING_CALL);
+                    EditorTextureMenu(INITIALIZING_CALL);
+                    EditorTreeMenu(INITIALIZING_CALL);
+                    EditorLandscapeMenu(INITIALIZING_CALL);
+                    MinimapMenu(INITIALIZING_CALL);
+                    EditorResourceMenu(INITIALIZING_CALL);
+                    EditorAnimalMenu(INITIALIZING_CALL);
+                    EditorPlayerMenu(INITIALIZING_CALL);
+                    */
+
+                    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                    break;
+
+
+        case MAP_QUIT:
+                    if (WNDCreate != NULL)
+                    {
+                        PosX = WNDCreate->getX();
+                        PosY = WNDCreate->getY();
+                        WNDCreate->setWaste();
+                        WNDCreate = NULL;
+                    }
+                    MapObj = NULL;
+                    TextWidth = NULL;
+                    width = 32;
+                    TextHeight = NULL;
+                    height = 32;
+                    ButtonLandscape = NULL;
+                    LandscapeType = 0;
+                    PicTextureIndex = -1;
+                    PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                    texture = TRIANGLE_TEXTURE_SNOW;
+                    PicBorderTextureIndex = -1;
+                    PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                    TextBorder = NULL;
+                    border = 0;
+                    border_texture = TRIANGLE_TEXTURE_SNOW;
+                    break;
+
+        case WINDOWQUIT:
+                    if (WNDCreate != NULL)
+                    {
+                        PosX = WNDCreate->getX();
+                        PosY = WNDCreate->getY();
+                        WNDCreate->setWaste();
+                        WNDCreate = NULL;
+                    }
+                    MapObj = NULL;
+                    TextWidth = NULL;
+                    width = 32;
+                    TextHeight = NULL;
+                    height = 32;
+                    ButtonLandscape = NULL;
+                    LandscapeType = 0;
+                    PicTextureIndex = -1;
+                    PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                    texture = TRIANGLE_TEXTURE_SNOW;
+                    PicBorderTextureIndex = -1;
+                    PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
+                    TextBorder = NULL;
+                    border = 0;
+                    border_texture = TRIANGLE_TEXTURE_SNOW;
+                    break;
+
+        default:    break;
+    }
+}
+
 #else
 //now the 4 game callbacks from the menubar will follow
 
@@ -1492,6 +2364,9 @@ void callback::MinimapMenu(int Param)
     static CMap* MapObj = NULL;
     static SDL_Surface *WndSurface = NULL;
     static int num_x = 1, num_y = 1;
+    //only in case INITIALIZING_CALL needed to create the window
+    int width;
+    int height;
 
     enum
     {
@@ -1508,8 +2383,8 @@ void callback::MinimapMenu(int Param)
                     num_x = (global::s2->getMapObj()->getMap()->width > 256 ? global::s2->getMapObj()->getMap()->width/256 : 1);
                     num_y = (global::s2->getMapObj()->getMap()->height > 256 ? global::s2->getMapObj()->getMap()->height/256 : 1);
 
-                    int width = global::s2->getMapObj()->getMap()->width/num_x;
-                    int height = global::s2->getMapObj()->getMap()->height/num_y;
+                    width = global::s2->getMapObj()->getMap()->width/num_x;
+                    height = global::s2->getMapObj()->getMap()->height/num_y;
                     //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
                     if ( (global::s2->getDisplaySurface()->w-12 < width) || (global::s2->getDisplaySurface()->h-30 < height) )
                         break;
@@ -1609,7 +2484,6 @@ void callback::viewer(int Param)
 {
     static CWindow *WNDViewer = NULL;
     static int index = 0;
-    static SDL_Surface *Surf_Window;
     static int PicInWndIndex = -1;
     static char PicInfos[50];
     static CFont *PicInfosText = NULL;
@@ -1640,7 +2514,6 @@ void callback::viewer(int Param)
                         WNDViewer->addButton(viewer, FORWARD_1,    105, 0, 35, 20, BUTTON_GREY, "->1");
                         WNDViewer->addButton(viewer, FORWARD_10,   140, 0, 35, 20, BUTTON_GREY, "->10");
                         WNDViewer->addButton(viewer, FORWARD_100,  175, 0, 35, 20, BUTTON_GREY, "->100");
-                        Surf_Window = WNDViewer->getSurface();
                     }
                     else
                     {
@@ -1696,7 +2569,6 @@ void callback::viewer(int Param)
                         WNDViewer->setWaste();
                         WNDViewer = NULL;
                         global::s2->UnregisterCallback(viewer);
-                        Surf_Window = NULL;
                         index = 0;
                         PicInWndIndex = -1;
                     }

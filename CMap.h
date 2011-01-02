@@ -70,6 +70,12 @@ class CMap
     public:
         CMap(char *filename);
         ~CMap();
+        void constructMap(char *filename, int width = 32, int height = 32, int type = 0, int texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
+        void destructMap(void);
+        bobMAP* generateMap(int width, int height, int type, int texture, int border, int border_texture);
+        void loadMapPics(void);
+        void unloadMapPics(void);
+
         void setMouseData(SDL_MouseMotionEvent motion);
         void setMouseData(SDL_MouseButtonEvent button);
         void setKeyboardData(SDL_KeyboardEvent key);

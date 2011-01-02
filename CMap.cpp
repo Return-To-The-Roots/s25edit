@@ -2,58 +2,33 @@
 
 CMap::CMap(char *filename)
 {
+    constructMap(filename);
+}
+
+CMap::~CMap()
+{
+    destructMap();
+}
+
+void CMap::constructMap(char *filename, int width, int height, int type, int texture, int border, int border_texture)
+{
+    map = NULL;
     Surf_Map = NULL;
     Surf_RightMenubar = NULL;
     displayRect.x = 0;
     displayRect.y = 0;
     displayRect.w = global::s2->GameResolutionX;
     displayRect.h = global::s2->GameResolutionY;
-    map = (bobMAP*)CFile::open_file(filename, WLD); //TODO: open_file(filename, SWD); if really necessary
+
+    if (filename != NULL)
+        map = (bobMAP*)CFile::open_file(filename, WLD); //TODO: open_file(filename, SWD); if really necessary
+
+    if (map == NULL)
+        map = generateMap(width, height, type, texture, border, border_texture);
+
 
     //load the right MAP0x.LST for all pictures
-    char outputString1[47], outputString2[34];
-    char picFile[17];
-    switch (map->type)
-    {
-        case 0:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
-                    strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
-                    strcpy(picFile, "./DATA/MAP00.LST");
-                    break;
-        case 1:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP01.LST...");
-                    strcpy(outputString2, "\nLoading file: /DATA/MAP01.LST...");
-                    strcpy(picFile, "./DATA/MAP01.LST");
-                    break;
-        case 2:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP02.LST...");
-                    strcpy(outputString2, "\nLoading file: /DATA/MAP02.LST...");
-                    strcpy(picFile, "./DATA/MAP02.LST");
-                    break;
-        default:    strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
-                    strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
-                    strcpy(picFile, "./DATA/MAP00.LST");
-                    break;
-    }
-    //load only the palette at this time from MAP0x.LST
-    std::cout << outputString1;
-    if ( CFile::open_file(picFile, LST, true) == false )
-    {
-        std::cout << "failure";
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << outputString2;
-    if ( CFile::open_file(picFile, LST) == false )
-    {
-        std::cout << "failure";
-    }
-    //set back palette
-    //CFile::set_palActual(CFile::get_palArray());
-    std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
-    if ( CFile::open_file("./DATA/MBOB/ROM_BOBS.LST", LST) == false )
-    {
-        std::cout << "failure";
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
+    loadMapPics();
 
     CSurface::get_nodeVectors(map);
     #ifdef _EDITORMODE
@@ -145,17 +120,10 @@ CMap::CMap(char *filename)
     }
     map->player = CountPlayers;
 }
-
-CMap::~CMap()
+void CMap::destructMap(void)
 {
     //free all surfaces that MAP0x.LST needed
-    for (int i = MAPPIC_ARROWCROSS_YELLOW; i <= MAPPIC_LAST_ENTRY; i++)
-    {
-        SDL_FreeSurface(global::bmpArray[i].surface);
-        global::bmpArray[i].surface = NULL;
-    }
-    //set back bmpArray-pointer, cause MAP0x.LST is no longer needed
-    CFile::set_bmpArray(global::bmpArray+MAPPIC_ARROWCROSS_YELLOW);
+    unloadMapPics();
     //free concatenated list for "undo" and "do"
     if (CurrPtr_savedVertices != NULL)
     {
@@ -182,6 +150,139 @@ CMap::~CMap()
     free(map->vertex);
     //free map structure memory
     free(map);
+}
+
+bobMAP* CMap::generateMap(int width, int height, int type, int texture, int border, int border_texture)
+{
+    bobMAP *myMap = (bobMAP*)malloc(sizeof(bobMAP));
+    Uint8 heightFactor;
+
+    strcpy(myMap->name, "Ohne Namen");
+    myMap->width = width;
+    myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
+    myMap->height = height;
+    myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
+    myMap->type = type;
+    myMap->player = 0;
+    strcpy(myMap->author, "Niemand");
+    for (int i = 0; i < 7; i++)
+    {
+        myMap->HQx[i] = 0xFFFF;
+        myMap->HQy[i] = 0xFFFF;
+    }
+
+    if ( (myMap->vertex = (struct point*) malloc(sizeof(struct point)*myMap->width*myMap->height)) == NULL )
+    {
+        free(myMap);
+        return NULL;
+    }
+
+    int a;
+    int b = 0;
+    for (int j = 0; j < myMap->height; j++)
+    {
+        if (j%2 == 0)
+            a = TRIANGLE_WIDTH/2;
+        else
+            a = TRIANGLE_WIDTH;
+
+        for (int i = 0; i < myMap->width; i++)
+        {
+            myMap->vertex[j*myMap->width+i].VertexX = i;
+            myMap->vertex[j*myMap->width+i].VertexY = j;
+            heightFactor = 0x0A;
+            myMap->vertex[j*myMap->width+i].h = heightFactor;
+            myMap->vertex[j*myMap->width+i].x = a;
+            myMap->vertex[j*myMap->width+i].y = b + (-TRIANGLE_INCREASE)*(heightFactor - 0x0A);
+            myMap->vertex[j*myMap->width+i].z = TRIANGLE_INCREASE*(heightFactor - 0x0A);
+            a += TRIANGLE_WIDTH;
+
+            if ( (j < border || myMap->height-j <= border) || (i < border || myMap->width-i <= border) )
+            {
+                myMap->vertex[j*myMap->width+i].rsuTexture = border_texture;
+                myMap->vertex[j*myMap->width+i].usdTexture = border_texture;
+            }
+            else
+            {
+                myMap->vertex[j*myMap->width+i].rsuTexture = texture;
+                myMap->vertex[j*myMap->width+i].usdTexture = texture;
+            }
+
+            //initialize all other blocks -- outcommented blocks are recalculated at map load
+            myMap->vertex[j*myMap->width+i].road = 0x00;
+            myMap->vertex[j*myMap->width+i].objectType = 0x00;
+            myMap->vertex[j*myMap->width+i].objectInfo = 0x00;
+            myMap->vertex[j*myMap->width+i].animal = 0x00;
+            myMap->vertex[j*myMap->width+i].unknown1 = 0x00;
+            //myMap->vertex[j*myMap->width+i].build = 0x00;
+            myMap->vertex[j*myMap->width+i].unknown2 = 0x07;
+            myMap->vertex[j*myMap->width+i].unknown3 = 0x00;
+            //myMap->vertex[j*myMap->width+i].resource = 0x00;
+            //myMap->vertex[j*myMap->width+i].shading = 0x00;
+            myMap->vertex[j*myMap->width+i].unknown5 = 0x00;
+        }
+        b += TRIANGLE_HEIGHT;
+    }
+
+    return myMap;
+}
+
+void CMap::loadMapPics(void)
+{
+    char outputString1[47], outputString2[34];
+    char picFile[17];
+    switch (map->type)
+    {
+        case 0:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
+                    strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
+                    strcpy(picFile, "./DATA/MAP00.LST");
+                    break;
+        case 1:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP01.LST...");
+                    strcpy(outputString2, "\nLoading file: /DATA/MAP01.LST...");
+                    strcpy(picFile, "./DATA/MAP01.LST");
+                    break;
+        case 2:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP02.LST...");
+                    strcpy(outputString2, "\nLoading file: /DATA/MAP02.LST...");
+                    strcpy(picFile, "./DATA/MAP02.LST");
+                    break;
+        default:    strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
+                    strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
+                    strcpy(picFile, "./DATA/MAP00.LST");
+                    break;
+    }
+    //load only the palette at this time from MAP0x.LST
+    std::cout << outputString1;
+    if ( CFile::open_file(picFile, LST, true) == false )
+    {
+        std::cout << "failure";
+    }
+    //set the right palette
+    CFile::set_palActual(CFile::get_palArray()-1);
+    std::cout << outputString2;
+    if ( CFile::open_file(picFile, LST) == false )
+    {
+        std::cout << "failure";
+    }
+    //set back palette
+    //CFile::set_palActual(CFile::get_palArray());
+    std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
+    if ( CFile::open_file("./DATA/MBOB/ROM_BOBS.LST", LST) == false )
+    {
+        std::cout << "failure";
+    }
+    //set back palette
+    CFile::set_palActual(CFile::get_palArray());
+}
+
+void CMap::unloadMapPics(void)
+{
+    for (int i = MAPPIC_ARROWCROSS_YELLOW; i <= MAPPIC_LAST_ENTRY; i++)
+    {
+        SDL_FreeSurface(global::bmpArray[i].surface);
+        global::bmpArray[i].surface = NULL;
+    }
+    //set back bmpArray-pointer, cause MAP0x.LST is no longer needed
+    CFile::set_bmpArray(global::bmpArray+MAPPIC_ARROWCROSS_YELLOW);
 }
 
 void CMap::setMouseData(SDL_MouseMotionEvent motion)
@@ -243,15 +344,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
         #ifdef _EDITORMODE
         //find out if user clicked on one of the game menu pictures
         //we start with lower menubar
-        if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+203) && button.x <= (displayRect.w/2+240)
-                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
-           )
-        {
-            //the editor-main-menu picture was clicked
-            callback::EditorQuitMenu(INITIALIZING_CALL); //"quit" menu is temporary, later this will be "main" menu
-            return;
-        }
-        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-236) && button.x <= (displayRect.w/2-199)
+        if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-236) && button.x <= (displayRect.w/2-199)
                                                   && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
            )
         {
@@ -329,6 +422,22 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
         {
             //the minimap picture was clicked
             callback::MinimapMenu(INITIALIZING_CALL);
+            return;
+        }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+166) && button.x <= (displayRect.w/2+203)
+                                                  && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the create-world picture was clicked
+            callback::EditorCreateMenu(INITIALIZING_CALL);
+            return;
+        }
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+203) && button.x <= (displayRect.w/2+240)
+                                             && button.y >= (displayRect.h-35) && button.y <= (displayRect.h-3)
+           )
+        {
+            //the editor-main-menu picture was clicked
+            callback::EditorQuitMenu(INITIALIZING_CALL); //"quit" menu is temporary, later this will be "main" menu
             return;
         }
         //now we check the right menubar
@@ -440,6 +549,52 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
                 setupVerticesActivity();
             }
         }
+        else if (key.keysym.sym == SDLK_1 || key.keysym.sym == SDLK_KP1)
+        {
+            ChangeSection = 0;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_2 || key.keysym.sym == SDLK_KP2)
+        {
+            ChangeSection = 1;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_3 || key.keysym.sym == SDLK_KP3)
+        {
+            ChangeSection = 2;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_4 || key.keysym.sym == SDLK_KP4)
+        {
+            ChangeSection = 3;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_5 || key.keysym.sym == SDLK_KP5)
+        {
+            ChangeSection = 4;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_6 || key.keysym.sym == SDLK_KP6)
+        {
+            ChangeSection = 5;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_7 || key.keysym.sym == SDLK_KP7)
+        {
+            ChangeSection = 6;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_8 || key.keysym.sym == SDLK_KP8)
+        {
+            ChangeSection = 7;
+            setupVerticesActivity();
+        }
+        else if (key.keysym.sym == SDLK_9 || key.keysym.sym == SDLK_KP9)
+        {
+            ChangeSection = 8;
+            setupVerticesActivity();
+        }
+
         else if (key.keysym.sym == SDLK_SPACE)
         {
             BuildHelp = !BuildHelp;
@@ -515,6 +670,69 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             else if (displayRect.y <= -displayRect.h)
                 displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
         }
+    }
+    //convert map to greenland
+    else if (key.keysym.sym == SDLK_g)
+    {
+        callback::PleaseWait(INITIALIZING_CALL);
+
+        //we have to close the windows and initialize them again to prevent failures
+        callback::EditorCursorMenu(MAP_QUIT);
+        callback::EditorTextureMenu(MAP_QUIT);
+        callback::EditorTreeMenu(MAP_QUIT);
+        callback::EditorLandscapeMenu(MAP_QUIT);
+        callback::MinimapMenu(MAP_QUIT);
+        callback::EditorResourceMenu(MAP_QUIT);
+        callback::EditorAnimalMenu(MAP_QUIT);
+        callback::EditorPlayerMenu(MAP_QUIT);
+
+        map->type = 0;
+        unloadMapPics();
+        loadMapPics();
+
+        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+    }
+    //convert map to wasteland
+    else if (key.keysym.sym == SDLK_o)
+    {
+        callback::PleaseWait(INITIALIZING_CALL);
+
+        //we have to close the windows and initialize them again to prevent failures
+        callback::EditorCursorMenu(MAP_QUIT);
+        callback::EditorTextureMenu(MAP_QUIT);
+        callback::EditorTreeMenu(MAP_QUIT);
+        callback::EditorLandscapeMenu(MAP_QUIT);
+        callback::MinimapMenu(MAP_QUIT);
+        callback::EditorResourceMenu(MAP_QUIT);
+        callback::EditorAnimalMenu(MAP_QUIT);
+        callback::EditorPlayerMenu(MAP_QUIT);
+
+        map->type = 1;
+        unloadMapPics();
+        loadMapPics();
+
+        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+    }
+    //convert map to winterland
+    else if (key.keysym.sym == SDLK_w)
+    {
+        callback::PleaseWait(INITIALIZING_CALL);
+
+        //we have to close the windows and initialize them again to prevent failures
+        callback::EditorCursorMenu(MAP_QUIT);
+        callback::EditorTextureMenu(MAP_QUIT);
+        callback::EditorTreeMenu(MAP_QUIT);
+        callback::EditorLandscapeMenu(MAP_QUIT);
+        callback::MinimapMenu(MAP_QUIT);
+        callback::EditorResourceMenu(MAP_QUIT);
+        callback::EditorAnimalMenu(MAP_QUIT);
+        callback::EditorPlayerMenu(MAP_QUIT);
+
+        map->type = 2;
+        unloadMapPics();
+        loadMapPics();
+
+        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
     }
     else if (key.type == SDL_KEYUP)
     {
@@ -787,7 +1005,7 @@ bool CMap::render(void)
 
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.w/2+96, displayRect.h-35);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, displayRect.w/2+131, displayRect.h-37);
-
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_NEWWORLD].surface, displayRect.w/2+166, displayRect.h-37);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w/2+207, displayRect.h-35);
 #else
 
@@ -1033,6 +1251,7 @@ void CMap::modifyVertex(void)
     }
     else if (mode == EDITOR_MODE_MAKE_HARBOUR)
     {
+        modifyHeightMakeBigHouse(VertexX, VertexY);
         modifyTextureMakeHarbour(VertexX, VertexY);
     }
     //at this time we need a content to set
@@ -1359,7 +1578,6 @@ void CMap::modifyTextureMakeHarbour(int VertexX, int VertexY)
         ||  map->vertex[VertexY*map->width+VertexX].rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
        )
     {
-        modifyHeightMakeBigHouse(VertexX, VertexY);
         map->vertex[VertexY*map->width+VertexX].rsuTexture += 0x40;
     }
 }
@@ -1368,8 +1586,12 @@ void CMap::modifyObject(int VertexX, int VertexY)
 {
     if (mode == EDITOR_MODE_CUT)
     {
-        map->vertex[VertexY*map->width+VertexX].objectType = 0x00;
-        map->vertex[VertexY*map->width+VertexX].objectInfo = 0x00;
+        //prevent cutting a player position
+        if (map->vertex[VertexY*map->width+VertexX].objectInfo != 0x80)
+        {
+            map->vertex[VertexY*map->width+VertexX].objectType = 0x00;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = 0x00;
+        }
     }
     else if (mode == EDITOR_MODE_TREE)
     {
@@ -1519,6 +1741,11 @@ void CMap::modifyObject(int VertexX, int VertexY)
             int newContent = modeContent + rand()%7;
 
             map->vertex[VertexY*map->width+VertexX].objectType = newContent;
+            map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
+        }
+        else if (modeContent == 0x09)
+        {
+            map->vertex[VertexY*map->width+VertexX].objectType = modeContent;
             map->vertex[VertexY*map->width+VertexX].objectInfo = modeContent2;
         }
     }

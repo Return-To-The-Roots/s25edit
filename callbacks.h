@@ -19,6 +19,7 @@ namespace callback
     void EditorLandscapeMenu(int Param);
     void EditorAnimalMenu(int Param);
     void EditorPlayerMenu(int Param);
+    void EditorCreateMenu(int Param);
     void EditorCursorMenu(int Param);
 #else
     void GameMenu(int Param);

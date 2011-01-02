@@ -598,6 +598,244 @@ void _FadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surfa
 	}
 }
 
+//==================================================================================
+// Draws a horisontal, gouraud shaded and textured line (respecting colorkeys)
+//==================================================================================
+void _FadedTexturedLineColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i1,Sint32 i2, Uint32 keys[], int keycount)
+{
+	Sint16 x;
+    Sint32 i;
+
+	/* Fix coords */
+	if ( x1 > x2 ) {
+		SWAP(x1,x2,x);
+		SWAP(sx1,sx2,x);
+		SWAP(sy1,sy2,x);
+		SWAP(i1,i2,i);
+	}
+
+	/* We use fixedpoint math */
+	Sint32 I = i1;
+
+	/* Color step value */
+	Sint32 istep = (i2-i1)/Sint32(x2-x1+1);
+
+	/* Fixed point texture starting coords */
+	Sint32 srcx = sx1<<16;
+	Sint32 srcy = sy1<<16;
+
+	/* Texture coords stepping value */
+	Sint32 xstep = Sint32((sx2-sx1)<<16) / Sint32(x2-x1+1);
+	Sint32 ystep = Sint32((sy2-sy1)<<16) / Sint32(x2-x1+1);
+
+
+	/* Clipping */
+	if(x2<sge_clip_xmin(dest) || x1>sge_clip_xmax(dest) || y<sge_clip_ymin(dest) || y>sge_clip_ymax(dest))
+		return;
+	if (x1 < sge_clip_xmin(dest)){
+	    /* Update start colors */
+		I += (sge_clip_xmin(dest)-x1)*istep;
+		/* Fix texture starting coord */
+		srcx += (sge_clip_xmin(dest)-x1)*xstep;
+		srcy += (sge_clip_xmin(dest)-x1)*ystep;
+  		x1 = sge_clip_xmin(dest);
+	}
+	if (x2 > sge_clip_xmax(dest))
+  		x2 = sge_clip_xmax(dest);
+
+
+	if(dest->format->BytesPerPixel == source->format->BytesPerPixel){
+		/* Fast mode. Just copy the pixel */
+
+		switch (dest->format->BytesPerPixel) {
+			case 1: { /* Assuming 8-bpp */
+				Uint8 *pixel;
+				Uint8 *row = (Uint8 *)dest->pixels + y*dest->pitch;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x;
+
+					*pixel = *((Uint8 *)source->pixels + (srcy>>16)*source->pitch + (srcx>>16));
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+
+			case 2: { /* Probably 15-bpp or 16-bpp */
+				Uint16 *pixel;
+				Uint16 *row = (Uint16 *)dest->pixels + y*dest->pitch/2;
+
+				Uint16 pitch = source->pitch/2;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x;
+
+					*pixel = *((Uint16 *)source->pixels + (srcy>>16)*pitch + (srcx>>16));
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+
+			case 3: { /* Slow 24-bpp mode, usually not used */
+				Uint8 *pixel, *srcpixel;
+				Uint8 *row = (Uint8 *)dest->pixels + y*dest->pitch;
+
+				Uint8 rshift8=dest->format->Rshift/8;
+				Uint8 gshift8=dest->format->Gshift/8;
+				Uint8 bshift8=dest->format->Bshift/8;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x*3;
+					srcpixel = (Uint8 *)source->pixels + (srcy>>16)*source->pitch + (srcx>>16)*3;
+
+					*(pixel+rshift8) = *(srcpixel+rshift8);
+  					*(pixel+gshift8) = *(srcpixel+gshift8);
+  					*(pixel+bshift8) = *(srcpixel+bshift8);
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+
+			case 4: { /* Probably 32-bpp */
+			    Uint32 pixel_value;
+			    bool isColorKey;
+				Uint32 *pixel;
+				Uint32 *row = (Uint32 *)dest->pixels + y*dest->pitch/4;
+
+				Uint16 pitch = source->pitch/4;
+
+                Uint8 r8,g8,b8;
+				Sint16 r,g,b;
+				//Uint32 r1,g1,b1;
+
+                for (x = x1; x <= x2; x++)
+                {
+                    isColorKey = false;
+
+                    pixel = row + x;
+
+                    pixel_value = *((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16));
+                    //test for colorkey
+                    for (int i = 0; i < keycount; i++)
+                    {
+                        if (pixel_value == keys[i])
+                        {
+                            isColorKey = true;
+                            break;
+                        }
+                    }
+
+                    if (!isColorKey)
+                    {
+                        //SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), source->format, &r, &g, &b);
+                        //r1=r*I;
+                        //g1=g*I;
+                        //b1=b*I;
+                        r = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Rmask) >> dest->format->Rshift )*I) >>16 );
+                        g = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Gmask) >> dest->format->Gshift )*I) >>16 );
+                        b = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Bmask) >> dest->format->Bshift )*I) >>16 );
+                        r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
+                        g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
+                        b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
+                        //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
+                        *pixel = ( (r8 << dest->format->Rshift) + (g8 << dest->format->Gshift) + (b8 << dest->format->Bshift) );
+                    }
+
+                    I += istep;
+
+                    srcx += xstep;
+                    srcy += ystep;
+                }
+			}
+			break;
+		}
+	}else{
+		/* Slow mode. We must translate every pixel color! */
+
+		Uint8 r=0,g=0,b=0;
+
+		switch (dest->format->BytesPerPixel) {
+			case 1: { /* Assuming 8-bpp */
+				Uint8 *pixel;
+				Uint8 *row = (Uint8 *)dest->pixels + y*dest->pitch;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x;
+
+					SDL_GetRGB(sge_GetPixel(source, srcx>>16, srcy>>16), source->format, &r, &g, &b);
+					*pixel = SDL_MapRGB( dest->format, r, g, b );
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+
+			case 2: { /* Probably 15-bpp or 16-bpp */
+				Uint16 *pixel;
+				Uint16 *row = (Uint16 *)dest->pixels + y*dest->pitch/2;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x;
+
+					SDL_GetRGB(sge_GetPixel(source, srcx>>16, srcy>>16), source->format, &r, &g, &b);
+					*pixel = MapRGB( dest->format, r, g, b );
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+
+			case 3: { /* Slow 24-bpp mode, usually not used */
+				Uint8 *pixel, *srcpixel;
+				Uint8 *row = (Uint8 *)dest->pixels + y*dest->pitch;
+
+				Uint8 rshift8=dest->format->Rshift/8;
+				Uint8 gshift8=dest->format->Gshift/8;
+				Uint8 bshift8=dest->format->Bshift/8;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x*3;
+					srcpixel = (Uint8 *)source->pixels + (srcy>>16)*source->pitch + (srcx>>16)*3;
+
+					SDL_GetRGB(sge_GetPixel(source, srcx>>16, srcy>>16), source->format, &r, &g, &b);
+
+					*(pixel+rshift8) = r;
+  					*(pixel+gshift8) = g;
+  					*(pixel+bshift8) = b;
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+
+			case 4: { /* Probably 32-bpp */
+				Uint32 *pixel;
+				Uint32 *row = (Uint32 *)dest->pixels + y*dest->pitch/4;
+
+				for (x = x1; x <= x2; x++){
+					pixel = row + x;
+
+					SDL_GetRGB(sge_GetPixel(source, srcx>>16, srcy>>16), source->format, &r, &g, &b);
+					*pixel = MapRGB( dest->format, r, g, b );
+
+					srcx += xstep;
+					srcy += ystep;
+				}
+			}
+			break;
+		}
+	}
+}
+
 void sge_TexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2)
 {
 	if ( SDL_MUSTLOCK(dest) && _sge_lock )
@@ -1358,6 +1596,174 @@ void sge_FadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sin
 			//_TexturedLine(dest, xb>>16, xc>>16, y, source, srcx2>>16, srcy2>>16, srcx3>>16, srcy3>>16);
 			//_FadedLine(dest, xb>>16, xc>>16, y, r2>>16, g2>>16, b2>>16, r3>>16, g3>>16, b3>>16);
 			_FadedTexturedLine(dest, xb>>16, xc>>16, y, source, srcx2>>16, srcy2>>16, srcx3>>16, srcy3>>16,i2,i3);
+
+			xb += m2;
+			xc += m3;
+
+			i2 += istep2;
+
+			i3 += istep3;
+
+			srcx2 += xstep2;
+			srcx3 += xstep3;
+			srcy2 += ystep2;
+			srcy3 += ystep3;
+		}
+	}
+
+	if ( SDL_MUSTLOCK(dest) && _sge_lock )
+		SDL_UnlockSurface(dest);
+	if ( SDL_MUSTLOCK(source) && _sge_lock )
+		SDL_UnlockSurface(source);
+
+	if(_sge_update!=1){return;}
+
+	Sint16 xmax=x1, xmin=x1;
+	xmax= (xmax>x2)? xmax : x2;
+	xmin= (xmin<x2)? xmin : x2;
+	xmax= (xmax>x3)? xmax : x3;
+	xmin= (xmin<x3)? xmin : x3;
+
+	sge_UpdateRect(dest, xmin, y1, xmax-xmin+1, y3-y1+1);
+}
+
+//==================================================================================
+// Draws a gouraud shaded and texured trigon (fast) (respecting colorkeys)
+//==================================================================================
+void sge_FadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint32 I1,Sint32 I2,Sint32 I3, Uint32 keys[], int keycount)
+{
+	Sint16 y;
+
+	if( y1==y3 )
+		return;
+
+    Sint32 i=0;
+	Sint32 i_orig1 = I1;
+	Sint32 i_orig2 = I2;
+	Sint32 i_orig3 = I3;
+
+	/* Sort coords */
+	if ( y1 > y2 ) {
+		SWAP(y1,y2,y);
+		SWAP(x1,x2,y);
+		SWAP(sx1,sx2,y);
+		SWAP(sy1,sy2,y);
+		SWAP(i_orig1,i_orig2,i);
+	}
+	if ( y2 > y3 ) {
+		SWAP(y2,y3,y);
+		SWAP(x2,x3,y);
+		SWAP(sx2,sx3,y);
+		SWAP(sy2,sy3,y);
+		SWAP(i_orig2,i_orig3,i);
+	}
+	if ( y1 > y2 ) {
+		SWAP(y1,y2,y);
+		SWAP(x1,x2,y);
+		SWAP(sx1,sx2,y);
+		SWAP(sy1,sy2,y);
+		SWAP(i_orig1,i_orig2,i);
+	}
+
+	/*
+	 * Again we do the same thing as in sge_FilledTrigon(). But here we must keep track of how the
+	 * texture coords change along the lines.
+	*/
+
+	/* Starting coords for the three lines */
+	Sint32 xa = Sint32(x1<<16);
+	Sint32 xb = xa;
+	Sint32 xc = Sint32(x2<<16);
+
+	/* Starting colors (rgb) for the three lines */
+	Sint32 i1 = i_orig1;
+	Sint32 i2 = i1;
+	Sint32 i3 = i_orig2;
+
+	/* Lines step values */
+	Sint32 m1 = 0;
+	Sint32 m2 = Sint32((x3 - x1)<<16)/Sint32(y3 - y1);
+	Sint32 m3 = 0;
+
+	/* Colors step values */
+	Sint32 istep1 = 0;
+	Sint32 istep2 = (i_orig3 - i1)/Sint32(y3 - y1);
+	Sint32 istep3 = 0;
+
+	/* Starting texture coords for the three lines */
+	Sint32 srcx1 = Sint32(sx1<<16);
+	Sint32 srcx2 = srcx1;
+	Sint32 srcx3 = Sint32(sx2<<16);
+
+	Sint32 srcy1 = Sint32(sy1<<16);
+	Sint32 srcy2 = srcy1;
+	Sint32 srcy3 = Sint32(sy2<<16);
+
+	/* Texture coords stepping value */
+	Sint32 xstep1 = 0;
+	Sint32 xstep2 = Sint32((sx3 - sx1) << 16) / Sint32(y3 - y1);
+	Sint32 xstep3 = 0;
+
+	Sint32 ystep1 = 0;
+	Sint32 ystep2 = Sint32((sy3 - sy1) << 16) / Sint32(y3 - y1);
+	Sint32 ystep3 = 0;
+
+	if ( SDL_MUSTLOCK(dest) && _sge_lock )
+		if ( SDL_LockSurface(dest) < 0 )
+			return;
+	if ( SDL_MUSTLOCK(source) && _sge_lock )
+		if ( SDL_LockSurface(source) < 0 )
+			return;
+
+	/* Upper half of the triangle */
+	if( y1==y2 )
+		//_TexturedLine(dest,x1,x2,y1,source,sx1,sy1,sx2,sy2);
+		//_FadedLine(dest, x1, x2, y1, col1.r, col1.g, col1.b, col2.r, col2.g, col2.b);
+		_FadedTexturedLineColorKeys(dest,x1,x2,y1,source,sx1,sy1,sx2,sy2,i_orig1,i_orig2, keys, keycount);
+	else{
+		m1 = Sint32((x2 - x1)<<16)/Sint32(y2 - y1);
+
+		istep1 = (i_orig2 - i_orig1)/Sint32(y2 - y1);
+
+		xstep1 = Sint32((sx2 - sx1) << 16) / Sint32(y2 - y1);
+		ystep1 = Sint32((sy2 - sy1) << 16) / Sint32(y2 - y1);
+
+		for ( y = y1; y <= y2; y++) {
+			//_TexturedLine(dest, xa>>16, xb>>16, y, source, srcx1>>16, srcy1>>16, srcx2>>16, srcy2>>16);
+			//_FadedLine(dest, xa>>16, xb>>16, y, r1>>16, g1>>16, b1>>16, r2>>16, g2>>16, b2>>16);
+			_FadedTexturedLineColorKeys(dest, xa>>16, xb>>16, y, source, srcx1>>16, srcy1>>16, srcx2>>16, srcy2>>16,i1,i2, keys, keycount);
+
+			xa += m1;
+			xb += m2;
+
+			i1 += istep1;
+
+			i2 += istep2;
+
+			srcx1 += xstep1;
+			srcx2 += xstep2;
+			srcy1 += ystep1;
+			srcy2 += ystep2;
+		}
+	}
+
+	/* Lower half of the triangle */
+	if( y2==y3 )
+		//_TexturedLine(dest,x2,x3,y2,source,sx2,sy2,sx3,sy3);
+		//_FadedLine(dest, x2, x3, y2, col2.r, col2.g, col2.b, col3.r, col3.g, col3.b);
+		_FadedTexturedLineColorKeys(dest,x2,x3,y2,source,sx2,sy2,sx3,sy3,i_orig2,i_orig3, keys, keycount);
+	else{
+		m3 = Sint32((x3 - x2)<<16)/Sint32(y3 - y2);
+
+		istep3 = (i_orig3 - i_orig2)/Sint32(y3 - y2);
+
+		xstep3 = Sint32((sx3 - sx2) << 16) / Sint32(y3 - y2);
+		ystep3 = Sint32((sy3 - sy2) << 16) / Sint32(y3 - y2);
+
+		for ( y = y2+1; y <= y3; y++) {
+			//_TexturedLine(dest, xb>>16, xc>>16, y, source, srcx2>>16, srcy2>>16, srcx3>>16, srcy3>>16);
+			//_FadedLine(dest, xb>>16, xc>>16, y, r2>>16, g2>>16, b2>>16, r3>>16, g3>>16, b3>>16);
+			_FadedTexturedLineColorKeys(dest, xb>>16, xc>>16, y, source, srcx2>>16, srcy2>>16, srcx3>>16, srcy3>>16,i2,i3, keys, keycount);
 
 			xb += m2;
 			xc += m3;
