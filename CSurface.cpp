@@ -504,7 +504,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
 
     //find out the texture for the triangle
     //upperX2, ..... are for special use in winterland.
-    unsigned char upperX, upperY, leftX, leftY, rightX, rightY, upperX2, upperY2, leftX2, leftY2, rightX2, rightY2;
+    unsigned char upperX, upperY, leftX, leftY, rightX, rightY, upperX2 = 0, upperY2 = 0, leftX2 = 0, leftY2 = 0, rightX2 = 0, rightY2 = 0;
     SDL_Rect BorderRect;
     Uint8 texture, texture_raw;
     SDL_Surface *Surf_Tileset;

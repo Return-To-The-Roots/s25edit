@@ -44,13 +44,13 @@
 		<Cursor position="10467" topLine="291" />
 	</File>
 	<File name="CGame_Render.cpp" open="0" top="0" tabpos="3">
-		<Cursor position="1214" topLine="17" />
+		<Cursor position="137" topLine="0" />
 	</File>
-	<File name="CMap.cpp" open="1" top="1" tabpos="4">
-		<Cursor position="55612" topLine="1160" />
+	<File name="CMap.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="9846" topLine="247" />
 	</File>
-	<File name="CMap.h" open="1" top="0" tabpos="6">
-		<Cursor position="3810" topLine="18" />
+	<File name="CMap.h" open="0" top="0" tabpos="6">
+		<Cursor position="120" topLine="0" />
 	</File>
 	<File name="CMenu.cpp" open="0" top="0" tabpos="10">
 		<Cursor position="6076" topLine="216" />
@@ -65,10 +65,10 @@
 		<Cursor position="341" topLine="0" />
 	</File>
 	<File name="CSurface.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="21867" topLine="586" />
+		<Cursor position="19053" topLine="503" />
 	</File>
 	<File name="CSurface.h" open="0" top="0" tabpos="7">
-		<Cursor position="2066" topLine="5" />
+		<Cursor position="1762" topLine="5" />
 	</File>
 	<File name="CWindow.cpp" open="0" top="0" tabpos="12">
 		<Cursor position="17191" topLine="458" />
@@ -76,11 +76,11 @@
 	<File name="CWindow.h" open="0" top="0" tabpos="13">
 		<Cursor position="2833" topLine="50" />
 	</File>
-	<File name="callbacks.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="61019" topLine="1146" />
+	<File name="callbacks.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="5128" topLine="80" />
 	</File>
 	<File name="callbacks.h" open="0" top="0" tabpos="2">
-		<Cursor position="739" topLine="0" />
+		<Cursor position="778" topLine="0" />
 	</File>
 	<File name="classes.h" open="0" top="0" tabpos="11">
 		<Cursor position="115" topLine="0" />

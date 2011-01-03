@@ -105,8 +105,8 @@ void callback::mainmenu(int Param)
         case LOADMAP:
                     callback::PleaseWait(INITIALIZING_CALL);
                     //Map = new CMap("BERG_.SWD");
-                    Map = new CMap("MISS208.WLD");
-                    //Map = new CMap("NEW_MAP.SWD");
+                    //Map = new CMap("MISS208.WLD");
+                    Map = new CMap("NEW_MAP.SWD");
                     //Map = new CMap(NULL);
                     global::s2->setMapObj(Map);
                     MainMenu->setWaste();
