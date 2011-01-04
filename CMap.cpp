@@ -76,6 +76,8 @@ void CMap::constructMap(char *filename, int width, int height, int type, int tex
     modeContent = 0x00;
     modeContent2 = 0x00;
     modify = false;
+    MaxRaiseHeight = 0x3C;
+    MinReduceHeight = 0x00;
     saveCurrentVertices = false;
     if ( (CurrPtr_savedVertices = (struct savedVertices*)malloc(sizeof(struct savedVertices))) != NULL)
     {
@@ -508,6 +510,26 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
     {
         if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RAISE)
             mode = EDITOR_MODE_REDUCE;
+        else if (key.keysym.sym == SDLK_e && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        {
+            if (MaxRaiseHeight > 0x00)
+                MaxRaiseHeight--;
+        }
+        else if (key.keysym.sym == SDLK_r && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        {
+            if (MaxRaiseHeight < 0x3C)
+                MaxRaiseHeight++;
+        }
+        else if (key.keysym.sym == SDLK_s && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        {
+            if (MinReduceHeight > 0x00)
+                MinReduceHeight--;
+        }
+        else if (key.keysym.sym == SDLK_d && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        {
+            if (MinReduceHeight < 0x3C)
+                MinReduceHeight++;
+        }
         else if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RESOURCE_RAISE)
             mode = EDITOR_MODE_RESOURCE_REDUCE;
         else if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_FLAG)
@@ -860,6 +882,8 @@ int CMap::correctMouseBlitY(int VertexX, int VertexY)
 
 bool CMap::render(void)
 {
+    char textBuffer[100];
+
     //check if gameresolution has been changed
     if (displayRect.w != global::s2->GameResolutionX || displayRect.h != global::s2->GameResolutionY)
     {
@@ -930,6 +954,9 @@ bool CMap::render(void)
     //text for x and y of vertex (shown in upper left corner)
     sprintf(textBuffer, "%d    %d", VertexX, VertexY);
     CFont::writeText(Surf_Map, textBuffer, 20, 20);
+    //text for MinReduceHeight and MaxRaiseHeight
+    sprintf(textBuffer, "min. Höhe: %#04x/0x3C  max. Höhe: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
+    CFont::writeText(Surf_Map, textBuffer, 100, 20);
 #else
     CSurface::Draw(Surf_Map, global::bmpArray[CIRCLE_FLAT_GREY].surface, MouseBlitX-10, MouseBlitY-10);
 #endif
@@ -1317,8 +1344,12 @@ void CMap::modifyHeight(int VertexX, int VertexY)
 
     if (mode == EDITOR_MODE_RAISE)
     {
+        if (tempP->z >= TRIANGLE_INCREASE*(MaxRaiseHeight - 0x0A)) //user specified maximum reached
+            return;
+
         if (tempP->z >= TRIANGLE_INCREASE*(0x3C - 0x0A)) //maximum reached (0x3C is max)
             return;
+
         tempP->y -= TRIANGLE_INCREASE;
         tempP->z += TRIANGLE_INCREASE;
         tempP->h += 0x01;
@@ -1364,8 +1395,12 @@ void CMap::modifyHeight(int VertexX, int VertexY)
     }
     else if (mode == EDITOR_MODE_REDUCE)
     {
+        if (tempP->z <= TRIANGLE_INCREASE*(MinReduceHeight - 0x0A)) //user specified minimum reached
+            return;
+
         if (tempP->z <= TRIANGLE_INCREASE*(0x00 - 0x0A)) //minimum reached (0x00 is min)
             return;
+
         tempP->y += TRIANGLE_INCREASE;
         tempP->z -= TRIANGLE_INCREASE;
         tempP->h -= 0x01;

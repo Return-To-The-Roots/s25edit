@@ -62,11 +62,12 @@ class CMap
         int VertexCounter;
         //array to store all vertices (editor mode) --> after constructing class CMap this will have 'VertexCounter' elements
         struct cursorPoint *Vertices;
-        //buffer for texts we maybe need to write
-        char textBuffer[50];
         //these are the new (internal) values for player positions (otherwise we had to walk through the objectXXXX-Blocks step by step)
         Uint16 PlayerHQx[MAXPLAYERS];
         Uint16 PlayerHQy[MAXPLAYERS];
+        //maximum value of height (user can modify this)
+        Uint8 MaxRaiseHeight;
+        Uint8 MinReduceHeight;
     public:
         CMap(char *filename);
         ~CMap();
