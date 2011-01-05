@@ -71,8 +71,8 @@ void CMap::constructMap(char *filename, int width, int height, int type, int tex
     Vertices = (struct cursorPoint*)malloc(VertexCounter*sizeof(struct cursorPoint));
     calculateVertices();
     setupVerticesActivity();
-    mode = EDITOR_MODE_RAISE;
-    lastMode = EDITOR_MODE_RAISE;
+    mode = EDITOR_MODE_HEIGHT_RAISE;
+    lastMode = EDITOR_MODE_HEIGHT_RAISE;
     modeContent = 0x00;
     modeContent2 = 0x00;
     modify = false;
@@ -351,7 +351,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
            )
         {
             //the height-mode picture was clicked
-            mode = EDITOR_MODE_RAISE;
+            mode = EDITOR_MODE_HEIGHT_RAISE;
             return;
         }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2-199) && button.x <= (displayRect.w/2-162)
@@ -508,24 +508,26 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
 {
     if (key.type == SDL_KEYDOWN)
     {
-        if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RAISE)
-            mode = EDITOR_MODE_REDUCE;
-        else if (key.keysym.sym == SDLK_e && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_HEIGHT_RAISE)
+            mode = EDITOR_MODE_HEIGHT_REDUCE;
+        else if (key.keysym.sym == SDLK_LALT && mode == EDITOR_MODE_HEIGHT_RAISE)
+            mode = EDITOR_MODE_HEIGHT_PLANE;
+        else if (key.keysym.sym == SDLK_e && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MaxRaiseHeight > 0x00)
                 MaxRaiseHeight--;
         }
-        else if (key.keysym.sym == SDLK_r && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        else if (key.keysym.sym == SDLK_r && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MaxRaiseHeight < 0x3C)
                 MaxRaiseHeight++;
         }
-        else if (key.keysym.sym == SDLK_s && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        else if (key.keysym.sym == SDLK_s && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MinReduceHeight > 0x00)
                 MinReduceHeight--;
         }
-        else if (key.keysym.sym == SDLK_d && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE))
+        else if (key.keysym.sym == SDLK_d && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MinReduceHeight < 0x3C)
                 MinReduceHeight++;
@@ -539,21 +541,21 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             lastMode = mode;
             mode = EDITOR_MODE_CUT;
         }
-        else if (key.keysym.sym == SDLK_b && mode != EDITOR_MODE_MAKE_BIG_HOUSE && mode != EDITOR_MODE_MAKE_HARBOUR)
+        else if (key.keysym.sym == SDLK_b && mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
         {
             lastMode = mode;
             lastChangeSection = ChangeSection;
             ChangeSection = 0;
             setupVerticesActivity();
-            mode = EDITOR_MODE_MAKE_BIG_HOUSE;
+            mode = EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE;
         }
-        else if (key.keysym.sym == SDLK_h && mode != EDITOR_MODE_MAKE_BIG_HOUSE && mode != EDITOR_MODE_MAKE_HARBOUR)
+        else if (key.keysym.sym == SDLK_h && mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
         {
             lastMode = mode;
             lastChangeSection = ChangeSection;
             ChangeSection = 0;
             setupVerticesActivity();
-            mode = EDITOR_MODE_MAKE_HARBOUR;
+            mode = EDITOR_MODE_TEXTURE_MAKE_HARBOUR;
         }
         else if (key.keysym.sym == SDLK_KP_PLUS)
         {
@@ -692,75 +694,78 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             else if (displayRect.y <= -displayRect.h)
                 displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
         }
-    }
-    //convert map to greenland
-    else if (key.keysym.sym == SDLK_g)
-    {
-        callback::PleaseWait(INITIALIZING_CALL);
+        //convert map to greenland
+        else if (key.keysym.sym == SDLK_g)
+        {
+            callback::PleaseWait(INITIALIZING_CALL);
 
-        //we have to close the windows and initialize them again to prevent failures
-        callback::EditorCursorMenu(MAP_QUIT);
-        callback::EditorTextureMenu(MAP_QUIT);
-        callback::EditorTreeMenu(MAP_QUIT);
-        callback::EditorLandscapeMenu(MAP_QUIT);
-        callback::MinimapMenu(MAP_QUIT);
-        callback::EditorResourceMenu(MAP_QUIT);
-        callback::EditorAnimalMenu(MAP_QUIT);
-        callback::EditorPlayerMenu(MAP_QUIT);
+            //we have to close the windows and initialize them again to prevent failures
+            callback::EditorCursorMenu(MAP_QUIT);
+            callback::EditorTextureMenu(MAP_QUIT);
+            callback::EditorTreeMenu(MAP_QUIT);
+            callback::EditorLandscapeMenu(MAP_QUIT);
+            callback::MinimapMenu(MAP_QUIT);
+            callback::EditorResourceMenu(MAP_QUIT);
+            callback::EditorAnimalMenu(MAP_QUIT);
+            callback::EditorPlayerMenu(MAP_QUIT);
 
-        map->type = 0;
-        unloadMapPics();
-        loadMapPics();
+            map->type = 0;
+            unloadMapPics();
+            loadMapPics();
 
-        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-    }
-    //convert map to wasteland
-    else if (key.keysym.sym == SDLK_o)
-    {
-        callback::PleaseWait(INITIALIZING_CALL);
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+        }
+        //convert map to wasteland
+        else if (key.keysym.sym == SDLK_o)
+        {
+            callback::PleaseWait(INITIALIZING_CALL);
 
-        //we have to close the windows and initialize them again to prevent failures
-        callback::EditorCursorMenu(MAP_QUIT);
-        callback::EditorTextureMenu(MAP_QUIT);
-        callback::EditorTreeMenu(MAP_QUIT);
-        callback::EditorLandscapeMenu(MAP_QUIT);
-        callback::MinimapMenu(MAP_QUIT);
-        callback::EditorResourceMenu(MAP_QUIT);
-        callback::EditorAnimalMenu(MAP_QUIT);
-        callback::EditorPlayerMenu(MAP_QUIT);
+            //we have to close the windows and initialize them again to prevent failures
+            callback::EditorCursorMenu(MAP_QUIT);
+            callback::EditorTextureMenu(MAP_QUIT);
+            callback::EditorTreeMenu(MAP_QUIT);
+            callback::EditorLandscapeMenu(MAP_QUIT);
+            callback::MinimapMenu(MAP_QUIT);
+            callback::EditorResourceMenu(MAP_QUIT);
+            callback::EditorAnimalMenu(MAP_QUIT);
+            callback::EditorPlayerMenu(MAP_QUIT);
 
-        map->type = 1;
-        unloadMapPics();
-        loadMapPics();
+            map->type = 1;
+            unloadMapPics();
+            loadMapPics();
 
-        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-    }
-    //convert map to winterland
-    else if (key.keysym.sym == SDLK_w)
-    {
-        callback::PleaseWait(INITIALIZING_CALL);
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+        }
+        //convert map to winterland
+        else if (key.keysym.sym == SDLK_w)
+        {
+            callback::PleaseWait(INITIALIZING_CALL);
 
-        //we have to close the windows and initialize them again to prevent failures
-        callback::EditorCursorMenu(MAP_QUIT);
-        callback::EditorTextureMenu(MAP_QUIT);
-        callback::EditorTreeMenu(MAP_QUIT);
-        callback::EditorLandscapeMenu(MAP_QUIT);
-        callback::MinimapMenu(MAP_QUIT);
-        callback::EditorResourceMenu(MAP_QUIT);
-        callback::EditorAnimalMenu(MAP_QUIT);
-        callback::EditorPlayerMenu(MAP_QUIT);
+            //we have to close the windows and initialize them again to prevent failures
+            callback::EditorCursorMenu(MAP_QUIT);
+            callback::EditorTextureMenu(MAP_QUIT);
+            callback::EditorTreeMenu(MAP_QUIT);
+            callback::EditorLandscapeMenu(MAP_QUIT);
+            callback::MinimapMenu(MAP_QUIT);
+            callback::EditorResourceMenu(MAP_QUIT);
+            callback::EditorAnimalMenu(MAP_QUIT);
+            callback::EditorPlayerMenu(MAP_QUIT);
 
-        map->type = 2;
-        unloadMapPics();
-        loadMapPics();
+            map->type = 2;
+            unloadMapPics();
+            loadMapPics();
 
-        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+        }
     }
     else if (key.type == SDL_KEYUP)
     {
-        //user probably released EDITOR_MODE_REDUCE
-        if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_REDUCE)
-            mode = EDITOR_MODE_RAISE;
+        //user probably released EDITOR_MODE_HEIGHT_REDUCE
+        if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_HEIGHT_REDUCE)
+            mode = EDITOR_MODE_HEIGHT_RAISE;
+        //user probably released EDITOR_MODE_HEIGHT_PLANE
+        else if (key.keysym.sym == SDLK_LALT && mode == EDITOR_MODE_HEIGHT_PLANE)
+            mode = EDITOR_MODE_HEIGHT_RAISE;
         //user probably released EDITOR_MODE_RESOURCE_REDUCE
         else if (key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RESOURCE_REDUCE)
             mode = EDITOR_MODE_RESOURCE_RAISE;
@@ -770,14 +775,14 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
         //user probably released EDITOR_MODE_CUT
         else if (key.keysym.sym == SDLK_LCTRL)
             mode = lastMode;
-        //user probably released EDITOR_MODE_MAKE_BIG_HOUSE
+        //user probably released EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE
         else if (key.keysym.sym == SDLK_b)
         {
             mode = lastMode;
             ChangeSection = lastChangeSection;
             setupVerticesActivity();
         }
-        //user probably released EDITOR_MODE_MAKE_HARBOUR
+        //user probably released EDITOR_MODE_TEXTURE_MAKE_HARBOUR
         else if (key.keysym.sym == SDLK_h)
         {
             mode = lastMode;
@@ -790,7 +795,7 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
 void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
 {
     //if user raises or reduces the height of a vertex, don't let the cursor jump to another vertex
-    //if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE) )
+    //if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE) )
         //return;
 
     int X = 0, Xeven = 0, Xuneven = 0;
@@ -915,41 +920,50 @@ bool CMap::render(void)
 
     //draw pictures to cursor position
 #ifdef _EDITORMODE
-    int symbol_index;
+    int symbol_index, symbol_index2 = -1;
     switch (mode)
     {
-        case EDITOR_MODE_CUT:               symbol_index = CURSOR_SYMBOL_SCISSORS;
-                                            break;
-        case EDITOR_MODE_TREE:              symbol_index = CURSOR_SYMBOL_TREE;
-                                            break;
-        case EDITOR_MODE_RAISE:             symbol_index = CURSOR_SYMBOL_ARROW_UP;
-                                            break;
-        case EDITOR_MODE_REDUCE:            symbol_index = CURSOR_SYMBOL_ARROW_DOWN;
-                                            break;
-        case EDITOR_MODE_TEXTURE:           symbol_index = CURSOR_SYMBOL_TEXTURE;
-                                            break;
-        case EDITOR_MODE_LANDSCAPE:         symbol_index = CURSOR_SYMBOL_LANDSCAPE;
-                                            break;
-        case EDITOR_MODE_FLAG:              symbol_index = CURSOR_SYMBOL_FLAG;
-                                            break;
-        case EDITOR_MODE_FLAG_DELETE:       symbol_index = CURSOR_SYMBOL_FLAG;
-                                            break;
-        case EDITOR_MODE_RESOURCE_REDUCE:   symbol_index = CURSOR_SYMBOL_PICKAXE_MINUS;
-                                            break;
-        case EDITOR_MODE_RESOURCE_RAISE:    symbol_index = CURSOR_SYMBOL_PICKAXE_PLUS;
-                                            break;
-        case EDITOR_MODE_MAKE_BIG_HOUSE:    symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_BIG;
-                                            break;
-        case EDITOR_MODE_MAKE_HARBOUR:      symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_HARBOUR;
-                                            break;
-        case EDITOR_MODE_ANIMAL:            symbol_index = CURSOR_SYMBOL_ANIMAL;
-                                            break;
-        default:                            symbol_index = CURSOR_SYMBOL_ARROW_UP;
-                                            break;
+        case EDITOR_MODE_CUT:                   symbol_index = CURSOR_SYMBOL_SCISSORS;
+                                                break;
+        case EDITOR_MODE_TREE:                  symbol_index = CURSOR_SYMBOL_TREE;
+                                                break;
+        case EDITOR_MODE_HEIGHT_RAISE:          symbol_index = CURSOR_SYMBOL_ARROW_UP;
+                                                break;
+        case EDITOR_MODE_HEIGHT_REDUCE:         symbol_index = CURSOR_SYMBOL_ARROW_DOWN;
+                                                break;
+        case EDITOR_MODE_HEIGHT_PLANE:          symbol_index = CURSOR_SYMBOL_ARROW_UP;
+                                                symbol_index2 = CURSOR_SYMBOL_ARROW_DOWN;
+                                                break;
+        case EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE: symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_BIG;
+                                                break;
+        case EDITOR_MODE_TEXTURE:               symbol_index = CURSOR_SYMBOL_TEXTURE;
+                                                break;
+        case EDITOR_MODE_TEXTURE_MAKE_HARBOUR:  symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_HARBOUR;
+                                                break;
+        case EDITOR_MODE_LANDSCAPE:             symbol_index = CURSOR_SYMBOL_LANDSCAPE;
+                                                break;
+        case EDITOR_MODE_FLAG:                  symbol_index = CURSOR_SYMBOL_FLAG;
+                                                break;
+        case EDITOR_MODE_FLAG_DELETE:           symbol_index = CURSOR_SYMBOL_FLAG;
+                                                break;
+        case EDITOR_MODE_RESOURCE_REDUCE:       symbol_index = CURSOR_SYMBOL_PICKAXE_MINUS;
+                                                break;
+        case EDITOR_MODE_RESOURCE_RAISE:        symbol_index = CURSOR_SYMBOL_PICKAXE_PLUS;
+                                                break;
+        case EDITOR_MODE_ANIMAL:                symbol_index = CURSOR_SYMBOL_ANIMAL;
+                                                break;
+        default:                                symbol_index = CURSOR_SYMBOL_ARROW_UP;
+                                                break;
     }
     for (int i = 0; i < VertexCounter; i++)
+    {
         if (Vertices[i].active)
+        {
             CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, Vertices[i].blit_x-10, Vertices[i].blit_y-10);
+            if (symbol_index2 >= 0)
+                CSurface::Draw(Surf_Map, global::bmpArray[symbol_index2].surface, Vertices[i].blit_x, Vertices[i].blit_y-7);
+        }
+    }
 
     //text for x and y of vertex (shown in upper left corner)
     sprintf(textBuffer, "%d    %d", VertexX, VertexY);
@@ -1266,22 +1280,50 @@ void CMap::modifyVertex(void)
         saveCurrentVertices = false;
     }
 
-    if (mode == EDITOR_MODE_RAISE || mode == EDITOR_MODE_REDUCE)
+    if (mode == EDITOR_MODE_HEIGHT_RAISE)
     {
         for (int i = 0; i < VertexCounter; i++)
             if (Vertices[i].active)
-                modifyHeight(Vertices[i].x, Vertices[i].y);
+                modifyHeightRaise(Vertices[i].x, Vertices[i].y);
     }
-    else if (mode == EDITOR_MODE_MAKE_BIG_HOUSE)
+    else if (mode == EDITOR_MODE_HEIGHT_REDUCE)
+    {
+        for (int i = 0; i < VertexCounter; i++)
+            if (Vertices[i].active)
+                modifyHeightReduce(Vertices[i].x, Vertices[i].y);
+    }
+    else if (mode == EDITOR_MODE_HEIGHT_PLANE)
+    {
+        //calculate height average over all vertices
+        int h_sum = 0;
+        int h_count = 0;
+        Uint8 h_avg = 0x00;
+
+        for (int i = 0; i < VertexCounter; i++)
+        {
+            if (Vertices[i].active)
+            {
+                h_sum += map->vertex[Vertices[i].y*map->width+Vertices[i].x].h;
+                h_count++;
+            }
+        }
+
+        h_avg = h_sum / h_count;
+
+        for (int i = 0; i < VertexCounter; i++)
+            if (Vertices[i].active)
+                modifyHeightPlane(Vertices[i].x, Vertices[i].y, h_avg);
+    }
+    else if (mode == EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE)
     {
         modifyHeightMakeBigHouse(VertexX, VertexY);
     }
-    else if (mode == EDITOR_MODE_MAKE_HARBOUR)
+    else if (mode == EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
     {
         modifyHeightMakeBigHouse(VertexX, VertexY);
         modifyTextureMakeHarbour(VertexX, VertexY);
     }
-    //at this time we need a content to set
+    //at this time we need a modeContent to set
     else if (mode == EDITOR_MODE_CUT)
     {
         for (int i = 0; i < VertexCounter; i++)
@@ -1329,7 +1371,7 @@ void CMap::modifyVertex(void)
     }
 }
 
-void CMap::modifyHeight(int VertexX, int VertexY)
+void CMap::modifyHeightRaise(int VertexX, int VertexY)
 {
     //vertex count for the points
     int X, Y;
@@ -1342,107 +1384,56 @@ void CMap::modifyHeight(int VertexX, int VertexY)
     if (VertexY%2 == 0)
         even = true;
 
-    if (mode == EDITOR_MODE_RAISE)
-    {
-        if (tempP->z >= TRIANGLE_INCREASE*(MaxRaiseHeight - 0x0A)) //user specified maximum reached
-            return;
+    //DO IT
+    if (tempP->z >= TRIANGLE_INCREASE*(MaxRaiseHeight - 0x0A)) //user specified maximum reached
+        return;
 
-        if (tempP->z >= TRIANGLE_INCREASE*(0x3C - 0x0A)) //maximum reached (0x3C is max)
-            return;
+    if (tempP->z >= TRIANGLE_INCREASE*(0x3C - 0x0A)) //maximum reached (0x3C is max)
+        return;
 
-        tempP->y -= TRIANGLE_INCREASE;
-        tempP->z += TRIANGLE_INCREASE;
-        tempP->h += 0x01;
-        CSurface::update_shading(map, VertexX, VertexY);
+    tempP->y -= TRIANGLE_INCREASE;
+    tempP->z += TRIANGLE_INCREASE;
+    tempP->h += 0x01;
+    CSurface::update_shading(map, VertexX, VertexY);
 
-        //after (5*TRIANGLE_INCREASE) pixel all vertices around will be raised too
-        //update first vertex left upside
-        X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
-        Y = VertexY-1;                  if (Y < 0) Y += map->height;
-        //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
-        if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update second vertex right upside
-        X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
-        Y = VertexY-1;                  if (Y < 0) Y += map->height;
-        //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
-        if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update third point bottom left
-        X = VertexX-1;                  if (X < 0) X += map->width;
-        Y = VertexY;
-        //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
-        if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update fourth point bottom right
-        X = VertexX+1;                  if (X >= map->width) X -= map->width;
-        Y = VertexY;
-        //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
-        if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update fifth point down left
-        X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
-        Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
-        //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
-        if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update sixth point down right
-        X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
-        Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
-        //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
-        if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-    }
-    else if (mode == EDITOR_MODE_REDUCE)
-    {
-        if (tempP->z <= TRIANGLE_INCREASE*(MinReduceHeight - 0x0A)) //user specified minimum reached
-            return;
+    //after (5*TRIANGLE_INCREASE) pixel all vertices around will be raised too
+    //update first vertex left upside
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+    Y = VertexY-1;                  if (Y < 0) Y += map->height;
+    //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
+        modifyHeightRaise(X, Y);
+    //update second vertex right upside
+    X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+    Y = VertexY-1;                  if (Y < 0) Y += map->height;
+    //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
+        modifyHeightRaise(X, Y);
+    //update third point bottom left
+    X = VertexX-1;                  if (X < 0) X += map->width;
+    Y = VertexY;
+    //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
+        modifyHeightRaise(X, Y);
+    //update fourth point bottom right
+    X = VertexX+1;                  if (X >= map->width) X -= map->width;
+    Y = VertexY;
+    //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
+        modifyHeightRaise(X, Y);
+    //update fifth point down left
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+    Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
+    //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
+        modifyHeightRaise(X, Y);
+    //update sixth point down right
+    X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+    Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
+    //only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    if (map->vertex[Y*map->width+X].z < tempP->z-(5*TRIANGLE_INCREASE))
+        modifyHeightRaise(X, Y);
 
-        if (tempP->z <= TRIANGLE_INCREASE*(0x00 - 0x0A)) //minimum reached (0x00 is min)
-            return;
-
-        tempP->y += TRIANGLE_INCREASE;
-        tempP->z -= TRIANGLE_INCREASE;
-        tempP->h -= 0x01;
-        CSurface::update_shading(map, VertexX, VertexY);
-        //after (5*TRIANGLE_INCREASE) pixel all vertices around will be reduced too
-        //update first vertex left upside
-        X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
-        Y = VertexY-1;                  if (Y < 0) Y += map->height;
-        //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
-        if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update second vertex right upside
-        X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
-        Y = VertexY-1;                  if (Y < 0) Y += map->height;
-        //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
-        if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update third point bottom left
-        X = VertexX-1;                  if (X < 0) X += map->width;
-        Y = VertexY;
-        //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
-        if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update fourth point bottom right
-        X = VertexX+1;                  if (X >= map->width) X -= map->width;
-        Y = VertexY;
-        //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
-        if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update fifth point down left
-        X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
-        Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
-        //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
-        if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-        //update sixth point down right
-        X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
-        Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
-        //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
-        if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
-            modifyHeight(X, Y);
-    }
     //at least setup the possible building and shading at the vertex and 2 sections around
     for (int i = 0; i < 19; i++)
     {
@@ -1451,10 +1442,87 @@ void CMap::modifyHeight(int VertexX, int VertexY)
     }
 }
 
+void CMap::modifyHeightReduce(int VertexX, int VertexY)
+{
+    //vertex count for the points
+    int X, Y;
+    struct point *tempP = &map->vertex[VertexY*map->width+VertexX];
+    //this is to setup the building depending on the vertices around
+    struct cursorPoint tempVertices[19];
+    calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
+
+    bool even = false;
+    if (VertexY%2 == 0)
+        even = true;
+
+    //DO IT
+    if (tempP->z <= TRIANGLE_INCREASE*(MinReduceHeight - 0x0A)) //user specified minimum reached
+        return;
+
+    if (tempP->z <= TRIANGLE_INCREASE*(0x00 - 0x0A)) //minimum reached (0x00 is min)
+        return;
+
+    tempP->y += TRIANGLE_INCREASE;
+    tempP->z -= TRIANGLE_INCREASE;
+    tempP->h -= 0x01;
+    CSurface::update_shading(map, VertexX, VertexY);
+    //after (5*TRIANGLE_INCREASE) pixel all vertices around will be reduced too
+    //update first vertex left upside
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+    Y = VertexY-1;                  if (Y < 0) Y += map->height;
+    //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
+        modifyHeightReduce(X, Y);
+    //update second vertex right upside
+    X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+    Y = VertexY-1;                  if (Y < 0) Y += map->height;
+    //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
+        modifyHeightReduce(X, Y);
+    //update third point bottom left
+    X = VertexX-1;                  if (X < 0) X += map->width;
+    Y = VertexY;
+    //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
+        modifyHeightReduce(X, Y);
+    //update fourth point bottom right
+    X = VertexX+1;                  if (X >= map->width) X -= map->width;
+    Y = VertexY;
+    //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
+        modifyHeightReduce(X, Y);
+    //update fifth point down left
+    X = VertexX - (even ? 1 : 0);   if (X < 0) X += map->width;
+    Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
+    //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
+        modifyHeightReduce(X, Y);
+    //update sixth point down right
+    X = VertexX + (even ? 0 : 1);   if (X >= map->width) X -= map->width;
+    Y = VertexY+1;                  if (Y >= map->height) Y -= map->height;
+    //only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    if (map->vertex[Y*map->width+X].z > tempP->z+(5*TRIANGLE_INCREASE))
+        modifyHeightReduce(X, Y);
+
+    //at least setup the possible building and shading at the vertex and 2 sections around
+    for (int i = 0; i < 19; i++)
+    {
+        modifyBuild(tempVertices[i].x, tempVertices[i].y);
+        modifyShading(tempVertices[i].x, tempVertices[i].y);
+    }
+}
+
+void CMap::modifyHeightPlane(int VertexX, int VertexY, Uint8 h)
+{
+    while (map->vertex[VertexY*map->width+VertexX].h < h)
+        modifyHeightRaise(VertexX, VertexY);
+
+    while (map->vertex[VertexY*map->width+VertexX].h > h)
+        modifyHeightReduce(VertexX, VertexY);
+}
+
 void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
 {
-    int tmp_lastMode = mode;
-
     //at first save all vertices we need to calculate the new building
     struct cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
@@ -1467,36 +1535,30 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
     //test the whole section
     for (int i = 0; i < 6; i++)
     {
-        mode = EDITOR_MODE_RAISE;
         while (height - map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h >= 0x04)
-            modifyHeight(tempVertices[i].x, tempVertices[i].y);
+            modifyHeightRaise(tempVertices[i].x, tempVertices[i].y);
 
-        mode = EDITOR_MODE_REDUCE;
         while (map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h - height >= 0x04)
-            modifyHeight(tempVertices[i].x, tempVertices[i].y);
+            modifyHeightReduce(tempVertices[i].x, tempVertices[i].y);
     }
 
     //test vertex lower right
-    mode = EDITOR_MODE_RAISE;
     while (height - map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].h >= 0x04)
-        modifyHeight(tempVertices[6].x, tempVertices[6].y);
+        modifyHeightRaise(tempVertices[6].x, tempVertices[6].y);
 
-    mode = EDITOR_MODE_REDUCE;
     while (map->vertex[tempVertices[6].y*map->width+tempVertices[6].x].h - height >= 0x02)
-        modifyHeight(tempVertices[6].x, tempVertices[6].y);
+        modifyHeightReduce(tempVertices[6].x, tempVertices[6].y);
 
     //now test the second section around the vertex
 
     //test the whole section
     for (int i = 7; i < 19; i++)
     {
-        mode = EDITOR_MODE_RAISE;
         while (height - map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h >= 0x03)
-            modifyHeight(tempVertices[i].x, tempVertices[i].y);
+            modifyHeightRaise(tempVertices[i].x, tempVertices[i].y);
 
-        mode = EDITOR_MODE_REDUCE;
         while (map->vertex[tempVertices[i].y*map->width+tempVertices[i].x].h - height >= 0x03)
-            modifyHeight(tempVertices[i].x, tempVertices[i].y);
+            modifyHeightReduce(tempVertices[i].x, tempVertices[i].y);
     }
 
     //remove harbour if there is one
@@ -1511,8 +1573,6 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
     {
         map->vertex[VertexY*map->width+VertexX].rsuTexture -= 0x40;
     }
-
-    mode = tmp_lastMode;
 }
 
 void CMap::modifyShading(int VertexX, int VertexY)

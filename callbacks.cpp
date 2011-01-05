@@ -563,7 +563,7 @@ void callback::EditorTextureMenu(int Param)
                         WNDTexture->setWaste();
                         WNDTexture = NULL;
                     }
-                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
                     MapObj->setModeContent(0x00);
                     lastContent = 0x00;
                     MapObj = NULL;
@@ -573,7 +573,7 @@ void callback::EditorTextureMenu(int Param)
                     break;
 
         case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
                     if (WNDTexture != NULL)
                     {
                         PosX = WNDTexture->getX();
@@ -753,7 +753,7 @@ void callback::EditorTreeMenu(int Param)
                         WNDTree->setWaste();
                         WNDTree = NULL;
                     }
-                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
                     MapObj->setModeContent(0x00);
                     MapObj->setModeContent2(0x00);
                     lastContent = 0x00;
@@ -763,7 +763,7 @@ void callback::EditorTreeMenu(int Param)
                     break;
 
         case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
                     if (WNDTree != NULL)
                     {
                         PosX = WNDTree->getX();
@@ -852,14 +852,14 @@ void callback::EditorResourceMenu(int Param)
                         WNDResource->setWaste();
                         WNDResource = NULL;
                     }
-                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
                     MapObj->setModeContent(0x00);
                     lastContent = 0x00;
                     MapObj = NULL;
                     break;
 
         case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
                     if (WNDResource != NULL)
                     {
                         PosX = WNDResource->getX();
@@ -1031,7 +1031,7 @@ void callback::EditorLandscapeMenu(int Param)
                         WNDLandscape->setWaste();
                         WNDLandscape = NULL;
                     }
-                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
                     MapObj->setModeContent(0x00);
                     MapObj->setModeContent2(0x00);
                     lastContent = 0x00;
@@ -1041,7 +1041,7 @@ void callback::EditorLandscapeMenu(int Param)
                     break;
 
         case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
                     if (WNDLandscape != NULL)
                     {
                         PosX = WNDLandscape->getX();
@@ -1139,14 +1139,14 @@ void callback::EditorAnimalMenu(int Param)
                         WNDAnimal->setWaste();
                         WNDAnimal = NULL;
                     }
-                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
                     MapObj->setModeContent(0x00);
                     lastContent = 0x00;
                     MapObj = NULL;
                     break;
 
         case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
                     if (WNDAnimal != NULL)
                     {
                         PosX = WNDAnimal->getX();
@@ -1259,7 +1259,7 @@ void callback::EditorPlayerMenu(int Param)
                         WNDPlayer->setWaste();
                         WNDPlayer = NULL;
                     }
-                    MapObj->setMode(EDITOR_MODE_RAISE);
+                    MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
                     MapObj->setModeContent(0x00);
                     MapObj->setModeContent2(0x00);
                     MapObj = NULL;
@@ -1271,7 +1271,7 @@ void callback::EditorPlayerMenu(int Param)
                     break;
 
         case MAP_QUIT:
-                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_RAISE), cause map is dead
+                    //we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
                     if (WNDPlayer != NULL)
                     {
                         PosX = WNDPlayer->getX();

@@ -130,7 +130,9 @@ class CMap
         int correctMouseBlitX(int VertexX, int VertexY);
         int correctMouseBlitY(int VertexX, int VertexY);
         void modifyVertex(void);
-        void modifyHeight(int VertexX, int VertexY);
+        void modifyHeightRaise(int VertexX, int VertexY);
+        void modifyHeightReduce(int VertexX, int VertexY);
+        void modifyHeightPlane(int VertexX, int VertexY, Uint8 h);
         void modifyHeightMakeBigHouse(int VertexX, int VertexY);
         void modifyShading(int VertexX, int VertexY);
         void modifyTexture(int VertexX, int VertexY, bool rsu, bool usd);
