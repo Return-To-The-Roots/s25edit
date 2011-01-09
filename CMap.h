@@ -141,6 +141,8 @@ class CMap
         void modifyAnimal(int VertexX, int VertexY);
         void modifyBuild(int VertexX, int VertexY);
         void modifyResource(int VertexX, int VertexY);
+        void modifyResourceRaise(int VertexX, int VertexY, Uint8 resource);
+        void modifyResourceReduce(int VertexX, int VertexY, Uint8 resource);
         void modifyPlayer(int VertexX, int VertexY);
 };
 

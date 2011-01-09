@@ -46,11 +46,11 @@
 	<File name="CGame_Render.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="137" topLine="0" />
 	</File>
-	<File name="CMap.cpp" open="1" top="1" tabpos="4">
-		<Cursor position="59549" topLine="1263" />
+	<File name="CMap.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="84162" topLine="1888" />
 	</File>
 	<File name="CMap.h" open="1" top="0" tabpos="6">
-		<Cursor position="7580" topLine="19" />
+		<Cursor position="8034" topLine="111" />
 	</File>
 	<File name="CMenu.cpp" open="0" top="0" tabpos="10">
 		<Cursor position="6076" topLine="216" />
@@ -64,8 +64,8 @@
 	<File name="CPicture.h" open="0" top="0" tabpos="0">
 		<Cursor position="341" topLine="0" />
 	</File>
-	<File name="CSurface.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="19053" topLine="503" />
+	<File name="CSurface.cpp" open="1" top="1" tabpos="5">
+		<Cursor position="22149" topLine="528" />
 	</File>
 	<File name="CSurface.h" open="0" top="0" tabpos="7">
 		<Cursor position="1762" topLine="5" />
@@ -86,7 +86,7 @@
 		<Cursor position="115" topLine="0" />
 	</File>
 	<File name="defines.h" open="1" top="0" tabpos="2">
-		<Cursor position="2651" topLine="74" />
+		<Cursor position="35525" topLine="1108" />
 	</File>
 	<File name="globals.cpp" open="0" top="0" tabpos="8">
 		<Cursor position="299" topLine="0" />

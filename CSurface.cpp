@@ -299,10 +299,25 @@ void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle d
                         row_end = height-1;
                         view_outside_edges = true;
                     }
+
                     else if ( (displayRect.y + displayRect.h) > myMap->height_pixel )
                     {
                         row_start = 0;
                         row_end = ((displayRect.y + displayRect.h) - myMap->height_pixel)/TRIANGLE_HEIGHT + 8;
+                        view_outside_edges = true;
+                    }
+                    else if ( displayRect.y <= 2*TRIANGLE_HEIGHT )
+                    {
+                        //this is for draw triangles that are reduced under the lower map edge (have bigger y-coords as myMap->height_pixel)
+                        row_start = height-3;
+                        row_end = height-1;
+                        view_outside_edges = true;
+                    }
+                    else if ( (displayRect.y+displayRect.h) >= (myMap->height_pixel-8*TRIANGLE_HEIGHT) )
+                    {
+                        //this is for draw triangles that are raised over the upper map edge (have negative y-coords)
+                        row_start = 0;
+                        row_end = 8;
                         view_outside_edges = true;
                     }
                 }
@@ -310,9 +325,15 @@ void CSurface::DrawTriangleField(SDL_Surface *display, struct DisplayRectangle d
                 if (k == 2 || k == 3)
                 {
                     //now call DrawTriangle for all triangles left or right outside
-                    if (displayRect.x < 0)
+                    if (displayRect.x <= 0)
                     {
                         col_start = width-1 - (-displayRect.x/TRIANGLE_WIDTH) - 1;
+                        col_end = width-1;
+                        view_outside_edges = true;
+                    }
+                    else if (displayRect.x > 0 && displayRect.x < TRIANGLE_WIDTH)
+                    {
+                        col_start = width-2;
                         col_end = width-1;
                         view_outside_edges = true;
                     }
@@ -436,10 +457,25 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     {
         bool triangle_shown = false;
 
-        if ( displayRect.x < 0 )
+        if ( displayRect.x <= 0 )
         {
             int outside_x = displayRect.x;
             int outside_w = -displayRect.x;
+            if ( (((P1.x-myMap->width_pixel) >= (outside_x)) && ((P1.x-myMap->width_pixel) <= (outside_x+outside_w)))
+              || (((P2.x-myMap->width_pixel) >= (outside_x)) && ((P2.x-myMap->width_pixel) <= (outside_x+outside_w)))
+              || (((P3.x-myMap->width_pixel) >= (outside_x)) && ((P3.x-myMap->width_pixel) <= (outside_x+outside_w)))
+               )
+            {
+                P1.x -= myMap->width_pixel;
+                P2.x -= myMap->width_pixel;
+                P3.x -= myMap->width_pixel;
+                triangle_shown = true;
+            }
+        }
+        else if ( displayRect.x > 0 && displayRect.x < TRIANGLE_WIDTH)
+        {
+            int outside_x = displayRect.x;
+            int outside_w = TRIANGLE_WIDTH;
             if ( (((P1.x-myMap->width_pixel) >= (outside_x)) && ((P1.x-myMap->width_pixel) <= (outside_x+outside_w)))
               || (((P2.x-myMap->width_pixel) >= (outside_x)) && ((P2.x-myMap->width_pixel) <= (outside_x+outside_w)))
               || (((P3.x-myMap->width_pixel) >= (outside_x)) && ((P3.x-myMap->width_pixel) <= (outside_x+outside_w)))
@@ -494,6 +530,36 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 P1.y += myMap->height_pixel;
                 P2.y += myMap->height_pixel;
                 P3.y += myMap->height_pixel;
+                triangle_shown = true;
+            }
+        }
+
+        //now test if triangle has negative y-coords cause it's raised over the upper map edge
+        if (P1.y < 0 || P2.y < 0 || P3.y < 0)
+        {
+            if ( (((P1.y+myMap->height_pixel) >= displayRect.y) && ((P1.y+myMap->height_pixel) <= (displayRect.y+displayRect.h)))
+              || (((P2.y+myMap->height_pixel) >= displayRect.y) && ((P2.y+myMap->height_pixel) <= (displayRect.y+displayRect.h)))
+              || (((P3.y+myMap->height_pixel) >= displayRect.y) && ((P3.y+myMap->height_pixel) <= (displayRect.y+displayRect.h)))
+               )
+            {
+                P1.y += myMap->height_pixel;
+                P2.y += myMap->height_pixel;
+                P3.y += myMap->height_pixel;
+                triangle_shown = true;
+            }
+        }
+
+        //now test if triangle has bigger y-coords as myMap->height_pixel cause it's reduced under the lower map edge
+        if (P1.y > myMap->height_pixel || P2.y > myMap->height_pixel || P3.y > myMap->height_pixel)
+        {
+            if ( (((P1.y-myMap->height_pixel) >= displayRect.y) && ((P1.y-myMap->height_pixel) <= (displayRect.y+displayRect.h)))
+              || (((P2.y-myMap->height_pixel) >= displayRect.y) && ((P2.y-myMap->height_pixel) <= (displayRect.y+displayRect.h)))
+              || (((P3.y-myMap->height_pixel) >= displayRect.y) && ((P3.y-myMap->height_pixel) <= (displayRect.y+displayRect.h)))
+               )
+            {
+                P1.y -= myMap->height_pixel;
+                P2.y -= myMap->height_pixel;
+                P3.y -= myMap->height_pixel;
                 triangle_shown = true;
             }
         }
