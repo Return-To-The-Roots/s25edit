@@ -48,6 +48,7 @@ void CMap::constructMap(char *filename, int width, int height, int type, int tex
     VertexX = 10;
     VertexY = 10;
     BuildHelp = false;
+    BitsPerPixel = 32;
     MouseBlitX = correctMouseBlitX(VertexX, VertexY);
     MouseBlitY = correctMouseBlitY(VertexX, VertexY);
     ChangeSection = 1;
@@ -161,8 +162,10 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
 
     strcpy(myMap->name, "Ohne Namen");
     myMap->width = width;
+    myMap->width_old = width;
     myMap->width_pixel = myMap->width*TRIANGLE_WIDTH;
     myMap->height = height;
+    myMap->height_old = height;
     myMap->height_pixel = myMap->height*TRIANGLE_HEIGHT;
     myMap->type = type;
     myMap->player = 0;
@@ -694,6 +697,7 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             else if (displayRect.y <= -displayRect.h)
                 displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
         }
+        #ifdef _EDITORMODE
         //convert map to greenland
         else if (key.keysym.sym == SDLK_g)
         {
@@ -756,6 +760,14 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             loadMapPics();
 
             callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+        }
+        #endif
+        else if (key.keysym.sym == SDLK_p)
+        {
+            if (BitsPerPixel == 8)
+                setBitsPerPixel(32);
+            else
+                setBitsPerPixel(8);
         }
     }
     else if (key.type == SDL_KEYUP)
@@ -902,8 +914,10 @@ bool CMap::render(void)
     {
         SDL_FreeSurface(Surf_Map);
         Surf_Map = NULL;
-        if ( (Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, 32, 0, 0, 0, 0)) == NULL )
+        if ( (Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, BitsPerPixel, 0, 0, 0, 0)) == NULL )
             return false;
+        if (BitsPerPixel == 8)
+            SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[0].colors, 0, 256);
         needSurface = false;
     }
     //else
@@ -914,7 +928,7 @@ bool CMap::render(void)
     if (modify)
         modifyVertex();
 
-    //if (map->vertex != NULL)
+    if (map->vertex != NULL)
         CSurface::DrawTriangleField(Surf_Map, displayRect, map);
 
 

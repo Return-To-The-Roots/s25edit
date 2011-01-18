@@ -16,6 +16,7 @@ class CMap
         bool needSurface;
         int VertexX, VertexY;
         bool BuildHelp;
+        int BitsPerPixel;
         //editor mode variables
         int mode;
         //necessary for release the EDITOR_MODE_CUT (set back to last used mode)
@@ -86,6 +87,8 @@ class CMap
         int getVertexX(void) { return VertexX; };
         int getVertexY(void) { return VertexY; };
         bool getBuildHelp(void) { return BuildHelp; };
+        int getBitsPerPixel(void) { return BitsPerPixel; };
+        void setBitsPerPixel(int bbp) { BitsPerPixel = bbp; needSurface = true; }
         void setMode(int mode) { this->mode = mode; };
         int getMode(void) { return mode; };
         void setModeContent(int modeContent) { this->modeContent = modeContent; };

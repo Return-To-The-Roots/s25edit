@@ -238,7 +238,7 @@
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1293971543 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
+1295381783 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
@@ -281,7 +281,7 @@
 	<freetype/ttnameid.h>
 	<freetype/internal/ftobjs.h>
 
-1293972064 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.cpp
+1295362320 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.cpp
 	<SDL/SDL.h>
 	"sge_surface.h"
 	"sge_primitives.h"

@@ -19,4 +19,6 @@ extern unsigned char TRIANGLE_HEIGHT;
 extern unsigned char TRIANGLE_WIDTH;
 extern unsigned char TRIANGLE_INCREASE;
 
+extern Uint8 gouData[3][256][256];
+
 #endif

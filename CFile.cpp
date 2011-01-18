@@ -55,6 +55,11 @@ void* CFile::open_file(char *filename, char filetype, bool only_loadPAL)
 
                     break;
 
+        case GOU:   if ( open_gou() == false )
+                        return_value = NULL;
+
+                    break;
+
         case WLD:   return_value = open_wld();
                     break;
 
@@ -456,29 +461,42 @@ bool CFile::open_lbm(char *filename)
     else
         return false;
 
-    //if this is a texture file, we need a 32-bit surface for SGE and we set a color key
-    if (    strcmp(filename, "TEX5.LBM")
-         || strcmp(filename, "TEX6.LBM")
-         || strcmp(filename, "TEX7.LBM")
-         || strcmp(filename, "TEXTUR_0.LBM")
-         || strcmp(filename, "TEXTUR_3.LBM")
-       );
+    //if this is a texture file, we need a secondary 32-bit surface for SGE and we set a color key at both surfaces
+    if (    strcmp(filename, "./GFX/TEXTURES/TEX5.LBM") == 0
+         || strcmp(filename, "./GFX/TEXTURES/TEX6.LBM") == 0
+         || strcmp(filename, "./GFX/TEXTURES/TEX7.LBM") == 0
+         || strcmp(filename, "./GFX/TEXTURES/TEXTUR_0.LBM") == 0
+         || strcmp(filename, "./GFX/TEXTURES/TEXTUR_3.LBM") == 0
+       )
     {
-        SDL_Surface *tmp = bmpArray->surface;
-        bmpArray->surface = NULL;
-        if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 32, 0, 0, 0, 0)) != NULL )
+        SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+
+        bmpArray++;
+        if ( (bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (bmpArray-1)->w, (bmpArray-1)->h, 32, 0, 0, 0, 0)) != NULL )
         {
-            SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));//0, 90, 134));
-            CSurface::Draw(bmpArray->surface, tmp, 0, 0);
-            SDL_FreeSurface(tmp);
+            SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+            CSurface::Draw(bmpArray->surface, (bmpArray-1)->surface, 0, 0);
         }
         else
-            bmpArray->surface = tmp;
+            bmpArray--;
     }
 
     //we are finished, the surface is filled
     //increment bmpArray for the next picture
     bmpArray++;
+
+    return true;
+}
+
+bool CFile::open_gou(void)
+{
+    static int internalArrayCtr = 0; //maximum is two cause there are only 3 GOUx.DAT-Files
+
+    if (internalArrayCtr > 2)
+        return false;
+
+    fread(gouData[internalArrayCtr], 256, 256, fp);
+    internalArrayCtr++;
 
     return true;
 }

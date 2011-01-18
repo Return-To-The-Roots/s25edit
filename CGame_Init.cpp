@@ -242,6 +242,38 @@ bool CGame::Init()
         return false;
     }
 
+    //load gouraud data
+    std::cout << "\nLoading file: /DATA/TEXTURES/GOU5.DAT...";
+    if ( CFile::open_file("./DATA/TEXTURES/GOU5.DAT", GOU) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    std::cout << "\nLoading file: /DATA/TEXTURES/GOU6.DAT...";
+    if ( CFile::open_file("./DATA/TEXTURES/GOU6.DAT", GOU) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    std::cout << "\nLoading file: /DATA/TEXTURES/GOU7.DAT...";
+    if ( CFile::open_file("./DATA/TEXTURES/GOU7.DAT", GOU) == false )
+    {
+        std::cout << "failure";
+        return false;
+    }
+    /*for (int i = 0; i < 3; i++)
+    {
+        puts("\n--------------------------------------------------------------------------------------------\n");
+        for (int j = 0; j < 256; j++)
+        {
+            puts("");
+            for (int k = 0; k < 256; k++)
+            {
+                printf ("%d ", gouData[i][j][k]);
+            }
+        }
+    }*/
+
 #ifdef _EDITORMODE
     //load only the palette at this time from editres.idx
     std::cout << "\nLoading palette from file: /DATA/EDITRES.IDX...";

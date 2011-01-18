@@ -27,6 +27,7 @@ class CFile
         static bool open_idx(char *filename);
         static bool open_bbm(void);
         static bool open_lbm(char *filename);
+        static bool open_gou(void);
         static bobMAP* open_wld(void);
         static bobMAP* open_swd(void);
         static bool save_lst(void *data);                   //not implemented yet

@@ -50,7 +50,8 @@ enum
     BBM,
     LBM,
     WLD,
-    SWD
+    SWD,
+    GOU
 };
 
 //Structure for Bobtypes 2 (RLE-Bitmaps), 4 (specific Bitmaps), 14 (uncompressed Bitmaps)
@@ -908,15 +909,18 @@ enum
 #endif
 
 //BEGIN: /GFX/TEXTURES/TEX5.LBM
-    TILESET_GREENLAND,
+    TILESET_GREENLAND_8BPP,
+    TILESET_GREENLAND_32BPP,
 //END: /GFX/TEXTURES/TEX5.LBM
 
 //BEGIN: /GFX/TEXTURES/TEX6.LBM
-    TILESET_WASTELAND,
+    TILESET_WASTELAND_8BPP,
+    TILESET_WASTELAND_32BPP,
 //END: /GFX/TEXTURES/TEX6.LBM
 
 //BEGIN: /GFX/TEXTURES/TEX7.LBM
-    TILESET_WINTERLAND,
+    TILESET_WINTERLAND_8BPP,
+    TILESET_WINTERLAND_32BPP,
 //END: /GFX/TEXTURES/TEX7.LBM
 
 //BEGIN: /DATA/MIS*BOBS.LST   * = 0,1,2,3,4,5
@@ -965,9 +969,9 @@ enum
     MAPPIC_HOUSE_HARBOUR,
     //some pictures missing here
 #ifdef _EDITORMODE
-    MAPPIC_TREE_PINE = 651 + 2070,
+    MAPPIC_TREE_PINE = 654 + 2070,
 #else
-    MAPPIC_TREE_PINE = 742 + 2070,
+    MAPPIC_TREE_PINE = 745 + 2070,
 #endif
     MAPPIC_TREE_BIRCH = MAPPIC_TREE_PINE + 15,
     MAPPIC_TREE_OAK = MAPPIC_TREE_PINE + 30,
@@ -1035,9 +1039,9 @@ enum
     MAPPIC_SNOWMAN,
     //some pictures missing here
 #ifdef _EDITORMODE
-    MAPPIC_LAST_ENTRY = 1430 + 2070
+    MAPPIC_LAST_ENTRY = 1433 + 2070
 #else
-    MAPPIC_LAST_ENTRY = 1521 + 2070
+    MAPPIC_LAST_ENTRY = 1524 + 2070
 #endif
 //END: /DATA/MAP00.LST
 };
@@ -1186,6 +1190,8 @@ enum
 #define TRIANGLE_TEXTURE_SWAMP                  0x03
 #define TRIANGLE_TEXTURE_STEPPE                 0x04
 #define TRIANGLE_TEXTURE_WATER                  0x05
+#define TRIANGLE_TEXTURE_WATER_                 0x06
+#define TRIANGLE_TEXTURE_STEPPE_                0x07
 #define TRIANGLE_TEXTURE_MEADOW1                0x08
 #define TRIANGLE_TEXTURE_MEADOW1_HARBOUR        0x48
 #define TRIANGLE_TEXTURE_MEADOW2                0x09
@@ -1200,6 +1206,7 @@ enum
 #define TRIANGLE_TEXTURE_FLOWER                 0x0F
 #define TRIANGLE_TEXTURE_FLOWER_HARBOUR         0x4F
 #define TRIANGLE_TEXTURE_LAVA                   0x10
+#define TRIANGLE_TEXTURE_COLOR                  0x11
 #define TRIANGLE_TEXTURE_MINING_MEADOW          0x12
 #define TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR  0x52
 #define TRIANGLE_TEXTURE_MEADOW_MIXED           0xBF    //this will not be written to map-files, it is only a indicator for mixed meadow in editor mode

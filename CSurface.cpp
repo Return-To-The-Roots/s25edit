@@ -606,13 +606,13 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
 
     switch (type)
     {
-        case MAP_GREENLAND:     Surf_Tileset = global::bmpArray[TILESET_GREENLAND].surface;
+        case MAP_GREENLAND:     Surf_Tileset = global::bmpArray[ global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP ].surface;
                                 break;
-        case MAP_WASTELAND:     Surf_Tileset = global::bmpArray[TILESET_WASTELAND].surface;
+        case MAP_WASTELAND:     Surf_Tileset = global::bmpArray[ global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP : TILESET_WASTELAND_32BPP ].surface;
                                 break;
-        case MAP_WINTERLAND:    Surf_Tileset = global::bmpArray[TILESET_WINTERLAND].surface;
+        case MAP_WINTERLAND:    Surf_Tileset = global::bmpArray[ global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WINTERLAND_8BPP : TILESET_WINTERLAND_32BPP ].surface;
                                 break;
-        default:                Surf_Tileset = global::bmpArray[TILESET_GREENLAND].surface;
+        default:                Surf_Tileset = global::bmpArray[ global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP ].surface;
                                 break;
     }
 
@@ -746,6 +746,10 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 leftY = 126;
                                                 rightX = 83;
                                                 rightY = 126;
+                                                BorderRect.x = 210;
+                                                BorderRect.y = 224;
+                                                BorderRect.w = 31;
+                                                BorderRect.h = 9;
                                                 break;
         case TRIANGLE_TEXTURE_MEADOW2:          upperX = 113;
                                                 upperY = 96;
@@ -845,16 +849,24 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
             if (type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
             {
                 sge_TexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX2, upperY2, leftX2, leftY2, rightX2, rightY2);
-                sge_FadedTexturedTrigonColorKeys(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i, colorkeys, keycount);
+                if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                    sge_PreCalcFadedTexturedTrigonColorKeys(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.shading<<8,P2.shading<<8,P3.shading<<8,gouData[type], colorkeys, keycount);
+                else
+                    sge_FadedTexturedTrigonColorKeys(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i, colorkeys, keycount);
             }
             else
-                sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+            {
+                if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                    sge_PreCalcFadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.shading<<8,P2.shading<<8,P3.shading<<8,gouData[type]);
+                else
+                    sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+            }
         }
         return;
     }
 
     //blit border
-    //if (P2.y == P3.y && texture_raw == TRIANGLE_TEXTURE_STEPPE)
+    //if (P2.y == P3.y && (texture_raw == TRIANGLE_TEXTURE_STEPPE || texture_raw == TRIANGLE_TEXTURE_MEADOW1))
         //Draw(display, Surf_Tileset, P2.x-displayRect.x, P2.y-displayRect.y, BorderRect.x, BorderRect.y, BorderRect.w, BorderRect.h);
         //sge_TexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y, P3.x-displayRect.x, P3.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+9, P3.x-displayRect.x, P3.y-displayRect.y+9, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
         //sge_TexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y, P3.x-displayRect.x, P3.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+9, P3.x-displayRect.x, P3.y-displayRect.y+9, Surf_Tileset, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y);
