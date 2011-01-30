@@ -15,6 +15,9 @@ CMenu::CMenu(int pic_background)
         static_pictures[i].y = 0;
         static_pictures[i].pic = -1;
     }
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+        textfields[i] = NULL;
+
     Surf_Menu = NULL;
     needSurface = true;
     needRender = true;
@@ -39,6 +42,11 @@ CMenu::~CMenu()
     {
         if (pictures[i] != NULL)
             delete pictures[i];
+    }
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            delete textfields[i];
     }
     SDL_FreeSurface(Surf_Menu);
 }
@@ -76,7 +84,21 @@ void CMenu::setMouseData(SDL_MouseButtonEvent button)
         if (buttons[i] != NULL)
             buttons[i]->setMouseData(button);
     }
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            textfields[i]->setMouseData(button);
+    }
     needRender = true;
+}
+
+void CMenu::setKeyboardData(SDL_KeyboardEvent key)
+{
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            textfields[i]->setKeyboardData(key);
+    }
 }
 
 CButton* CMenu::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color, const char *text, int picture)
@@ -236,6 +258,41 @@ bool CMenu::delStaticPicture(int ArrayIndex)
     return true;
 }
 
+CTextfield* CMenu::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
+{
+    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+        return false;
+
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] == NULL)
+        {
+            textfields[i] = new CTextfield(x, y, cols, rows, fontsize, text_color, bg_color, button_style);
+            needRender = true;
+            return textfields[i];
+        }
+    }
+    return NULL;
+}
+
+bool CMenu::delTextfield(CTextfield* TextfieldToDelete)
+{
+    if (TextfieldToDelete == NULL)
+        return false;
+
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] == TextfieldToDelete)
+        {
+            delete textfields[i];
+            textfields[i] = NULL;
+            needRender = true;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool CMenu::render(void)
 {
     if (pic_background < 0)
@@ -270,6 +327,11 @@ bool CMenu::render(void)
     {
         if (texts[i] != NULL)
             CSurface::Draw(Surf_Menu, texts[i]->getSurface(), texts[i]->getX(), texts[i]->getY());
+    }
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            CSurface::Draw(Surf_Menu, textfields[i]->getSurface(), textfields[i]->getX(), textfields[i]->getY());
     }
     for (int i = 0; i < MAXBUTTONS; i++)
     {

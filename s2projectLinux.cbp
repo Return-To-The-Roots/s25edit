@@ -1,93 +1,93 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-    <FileVersion major="1" minor="6" />
-    <Project>
-        <Option title="s2project" />
-        <Option pch_mode="2" />
-        <Option compiler="gcc" />
-        <Build>
-            <Target title="Release">
-                <Option output="bin/s2project" prefix_auto="1" extension_auto="1" />
-                <Option object_output="obj/" />
-                <Option type="1" />
-                <Option compiler="gcc" />
-                <Compiler>
-                    <Add option="-Wextra" />
-                    <Add option="-Wall" />
-                </Compiler>
-                <Linker>
-                    <Add option="-s" />
-                    <Add option="-lSDLmain -lSDL" />
-                </Linker>
-            </Target>
-        </Build>
-        <Compiler>
-            <Add option="-Wall" />
-        </Compiler>
-        <Unit filename="CButton.cpp" />
-        <Unit filename="CButton.h" />
-        <Unit filename="CDebug.cpp">
-            <Option compilerVar="CC" />
-        </Unit>
-        <Unit filename="CDebug.h" />
-        <Unit filename="CFile.cpp" />
-        <Unit filename="CFile.h" />
-        <Unit filename="CFont.cpp" />
-        <Unit filename="CFont.h" />
-        <Unit filename="CGame.cpp" />
-        <Unit filename="CGame.h" />
-        <Unit filename="CGame_Cleanup.cpp" />
-        <Unit filename="CGame_Event.cpp" />
-        <Unit filename="CGame_GameLoop.cpp" />
-        <Unit filename="CGame_Init.cpp" />
-        <Unit filename="CGame_Render.cpp" />
-        <Unit filename="CMap.cpp" />
-        <Unit filename="CMap.h" />
-        <Unit filename="CMenu.cpp" />
-        <Unit filename="CMenu.h" />
-        <Unit filename="CPicture.cpp">
-            <Option compilerVar="CC" />
-        </Unit>
-        <Unit filename="CPicture.h" />
-        <Unit filename="CSurface.cpp" />
-        <Unit filename="CSurface.h" />
-        <Unit filename="CWindow.cpp" />
-        <Unit filename="CWindow.h" />
-        <Unit filename="SGE/sge.h" />
-        <Unit filename="SGE/sge_blib.cpp" />
-        <Unit filename="SGE/sge_blib.h" />
-        <Unit filename="SGE/sge_bm_text.cpp" />
-        <Unit filename="SGE/sge_bm_text.h" />
-        <Unit filename="SGE/sge_collision.cpp" />
-        <Unit filename="SGE/sge_collision.h" />
-        <Unit filename="SGE/sge_config.h" />
-        <Unit filename="SGE/sge_internal.h" />
-        <Unit filename="SGE/sge_misc.cpp" />
-        <Unit filename="SGE/sge_misc.h" />
-        <Unit filename="SGE/sge_primitives.cpp" />
-        <Unit filename="SGE/sge_primitives.h" />
-        <Unit filename="SGE/sge_rotation.cpp" />
-        <Unit filename="SGE/sge_rotation.h" />
-        <Unit filename="SGE/sge_shape.cpp" />
-        <Unit filename="SGE/sge_shape.h" />
-        <Unit filename="SGE/sge_surface.cpp" />
-        <Unit filename="SGE/sge_surface.h" />
-        <Unit filename="SGE/sge_textpp.cpp" />
-        <Unit filename="SGE/sge_textpp.h" />
-        <Unit filename="SGE/sge_tt_text.cpp" />
-        <Unit filename="SGE/sge_tt_text.h" />
-        <Unit filename="callbacks.cpp" />
-        <Unit filename="callbacks.h" />
-        <Unit filename="classes.h" />
-        <Unit filename="defines.h" />
-        <Unit filename="globals.cpp" />
-        <Unit filename="globals.h" />
-        <Unit filename="includes.h" />
-        <Extensions>
-            <code_completion />
-            <envvars />
-            <debugger />
-            <lib_finder disable_auto="1" />
-        </Extensions>
-    </Project>
-</CodeBlocks_project_file> 
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="s25edit" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="bin\s25edit" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wextra" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-lSDLmain -lSDL" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="CDebug.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="CDebug.h" />
+		<Unit filename="CGame.cpp" />
+		<Unit filename="CGame.h" />
+		<Unit filename="CGame_Cleanup.cpp" />
+		<Unit filename="CGame_Event.cpp" />
+		<Unit filename="CGame_GameLoop.cpp" />
+		<Unit filename="CGame_Init.cpp" />
+		<Unit filename="CGame_Render.cpp" />
+		<Unit filename="CIO\CButton.cpp" />
+		<Unit filename="CIO\CButton.h" />
+		<Unit filename="CIO\CFile.cpp" />
+		<Unit filename="CIO\CFile.h" />
+		<Unit filename="CIO\CFont.cpp" />
+		<Unit filename="CIO\CFont.h" />
+		<Unit filename="CIO\CMenu.cpp" />
+		<Unit filename="CIO\CMenu.h" />
+		<Unit filename="CIO\CPicture.cpp" />
+		<Unit filename="CIO\CPicture.h" />
+		<Unit filename="CIO\CTextfield.cpp" />
+		<Unit filename="CIO\CTextfield.h" />
+		<Unit filename="CIO\CWindow.cpp" />
+		<Unit filename="CIO\CWindow.h" />
+		<Unit filename="CMap.cpp" />
+		<Unit filename="CMap.h" />
+		<Unit filename="CSurface.cpp" />
+		<Unit filename="CSurface.h" />
+		<Unit filename="SGE\sge.h" />
+		<Unit filename="SGE\sge_blib.cpp" />
+		<Unit filename="SGE\sge_blib.h" />
+		<Unit filename="SGE\sge_bm_text.cpp" />
+		<Unit filename="SGE\sge_bm_text.h" />
+		<Unit filename="SGE\sge_collision.cpp" />
+		<Unit filename="SGE\sge_collision.h" />
+		<Unit filename="SGE\sge_config.h" />
+		<Unit filename="SGE\sge_internal.h" />
+		<Unit filename="SGE\sge_misc.cpp" />
+		<Unit filename="SGE\sge_misc.h" />
+		<Unit filename="SGE\sge_primitives.cpp" />
+		<Unit filename="SGE\sge_primitives.h" />
+		<Unit filename="SGE\sge_rotation.cpp" />
+		<Unit filename="SGE\sge_rotation.h" />
+		<Unit filename="SGE\sge_shape.cpp" />
+		<Unit filename="SGE\sge_shape.h" />
+		<Unit filename="SGE\sge_surface.cpp" />
+		<Unit filename="SGE\sge_surface.h" />
+		<Unit filename="SGE\sge_textpp.cpp" />
+		<Unit filename="SGE\sge_textpp.h" />
+		<Unit filename="SGE\sge_tt_text.cpp" />
+		<Unit filename="SGE\sge_tt_text.h" />
+		<Unit filename="callbacks.cpp" />
+		<Unit filename="callbacks.h" />
+		<Unit filename="classes.h" />
+		<Unit filename="defines.h" />
+		<Unit filename="globals.cpp" />
+		<Unit filename="globals.h" />
+		<Unit filename="includes.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

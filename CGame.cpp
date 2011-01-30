@@ -6,7 +6,15 @@ CGame::CGame()
     GameResolutionY = 768;
     MenuResolutionX = 640;
     MenuResolutionY = 480;
+
+#if defined (_ADMINMODE)
     fullscreen = false;
+#elif defined(_VIEWERMODE)
+    fullscreen = false;
+#else
+    fullscreen = true;
+#endif
+
 #ifdef _ADMINMODE
     FrameCounter = 0;
     RegisteredCallbacks = 0;

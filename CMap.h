@@ -81,39 +81,44 @@ class CMap
         void setMouseData(SDL_MouseMotionEvent motion);
         void setMouseData(SDL_MouseButtonEvent button);
         void setKeyboardData(SDL_KeyboardEvent key);
-        void setActive(void) { active = true; };
-        void setInactive(void) { active = false; };
-        bool isActive(void) { return active; };
-        int getVertexX(void) { return VertexX; };
-        int getVertexY(void) { return VertexY; };
-        bool getBuildHelp(void) { return BuildHelp; };
-        int getBitsPerPixel(void) { return BitsPerPixel; };
+        void setActive(void) { active = true; }
+        void setInactive(void) { active = false; }
+        bool isActive(void) { return active; }
+        int getVertexX(void) { return VertexX; }
+        int getVertexY(void) { return VertexY; }
+        bool getBuildHelp(void) { return BuildHelp; }
+        int getBitsPerPixel(void) { return BitsPerPixel; }
         void setBitsPerPixel(int bbp) { BitsPerPixel = bbp; needSurface = true; }
-        void setMode(int mode) { this->mode = mode; };
-        int getMode(void) { return mode; };
-        void setModeContent(int modeContent) { this->modeContent = modeContent; };
-        void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; };
-        int getModeContent(void) { return modeContent; };
-        int getModeContent2(void) { return modeContent2; };
-        bobMAP* getMap(void) { return map; };
-        SDL_Surface* getSurface(void) { render(); return Surf_Map; };
-        DisplayRectangle getDisplayRect(void) { return displayRect; };
-        void setDisplayRect(DisplayRectangle displayRect) { this->displayRect = displayRect; };
-        Uint16* getPlayerHQx(void) { return PlayerHQx; };
-        Uint16* getPlayerHQy(void) { return PlayerHQy; };
+        void setMode(int mode) { this->mode = mode; }
+        int getMode(void) { return mode; }
+        void setModeContent(int modeContent) { this->modeContent = modeContent; }
+        void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; }
+        int getModeContent(void) { return modeContent; }
+        int getModeContent2(void) { return modeContent2; }
+        bobMAP* getMap(void) { return map; }
+        SDL_Surface* getSurface(void) { render(); return Surf_Map; }
+        DisplayRectangle getDisplayRect(void) { return displayRect; }
+        void setDisplayRect(DisplayRectangle displayRect) { this->displayRect = displayRect; }
+        Uint16* getPlayerHQx(void) { return PlayerHQx; }
+        Uint16* getPlayerHQy(void) { return PlayerHQy; }
+        char* getMapname(void) { return map->name; }
+        void setMapname(char* name) { strcpy(map->name, name); }
+        char* getAuthor(void) { return map->author; }
+        void setAuthor(char* author) { strcpy(map->author, author); }
+
         void drawMinimap(SDL_Surface *Window);
         bool render(void);
         //get and set some variables necessary for cursor behavior
-        void setHexagonMode(bool HexagonMode) { ChangeSectionHexagonMode = HexagonMode; setupVerticesActivity(); };
-        bool getHexagonMode(void) { return ChangeSectionHexagonMode; };
-        void setVertexFillRSU(bool fillRSU) { VertexFillRSU = fillRSU; setupVerticesActivity(); };
-        bool getVertexFillRSU(void) { return VertexFillRSU; };
-        void setVertexFillUSD(bool fillUSD) { VertexFillUSD = fillUSD; setupVerticesActivity(); };
-        bool getVertexFillUSD(void) { return VertexFillUSD; };
-        void setVertexFillRandom(bool fillRandom) { VertexFillRandom = fillRandom; setupVerticesActivity(); };
-        bool getVertexFillRandom(void) { return VertexFillRandom; };
-        void setVertexActivityRandom(bool activityRandom) { VertexActivityRandom = activityRandom; setupVerticesActivity(); };
-        bool getVertexActivityRandom(void) { return VertexActivityRandom; };
+        void setHexagonMode(bool HexagonMode) { ChangeSectionHexagonMode = HexagonMode; setupVerticesActivity(); }
+        bool getHexagonMode(void) { return ChangeSectionHexagonMode; }
+        void setVertexFillRSU(bool fillRSU) { VertexFillRSU = fillRSU; setupVerticesActivity(); }
+        bool getVertexFillRSU(void) { return VertexFillRSU; }
+        void setVertexFillUSD(bool fillUSD) { VertexFillUSD = fillUSD; setupVerticesActivity(); }
+        bool getVertexFillUSD(void) { return VertexFillUSD; }
+        void setVertexFillRandom(bool fillRandom) { VertexFillRandom = fillRandom; setupVerticesActivity(); }
+        bool getVertexFillRandom(void) { return VertexFillRandom; }
+        void setVertexActivityRandom(bool activityRandom) { VertexActivityRandom = activityRandom; setupVerticesActivity(); }
+        bool getVertexActivityRandom(void) { return VertexActivityRandom; }
 
     private:
         //returns count of the vertices that are involved in changes (editor mode) -->THIS FUNCTION IS OUTDATED

@@ -3,7 +3,7 @@
 #ifndef _CFILE_H
     #define _CFILE_H
 
-#include "includes.h"
+#include "../includes.h"
 
 class CFile
 {
@@ -16,9 +16,10 @@ class CFile
         static bobPAL *palActual;   //surfaces for new pictures will use this palette
     public:
         //Access Methods
-        static void set_palActual(bobPAL *Actual) { palActual = Actual; };
-        static bobPAL* get_palArray(void) { return palArray; };
-        static void set_bmpArray(bobBMP *new_bmpArray) { bmpArray = new_bmpArray; };
+        static void set_palActual(bobPAL *Actual) { palActual = Actual; }
+        static bobPAL* get_palArray(void) { return palArray; }
+        static void set_palArray(bobPAL *Array) { palArray = Array; }
+        static void set_bmpArray(bobBMP *new_bmpArray) { bmpArray = new_bmpArray; }
 
     private:
         //Methods

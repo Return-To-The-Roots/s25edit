@@ -1,7 +1,7 @@
 #ifndef _CMENU_H
     #define _CMENU_H
 
-#include "includes.h"
+#include "../includes.h"
 
 class CMenu
 {
@@ -19,6 +19,7 @@ class CMenu
         CButton *buttons[MAXBUTTONS];
         CFont *texts[MAXTEXTS];
         CPicture *pictures[MAXPICTURES];
+        CTextfield *textfields[MAXTEXTFIELDS];
         struct { int x, y, pic; } static_pictures[MAXPICTURES];
 
     public:
@@ -29,6 +30,7 @@ class CMenu
         void setBackgroundPicture(int pic_background);
         void setMouseData(SDL_MouseMotionEvent motion);
         void setMouseData(SDL_MouseButtonEvent button);
+        void setKeyboardData(SDL_KeyboardEvent key);
         SDL_Surface* getSurface(void) { render(); return Surf_Menu; };
         void setActive(void) { active = true; };
         void setInactive(void) { active = false; };
@@ -45,6 +47,8 @@ class CMenu
         bool delPicture(CPicture *PictureToDelete);
         int addStaticPicture(int x, int y, int picture);
         bool delStaticPicture(int ArrayIndex);
+        CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fonsize = 14, int text_color = FONT_YELLOW, int bg_color = -1, bool button_style = false);
+        bool delTextfield(CTextfield* TextfieldToDelete);
         bool render(void);
 };
 

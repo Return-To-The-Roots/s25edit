@@ -129,10 +129,7 @@ bool CFile::open_lst(void)
                                 break;
 
             case BOBTYPE04:     if ( read_bob04(PLAYER_BLUE) == false )
-                                {
-                                    puts("\njo alter was geht\n");
                                     return false;
-                                }
                                 break;
 
             case BOBTYPE05:     if ( read_bob05() == false )
@@ -511,15 +508,23 @@ bobMAP* CFile::open_wld(void)
 
     fseek(fp, 10, SEEK_SET);
     fread(myMap->name, 20, 1, fp);
-    myMap->name[20] = '\0'; //for safety
     fread(&myMap->width_old, 2, 1, fp);
     fread(&myMap->height_old, 2, 1, fp);
     fread(&myMap->type, 1, 1, fp);
     fread(&myMap->player, 1, 1, fp);
     fread(myMap->author, 20, 1, fp);
-    myMap->author[20] = '\0'; //for safety
     fread(myMap->HQx, 2, 7, fp);
     fread(myMap->HQy, 2, 7, fp);
+
+    //go to big map header and read it
+    fseek(fp, 92, SEEK_SET);
+    for (int i = 0; i < 250; i++)
+    {
+        fread(&myMap->header[i].type, 1, 1, fp);
+        fread(&myMap->header[i].x, 1, 2, fp);
+        fread(&myMap->header[i].y, 1, 2, fp);
+        fread(&myMap->header[i].area, 1, 4, fp);
+    }
 
     //go to real map height and width
     fseek(fp, 2348, SEEK_SET);
@@ -810,9 +815,14 @@ bool CFile::save_wld(void *data)
     //unknown data (8 Bytes)
     for (int i = 0; i < 8; i++)
         fwrite(&zero, 1, 1, fp);
-    //land/water information    (always 2250 Bytes)
-    for (int i = 0; i < 2250; i++)
-        fwrite(&zero, 1, 1, fp);
+    //big map header with area information
+    for (int i = 0; i < 250; i++)
+    {
+        fwrite(&myMap->header[i].type, 1, 1, fp);
+        fwrite(&myMap->header[i].x, 1, 2, fp);
+        fwrite(&myMap->header[i].y, 1, 2, fp);
+        fwrite(&myMap->header[i].area, 1, 4, fp);
+    }
     //0x11 0x27
     temp = 0x11;
     fwrite(&temp, 1, 1, fp);

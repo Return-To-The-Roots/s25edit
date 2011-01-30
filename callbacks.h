@@ -12,6 +12,8 @@ namespace callback
     void MinimapMenu(int Param);
 #ifdef _EDITORMODE
     void EditorMainMenu(int Param);
+    void EditorLoadMenu(int Param);
+    void EditorSaveMenu(int Param);
     void EditorQuitMenu(int Param);
     void EditorTextureMenu(int Param);
     void EditorTreeMenu(int Param);

@@ -9,6 +9,7 @@ class CFile;
 class CSurface;
 class CWindow;
 class CPicture;
+class CTextfield;
 class CMap;
 #ifdef _ADMINMODE
 class CDebug;

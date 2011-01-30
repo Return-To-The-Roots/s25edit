@@ -66,18 +66,16 @@ void callback::PleaseWait(int Param)
 void callback::mainmenu(int Param)
 {
     static CMenu *MainMenu = NULL;
-    static CMap *Map = NULL;
 
     enum
     {
         ENDGAME = 1,
-        LOADMAP
+        STARTEDITOR
     };
 
     switch (Param)
     {
         case INITIALIZING_CALL:
-                    Map = NULL;
                     MainMenu = new CMenu(SPLASHSCREEN_MAINMENU);
                     if (!global::s2->RegisterMenu(MainMenu))
                     {
@@ -85,12 +83,12 @@ void callback::mainmenu(int Param)
                         MainMenu = NULL;
                         return;
                     }
-                    MainMenu->addButton(callback::mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Programm Verlassen");
+                    MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Programm Verlassen");
                     #ifdef _ADMINMODE
-                        MainMenu->addButton(callback::submenu1, INITIALIZING_CALL, 50, 200, 200, 20, BUTTON_GREY, "Submenu_1");
-                        MainMenu->addButton(callback::mainmenu, LOADMAP, 50, 160, 200, 20, BUTTON_STONE, "Testmap laden");
+                        MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 200, 200, 20, BUTTON_GREY, "Submenu_1");
                     #endif
-                    MainMenu->addButton(callback::submenuOptions, INITIALIZING_CALL, 50, 370, 200, 20, BUTTON_GREEN2, "Optionen");
+                    MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Editor starten");
+                    MainMenu->addButton(submenuOptions, INITIALIZING_CALL, 50, 370, 200, 20, BUTTON_GREEN2, "Optionen");
                     break;
 
         case CALL_FROM_GAMELOOP:
@@ -102,16 +100,12 @@ void callback::mainmenu(int Param)
                     global::s2->Running = false;
                     break;
 
-        case LOADMAP:
-                    callback::PleaseWait(INITIALIZING_CALL);
-                    //Map = new CMap("BERG_.SWD");
-                    //Map = new CMap("MISS208.WLD");
-                    Map = new CMap("NEW_MAP.SWD");
-                    //Map = new CMap(NULL);
-                    global::s2->setMapObj(Map);
+        case STARTEDITOR:
+                    PleaseWait(INITIALIZING_CALL);
+                    global::s2->setMapObj(new CMap(NULL));
                     MainMenu->setWaste();
                     MainMenu = NULL;
-                    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                    PleaseWait(WINDOW_QUIT_MESSAGE);
                     break;
 
         default:    break;
@@ -149,7 +143,7 @@ void callback::submenuOptions(int Param)
                     return;
                 }
                 //add button for "back to main menu"
-                SubMenu->addButton(callback::submenuOptions, MAINMENU, (int)(global::s2->MenuResolutionX/2-100), 440, 200, 20, BUTTON_RED1, "zurück");
+                SubMenu->addButton(submenuOptions, MAINMENU, (int)(global::s2->MenuResolutionX/2-100), 440, 200, 20, BUTTON_RED1, "zurück");
                 //add menu title
                 SubMenu->addText("Optionen", (int)(global::s2->MenuResolutionX/2-20), 10, 14);
                 //add screen resolution
@@ -158,14 +152,14 @@ void callback::submenuOptions(int Param)
                 sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY, (global::s2->fullscreen ? "Fullscreen" : "Window"));
                 TextResolution = SubMenu->addText(puffer, (int)(global::s2->MenuResolutionX/2-110), 50, 11);
                 //add buttons for resolutions
-                SubMenu->addButton(callback::submenuOptions, RES_640, (int)(global::s2->MenuResolutionX/2-100), 70, 200, 20, BUTTON_RED1, "640*480");
-                SubMenu->addButton(callback::submenuOptions, RES_800, (int)(global::s2->MenuResolutionX/2-100), 90, 200, 20, BUTTON_RED1, "800*600");
-                SubMenu->addButton(callback::submenuOptions, RES_1024, (int)(global::s2->MenuResolutionX/2-100), 110, 200, 20, BUTTON_RED1, "1024*768");
-                SubMenu->addButton(callback::submenuOptions, RES_1280, (int)(global::s2->MenuResolutionX/2-100), 130, 200, 20, BUTTON_RED1, "1280*1024");
-                SubMenu->addButton(callback::submenuOptions, RES_1440, (int)(global::s2->MenuResolutionX/2-100), 150, 200, 20, BUTTON_RED1, "1440*900");
+                SubMenu->addButton(submenuOptions, RES_640, (int)(global::s2->MenuResolutionX/2-100), 70, 200, 20, BUTTON_RED1, "640*480");
+                SubMenu->addButton(submenuOptions, RES_800, (int)(global::s2->MenuResolutionX/2-100), 90, 200, 20, BUTTON_RED1, "800*600");
+                SubMenu->addButton(submenuOptions, RES_1024, (int)(global::s2->MenuResolutionX/2-100), 110, 200, 20, BUTTON_RED1, "1024*768");
+                SubMenu->addButton(submenuOptions, RES_1280, (int)(global::s2->MenuResolutionX/2-100), 130, 200, 20, BUTTON_RED1, "1280*1024");
+                SubMenu->addButton(submenuOptions, RES_1440, (int)(global::s2->MenuResolutionX/2-100), 150, 200, 20, BUTTON_RED1, "1440*900");
                 if (ButtonFullscreen != NULL)
                     SubMenu->delButton(ButtonFullscreen);
-                ButtonFullscreen = SubMenu->addButton(callback::submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
+                ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
                 //add video driver name
                 SDL_VideoDriverName(puffer, 80);
                 sprintf(puffer2, "Video-Treiber: %s", puffer);
@@ -223,7 +217,7 @@ void callback::submenuOptions(int Param)
                         TextResolution = SubMenu->addText(puffer, (int)(global::s2->MenuResolutionX/2-110), 50, 11);
                         if (ButtonFullscreen != NULL)
                             SubMenu->delButton(ButtonFullscreen);
-                        ButtonFullscreen = SubMenu->addButton(callback::submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
+                        ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
                         break;
 
         default:    break;
@@ -235,7 +229,237 @@ void callback::submenuOptions(int Param)
 
 void callback::EditorMainMenu(int Param)
 {
-    ;
+    static CWindow *WNDMain = NULL;
+
+    enum
+    {
+        LOADMENU,
+        SAVEMENU,
+        QUITMENU,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDMain != NULL)
+                        break;
+                    WNDMain = new CWindow(EditorMainMenu, WINDOWQUIT, global::s2->GameResolutionX/2-110, global::s2->GameResolutionY/2-160, 220, 320, "Hauptmenu", WINDOW_GREEN1, WINDOW_CLOSE);
+                    if (global::s2->RegisterWindow(WNDMain))
+                    {
+                        WNDMain->addButton(EditorMainMenu, LOADMENU, 8, 100, 190, 20, BUTTON_GREEN2, "Karte laden");
+                        WNDMain->addButton(EditorMainMenu, SAVEMENU, 8, 125, 190, 20, BUTTON_GREEN2, "Karte speichern");
+
+                        WNDMain->addButton(EditorMainMenu, QUITMENU, 8, 260, 190, 20, BUTTON_GREEN2, "Editor verlassen");
+                    }
+                    else
+                    {
+                        delete WNDMain;
+                        WNDMain = NULL;
+                        return;
+                    }
+                    break;
+
+        case WINDOWQUIT:
+                if (WNDMain != NULL)
+                {
+                    WNDMain->setWaste();
+                    WNDMain = NULL;
+                }
+                break;
+
+        case MAP_QUIT:
+                if (WNDMain != NULL)
+                {
+                    WNDMain->setWaste();
+                    WNDMain = NULL;
+                }
+                break;
+
+        case QUITMENU:
+                    EditorQuitMenu(INITIALIZING_CALL);
+                    break;
+
+        case LOADMENU:
+                    EditorLoadMenu(INITIALIZING_CALL);
+                    break;
+
+        case SAVEMENU:
+                    EditorSaveMenu(INITIALIZING_CALL);
+                    break;
+
+        default:    break;
+    }
+}
+
+void callback::EditorLoadMenu(int Param)
+{
+    static CWindow *WNDLoad = NULL;
+    static CTextfield *TXTF_Filename = NULL;
+    static CMap* MapObj = NULL;
+
+    enum
+    {
+        LOADMAP,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDLoad != NULL)
+                        break;
+                    WNDLoad = new CWindow(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolutionX/2-140, global::s2->GameResolutionY/2-45, 280, 120, "Laden", WINDOW_GREEN1, WINDOW_CLOSE);
+                    if (global::s2->RegisterWindow(WNDLoad))
+                    {
+                        MapObj = global::s2->getMapObj();
+
+                        TXTF_Filename = WNDLoad->addTextfield(10, 10, 21, 1);
+                        TXTF_Filename->setText("WORLDS/");
+                        WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Laden");
+                        WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "Abbrechen");
+                    }
+                    else
+                    {
+                        delete WNDLoad;
+                        WNDLoad = NULL;
+                        return;
+                    }
+                    break;
+
+        case WINDOWQUIT:
+                if (WNDLoad != NULL)
+                {
+                    WNDLoad->setWaste();
+                    WNDLoad = NULL;
+                }
+                TXTF_Filename = NULL;
+                break;
+
+        case MAP_QUIT:
+                if (WNDLoad != NULL)
+                {
+                    WNDLoad->setWaste();
+                    WNDLoad = NULL;
+                }
+                TXTF_Filename = NULL;
+                break;
+
+        case LOADMAP:
+                    PleaseWait(INITIALIZING_CALL);
+
+                    //we have to close the windows and initialize them again to prevent failures
+                    EditorCursorMenu(MAP_QUIT);
+                    EditorTextureMenu(MAP_QUIT);
+                    EditorTreeMenu(MAP_QUIT);
+                    EditorLandscapeMenu(MAP_QUIT);
+                    MinimapMenu(MAP_QUIT);
+                    EditorResourceMenu(MAP_QUIT);
+                    EditorAnimalMenu(MAP_QUIT);
+                    EditorPlayerMenu(MAP_QUIT);
+
+                    MapObj->destructMap();
+                    MapObj->constructMap((char*)TXTF_Filename->getText());
+
+                    //we need to check which of these windows was active before
+                    /*
+                    EditorCursorMenu(INITIALIZING_CALL);
+                    EditorTextureMenu(INITIALIZING_CALL);
+                    EditorTreeMenu(INITIALIZING_CALL);
+                    EditorLandscapeMenu(INITIALIZING_CALL);
+                    MinimapMenu(INITIALIZING_CALL);
+                    EditorResourceMenu(INITIALIZING_CALL);
+                    EditorAnimalMenu(INITIALIZING_CALL);
+                    EditorPlayerMenu(INITIALIZING_CALL);
+                    */
+
+                    PleaseWait(WINDOW_QUIT_MESSAGE);
+                    EditorLoadMenu(WINDOWQUIT);
+                    break;
+
+        default:    break;
+    }
+}
+
+void callback::EditorSaveMenu(int Param)
+{
+    static CWindow *WNDSave = NULL;
+    static CTextfield *TXTF_Filename = NULL;
+    static CTextfield *TXTF_Mapname = NULL;
+    static CTextfield *TXTF_Author = NULL;
+    static CMap* MapObj = NULL;
+
+    enum
+    {
+        SAVEMAP,
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL:
+                    if (WNDSave != NULL)
+                        break;
+                    WNDSave = new CWindow(EditorSaveMenu, WINDOWQUIT, global::s2->GameResolutionX/2-140, global::s2->GameResolutionY/2-100, 280, 200, "Speichern", WINDOW_GREEN1, WINDOW_CLOSE);
+                    if (global::s2->RegisterWindow(WNDSave))
+                    {
+                        MapObj = global::s2->getMapObj();
+
+                        WNDSave->addText("Dateiname", 100, 2, 9);
+                        TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
+                        TXTF_Filename->setText("WORLDS/");
+                        WNDSave->addText("Kartenname", 98, 38, 9);
+                        TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
+                        TXTF_Mapname->setText(MapObj->getMapname());
+                        WNDSave->addText("Author", 110, 75, 9);
+                        TXTF_Author = WNDSave->addTextfield(10, 87, 19, 1);
+                        TXTF_Author->setText(MapObj->getAuthor());
+                        WNDSave->addButton(EditorSaveMenu, SAVEMAP, 170, 120, 90, 20, BUTTON_GREY, "Speichern");
+                        WNDSave->addButton(EditorSaveMenu, WINDOWQUIT, 170, 145, 90, 20, BUTTON_RED1, "Abbrechen");
+                    }
+                    else
+                    {
+                        delete WNDSave;
+                        WNDSave = NULL;
+                        return;
+                    }
+                    break;
+
+        case WINDOWQUIT:
+                if (WNDSave != NULL)
+                {
+                    WNDSave->setWaste();
+                    WNDSave = NULL;
+                }
+                TXTF_Filename = NULL;
+                TXTF_Mapname = NULL;
+                TXTF_Author = NULL;
+                break;
+
+        case MAP_QUIT:
+                if (WNDSave != NULL)
+                {
+                    WNDSave->setWaste();
+                    WNDSave = NULL;
+                }
+                TXTF_Filename = NULL;
+                TXTF_Mapname = NULL;
+                TXTF_Author = NULL;
+                break;
+
+        case SAVEMAP:
+                    PleaseWait(INITIALIZING_CALL);
+
+                    MapObj->setMapname((char*)TXTF_Mapname->getText());
+                    MapObj->setAuthor((char*)TXTF_Author->getText());
+                    CFile::save_file((char*)TXTF_Filename->getText(), WLD, MapObj->getMap());
+
+                    PleaseWait(WINDOW_QUIT_MESSAGE);
+                    EditorSaveMenu(WINDOWQUIT);
+                    break;
+
+        default:    break;
+    }
 }
 
 void callback::EditorQuitMenu(int Param)
@@ -275,6 +499,8 @@ void callback::EditorQuitMenu(int Param)
                     WNDBackToMainMenu = NULL;
                     //now call all EditorMenu callbacks (from the menubar) with MAP_QUIT
                     EditorMainMenu(MAP_QUIT);
+                    EditorLoadMenu(MAP_QUIT);
+                    EditorSaveMenu(MAP_QUIT);
                     EditorTextureMenu(MAP_QUIT);
                     EditorTreeMenu(MAP_QUIT);
                     EditorLandscapeMenu(MAP_QUIT);
@@ -2221,7 +2447,7 @@ void callback::EditorCreateMenu(int Param)
                     break;
 
         case CREATE_WORLD:
-                    callback::PleaseWait(INITIALIZING_CALL);
+                    PleaseWait(INITIALIZING_CALL);
 
                     //we have to close the windows and initialize them again to prevent failures
                     EditorCursorMenu(MAP_QUIT);
@@ -2248,7 +2474,7 @@ void callback::EditorCreateMenu(int Param)
                     EditorPlayerMenu(INITIALIZING_CALL);
                     */
 
-                    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                    PleaseWait(WINDOW_QUIT_MESSAGE);
                     break;
 
 
@@ -2598,6 +2824,9 @@ void callback::submenu1(int Param)
     static CPicture *testWindowPicture = NULL;
     static CFont *testWindowText = NULL;
     static CFont *testWindowText2 = NULL;
+    static CTextfield *testTextfield = NULL;
+    static CFont *TextFrom_testTextfield = NULL;
+    static CTextfield *testTextfield_testWindow = NULL;
 
     static int picIndex = -1;
     char puffer[80];
@@ -2643,6 +2872,10 @@ void callback::submenu1(int Param)
                 createWindow = SubMenu->addButton(submenu1, CREATEWINDOW, 500, 10, 130, 30, BUTTON_GREEN1, "Fenster erzeugen");
                 picObject = SubMenu->addPicture(submenu1, PICOBJECT, 200, 30, MIS0BOBS_SHIP);
                 picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
+                //text block with \n
+                sprintf(puffer, "\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile");
+                SubMenu->addText(puffer, 400, 200, 14);
+                testTextfield = SubMenu->addTextfield(400, 300, 10, 3);
                 break;
 
         case MAINMENU:  SubMenu->setWaste();
@@ -2659,6 +2892,9 @@ void callback::submenu1(int Param)
                         testWindowPicture = NULL;
                         testWindowText = NULL;
                         testWindowText2 = NULL;
+                        testTextfield = NULL;
+                        TextFrom_testTextfield = NULL;
+                        testTextfield_testWindow = NULL;
                         global::s2->UnregisterCallback(submenu1);
                         if (testWindow != NULL)
                         {
@@ -2696,6 +2932,8 @@ void callback::submenu1(int Param)
                                     testWindow->addButton(submenu1, -10, 150, 100, 210, 30, BUTTON_GREEN2, "Button innerhalb des Fensters");
                                     testWindowPicture = testWindow->addPicture(submenu1, TESTWINDOWPICTURE, 10, 60, MIS2BOBS_FORTRESS);
                                     testWindowPicture->setMotionParams(TESTWINDOWPICTUREENTRY, TESTWINDOWPICTURELEAVE);
+                                    testTextfield_testWindow = testWindow->addTextfield(130, 30, 10, 3, 14, FONT_RED, BUTTON_GREY, true);
+                                    testTextfield_testWindow->setText("Die ist ein sehr langer Testtext in der Hoffnung, das Textfeld ein für alle mal zu sprengen");
                                 }
                                 else
                                 {
@@ -2795,6 +3033,14 @@ void callback::submenu1(int Param)
                             sprintf(puffer, "zaehler: %d", counter);
                             counterText = SubMenu->addText(puffer, 100, 20, 9);
                         }
+
+                        if (TextFrom_testTextfield != NULL)
+                        {
+                            SubMenu->delText(TextFrom_testTextfield);
+                            TextFrom_testTextfield = NULL;
+                        }
+                        sprintf(puffer, "Der Text im Textfeld lautet: %s", testTextfield->getText());
+                        TextFrom_testTextfield = SubMenu->addText(puffer, 200, 400, 14);
                     }
                     counter++;
                     break;

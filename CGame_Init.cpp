@@ -2,7 +2,7 @@
 
 bool CGame::Init()
 {
-    std::cout << "Welcome to a re-engineered version of Bluebytes \"Siedler 2 Gold\" powered by SDL/SGE(modified)\n";
+    std::cout << "Return to the Roots Mapeditor\n";
 
 
     std::cout << "\nInitializing SDL...";
@@ -12,7 +12,7 @@ bool CGame::Init()
         return false;
     }
 
-    SDL_EnableKeyRepeat(50,50);
+    SDL_EnableKeyRepeat(100,100);
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "\nCreate Window...";
@@ -23,7 +23,7 @@ bool CGame::Init()
         return false;
     }
 
-    SDL_WM_SetCaption("Siedler 2 re-engineered, powered by SDL/SGE(modified)",0);
+    SDL_WM_SetCaption("Return to the Roots Mapeditor",0);
 
     /*NOTE: its important to load a palette at first,
      *      otherwise all images will be black (in exception of the LBM-Files, they have their own palette).

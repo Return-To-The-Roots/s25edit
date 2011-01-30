@@ -24,11 +24,53 @@ void CGame::EventHandling(SDL_Event *Event)
             break;
         }
 
-        case SDL_KEYDOWN: {
+        case SDL_KEYDOWN:
+        {
 
-            //deliver keyboard data to map
-            if (MapObj != NULL)
-                MapObj->setKeyboardData(Event->key);
+            //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
+            //      delivering earlier, for doing this we make use of a variable showing us the deliver status
+            bool delivered = false;
+            //now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
+            //we have to change the prioritys of the windows (for rendering), so find the highest one
+            int highestPriority = 0;
+            for (int j = 0; j < MAXWINDOWS; j++)
+            {
+                if (Windows[j] != NULL && Windows[j]->getPriority() > highestPriority)
+                    highestPriority = Windows[j]->getPriority();
+            }
+
+            for (int i = 0; i < MAXWINDOWS; i++)
+            {
+                if (Windows[i] != NULL && !Windows[i]->isWaste() && Windows[i]->isMarked() && Windows[i]->getPriority() == highestPriority && Windows[i]->hasActiveInputElement())
+                {
+                    Windows[i]->setKeyboardData(Event->key);
+                    delivered = true;
+                    break;
+                }
+            }
+            //if (delivered)
+            //    break;
+
+            //deliver keyboard data to map if active
+            if (!delivered)
+            {
+                if (MapObj != NULL && MapObj->isActive())
+                {
+                    MapObj->setKeyboardData(Event->key);
+                    //data has been delivered to map, so no menu is in the foreground --> stop delivering
+                    //break;
+                }
+            }
+
+            //deliver keyboard data to active menus
+            if (!delivered)
+            {
+                for (int i = 0; i < MAXMENUS; i++)
+                {
+                    if (Menus[i] != NULL && Menus[i]->isActive() && !Menus[i]->isWaste())
+                        Menus[i]->setKeyboardData(Event->key);
+                }
+            }
 
             switch (Event->key.keysym.sym)
             {
@@ -198,7 +240,15 @@ void CGame::EventHandling(SDL_Event *Event)
         case SDL_MOUSEMOTION:
         {
             //setup mouse cursor data
-            if ((Event->motion.state&SDL_BUTTON(SDL_BUTTON_RIGHT))==0)
+            if (MapObj != NULL && MapObj->isActive())
+            {
+                if ((Event->motion.state&SDL_BUTTON(SDL_BUTTON_RIGHT))==0)
+                {
+                    Cursor.x = Event->motion.x;
+                    Cursor.y = Event->motion.y;
+                }
+            }
+            else
             {
                 Cursor.x = Event->motion.x;
                 Cursor.y = Event->motion.y;

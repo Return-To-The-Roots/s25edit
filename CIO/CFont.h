@@ -1,7 +1,7 @@
 #ifndef _CFONT_H
     #define _CFONT_H
 
-#include "includes.h"
+#include "../includes.h"
 
 class CFont
 {
@@ -12,6 +12,7 @@ class CFont
         Uint16 x;
         Uint16 y;
         Uint16 w;
+        Uint16 h;
         unsigned char *string;
         int fontsize;   //== Uint16 h;
         int color;
@@ -30,9 +31,11 @@ class CFont
         int getH(void) { return fontsize; };
         void setFontsize(int fontsize);
         void setColor(int color);
+        void setText(const char *string);
+        void setText(unsigned char *string);
         SDL_Surface* getSurface(void) { return Surf_Font; };
         //Methods
-        //fontsize can be 9, 11 or 14 (otherwise it will be set to 9)
+        //fontsize can be 9, 11 or 14 (otherwise it will be set to 9) ---- '\n' is possible
         bool writeText(const char *string);
         bool writeText(unsigned char *string);
         //this functions can used as CFont::writeText to write text directly to a surface without creating an object

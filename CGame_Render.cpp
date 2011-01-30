@@ -96,7 +96,7 @@ void CGame::Render()
     //CFont::writeText(Surf_Display, "!@#$%&*()-_=+,<.>/?;:'\"\\1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ©ÄÇÖÜßàáâäçèéêëìíîïñòóôöùúûü", 10, 150, 9);
     //CFont::writeText(Surf_Display, "!!!!", 10, 150, 14, FONT_YELLOW);
     //char text[] = "hasdfsdf34!!!!";
-    //CFont::writeText(Surf_Display, (unsigned char*)text, 10, 150, 14, FONT_BLUE+1);
+    //CFont::writeText(Surf_Display, (unsigned char*)text, 10, 150, 14, FONT_MINTGREEN, ALIGN_RIGHT);
 
     SDL_Flip(Surf_Display);
 

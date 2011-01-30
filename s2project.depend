@@ -8,7 +8,7 @@
 	"CEvent.h"
 	"CSurface.h"
 
-1295379922 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
+1296404422 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
 
 1267822972 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cevent.h
 	<SDL/SDL.h>
@@ -66,20 +66,20 @@
 1268587239 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_gameloop.cpp
 	"CGame.h"
 
-1295342701 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
+1296406452 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
 	"CGame.h"
 
-1294670309 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
+1296243219 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
 	"CGame.h"
 	<stdio.h>
 
-1293726203 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_event.cpp
+1296397062 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_event.cpp
 	"CGame.h"
 
-1282218145 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfont.h
+1296243214 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfont.h
 	"includes.h"
 
-1282218309 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfont.cpp
+1296242867 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfont.cpp
 	"CFont.h"
 
 1282218613 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cmenu.h
@@ -97,16 +97,16 @@
 1295338710 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\globals.h
 	"includes.h"
 
-1295338567 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\globals.cpp
+1295510700 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\globals.cpp
 	"globals.h"
 
-1293956807 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.h
+1296393253 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.h
 	"includes.h"
 
-1294221557 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
+1296405304 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
 	"callbacks.h"
 
-1293298459 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
+1296300921 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
 	<iostream>
 	<cmath>
 	<SDL/SDL.h>
@@ -117,17 +117,18 @@
 	"globals.h"
 	"callbacks.h"
 	"CSurface.h"
-	"CFile.h"
-	"CFont.h"
-	"CButton.h"
-	"CMenu.h"
-	"CWindow.h"
-	"CPicture.h"
+	"CIO/CFile.h"
+	"CIO/CFont.h"
+	"CIO/CButton.h"
+	"CIO/CMenu.h"
+	"CIO/CWindow.h"
+	"CIO/CPicture.h"
+	"CIO/CTextfield.h"
 	"CMap.h"
 	"CDebug.h"
 	"CGame.h"
 
-1279873437 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\classes.h
+1296313359 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\classes.h
 
 1293024001 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cwindow.h
 	"includes.h"
@@ -147,16 +148,16 @@
 1291644189 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cdebug.cpp
 	"CDebug.h"
 
-1295377163 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.h
+1296405020 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.h
 	"includes.h"
 
-1295381997 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.cpp
+1296402499 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.cpp
 	"CMap.h"
 
-1295337649 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.h
+1295460007 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.h
 	"includes.h"
 
-1295379626 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.cpp
+1295458638 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cfile.cpp
 	"CFile.h"
 
 1059907474 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge.h
@@ -216,11 +217,53 @@
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1295381783 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
+1295516709 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
 1277823034 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_rotation.h
 	<SDL/SDL.h>
 	"sge_internal.h"
+
+1296306104 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.h
+	"../includes.h"
+
+1296247472 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.h
+	"../includes.h"
+
+1296376016 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.h
+	"../includes.h"
+
+1296396771 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.h
+	"../includes.h"
+
+1296247493 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.h
+	"../includes.h"
+
+1296247464 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.h
+	"../includes.h"
+
+1283250789 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.cpp
+	"CButton.h"
+
+1296404422 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.cpp
+	"CFile.h"
+
+1296317314 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.cpp
+	"CFont.h"
+
+1296375955 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.cpp
+	"CMenu.h"
+
+1269361949 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.cpp
+	"CPicture.h"
+
+1296397092 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.cpp
+	"CWindow.h"
+
+1296396897 c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.h
+	"../includes.h"
+
+1296403974 source:c:\dokumente und einstellungen\marc\eigene dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.cpp
+	"CTextfield.h"
 

@@ -40,6 +40,9 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
         static_pictures[i].y = 0;
         static_pictures[i].pic = -1;
     }
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+        textfields[i] = NULL;
+
     this->title = (unsigned char*) title;
     this->callback = callback;
     this->callbackQuitMessage = callbackQuitMessage;
@@ -69,6 +72,11 @@ CWindow::~CWindow()
         if (pictures[i] != NULL)
             delete pictures[i];
     }
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            delete textfields[i];
+    }
     SDL_FreeSurface(Surf_Window);
 }
 
@@ -88,6 +96,14 @@ void CWindow::setColor(int color)
 {
     pic_background = color;
     needRender = true;
+}
+
+bool CWindow::hasActiveInputElement(void)
+{
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+        if (textfields[i] != NULL && textfields[i]->isActive())
+            return true;
+    return false;
 }
 
 void CWindow::setMouseData(SDL_MouseMotionEvent motion)
@@ -296,11 +312,26 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
             if (buttons[i] != NULL)
                 buttons[i]->setMouseData(button);
         }
+        for (int i = 0; i < MAXTEXTFIELDS; i++)
+        {
+            if (textfields[i] != NULL)
+                textfields[i]->setMouseData(button);
+        }
     }
 
     //at least call the callback
     callback(WINDOW_CLICKED_CALL);
 
+    needRender = true;
+}
+
+void CWindow::setKeyboardData(SDL_KeyboardEvent key)
+{
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            textfields[i]->setKeyboardData(key);
+    }
     needRender = true;
 }
 
@@ -466,6 +497,42 @@ bool CWindow::delStaticPicture(int ArrayIndex)
     return true;
 }
 
+CTextfield* CWindow::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
+{
+    //x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
+    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
+    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
+
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] == NULL)
+        {
+            textfields[i] = new CTextfield(x_abs, y_abs, cols, rows, fontsize, text_color, bg_color, button_style);
+            needRender = true;
+            return textfields[i];
+        }
+    }
+    return NULL;
+}
+
+bool CWindow::delTextfield(CTextfield* TextfieldToDelete)
+{
+    if (TextfieldToDelete == NULL)
+        return false;
+
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] == TextfieldToDelete)
+        {
+            delete textfields[i];
+            textfields[i] = NULL;
+            needRender = true;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool CWindow::render(void)
 {
     //position in the Surface 'Surf_Window'
@@ -482,6 +549,15 @@ bool CWindow::render(void)
     int minimizebutton = WINDOW_BUTTON_MINIMIZE;
     //resize button (can be marked, clicked or normal)
     int resizebutton = WINDOW_BUTTON_RESIZE;
+
+
+    //test if a textfield has changed
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            if (textfields[i]->hasRendered())
+                needRender = true;
+    }
 
     //if we don't need to render, all is up to date, return true
     if (!needRender)
@@ -560,6 +636,11 @@ bool CWindow::render(void)
         {
             if (texts[i] != NULL && texts[i]->getX() < Surf_Window->w && texts[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, texts[i]->getSurface(), texts[i]->getX(), texts[i]->getY());
+        }
+        for (int i = 0; i < MAXTEXTFIELDS; i++)
+        {
+            if (textfields[i] != NULL && textfields[i]->getX() < Surf_Window->w && textfields[i]->getY() < Surf_Window->h)
+                CSurface::Draw(Surf_Window, textfields[i]->getSurface(), textfields[i]->getX(), textfields[i]->getY());
         }
     }
 
@@ -684,3 +765,16 @@ bool CWindow::render(void)
     return true;
 }
 
+void CWindow::setInactive(void)
+{
+     active = false;
+     clicked = false;
+     marked = false;
+     needRender = true;
+
+    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    {
+        if (textfields[i] != NULL)
+            textfields[i]->setInactive();
+    }
+}

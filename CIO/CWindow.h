@@ -1,7 +1,7 @@
 #ifndef _CWINDOW_H
     #define _CWINDOW_H
 
-#include "includes.h"
+#include "../includes.h"
 
 class CWindow
 {
@@ -24,6 +24,7 @@ class CWindow
         CFont *texts[MAXTEXTS];
         CPicture *pictures[MAXPICTURES];
         struct { int x, y, pic; } static_pictures[MAXPICTURES];
+        CTextfield *textfields[MAXTEXTFIELDS];
         unsigned char *title;
         bool marked;
         bool clicked;
@@ -53,22 +54,26 @@ class CWindow
         int getY(void) { return y; };
         int getW(void) { return w; };
         int getH(void) { return h; };
-        int getPriority(void) { return priority; };
-        void setPriority(int priority) { this->priority = priority; };
+        int getPriority(void) { return priority; }
+        void setPriority(int priority) { this->priority = priority; }
         void setTitle(const char *title);
         void setTitle(unsigned char *title);
         void setMouseData(SDL_MouseMotionEvent motion);
         void setMouseData(SDL_MouseButtonEvent button);
-        SDL_Surface* getSurface(void) { render(); return Surf_Window; };
-        void setActive(void) { active = true; marked = true; needRender = true; };
-        void setInactive(void) { active = false; clicked = false; marked = false; needRender = true; };
-        bool isActive(void) { return active; };
-        void setWaste(void) { waste = true; };
-        bool isWaste(void) { return waste; };
-        bool isMoving(void) { return moving; };
-        bool isResizing(void) { return resizing; };
+        void setKeyboardData(SDL_KeyboardEvent key);
+        SDL_Surface* getSurface(void) { render(); return Surf_Window; }
+        void setActive(void) { active = true; marked = true; needRender = true; }
+        void setInactive(void);
+        bool isActive(void) { return active; }
+        void setWaste(void) { waste = true; }
+        bool isWaste(void) { return waste; }
+        bool isMoving(void) { return moving; }
+        bool isResizing(void) { return resizing; }
+        bool isMarked(void) { return marked; }
         //we can not trust this information, cause if minimized is false, it is possible, that we still have the old minimized surface
         //bool isMinimized(void) { return minimized; };
+        //we need an information if a input-element (textfield etc.) is active to not deliver the input to other gui-element in the event system
+        bool hasActiveInputElement(void);
         void setColor(int color);
         //Methods
         CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20, int color = BUTTON_GREY, const char *text = NULL, int picture = -1);
@@ -80,6 +85,8 @@ class CWindow
         bool delPicture(CPicture *PictureToDelete);
         int addStaticPicture(int x, int y, int picture);
         bool delStaticPicture(int ArrayIndex);
+        CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fonsize = 14, int text_color = FONT_YELLOW, int bg_color = -1, bool button_style = false);
+        bool delTextfield(CTextfield* TextfieldToDelete);
         bool render(void);
 };
 

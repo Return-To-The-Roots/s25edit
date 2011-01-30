@@ -13,8 +13,7 @@ CFont::CFont(const char *string, int x, int y, int fontsize, int color)
     this->color = color;
     Surf_Font = NULL;
     //create surface and write text to it
-    if ( writeText(this->string) == false)
-        throw "Could not create font surface!\n";
+    writeText(this->string);
 }
 
 CFont::CFont(unsigned char *string, int x, int y, int fontsize, int color)
@@ -30,8 +29,7 @@ CFont::CFont(unsigned char *string, int x, int y, int fontsize, int color)
     this->color = color;
     Surf_Font = NULL;
     //create surface and write text to it
-    if ( writeText(this->string) == false)
-        throw "Could not create font surface!\n";
+    writeText(this->string);
 }
 
 CFont::~CFont()
@@ -54,10 +52,26 @@ void CFont::setColor(int color)
     writeText(string);
 }
 
+void CFont::setText(const char *string)
+{
+    setText((unsigned char*)string);
+}
+
+void CFont::setText(unsigned char *string)
+{
+    SDL_FreeSurface(Surf_Font);
+    this->string = string;
+    writeText(this->string);
+}
+
 bool CFont::writeText(const char *string)
 {
     //data for counting pixels to create the surface
-    unsigned int pixel_ctr = 0;
+    unsigned int pixel_ctr_w = 0;
+    unsigned int pixel_ctr_w_tmp = 0;
+    //ROW_SEPARATOR IS ALSO USED IN CTEXTFIELD-CLASS, SO DO NOT CHANGE!!
+    int row_separator = (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4));
+    unsigned int pixel_ctr_h = fontsize + row_separator;
     bool pixel_count_loop = true;
     //the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
@@ -65,6 +79,7 @@ bool CFont::writeText(const char *string)
     unsigned char *chiffre = (string == NULL ? this->string : (unsigned char*) string);
     //counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = 0;
+    int pos_y = 0;
 
     if (string == NULL && this->string == NULL)
         return false;
@@ -195,16 +210,30 @@ bool CFont::writeText(const char *string)
         //if we only count pixels in this round
         if (pixel_count_loop)
         {
-            pixel_ctr += global::bmpArray[chiffre_index].w;
-            chiffre++;
+            if (*chiffre == '\n')
+            {
+                pixel_ctr_h += row_separator+fontsize;
+                if (pixel_ctr_w_tmp > pixel_ctr_w)
+                    pixel_ctr_w = pixel_ctr_w_tmp;
+                pixel_ctr_w_tmp = 0;
+                chiffre++;
+            }
+            else
+            {
+                pixel_ctr_w_tmp += global::bmpArray[chiffre_index].w;
+                chiffre++;
+            }
 
             //if this was the last chiffre setup width, create surface and go in normal mode to write text to the surface
             if (*chiffre == '\0')
             {
-                w = pixel_ctr;
+                if (pixel_ctr_w_tmp > pixel_ctr_w)
+                    pixel_ctr_w = pixel_ctr_w_tmp;
+                w = pixel_ctr_w;
+                h = pixel_ctr_h;
                 if (Surf_Font != NULL)
                     SDL_FreeSurface(Surf_Font);
-                if ( (Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, fontsize, 32, 0, 0, 0, 0)) == NULL )
+                if ( (Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL )
                     return false;
                 SDL_SetColorKey(Surf_Font, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
                 chiffre = this->string;
@@ -217,12 +246,24 @@ bool CFont::writeText(const char *string)
 
         //now we have our index and can use global::bmpArray[chiffre_index] to get the picture
 
+        //test for new line
+        if (*chiffre == '\n')
+        {
+            pos_y += row_separator + fontsize;
+            pos_x = 0;
+            chiffre++;
+            continue;
+        }
+
         //if right end of surface is reached, stop drawing chiffres
         if (Surf_Font->w < pos_x + global::bmpArray[chiffre_index].w)
             break;
+        //if lower end of surface is reached, stop drawing chiffres
+        if (Surf_Font->h < pos_y + row_separator + global::bmpArray[chiffre_index].h)
+            break;
 
         //draw the chiffre to the destination
-        CSurface::Draw(Surf_Font, global::bmpArray[chiffre_index].surface, pos_x, 0);
+        CSurface::Draw(Surf_Font, global::bmpArray[chiffre_index].surface, pos_x, pos_y);
 
         //set position for next chiffre depending on the width of the actual drawn
         //NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237 'í' instead
@@ -245,7 +286,7 @@ bool CFont::writeText(unsigned char *string)
 bool CFont::writeText(SDL_Surface *Surf_Dest, const char *string, int x, int y, int fontsize, int color, int align)
 {
     //data for necessary counting pixels depending on alignment
-    unsigned int pixel_ctr = 0;
+    unsigned int pixel_ctr_w = 0;
     bool pixel_count_loop;
     //the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
@@ -253,6 +294,7 @@ bool CFont::writeText(SDL_Surface *Surf_Dest, const char *string, int x, int y, 
     unsigned char *chiffre = (unsigned char*) string;
     //counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = x;
+    int pos_y = y;
 
     if (global::bmpArray == NULL || Surf_Dest == NULL || string == NULL)
         return false;
@@ -409,11 +451,12 @@ bool CFont::writeText(SDL_Surface *Surf_Dest, const char *string, int x, int y, 
         //if we only count pixels in this round
         if (pixel_count_loop)
         {
-            pixel_ctr += global::bmpArray[chiffre_index].w;
+            pixel_ctr_w += global::bmpArray[chiffre_index].w;
+
             //if text is to long to go further left, stop loop and begin writing at x=0
-            if ( (align == ALIGN_MIDDLE) && (x - (unsigned int)(pixel_ctr / 2) <= 0) )
+            if ( (align == ALIGN_MIDDLE) && (x - (unsigned int)(pixel_ctr_w / 2) <= 0) )
                 pos_x = 0;
-            else if ( (align == ALIGN_RIGHT) && (Surf_Dest->w-1 - pixel_ctr <= 0) )
+            else if ( (align == ALIGN_RIGHT) && (Surf_Dest->w-1 - pixel_ctr_w <= 0) )
                 pos_x = 0;
 
             chiffre++;
@@ -424,9 +467,9 @@ bool CFont::writeText(SDL_Surface *Surf_Dest, const char *string, int x, int y, 
                 chiffre = (unsigned char*) string;
 
                 if (align == ALIGN_MIDDLE)
-                    pos_x = x - (unsigned int)(pixel_ctr / 2);
+                    pos_x = x - (unsigned int)(pixel_ctr_w / 2);
                 else if (align == ALIGN_RIGHT)
-                    pos_x = Surf_Dest->w-1 - pixel_ctr;
+                    pos_x = Surf_Dest->w-1 - pixel_ctr_w;
 
                 pixel_count_loop = false;
                 continue;
@@ -442,7 +485,7 @@ bool CFont::writeText(SDL_Surface *Surf_Dest, const char *string, int x, int y, 
             break;
 
         //draw the chiffre to the destination
-        CSurface::Draw(Surf_Dest, global::bmpArray[chiffre_index].surface, pos_x, y);
+        CSurface::Draw(Surf_Dest, global::bmpArray[chiffre_index].surface, pos_x, pos_y);
 
         //set position for next chiffre depending on the width of the actual drawn
         //NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237 'í' instead

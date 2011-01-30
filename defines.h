@@ -5,7 +5,7 @@
 //in viewer mode there is only a window and the user can scoll through all loaden pictures
 //#define _VIEWERMODE
 //in admin mode, there are some key combos to open debugger, resource viewer and so on
-#define _ADMINMODE
+//#define _ADMINMODE
 //in editor mode there is the possibility to load, edit and save created maps
 #define _EDITORMODE
 
@@ -84,6 +84,14 @@ typedef struct BobtypeSHADOW
 //Datatypes for the Map
 //vector structure
 struct vector { float x, y, z; };
+//structure for the 250 9Byte-Items from die 2250Bytes long map header
+struct MapHeaderItem
+{
+    Uint8 type;     //land or water (snow, swamp and lava are not counted)
+    Uint16 x;
+    Uint16 y;
+    Uint32 area;    //number of vertices this area has
+};
 //point structure ('i' is a 16 bit integer shifted left 16 times --> fixed point math for speed)
 struct point
 {
@@ -115,7 +123,7 @@ struct DisplayRectangle { long int x,y; long int w,h; };
 //map strutcture
 typedef struct BobtypeMAP
 {
-    char name[21];
+    char name[20];
     Uint16 height;
     Uint16 height_old;
     Uint16 height_pixel;
@@ -127,7 +135,9 @@ typedef struct BobtypeMAP
     //these are the original values
     Uint16 HQx[7];
     Uint16 HQy[7];
-    char author[21];
+    char author[20];
+    //250 items from the big map header
+    MapHeaderItem header[250];
     struct point *vertex;
 } bobMAP;
 //map types
@@ -304,7 +314,7 @@ enum
     ///             ONLY THE START-VALUES (FONT9_SPACE, FONT11_SPACE, FONT14_SPACE) HAVE THE RIGHT INDEX!
 
     //fontsize 11
-    FONT11_SPACE,           //spacebar
+    FONT11_SPACE,               //spacebar
     FONT11_EXCLAMATION_POINT,   // !
     FONT11_DOUBLE_QUOTES,       // "
     FONT11_SHARP,               // #
@@ -1078,7 +1088,15 @@ enum
 enum
 {
     PAL_RESOURCE = 0,
-    PAL_IO
+    PAL_IO,
+#ifdef _VIEWERMODE
+    PAL_MAP00,
+    PAL_MAP01,
+    PAL_MAP02
+#else
+    PAL_MAPxx,
+    PAL_xBBM
+#endif
 };
 
 //Button-Colors (after all used by CButton and other Objects using CButton)
@@ -1169,6 +1187,8 @@ enum
 #define MAXTEXTS 100
 //maximum number of pictures that can be shown WITHIN a menu or window
 #define MAXPICTURES 50
+//maximum number of textfields that can be created WITHIN a menu or window
+#define MAXTEXTFIELDS 10
 
 //maximum players for a map
 #define MAXPLAYERS 16

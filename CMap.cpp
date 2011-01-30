@@ -234,25 +234,33 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
 
 void CMap::loadMapPics(void)
 {
-    char outputString1[47], outputString2[34];
-    char picFile[17];
+    char outputString1[47], outputString2[34], outputString3[53];
+    char picFile[17], palFile[23];
     switch (map->type)
     {
         case 0:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
                     strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
                     strcpy(picFile, "./DATA/MAP00.LST");
+                    strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...");
+                    strcpy(palFile, "./GFX/PALETTE/PAL5.BBM");
                     break;
         case 1:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP01.LST...");
                     strcpy(outputString2, "\nLoading file: /DATA/MAP01.LST...");
                     strcpy(picFile, "./DATA/MAP01.LST");
+                    strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL6.BBM...");
+                    strcpy(palFile, "./GFX/PALETTE/PAL6.BBM");
                     break;
         case 2:     strcpy(outputString1, "\nLoading palette from file: /DATA/MAP02.LST...");
                     strcpy(outputString2, "\nLoading file: /DATA/MAP02.LST...");
                     strcpy(picFile, "./DATA/MAP02.LST");
+                    strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL7.BBM...");
+                    strcpy(palFile, "./GFX/PALETTE/PAL7.BBM");
                     break;
         default:    strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
                     strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
                     strcpy(picFile, "./DATA/MAP00.LST");
+                    strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...");
+                    strcpy(palFile, "./GFX/PALETTE/PAL5.BBM");
                     break;
     }
     //load only the palette at this time from MAP0x.LST
@@ -277,6 +285,12 @@ void CMap::loadMapPics(void)
     //}
     //set back palette
     CFile::set_palActual(CFile::get_palArray());
+    //load palette file for the map (for precalculated shading)
+    std::cout << outputString3;
+    if ( CFile::open_file(palFile, LST, true) == false )
+    {
+        std::cout << "failure";
+    }
 }
 
 void CMap::unloadMapPics(void)
@@ -288,6 +302,9 @@ void CMap::unloadMapPics(void)
     }
     //set back bmpArray-pointer, cause MAP0x.LST is no longer needed
     CFile::set_bmpArray(global::bmpArray+MAPPIC_ARROWCROSS_YELLOW);
+    //set back palArray-pointer, cause PALx.BBM is no longer needed
+    CFile::set_palActual(&global::palArray[PAL_IO]);
+    CFile::set_palArray(&global::palArray[PAL_IO+1]);
 }
 
 void CMap::setMouseData(SDL_MouseMotionEvent motion)
@@ -442,29 +459,19 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
            )
         {
             //the editor-main-menu picture was clicked
-            callback::EditorQuitMenu(INITIALIZING_CALL); //"quit" menu is temporary, later this will be "main" menu
+            callback::EditorMainMenu(INITIALIZING_CALL);
             return;
         }
         //now we check the right menubar
+        #ifdef _ADMINMODE
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w-37) && button.x <= (displayRect.w)
                                                   && button.y >= (displayRect.h/2+200) && button.y <= (displayRect.h/2+237)
            )
         {
-            //the temproray save-map picture was clicked
-            callback::PleaseWait(INITIALIZING_CALL);
-            //for safety recalculate build and shadow data --> is done on map load, so it's not necessary again
-            //for (int i = 0; i < map->height; i++)
-            //{
-            //    for (int j = 0; j < map->width; j++)
-            //    {
-            //        modifyBuild(j, i);
-            //        modifyShading(j, i);
-            //    }
-            //}
-            CFile::save_file("./WORLDS/NEW_MAP.SWD", SWD, map);
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+            //the temporary bugkill picture was clicked
             return;
         }
+        #endif
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w-37) && button.x <= (displayRect.w)
                                                   && button.y >= (displayRect.h/2-239) && button.y <= (displayRect.h/2-202)
            )
@@ -821,8 +828,8 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
         Xeven += (map->width);
     else if (Xeven > map->width-1)
         Xeven -= (map->width-1);
-    //Xuneven = (MouseX + displayRect.x + TRIANGLE_WIDTH/2) / TRIANGLE_WIDTH;
-    Xuneven = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
+    Xuneven = (MouseX + displayRect.x + TRIANGLE_WIDTH/2) / TRIANGLE_WIDTH;
+    //Xuneven = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
     if (Xuneven < 0)
         Xuneven += (map->width-1);
     else if (Xuneven > map->width-1)
@@ -917,7 +924,7 @@ bool CMap::render(void)
         if ( (Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, BitsPerPixel, 0, 0, 0, 0)) == NULL )
             return false;
         if (BitsPerPixel == 8)
-            SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[0].colors, 0, 256);
+            SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors, 0, 256);
         needSurface = false;
     }
     //else
@@ -1096,8 +1103,10 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w-36, displayRect.h/2+163, 0, 0, 32, 37);
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w-36, displayRect.h/2+200, 0, 0, 32, 37);
     //pictures
-    //temprorary to save a map
+    #ifdef _ADMINMODE
+    //temprorary bugkill picture
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w-37, displayRect.h/2+202);
+    #endif
     //four cursor menu pictures
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.w-33, displayRect.h/2-237);
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.w-20, displayRect.h/2-235);
@@ -1528,10 +1537,11 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
 
 void CMap::modifyHeightPlane(int VertexX, int VertexY, Uint8 h)
 {
-    while (map->vertex[VertexY*map->width+VertexX].h < h)
+    //we could do "while" but "if" looks better during planing (optical effect)
+    if (map->vertex[VertexY*map->width+VertexX].h < h)
         modifyHeightRaise(VertexX, VertexY);
-
-    while (map->vertex[VertexY*map->width+VertexX].h > h)
+    //we could do "while" but "if" looks better during planing (optical effect)
+    if (map->vertex[VertexY*map->width+VertexX].h > h)
         modifyHeightReduce(VertexX, VertexY);
 }
 
