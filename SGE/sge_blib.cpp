@@ -604,10 +604,10 @@ void _FadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surfa
 //==================================================================================
 // Draws a horisontal, textured line with precalculated gouraud shading
 //==================================================================================
-void _PreCalcFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 i1,Sint16 i2,Uint8 PreCalcPalettes[][256])
+void _PreCalcFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Uint16 i1,Uint16 i2,Uint8 PreCalcPalettes[][256])
 {
 	Sint16 x;
-    Sint16 i;
+    Uint16 i;
 
 	/* Fix coords */
 	if ( x1 > x2 ) {
@@ -618,7 +618,7 @@ void _PreCalcFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SD
 	}
 
 	/* We use fixedpoint math */
-	Sint16 I = i1;
+	Uint16 I = i1;
 
 	/* Color step value */
 	Sint16 istep = (i2-i1)/(x2-x1+1);
@@ -659,7 +659,8 @@ void _PreCalcFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SD
 					pixel = row + x;
 
 					*pixel = PreCalcPalettes[ (Uint8)(I>>8) ] [ *((Uint8 *)source->pixels + (srcy>>16)*source->pitch + (srcx>>16)) ];
-					//printf("I:%d\nUint8 I:%d\nUint8 I>>8:%d\nUint8 (I>>8):%d\n", I, (Uint8)I, (Uint8)I>>8, (Uint8)(I>>8));
+					//if (I>>8 < 0x00)
+                    //    printf("\n(i1>>8):%d (i2>>8):%d I:%d (I>>8):%d (Uint8)(I>>8):%d istep:%d", i1>>8, i2>>8, I, I>>8, (Uint8)(I>>8), istep);
 
 					srcx += xstep;
 					srcy += ystep;
@@ -827,10 +828,10 @@ void _PreCalcFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SD
 //==================================================================================
 // Draws a horisontal, textured line with precalculated gouraud shading (respecting colorkeys)
 //==================================================================================
-void _PreCalcFadedTexturedLineColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 i1,Sint16 i2,Uint8 PreCalcPalettes[][256],Uint32 keys[],int keycount)
+void _PreCalcFadedTexturedLineColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Uint16 i1,Uint16 i2,Uint8 PreCalcPalettes[][256],Uint32 keys[],int keycount)
 {
 	Sint16 x;
-    Sint16 i;
+    Uint16 i;
 
 	/* Fix coords */
 	if ( x1 > x2 ) {
@@ -841,7 +842,7 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 x2,Si
 	}
 
 	/* We use fixedpoint math */
-	Sint16 I = i1;
+	Uint16 I = i1;
 
 	/* Color step value */
 	Sint16 istep = (i2-i1)/(x2-x1+1);
@@ -2096,17 +2097,17 @@ void sge_FadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sin
 //==================================================================================
 // Draws a texured trigon  with precalculated gouraud shading (fast)
 //==================================================================================
-void sge_PreCalcFadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 I1,Sint16 I2,Sint16 I3,Uint8 PreCalcPalettes[][256])
+void sge_PreCalcFadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Uint16 I1,Uint16 I2,Uint16 I3,Uint8 PreCalcPalettes[][256])
 {
 	Sint16 y;
 
 	if( y1==y3 )
 		return;
 
-    Sint16 i=0;
-	Sint16 i_orig1 = I1;
-	Sint16 i_orig2 = I2;
-	Sint16 i_orig3 = I3;
+    Uint16 i=0;
+	Uint16 i_orig1 = I1;
+	Uint16 i_orig2 = I2;
+	Uint16 i_orig3 = I3;
 
 	/* Sort coords */
 	if ( y1 > y2 ) {
@@ -2142,9 +2143,9 @@ void sge_PreCalcFadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16
 	Sint32 xc = Sint32(x2<<16);
 
 	/* Starting colors (rgb) for the three lines */
-	Sint16 i1 = i_orig1;
-	Sint16 i2 = i1;
-	Sint16 i3 = i_orig2;
+	Uint16 i1 = i_orig1;
+	Uint16 i2 = i1;
+	Uint16 i3 = i_orig2;
 
 	/* Lines step values */
 	Sint32 m1 = 0;
@@ -2198,6 +2199,9 @@ void sge_PreCalcFadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16
 			//_TexturedLine(dest, xa>>16, xb>>16, y, source, srcx1>>16, srcy1>>16, srcx2>>16, srcy2>>16);
 			//_FadedLine(dest, xa>>16, xb>>16, y, r1>>16, g1>>16, b1>>16, r2>>16, g2>>16, b2>>16);
 			_PreCalcFadedTexturedLine(dest, xa>>16, xb>>16, y, source, srcx1>>16, srcy1>>16, srcx2>>16, srcy2>>16,i1,i2,PreCalcPalettes);
+
+            //if (i1 < 0 || i2 < 0)
+                //printf("\nx1:%d y1:%d x2:%d y2:%d x3:%d y3:%d i1>>8:%d i2>>8:%d istep1:%d istep2:%d I1>>8:%d I2>>8:%d I3>>8:%d", x1, y1, x2, y2, x3, y3, i1>>8, i2>>8, istep1, istep2, I1>>7, I2>>8, I3>>8);
 
 			xa += m1;
 			xb += m2;
@@ -2432,17 +2436,17 @@ void sge_FadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint
 //==================================================================================
 // Draws a texured trigon  with precalculated gouraud shading (fast) respecting the color keys
 //==================================================================================
-void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 I1,Sint16 I2,Sint16 I3,Uint8 PreCalcPalettes[][256], Uint32 keys[], int keycount)
+void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Uint16 I1,Uint16 I2,Uint16 I3,Uint8 PreCalcPalettes[][256], Uint32 keys[], int keycount)
 {
 	Sint16 y;
 
 	if( y1==y3 )
 		return;
 
-    Sint16 i=0;
-	Sint16 i_orig1 = I1;
-	Sint16 i_orig2 = I2;
-	Sint16 i_orig3 = I3;
+    Uint16 i=0;
+	Uint16 i_orig1 = I1;
+	Uint16 i_orig2 = I2;
+	Uint16 i_orig3 = I3;
 
 	/* Sort coords */
 	if ( y1 > y2 ) {
@@ -2478,9 +2482,9 @@ void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 
 	Sint32 xc = Sint32(x2<<16);
 
 	/* Starting colors (rgb) for the three lines */
-	Sint16 i1 = i_orig1;
-	Sint16 i2 = i1;
-	Sint16 i3 = i_orig2;
+	Uint16 i1 = i_orig1;
+	Uint16 i2 = i1;
+	Uint16 i3 = i_orig2;
 
 	/* Lines step values */
 	Sint32 m1 = 0;

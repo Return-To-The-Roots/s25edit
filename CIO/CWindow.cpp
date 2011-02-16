@@ -172,13 +172,17 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
             resizing = false;
         if (resizing)
         {
-            w += motion.xrel;
-            h += motion.yrel;
+            //only resize if not minimized
+            if (!minimized)
+            {
+                w += motion.xrel;
+                h += motion.yrel;
 
-            //MISSING: we have to test if user moves outside the surface or window size is under minimum
+                //MISSING: we have to test if window size is under minimum
 
-            //the window has resized, so we need a new surface
-            needSurface = true;
+                //the window has resized, so we need a new surface
+                needSurface = true;
+            }
         }
     }
 

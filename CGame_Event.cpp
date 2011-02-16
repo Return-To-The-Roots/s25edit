@@ -74,7 +74,7 @@ void CGame::EventHandling(SDL_Event *Event)
 
             switch (Event->key.keysym.sym)
             {
-                case SDLK_F1:       if (fullscreen)
+                case SDLK_F2:       if (fullscreen)
                                         fullscreen = false;
                                     else
                                         fullscreen = true;

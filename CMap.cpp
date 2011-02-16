@@ -522,22 +522,30 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             mode = EDITOR_MODE_HEIGHT_REDUCE;
         else if (key.keysym.sym == SDLK_LALT && mode == EDITOR_MODE_HEIGHT_RAISE)
             mode = EDITOR_MODE_HEIGHT_PLANE;
-        else if (key.keysym.sym == SDLK_e && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        else if (key.keysym.sym == SDLK_INSERT && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MaxRaiseHeight > 0x00)
                 MaxRaiseHeight--;
         }
-        else if (key.keysym.sym == SDLK_r && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        else if (key.keysym.sym == SDLK_HOME && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        {
+            MaxRaiseHeight = 0x3C;
+        }
+        else if (key.keysym.sym == SDLK_PAGEUP && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MaxRaiseHeight < 0x3C)
                 MaxRaiseHeight++;
         }
-        else if (key.keysym.sym == SDLK_s && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        else if (key.keysym.sym == SDLK_DELETE && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MinReduceHeight > 0x00)
                 MinReduceHeight--;
         }
-        else if (key.keysym.sym == SDLK_d && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        else if (key.keysym.sym == SDLK_END && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        {
+            MinReduceHeight = 0x00;
+        }
+        else if (key.keysym.sym == SDLK_PAGEDOWN && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
         {
             if (MinReduceHeight < 0x3C)
                 MinReduceHeight++;
@@ -705,6 +713,11 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
                 displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
         }
         #ifdef _EDITORMODE
+        //help menu
+        else if (key.keysym.sym == SDLK_F1)
+        {
+            callback::EditorHelpMenu(INITIALIZING_CALL);
+        }
         //convert map to greenland
         else if (key.keysym.sym == SDLK_g)
         {

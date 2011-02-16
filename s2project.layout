@@ -5,40 +5,40 @@
 		<Cursor position="21" topLine="0" />
 	</File>
 	<File name="CDebug.h" open="0" top="0" tabpos="5">
-		<Cursor position="1919" topLine="36" />
+		<Cursor position="1919" topLine="3" />
 	</File>
-	<File name="CGame.cpp" open="1" top="1" tabpos="6">
-		<Cursor position="154" topLine="0" />
+	<File name="CGame.cpp" open="0" top="0" tabpos="6">
+		<Cursor position="123" topLine="0" />
 	</File>
 	<File name="CGame.h" open="0" top="0" tabpos="10">
-		<Cursor position="268" topLine="1" />
+		<Cursor position="2034" topLine="54" />
 	</File>
 	<File name="CGame_Cleanup.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="860" topLine="0" />
 	</File>
-	<File name="CGame_Event.cpp" open="0" top="0" tabpos="8">
-		<Cursor position="2191" topLine="40" />
+	<File name="CGame_Event.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="2596" topLine="51" />
 	</File>
 	<File name="CGame_GameLoop.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="178" topLine="0" />
 	</File>
 	<File name="CGame_Init.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="482" topLine="0" />
+		<Cursor position="2505" topLine="48" />
 	</File>
-	<File name="CGame_Render.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="3326" topLine="68" />
+	<File name="CGame_Render.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="1557" topLine="6" />
 	</File>
 	<File name="CIO\CButton.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="8621" topLine="265" />
 	</File>
 	<File name="CIO\CButton.h" open="0" top="0" tabpos="0">
-		<Cursor position="1745" topLine="18" />
+		<Cursor position="608" topLine="9" />
 	</File>
 	<File name="CIO\CFile.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="15841" topLine="482" />
 	</File>
 	<File name="CIO\CFile.h" open="0" top="0" tabpos="0">
-		<Cursor position="2519" topLine="24" />
+		<Cursor position="1868" topLine="27" />
 	</File>
 	<File name="CIO\CFont.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="12063" topLine="338" />
@@ -46,11 +46,11 @@
 	<File name="CIO\CFont.h" open="0" top="0" tabpos="0">
 		<Cursor position="1090" topLine="9" />
 	</File>
-	<File name="CIO\CMenu.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="6373" topLine="243" />
+	<File name="CIO\CMenu.cpp" open="0" top="0" tabpos="8">
+		<Cursor position="8146" topLine="297" />
 	</File>
 	<File name="CIO\CMenu.h" open="0" top="0" tabpos="0">
-		<Cursor position="2323" topLine="19" />
+		<Cursor position="477" topLine="4" />
 	</File>
 	<File name="CIO\CPicture.h" open="0" top="0" tabpos="0">
 		<Cursor position="61" topLine="0" />
@@ -59,43 +59,43 @@
 		<Cursor position="15390" topLine="420" />
 	</File>
 	<File name="CIO\CTextfield.h" open="0" top="0" tabpos="0">
-		<Cursor position="1641" topLine="24" />
+		<Cursor position="1109" topLine="6" />
 	</File>
 	<File name="CIO\CWindow.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="13523" topLine="355" />
+		<Cursor position="6287" topLine="150" />
 	</File>
 	<File name="CIO\CWindow.h" open="0" top="0" tabpos="0">
-		<Cursor position="2981" topLine="44" />
+		<Cursor position="1735" topLine="0" />
 	</File>
 	<File name="CMap.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="5460" topLine="139" />
+		<Cursor position="31774" topLine="75" />
 	</File>
 	<File name="CMap.h" open="1" top="0" tabpos="5">
-		<Cursor position="5593" topLine="86" />
+		<Cursor position="1506" topLine="9" />
 	</File>
 	<File name="CSurface.cpp" open="0" top="0" tabpos="5">
-		<Cursor position="41436" topLine="0" />
+		<Cursor position="41626" topLine="861" />
 	</File>
 	<File name="CSurface.h" open="0" top="0" tabpos="7">
 		<Cursor position="1762" topLine="5" />
 	</File>
-	<File name="callbacks.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="19474" topLine="429" />
+	<File name="callbacks.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="3505" topLine="74" />
 	</File>
 	<File name="callbacks.h" open="0" top="0" tabpos="2">
-		<Cursor position="499" topLine="0" />
+		<Cursor position="425" topLine="0" />
 	</File>
 	<File name="classes.h" open="0" top="0" tabpos="11">
 		<Cursor position="185" topLine="0" />
 	</File>
 	<File name="defines.h" open="1" top="0" tabpos="2">
-		<Cursor position="4144" topLine="108" />
+		<Cursor position="4244" topLine="108" />
 	</File>
 	<File name="globals.cpp" open="0" top="0" tabpos="8">
-		<Cursor position="443" topLine="0" />
+		<Cursor position="85" topLine="0" />
 	</File>
 	<File name="globals.h" open="0" top="0" tabpos="20">
-		<Cursor position="473" topLine="0" />
+		<Cursor position="151" topLine="0" />
 	</File>
 	<File name="includes.h" open="0" top="0" tabpos="9">
 		<Cursor position="456" topLine="0" />

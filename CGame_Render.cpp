@@ -7,6 +7,7 @@ void CGame::Render()
     //SDL_FillRect( Surf_Display, NULL, SDL_MapRGB(Surf_Display->format,0,0,0) );
 
     //check resolution
+    /*
     if (MapObj == NULL || !MapObj->isActive())
     {
         //we are in menu
@@ -20,6 +21,7 @@ void CGame::Render()
     }
     else
     {
+    */
         //we are in game
         if ( (Surf_Display->w != GameResolutionX || Surf_Display->h != GameResolutionY) ||
             ( (fullscreen && !(Surf_Display->flags&SDL_FULLSCREEN)) || (!fullscreen && (Surf_Display->flags&SDL_FULLSCREEN)) )
@@ -28,13 +30,14 @@ void CGame::Render()
             SDL_FreeSurface(Surf_Display);
             Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
         }
-    }
+    //}
 
 #ifndef _VIEWERMODE
     //if the S2 loading screen is shown, render only this until user clicks a mouse button
     if (showLoadScreen)
     {
-        CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
+        //CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
+        sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w-1, 0, 0, Surf_Display->h-1, Surf_Display->w-1, Surf_Display->h-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w-1, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h-1);
         SDL_Flip(Surf_Display);
         return;
     }

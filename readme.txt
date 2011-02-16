@@ -5,7 +5,7 @@ Used librarys: SDL and a modified version of SGE.
 
 Installation:
 -------------
-Put s2project.exe, SDL.dll, SGE.dll.
+Put s2project.exe, SDL.dll, SGE.dll in your Siedler 2 Gold (C) directory.
 Don't create a subfolder. All files have to be in the same directory as your S2.EXE is.
 
 

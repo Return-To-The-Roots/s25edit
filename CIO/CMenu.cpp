@@ -307,12 +307,14 @@ bool CMenu::render(void)
     {
         SDL_FreeSurface(Surf_Menu);
         Surf_Menu = NULL;
-        if ( (Surf_Menu = SDL_CreateRGBSurface(SDL_SWSURFACE, global::s2->MenuResolutionX, global::s2->MenuResolutionY, 32, 0, 0, 0, 0)) == NULL )
+        if ( (Surf_Menu = SDL_CreateRGBSurface(SDL_SWSURFACE, global::s2->getResX(), global::s2->getResY(), 32, 0, 0, 0, 0)) == NULL )
             return false;
         needSurface = false;
     }
 
-    CSurface::Draw(Surf_Menu, global::bmpArray[pic_background].surface, 0, 0);
+    //CSurface::Draw(Surf_Menu, global::bmpArray[pic_background].surface, 0, 0);
+    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w-1, 0, 0, Surf_Menu->h-1, Surf_Menu->w-1, Surf_Menu->h-1, global::bmpArray[pic_background].surface, 0, 0, global::bmpArray[pic_background].surface->w-1, 0, 0, global::bmpArray[pic_background].surface->h-1, global::bmpArray[pic_background].surface->w-1, global::bmpArray[pic_background].surface->h-1);
+
     for (int i = 0; i < MAXPICTURES; i++)
     {
         if (static_pictures[i].pic >= 0)

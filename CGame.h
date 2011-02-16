@@ -10,6 +10,7 @@ class CGame
     public:
         int GameResolutionX;
         int GameResolutionY;
+        //MenuResolution is old and not used anymore
         int MenuResolutionX;
         int MenuResolutionY;
         bool fullscreen;
@@ -83,6 +84,8 @@ class CGame
 		CMap *getMapObj(void) { return MapObj; };
 		void delMapObj(void);
 		SDL_Surface* getDisplaySurface(void) { return Surf_Display; };
+		int getResX(void) { return GameResolutionX; }
+		int getResY(void) { return GameResolutionY; }
 };
 
 #endif

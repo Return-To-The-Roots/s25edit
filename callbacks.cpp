@@ -40,7 +40,7 @@ void callback::PleaseWait(int Param)
                                 }
                                 break;
 
-        case CALL_FROM_GAMELOOP:    //This windows gives a "Please Wait"-string, so it is shown while there is an intensive operation
+        case CALL_FROM_GAMELOOP:    //This window gives a "Please Wait"-string, so it is shown while there is an intensive operation
                                     //during ONE gameloop. Therefore it is only shown DURING this ONE operation. If the next gameloop
                                     //appears, the operation MUST have been finished and we can destroy this window.
                                     if (WNDWait != NULL)
@@ -225,7 +225,95 @@ void callback::submenuOptions(int Param)
 }
 
 #ifdef _EDITORMODE
-//now the editor callbacks from the menubar will follow (editor mode)
+//now the editor callbacks will follow (editor mode)
+
+void callback::EditorHelpMenu(int Param)
+{
+    //NOTE: This "Please wait"-window is shown until the PleaseWait-callback is called with 'WINDOW_QUIT_MESSAGE'.
+    //      The window will be registered by the game. To do it the other way (create and then let it automatically
+    //      destroy by the gameloop), you don't need to register the window, but register the callback.
+
+    static CWindow *WNDHelp;
+
+    enum
+    {
+        WINDOWQUIT
+    };
+
+    switch (Param)
+    {
+        case INITIALIZING_CALL: if (WNDHelp != NULL)
+                                    break;
+                                WNDHelp = new CWindow(EditorHelpMenu, WINDOWQUIT, global::s2->getDisplaySurface()->w/2-320, global::s2->getDisplaySurface()->h/2-240, 640, 480, "Hilfe", WINDOW_GREEN2, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE);
+                                if (global::s2->RegisterWindow(WNDHelp))
+                                {
+                                    //we don't register this window cause we will destroy it manually if we need
+                                    //global::s2->RegisterCallback(PleaseWait);
+
+                                    WNDHelp->addText(   "Hilfe-Menu........................................................................................................F1\n"
+                                                        "Fenster/Vollbild...............................................................................................F2\n"
+                                                        "Zoom in/normal/out (experimentell)................................................................F5/F6/F7\n"
+                                                        "Scrollen............................................................................................................Pfeiltasten\n"
+                                                        "Cursorgrösse 1-9 (von 11).................................................................................1-9\n"
+                                                        "Cursor vergrössern/verkleinern..................................................................+/-\n"
+                                                        "Scheren-Modus................................................................................................Strg\n"
+                                                        "Modus umkehren..............................................................................................Shift\n"
+                                                        "(bspw. Höhe senken, Spieler entfernen, Ressourcen senken)\n"
+                                                        "Planiermodus....................................................................................................Alt\n"
+                                                        "Maximal-Höhe senken/standard/erhöhen......................................................Einf/Pos1/BildAuf\n"
+                                                        "(über dies kann dann nicht erhöht werden)\n"
+                                                        "Minimal-Höhe senken/standard/erhöhen.......................................................Entf/Ende/BildAb\n"
+                                                        "(unter dies kann dann nicht gesenkt werden)\n"
+                                                        "Rückgängig.......................................................................................................Q\n"
+                                                        "(nur Aktionen, die mit dem Cursor durchgeführt wurden)\n"
+                                                        "Bauhilfe an/aus................................................................................................Leertaste\n"
+                                                        "Schloss-Modus..................................................................................................B\n"
+                                                        "(das umliegende Gelände wird so geebnet,\n"
+                                                        " dass ein grosses Haus gebaut werden kann)\n"
+                                                        "Hafen-Modus.....................................................................................................H\n"
+                                                        "(das umliegende Gelände wird so verändert,\n"
+                                                        " dass ein Hafen gebaut werden kann)\n"
+                                                        "Map \"on-the-fly\" konvertieren (Grün-/Winter-/Ödland).................................G/W/O\n"
+                                                        "Neue/Originale Schattierung (experimentell).................................................P\n"
+                                                    , 10, 10, 11);
+                                }
+                                else
+                                {
+                                    delete WNDHelp;
+                                    WNDHelp = NULL;
+                                    return;
+                                }
+                                break;
+
+        case CALL_FROM_GAMELOOP:    break;
+
+        case WINDOW_QUIT_MESSAGE:   //this is the global window quit message, callback is explicit called with this value, so destroy the window
+                                    if (WNDHelp != NULL)
+                                    {
+                                        WNDHelp->setWaste();
+                                        WNDHelp = NULL;
+                                    }
+                                    break;
+
+        case WINDOWQUIT:            //this is the own window quit message of the callback
+                                    if (WNDHelp != NULL)
+                                    {
+                                        WNDHelp->setWaste();
+                                        WNDHelp = NULL;
+                                    }
+                                    break;
+
+        case MAP_QUIT:              //this is the global window quit message, callback is explicit called with this value, so destroy the window
+                                    if (WNDHelp != NULL)
+                                    {
+                                        WNDHelp->setWaste();
+                                        WNDHelp = NULL;
+                                    }
+                                    break;
+
+        default:                break;
+    }
+}
 
 void callback::EditorMainMenu(int Param)
 {
@@ -498,6 +586,7 @@ void callback::EditorQuitMenu(int Param)
                     WNDBackToMainMenu->setWaste();
                     WNDBackToMainMenu = NULL;
                     //now call all EditorMenu callbacks (from the menubar) with MAP_QUIT
+                    EditorHelpMenu(MAP_QUIT);
                     EditorMainMenu(MAP_QUIT);
                     EditorLoadMenu(MAP_QUIT);
                     EditorSaveMenu(MAP_QUIT);
