@@ -47,7 +47,8 @@ void CMap::constructMap(char *filename, int width, int height, int type, int tex
     active = true;
     VertexX = 10;
     VertexY = 10;
-    BuildHelp = false;
+    RenderBuildHelp = false;
+    RenderBorders = true;
     BitsPerPixel = 32;
     MouseBlitX = correctMouseBlitX(VertexX, VertexY);
     MouseBlitY = correctMouseBlitY(VertexX, VertexY);
@@ -122,6 +123,9 @@ void CMap::constructMap(char *filename, int width, int height, int type, int tex
         }
     }
     map->player = CountPlayers;
+
+    HorizontalMovementLocked = false;
+    VerticalMovementLocked = false;
 }
 void CMap::destructMap(void)
 {
@@ -318,8 +322,11 @@ void CMap::setMouseData(SDL_MouseMotionEvent motion)
         //this whole "warping-thing" is to prevent cursor-moving WITHIN the window while user moves over the map
         if (warping == false)
         {
-            displayRect.x += motion.xrel;
-            displayRect.y += motion.yrel;
+            if (!HorizontalMovementLocked)
+                displayRect.x += motion.xrel;
+            if (!VerticalMovementLocked)
+                displayRect.y += motion.yrel;
+
             warping = true;
             SDL_WarpMouse(motion.x-motion.xrel, motion.y-motion.yrel);
         }
@@ -340,8 +347,10 @@ void CMap::setMouseData(SDL_MouseMotionEvent motion)
 #else
     if (SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(3))
     {
-        displayRect.x += motion.xrel;
-        displayRect.y += motion.yrel;
+        if (!HorizontalMovementLocked)
+            displayRect.x += motion.xrel;
+        if (!VerticalMovementLocked)
+            displayRect.y += motion.yrel;
 
         //reset coords of displayRects when end of map is reached
         if (displayRect.x >= map->width*TRIANGLE_WIDTH)
@@ -435,7 +444,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
            )
         {
             //the build-help picture was clicked
-            BuildHelp = !BuildHelp;
+            RenderBuildHelp = !RenderBuildHelp;
             return;
         }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w/2+131) && button.x <= (displayRect.w/2+168)
@@ -469,6 +478,10 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
            )
         {
             //the temporary bugkill picture was clicked
+            //do a quicksave
+            callback::PleaseWait(INITIALIZING_CALL);
+            CFile::save_file("WORLDS/QUICKSAVE.WLD", WLD, map);
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
             return;
         }
         #endif
@@ -639,7 +652,11 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
 
         else if (key.keysym.sym == SDLK_SPACE)
         {
-            BuildHelp = !BuildHelp;
+            RenderBuildHelp = !RenderBuildHelp;
+        }
+        else if (key.keysym.sym == SDLK_F11)
+        {
+            RenderBorders = !RenderBorders;
         }
         else if (key.keysym.sym == SDLK_q)
         {
@@ -788,6 +805,16 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
                 setBitsPerPixel(32);
             else
                 setBitsPerPixel(8);
+        }
+        //lock horizontal movement
+        else if (key.keysym.sym == SDLK_F9)
+        {
+            HorizontalMovementLocked = !HorizontalMovementLocked;
+        }
+        //lock vertical movement
+        else if (key.keysym.sym == SDLK_F10)
+        {
+            VerticalMovementLocked = !VerticalMovementLocked;
         }
     }
     else if (key.type == SDL_KEYUP)
@@ -1005,6 +1032,22 @@ bool CMap::render(void)
     //text for MinReduceHeight and MaxRaiseHeight
     sprintf(textBuffer, "min. Höhe: %#04x/0x3C  max. Höhe: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
     CFont::writeText(Surf_Map, textBuffer, 100, 20);
+    //text for MovementLocked
+    if (HorizontalMovementLocked && VerticalMovementLocked)
+    {
+        sprintf(textBuffer, "Bewegung gesperrt (F9 oder F10 zum entsperren)");
+        CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
+    }
+    else if (HorizontalMovementLocked)
+    {
+        sprintf(textBuffer, "Horizontale Bewegung gesperrt (F9 zum entsperren)");
+        CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
+    }
+    else if (VerticalMovementLocked)
+    {
+        sprintf(textBuffer, "Vertikale Bewegung gesperrt (F10 zum entsperren)");
+        CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
+    }
 #else
     CSurface::Draw(Surf_Map, global::bmpArray[CIRCLE_FLAT_GREY].surface, MouseBlitX-10, MouseBlitY-10);
 #endif

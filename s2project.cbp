@@ -12,7 +12,22 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-march=core2" />
 					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-lmingw32 -lSDLmain -lSDL -mwindows" />
+					<Add library="SGE\bin\Release\libSGE.dll.a" />
+				</Linker>
+			</Target>
+			<Target title="Release64">
+				<Option output="bin64\s25edit" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj64\" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler_x64" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-m64" />
 				</Compiler>
 				<Linker>
 					<Add option="-lmingw32 -lSDLmain -lSDL -lSGE -mwindows" />
@@ -58,6 +73,9 @@
 		<Unit filename="globals.cpp" />
 		<Unit filename="globals.h" />
 		<Unit filename="includes.h" />
+		<Unit filename="s25edit.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

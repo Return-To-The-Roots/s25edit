@@ -92,7 +92,7 @@ struct MapHeaderItem
     Uint16 y;
     Uint32 area;    //number of vertices this area has
 };
-//point structure ('i' is a 16 bit integer shifted left 16 times --> fixed point math for speed)
+//point structure
 struct point
 {
     Uint16 VertexX;             /* number of the vertex on x-axis */
@@ -101,7 +101,7 @@ struct point
     long int y;                 /* calculated with section 1 */
     int z;                      /* calculated with section 1 */
     Uint8 h;                    /* section 1 */
-    Sint32 i;
+    Sint32 i;                   /* calculated light values for new shading by SGE (a 16 bit integer shifted left 16 times --> fixed point math for speed) */
     struct vector flatVector;
     struct vector normVector;
     Uint8 rsuTexture;           /* section 2 */
@@ -1197,7 +1197,7 @@ enum
 #define MAXMAPHEIGHT 1152
 
 //triangle values
-//these values are now handled in globals.h and globals.cpp, cause they must be changeable
+//these values are now handled in globals.h and globals.cpp, cause they must be changeable for the zoom mode
 //#define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
 //#define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
 //#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be greater than 5

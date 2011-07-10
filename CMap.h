@@ -15,7 +15,8 @@ class CMap
         bool active;
         bool needSurface;
         int VertexX, VertexY;
-        bool BuildHelp;
+        bool RenderBuildHelp;
+        bool RenderBorders;
         int BitsPerPixel;
         //editor mode variables
         int mode;
@@ -69,6 +70,9 @@ class CMap
         //maximum value of height (user can modify this)
         Uint8 MaxRaiseHeight;
         Uint8 MinReduceHeight;
+        //lock vertical or horizontal movement
+        bool HorizontalMovementLocked;
+        bool VerticalMovementLocked;
     public:
         CMap(char *filename);
         ~CMap();
@@ -86,7 +90,8 @@ class CMap
         bool isActive(void) { return active; }
         int getVertexX(void) { return VertexX; }
         int getVertexY(void) { return VertexY; }
-        bool getBuildHelp(void) { return BuildHelp; }
+        bool getRenderBuildHelp(void) { return RenderBuildHelp; }
+        bool getRenderBorders(void) { return RenderBorders; }
         int getBitsPerPixel(void) { return BitsPerPixel; }
         void setBitsPerPixel(int bbp) { BitsPerPixel = bbp; needSurface = true; }
         void setMode(int mode) { this->mode = mode; }

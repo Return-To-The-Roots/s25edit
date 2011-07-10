@@ -16,8 +16,9 @@ CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsiz
     setColor(bg_color);
     //allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
     text = (unsigned char*)malloc( ((this->cols+1)*this->rows+2)*sizeof(unsigned char) );
-    *text = '\0';
-    *(text+((this->cols+1)*this->rows+1)) = '\0';
+    //initialize memory
+    for (int i = 0; i <= (this->cols+1)*this->rows+1; i++)
+        *(text+i) = '\0';
 
     Surf_Text = NULL;
     needSurface = true;
@@ -193,7 +194,7 @@ void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
                                             break;
                                     }
                                     //decide which chiffre to save
-                                    if ( key.keysym.sym >= 48 && key.keysym.sym <= 57 || key.keysym.sym == 32)
+                                    if ( (key.keysym.sym >= 48 && key.keysym.sym <= 57) || key.keysym.sym == 32)
                                         chiffre = (unsigned char)key.keysym.sym;
                                     else if ( key.keysym.sym >= 97 && key.keysym.sym <= 122 )
                                     {

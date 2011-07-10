@@ -128,7 +128,7 @@ void callback::submenuOptions(int Param)
         RES_800,
         RES_1024,
         RES_1280,
-        RES_1440,
+        RES_1680,
         FULLSCREEN
     };
 
@@ -156,7 +156,7 @@ void callback::submenuOptions(int Param)
                 SubMenu->addButton(submenuOptions, RES_800, (int)(global::s2->MenuResolutionX/2-100), 90, 200, 20, BUTTON_RED1, "800*600");
                 SubMenu->addButton(submenuOptions, RES_1024, (int)(global::s2->MenuResolutionX/2-100), 110, 200, 20, BUTTON_RED1, "1024*768");
                 SubMenu->addButton(submenuOptions, RES_1280, (int)(global::s2->MenuResolutionX/2-100), 130, 200, 20, BUTTON_RED1, "1280*1024");
-                SubMenu->addButton(submenuOptions, RES_1440, (int)(global::s2->MenuResolutionX/2-100), 150, 200, 20, BUTTON_RED1, "1440*900");
+                SubMenu->addButton(submenuOptions, RES_1680, (int)(global::s2->MenuResolutionX/2-100), 150, 200, 20, BUTTON_RED1, "1680*1050");
                 if (ButtonFullscreen != NULL)
                     SubMenu->delButton(ButtonFullscreen);
                 ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
@@ -200,8 +200,8 @@ void callback::submenuOptions(int Param)
                         sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY, (global::s2->fullscreen ? "Fullscreen" : "Window"));
                         TextResolution = SubMenu->addText(puffer, (int)(global::s2->MenuResolutionX/2-110), 50, 11);
                         break;
-        case RES_1440:  global::s2->GameResolutionX = 1440;
-                        global::s2->GameResolutionY = 900;
+        case RES_1680:  global::s2->GameResolutionX = 1680;
+                        global::s2->GameResolutionY = 1050;
                         if (TextResolution != NULL)
                             SubMenu->delText(TextResolution);
                         sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY, (global::s2->fullscreen ? "Fullscreen" : "Window"));
@@ -275,6 +275,9 @@ void callback::EditorHelpMenu(int Param)
                                                         " dass ein Hafen gebaut werden kann)\n"
                                                         "Map \"on-the-fly\" konvertieren (Grün-/Winter-/Ödland).................................G/W/O\n"
                                                         "Neue/Originale Schattierung (experimentell).................................................P\n"
+                                                        "Horizontale Bewegung sperren/entsperren...................................................F9\n"
+                                                        "Vertikale Bewegung sperren/entsperren......................................................F10\n"
+                                                        "Ränder an-/abschalten....................................................................................F11\n"
                                                     , 10, 10, 11);
                                 }
                                 else
@@ -3111,28 +3114,28 @@ void callback::submenu1(int Param)
                                         break;
 
         case CALL_FROM_GAMELOOP:    if (counter % 10 == 0)
-                    {
-                        if (counterText != NULL)
-                        {
-                            SubMenu->delText(counterText);
-                            counterText = NULL;
-                        }
-                        if (counterText == NULL)
-                        {
-                            sprintf(puffer, "zaehler: %d", counter);
-                            counterText = SubMenu->addText(puffer, 100, 20, 9);
-                        }
+                                    {
+                                        if (counterText != NULL)
+                                        {
+                                            SubMenu->delText(counterText);
+                                            counterText = NULL;
+                                        }
+                                        if (counterText == NULL)
+                                        {
+                                            sprintf(puffer, "zaehler: %d", counter);
+                                            counterText = SubMenu->addText(puffer, 100, 20, 9);
+                                        }
 
-                        if (TextFrom_testTextfield != NULL)
-                        {
-                            SubMenu->delText(TextFrom_testTextfield);
-                            TextFrom_testTextfield = NULL;
-                        }
-                        sprintf(puffer, "Der Text im Textfeld lautet: %s", testTextfield->getText());
-                        TextFrom_testTextfield = SubMenu->addText(puffer, 200, 400, 14);
-                    }
-                    counter++;
-                    break;
+                                        if (TextFrom_testTextfield != NULL)
+                                        {
+                                            SubMenu->delText(TextFrom_testTextfield);
+                                            TextFrom_testTextfield = NULL;
+                                        }
+                                        sprintf(puffer, "Der Text im Textfeld lautet: %s", testTextfield->getText());
+                                        TextFrom_testTextfield = SubMenu->addText(puffer, 200, 400, 14);
+                                    }
+                                    counter++;
+                                    break;
 
         default:    break;
     }

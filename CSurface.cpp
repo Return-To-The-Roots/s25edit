@@ -571,7 +571,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     //find out the texture for the triangle
     //upperX2, ..... are for special use in winterland.
     unsigned char upperX, upperY, leftX, leftY, rightX, rightY, upperX2 = 0, upperY2 = 0, leftX2 = 0, leftY2 = 0, rightX2 = 0, rightY2 = 0;
-    SDL_Rect BorderRect;
+    static SDL_Rect BorderRect, BorderRectSnow = {210,176,31,9}, BorderRectMining = {210,192,31,9}, BorderRectSteppe = {210,208,31,9}, BorderRectMeadow = {210,224,31,9}, BorderRectWater = {210,240,31,9};
     Uint8 texture, texture_raw;
     SDL_Surface *Surf_Tileset;
 
@@ -716,10 +716,6 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 leftY = 30;
                                                 rightX = 83;
                                                 rightY = 30;
-                                                BorderRect.x = 210;
-                                                BorderRect.y = 208;
-                                                BorderRect.w = 31;
-                                                BorderRect.h = 9;
                                                 break;
         case TRIANGLE_TEXTURE_WATER:            if (P1.y < P2.y)
                                                 {
@@ -746,10 +742,6 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                                 leftY = 126;
                                                 rightX = 83;
                                                 rightY = 126;
-                                                BorderRect.x = 210;
-                                                BorderRect.y = 224;
-                                                BorderRect.w = 31;
-                                                BorderRect.h = 9;
                                                 break;
         case TRIANGLE_TEXTURE_MEADOW2:          upperX = 113;
                                                 upperY = 96;
@@ -865,11 +857,374 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
         return;
     }
 
-    //blit border
-    //if (P2.y == P3.y && (texture_raw == TRIANGLE_TEXTURE_STEPPE || texture_raw == TRIANGLE_TEXTURE_MEADOW1))
-        //Draw(display, Surf_Tileset, P2.x-displayRect.x, P2.y-displayRect.y, BorderRect.x, BorderRect.y, BorderRect.w, BorderRect.h);
-        //sge_TexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y, P3.x-displayRect.x, P3.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+9, P3.x-displayRect.x, P3.y-displayRect.y+9, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
-        //sge_TexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y, P3.x-displayRect.x, P3.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+9, P3.x-displayRect.x, P3.y-displayRect.y+9, Surf_Tileset, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y);
+    //blit borders
+    ///PRIORITY FROM HIGH TO LOW: SNOW, MINING_MEADOW, STEPPE, STEPPE_MEADOW2, MINING, MEADOW, FLOWER, STEPPE_MEADOW1, SWAMP, WATER, LAVA
+    if (global::s2->getMapObj()->getRenderBorders())
+    {
+        //we have to decide which border to blit, "left or right" or "top or bottom", therefore we are using two bool variables, the first is left/top, the second is right/bottom
+        bool Border1, Border2;
+        struct point tempP;
+        //RSU-Triangle
+        if (P1.y < P2.y)
+        {
+            //decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
+            Uint16 col = (P1.VertexX-1 < 0 ? myMap->width-1 : P1.VertexX-1);
+            tempP = myMap->vertex[P1.VertexY*myMap->width+col];
+
+            //only if textures are not the same or textures are both mining or meadow
+            if  (!( (tempP.usdTexture == P1.rsuTexture)
+             || (   (tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                &&  (P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                )
+             || (   (tempP.usdTexture == TRIANGLE_TEXTURE_MINING1 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING2 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING3 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING4)
+                &&  (P1.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING2 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                )
+                ) )
+            {
+                Border1 = false;
+                Border2 = false;
+
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_WATER)
+                {
+                    BorderRect = BorderRectWater;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_WATER)
+                {
+                    BorderRect = BorderRectWater;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_SWAMP || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_FLOWER || tempP.usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_SWAMP || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_FLOWER || P1.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_MINING1 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING2 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING3 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING4)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING2 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE)
+                {
+                    BorderRect = BorderRectSteppe;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE)
+                {
+                    BorderRect = BorderRectSteppe;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW || tempP.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P1.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.usdTexture == TRIANGLE_TEXTURE_SNOW)
+                {
+                    BorderRect = BorderRectSnow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P1.rsuTexture == TRIANGLE_TEXTURE_SNOW)
+                {
+                    BorderRect = BorderRectSnow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+
+                if (Border1)
+                {
+                    //usd-right
+                    sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x+5, P1.y-displayRect.y+3, P2.x-displayRect.x+5, P2.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
+                }
+                else if (Border2)
+                {
+                    //rsu-left
+                    sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3, P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
+                }
+            }
+        }
+        //USD-Triangle
+        else
+        {
+            //only if textures are not the same or textures are both mining or meadow
+            if  (!( (P2.rsuTexture == P2.usdTexture)
+             || (   (P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                &&  (P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                )
+             || (   (P2.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING2 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                &&  (P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2 || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4)
+                )
+                ) )
+            {
+                Border1 = false;
+                Border2 = false;
+
+                //decide which border to blit (left/right)
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_WATER)
+                {
+                    BorderRect = BorderRectWater;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_WATER)
+                {
+                    BorderRect = BorderRectWater;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_SWAMP || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_SWAMP || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING2 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2 || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE)
+                {
+                    BorderRect = BorderRectSteppe;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_STEPPE)
+                {
+                    BorderRect = BorderRectSteppe;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (P2.rsuTexture == TRIANGLE_TEXTURE_SNOW)
+                {
+                    BorderRect = BorderRectSnow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_SNOW)
+                {
+                    BorderRect = BorderRectSnow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+
+                if (Border1)
+                {
+                    //rsu-right
+                    sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y+2, P2.x-displayRect.x, P2.y-displayRect.y, P1.x-displayRect.x+5, P1.y-displayRect.y-1, P2.x-displayRect.x+5, P2.y-displayRect.y-3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
+                }
+                else if (Border2)
+                {
+                    //usd-left
+                    sge_FadedTexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x-5, P2.y-displayRect.y+1, P1.x-displayRect.x-5, P1.y-displayRect.y+3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P1.i);
+                }
+            }
+
+            //decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
+            Uint16 row = (P2.VertexY-1 < 0 ? myMap->height-1 : P2.VertexY-1);
+            Uint16 col = (P2.VertexY%2==0 ? P2.VertexX : (P2.VertexX+1 > myMap->width-1 ? 0 : P2.VertexX+1));
+            tempP = myMap->vertex[row*myMap->width+col];
+
+            //only if textures are not the same or textures are both mining or meadow
+            if  (!( (tempP.rsuTexture == P2.usdTexture)
+             || (   (tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                &&  (P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                )
+             || (   (tempP.rsuTexture == TRIANGLE_TEXTURE_MINING1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING2 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                &&  (P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2 || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4)
+                )
+                ) )
+            {
+                Border1 = false;
+                Border2 = false;
+
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_WATER)
+                {
+                    BorderRect = BorderRectWater;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_WATER)
+                {
+                    BorderRect = BorderRectWater;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_SWAMP || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_FLOWER || tempP.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_SWAMP || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_MINING1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING2 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2 || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
+                {
+                    BorderRect = BorderRectMeadow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE)
+                {
+                    BorderRect = BorderRectSteppe;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_STEPPE)
+                {
+                    BorderRect = BorderRectSteppe;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                {
+                    BorderRect = BorderRectMining;
+                    Border1 = false;
+                    Border2 = true;
+                }
+                if (tempP.rsuTexture == TRIANGLE_TEXTURE_SNOW)
+                {
+                    BorderRect = BorderRectSnow;
+                    Border1 = true;
+                    Border2 = false;
+                }
+                else if (P2.usdTexture == TRIANGLE_TEXTURE_SNOW)
+                {
+                    BorderRect = BorderRectSnow;
+                    Border1 = false;
+                    Border2 = true;
+                }
+
+                if (Border1)
+                {
+                    //rsu-down
+                    sge_FadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P3.i);
+                }
+                else if (Border2)
+                {
+                    //usd-top
+                    sge_FadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5, P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P3.i);
+                }
+
+                ///all border-blit functions for copy&paste
+                //rsu-down
+                //sge_TexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                //rsu-left
+                //sge_TexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3, P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                //rsu-right
+                //sge_TexturedRect(display, P3.x-displayRect.x, P3.y-displayRect.y+2, P1.x-displayRect.x, P1.y-displayRect.y, P3.x-displayRect.x+5, P3.y-displayRect.y-1, P1.x-displayRect.x+5, P1.y-displayRect.y-3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                //usd-top
+                //sge_TexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5, P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                //usd-left
+                //sge_TexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y-2, P2.x-displayRect.x, P2.y-displayRect.y, P1.x-displayRect.x-5, P1.y-displayRect.y+1, P2.x-displayRect.x-5, P2.y-displayRect.y+3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                //usd-right
+                //sge_TexturedRect(display, P3.x-displayRect.x, P3.y-displayRect.y, P1.x-displayRect.x, P1.y-displayRect.y-2, P3.x-displayRect.x+5, P3.y-displayRect.y+3, P1.x-displayRect.x+5, P1.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+            }
+        }
+    }
 
     //blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
 
@@ -1081,7 +1436,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
     #endif
 
     //blit buildings
-    if (global::s2->getMapObj()->getBuildHelp())
+    if (global::s2->getMapObj()->getRenderBuildHelp())
     {
         if (P2.y < P1.y)
         {

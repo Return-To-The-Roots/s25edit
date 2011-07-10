@@ -229,6 +229,7 @@ void _TexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *s
 					pixel = row + x;
 
                     pixel_value = *((Uint8 *)source->pixels + (srcy>>16)*source->pitch + (srcx>>16));
+
                     if (pixel_value != source->format->colorkey)
                         *pixel = pixel_value;
 
@@ -503,14 +504,18 @@ void _FadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surfa
                     //r1=r*I;
                     //g1=g*I;
                     //b1=b*I;
-                    r = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Rmask) >> dest->format->Rshift )*I) >>16 );
-                    g = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Gmask) >> dest->format->Gshift )*I) >>16 );
-                    b = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Bmask) >> dest->format->Bshift )*I) >>16 );
-                    r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                    g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                    b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                    //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                    *pixel = ( (r8 << dest->format->Rshift) + (g8 << dest->format->Gshift) + (b8 << dest->format->Bshift) );
+                    //test for colorkey
+                    if ( *((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) != source->format->colorkey )
+                    {
+                        r = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Rmask) >> dest->format->Rshift )*I) >>16 );
+                        g = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Gmask) >> dest->format->Gshift )*I) >>16 );
+                        b = ( (((*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)) & dest->format->Bmask) >> dest->format->Bshift )*I) >>16 );
+                        r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
+                        g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
+                        b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
+                        //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
+                        *pixel = ( (r8 << dest->format->Rshift) + (g8 << dest->format->Gshift) + (b8 << dest->format->Bshift) );
+                    }
 
                     I += istep;
 
@@ -2762,6 +2767,167 @@ void sge_TexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,
 	sge_UpdateRect(dest, xmin, y1, xmax-xmin+1, y4-y1+1);
 }
 
+
+//==================================================================================
+// Draws a gouraud shaded and texured *RECTANGLE* (shaded only from left to right)
+//==================================================================================
+void sge_FadedTexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,Sint16 x4,Sint16 y4,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 sx4,Sint16 sy4,Sint32 i1,Sint32 i2)
+{
+	Sint16 y;
+
+	if( y1==y3 || y1 == y4 || y4 == y2 )
+		return;
+
+	/* Sort the coords */
+	if ( y1 > y2 ) {
+		SWAP(x1,x2,y);
+		SWAP(y1,y2,y);
+		SWAP(sx1,sx2,y);
+		SWAP(sy1,sy2,y);
+	}
+	if ( y2 > y3 ) {
+		SWAP(x3,x2,y);
+		SWAP(y3,y2,y);
+		SWAP(sx3,sx2,y);
+		SWAP(sy3,sy2,y);
+	}
+	if ( y1 > y2 ) {
+		SWAP(x1,x2,y);
+		SWAP(y1,y2,y);
+		SWAP(sx1,sx2,y);
+		SWAP(sy1,sy2,y);
+	}
+	if ( y3 > y4 ) {
+		SWAP(x3,x4,y);
+		SWAP(y3,y4,y);
+		SWAP(sx3,sx4,y);
+		SWAP(sy3,sy4,y);
+	}
+	if ( y2 > y3 ) {
+		SWAP(x3,x2,y);
+		SWAP(y3,y2,y);
+		SWAP(sx3,sx2,y);
+		SWAP(sy3,sy2,y);
+	}
+	if ( y1 > y2 ) {
+		SWAP(x1,x2,y);
+		SWAP(y1,y2,y);
+		SWAP(sx1,sx2,y);
+		SWAP(sy1,sy2,y);
+	}
+
+	/*
+	 * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
+	*/
+
+	Sint32 xa = Sint32(x1<<16);
+	Sint32 xb = xa;
+	Sint32 xc = Sint32(x2<<16);
+	Sint32 xd = Sint32(x3<<16);
+
+	Sint32 m1 = 0;
+	Sint32 m2 = Sint32((x3 - x1)<<16)/Sint32(y3 - y1);
+	Sint32 m3 = Sint32((x4 - x2)<<16)/Sint32(y4 - y2);
+	Sint32 m4 = 0;
+
+	Sint32 srcx1 = Sint32(sx1<<16);
+	Sint32 srcx2 = srcx1;
+	Sint32 srcx3 = Sint32(sx2<<16);
+	Sint32 srcx4 = Sint32(sx3<<16);
+
+	Sint32 srcy1 = Sint32(sy1<<16);
+	Sint32 srcy2 = srcy1;
+	Sint32 srcy3 = Sint32(sy2<<16);
+	Sint32 srcy4 = Sint32(sy3<<16);
+
+	Sint32 xstep1 = 0;
+	Sint32 xstep2 = Sint32((sx3 - sx1) << 16) / Sint32(y3 - y1);
+	Sint32 xstep3 = Sint32((sx4 - sx2) << 16) / Sint32(y4 - y2);
+	Sint32 xstep4 = 0;
+
+	Sint32 ystep1 = 0;
+	Sint32 ystep2 = Sint32((sy3 - sy1) << 16) / Sint32(y3 - y1);
+	Sint32 ystep3 = Sint32((sy4 - sy2) << 16) / Sint32(y4 - y2);
+	Sint32 ystep4 = 0;
+
+	if ( SDL_MUSTLOCK(dest) && _sge_lock )
+		if ( SDL_LockSurface(dest) < 0 )
+			return;
+
+	/* Upper bit of the rectangle */
+	if( y1==y2 )
+		_FadedTexturedLine(dest,x1,x2,y1,source,sx1,sy1,sx2,sy2,i1,i2);
+	else{
+		m1 = Sint32((x2 - x1)<<16)/Sint32(y2 - y1);
+
+		xstep1 = Sint32((sx2 - sx1) << 16) / Sint32(y2 - y1);
+		ystep1 = Sint32((sy2 - sy1) << 16) / Sint32(y2 - y1);
+
+		for ( y = y1; y <= y2; y++) {
+			_FadedTexturedLine(dest, xa>>16, xb>>16, y, source, srcx1>>16, srcy1>>16, srcx2>>16, srcy2>>16,i1,i2);
+
+			xa += m1;
+			xb += m2;
+
+			srcx1 += xstep1;
+			srcx2 += xstep2;
+			srcy1 += ystep1;
+			srcy2 += ystep2;
+		}
+	}
+
+	/* Middle bit of the rectangle */
+	for ( y = y2+1; y <= y3; y++) {
+		_FadedTexturedLine(dest, xb>>16, xc>>16, y, source, srcx2>>16, srcy2>>16, srcx3>>16, srcy3>>16,i1,i2);
+
+		xb += m2;
+		xc += m3;
+
+		srcx2 += xstep2;
+		srcx3 += xstep3;
+		srcy2 += ystep2;
+		srcy3 += ystep3;
+	}
+
+	/* Lower bit of the rectangle */
+	if( y3==y4 )
+		_FadedTexturedLine(dest,x3,x4,y3,source,sx3,sy3,sx4,sy4,i1,i2);
+	else{
+		m4 = Sint32((x4 - x3)<<16)/Sint32(y4 - y3);
+
+		xstep4 = Sint32((sx4 - sx3) << 16) / Sint32(y4 - y3);
+		ystep4 = Sint32((sy4 - sy3) << 16) / Sint32(y4 - y3);
+
+		for ( y = y3+1; y <= y4; y++) {
+			_FadedTexturedLine(dest, xc>>16, xd>>16, y, source, srcx3>>16, srcy3>>16, srcx4>>16, srcy4>>16,i1,i2);
+
+			xc += m3;
+			xd += m4;
+
+			srcx3 += xstep3;
+			srcx4 += xstep4;
+			srcy3 += ystep3;
+			srcy4 += ystep4;
+		}
+
+	}
+
+
+	if ( SDL_MUSTLOCK(dest) && _sge_lock )
+		SDL_UnlockSurface(dest);
+
+	if(_sge_update!=1){return;}
+
+	Sint16 xmax=x1, xmin=x1;
+	xmax= (xmax>x2)? xmax : x2;
+	xmin= (xmin<x2)? xmin : x2;
+	xmax= (xmax>x3)? xmax : x3;
+	xmin= (xmin<x3)? xmin : x3;
+	xmax= (xmax>x4)? xmax : x4;
+	xmin= (xmin<x4)? xmin : x4;
+
+	sge_UpdateRect(dest, xmin, y1, xmax-xmin+1, y4-y1+1);
+}
 
 
 //==================================================================================
