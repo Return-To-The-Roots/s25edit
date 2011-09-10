@@ -526,7 +526,7 @@
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1310335515 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
+1315656706 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
@@ -569,7 +569,7 @@
 	<freetype/ttnameid.h>
 	<freetype/internal/ftobjs.h>
 
-1310335488 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.cpp
+1315657350 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.cpp
 	<SDL/SDL.h>
 	"sge_surface.h"
 	"sge_primitives.h"

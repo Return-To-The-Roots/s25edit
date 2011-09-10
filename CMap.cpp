@@ -21,11 +21,10 @@ void CMap::constructMap(char *filename, int width, int height, int type, int tex
     displayRect.h = global::s2->GameResolutionY;
 
     if (filename != NULL)
-        map = (bobMAP*)CFile::open_file(filename, WLD); //TODO: open_file(filename, SWD); if really necessary
+        map = (bobMAP*)CFile::open_file(filename, WLD);
 
     if (map == NULL)
         map = generateMap(width, height, type, texture, border, border_texture);
-
 
     //load the right MAP0x.LST for all pictures
     loadMapPics();
@@ -472,19 +471,37 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             return;
         }
         //now we check the right menubar
-        #ifdef _ADMINMODE
+        else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w-37) && button.x <= (displayRect.w)
+                                                  && button.y >= (displayRect.h/2+162) && button.y <= (displayRect.h/2+199)
+           )
+        {
+            //the bugkill picture was clicked for quickload
+            callback::PleaseWait(INITIALIZING_CALL);
+            //we have to close the windows and initialize them again to prevent failures
+            callback::EditorCursorMenu(MAP_QUIT);
+            callback::EditorTextureMenu(MAP_QUIT);
+            callback::EditorTreeMenu(MAP_QUIT);
+            callback::EditorLandscapeMenu(MAP_QUIT);
+            callback::MinimapMenu(MAP_QUIT);
+            callback::EditorResourceMenu(MAP_QUIT);
+            callback::EditorAnimalMenu(MAP_QUIT);
+            callback::EditorPlayerMenu(MAP_QUIT);
+
+            destructMap();
+            constructMap((char*)"WORLDS/quicksave.swd");
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+            return;
+        }
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w-37) && button.x <= (displayRect.w)
                                                   && button.y >= (displayRect.h/2+200) && button.y <= (displayRect.h/2+237)
            )
         {
-            //the temporary bugkill picture was clicked
-            //do a quicksave
+            //the bugkill picture was clicked for quicksave
             callback::PleaseWait(INITIALIZING_CALL);
-            CFile::save_file("WORLDS/QUICKSAVE.WLD", WLD, map);
+            CFile::save_file("WORLDS/quicksave.swd", SWD, map);
             callback::PleaseWait(WINDOW_QUIT_MESSAGE);
             return;
         }
-        #endif
         else if (button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w-37) && button.x <= (displayRect.w)
                                                   && button.y >= (displayRect.h/2-239) && button.y <= (displayRect.h/2-202)
            )
@@ -944,7 +961,7 @@ int CMap::correctMouseBlitY(int VertexX, int VertexY)
     return MouseBlitY;
 }
 
-bool CMap::render(void)
+void CMap::render(void)
 {
     char textBuffer[100];
 
@@ -962,7 +979,7 @@ bool CMap::render(void)
         SDL_FreeSurface(Surf_Map);
         Surf_Map = NULL;
         if ( (Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, BitsPerPixel, 0, 0, 0, 0)) == NULL )
-            return false;
+            return;
         if (BitsPerPixel == 8)
             SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors, 0, 256);
         needSurface = false;
@@ -1048,6 +1065,7 @@ bool CMap::render(void)
         sprintf(textBuffer, "Vertikale Bewegung gesperrt (F10 zum entsperren)");
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     }
+
 #else
     CSurface::Draw(Surf_Map, global::bmpArray[CIRCLE_FLAT_GREY].surface, MouseBlitX-10, MouseBlitY-10);
 #endif
@@ -1159,19 +1177,21 @@ bool CMap::render(void)
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w-36, displayRect.h/2+163, 0, 0, 32, 37);
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w-36, displayRect.h/2+200, 0, 0, 32, 37);
     //pictures
-    #ifdef _ADMINMODE
-    //temprorary bugkill picture
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w-37, displayRect.h/2+202);
-    #endif
     //four cursor menu pictures
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.w-33, displayRect.h/2-237);
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.w-20, displayRect.h/2-235);
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.w-33, displayRect.h/2-220);
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.w-20, displayRect.h/2-220);
+    //bugkill picture for quickload with text
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w-37, displayRect.h/2+162);
+    sprintf(textBuffer, "Load");
+    CFont::writeText(Surf_Map, textBuffer, displayRect.w-35, displayRect.h/2+193);
+    //bugkill picture for quicksave with text
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w-37, displayRect.h/2+200);
+    sprintf(textBuffer, "Save");
+    CFont::writeText(Surf_Map, textBuffer, displayRect.w-35, displayRect.h/2+231);
 
 #endif
-
-    return true;
 }
 
 void CMap::drawMinimap(SDL_Surface *Window)
@@ -1185,6 +1205,10 @@ void CMap::drawMinimap(SDL_Surface *Window)
     //this variables are needed to reduce the size of minimap-windows of big maps
     int num_x = (map->width > 256 ? map->width/256 : 1);
     int num_y = (map->height > 256 ? map->height/256 : 1);
+
+    //make sure the minimap has the same proportions as the "real" map, so scale the same rate
+    num_x = (num_x > num_y ? num_x : num_y);
+    num_y = (num_x > num_y ? num_x : num_y);
 
     //if (Window->w < map->width || Window->h < map->height)
         //return;

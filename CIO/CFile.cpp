@@ -506,6 +506,13 @@ bobMAP* CFile::open_wld(void)
     if (myMap == NULL)
         return myMap;
 
+    //initialize myMap->name and myMap->author (both 20 chars) to prevent filling with random memory content
+    for (int i = 0; i < 20; i++)
+    {
+        myMap->name[i] = '\0';
+        myMap->author[i] = '\0';
+    }
+
     fseek(fp, 10, SEEK_SET);
     fread(myMap->name, 20, 1, fp);
     fread(&myMap->width_old, 2, 1, fp);

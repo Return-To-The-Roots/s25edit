@@ -458,7 +458,7 @@
 1282063201 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cdebug.h
 	"includes.h"
 
-1304424981 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
+1310391836 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
 	<iostream>
 	<cmath>
 	<SDL/SDL.h>
@@ -469,13 +469,7 @@
 	"globals.h"
 	"callbacks.h"
 	"CSurface.h"
-	"CIO/CFile.h"
-	"CIO/CFont.h"
-	"CIO/CButton.h"
-	"CIO/CMenu.h"
-	"CIO/CWindow.h"
-	"CIO/CPicture.h"
-	"CIO/CTextfield.h"
+	"CIO/CIO.h"
 	"CMap.h"
 	"CDebug.h"
 	"CGame.h"
@@ -537,7 +531,7 @@
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1310335515 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
+1315656706 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
@@ -545,17 +539,17 @@
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1310317087 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
+1312134001 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
 
 1296316959 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\classes.h
 
 1295342310 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\globals.h
 	"includes.h"
 
-1296487509 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.h
+1310759059 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.h
 	"includes.h"
 
-1293968982 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.h
+1310505618 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.h
 	"includes.h"
 
 1296251064 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.h
@@ -579,7 +573,7 @@
 1296400497 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.h
 	"../includes.h"
 
-1310307624 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.h
+1310505248 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.h
 	"includes.h"
 
 1296688074 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame.h
@@ -591,29 +585,29 @@
 1291645741 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_cleanup.cpp
 	"CGame.h"
 
-1296488525 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_event.cpp
+1310411322 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_event.cpp
 	"CGame.h"
 
 1268590839 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_gameloop.cpp
 	"CGame.h"
 
-1296688271 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
+1315318041 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
 	"CGame.h"
 
-1296688460 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
+1315318041 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
 	"CGame.h"
 	<stdio.h>
 
 1283254389 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.cpp
 	"CButton.h"
 
-1296408022 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.cpp
+1310661697 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.cpp
 	"CFile.h"
 
 1296320914 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.cpp
 	"CFont.h"
 
-1296688126 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.cpp
+1310411807 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.cpp
 	"CMenu.h"
 
 1269365549 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.cpp
@@ -625,17 +619,26 @@
 1296488845 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.cpp
 	"CWindow.h"
 
-1310307711 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.cpp
+1310770016 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.cpp
 	"CMap.h"
 
-1310334227 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.cpp
+1312134001 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.cpp
 	"CSurface.h"
 
 1295514300 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\globals.cpp
 	"globals.h"
 
-1310307791 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
+1310664543 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
 	"callbacks.h"
 
 1310139675 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\s25edit.rc
+
+1310391851 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cio.h
+	"CFile.h"
+	"CFont.h"
+	"CButton.h"
+	"CMenu.h"
+	"CWindow.h"
+	"CPicture.h"
+	"CTextfield.h"
 

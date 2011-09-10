@@ -6,6 +6,7 @@
 class CMap
 {
     friend class CDebug;
+    friend class CSurface;
 
     private:
         SDL_Surface *Surf_Map;
@@ -112,7 +113,7 @@ class CMap
         void setAuthor(char* author) { strcpy(map->author, author); }
 
         void drawMinimap(SDL_Surface *Window);
-        bool render(void);
+        void render(void);
         //get and set some variables necessary for cursor behavior
         void setHexagonMode(bool HexagonMode) { ChangeSectionHexagonMode = HexagonMode; setupVerticesActivity(); }
         bool getHexagonMode(void) { return ChangeSectionHexagonMode; }

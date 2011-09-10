@@ -1,6 +1,3 @@
-//NOTE: negative callbackParams are reserved: -1 = callback is called first time, -2 = used by gameloop for registered
-//callbacks (callbacks that will additionally execute WITHIN the gameloop)
-
 #include "callbacks.h"
 
 void callback::PleaseWait(int Param)
@@ -2700,6 +2697,10 @@ void callback::MinimapMenu(int Param)
                     //this variables are needed to reduce the size of minimap-windows of big maps
                     num_x = (global::s2->getMapObj()->getMap()->width > 256 ? global::s2->getMapObj()->getMap()->width/256 : 1);
                     num_y = (global::s2->getMapObj()->getMap()->height > 256 ? global::s2->getMapObj()->getMap()->height/256 : 1);
+
+                    //make sure the minimap has the same proportions as the "real" map, so scale the same rate
+                    num_x = (num_x > num_y ? num_x : num_y);
+                    num_y = (num_x > num_y ? num_x : num_y);
 
                     width = global::s2->getMapObj()->getMap()->width/num_x;
                     height = global::s2->getMapObj()->getMap()->height/num_y;

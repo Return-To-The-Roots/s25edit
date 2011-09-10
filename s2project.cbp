@@ -54,6 +54,7 @@
 		<Unit filename="CIO\CFile.h" />
 		<Unit filename="CIO\CFont.cpp" />
 		<Unit filename="CIO\CFont.h" />
+		<Unit filename="CIO\CIO.h" />
 		<Unit filename="CIO\CMenu.cpp" />
 		<Unit filename="CIO\CMenu.h" />
 		<Unit filename="CIO\CPicture.cpp" />

@@ -1178,7 +1178,7 @@ enum
 //maximum number of menus
 #define MAXMENUS 20
 //maximum number of windows
-#define MAXWINDOWS 30
+#define MAXWINDOWS 100
 //maximum number of callbacks
 #define MAXCALLBACKS 100
 //maximum number of buttons that can be created WITHIN a menu or window
@@ -1186,15 +1186,15 @@ enum
 //maximum number of texts that can be written WITHIN a menu or window
 #define MAXTEXTS 100
 //maximum number of pictures that can be shown WITHIN a menu or window
-#define MAXPICTURES 50
+#define MAXPICTURES 100
 //maximum number of textfields that can be created WITHIN a menu or window
 #define MAXTEXTFIELDS 10
 
 //maximum players for a map
 #define MAXPLAYERS 16
 //maximum map size
-#define MAXMAPWIDTH  1152
-#define MAXMAPHEIGHT 1152
+#define MAXMAPWIDTH  1024
+#define MAXMAPHEIGHT 1024
 
 //triangle values
 //these values are now handled in globals.h and globals.cpp, cause they must be changeable for the zoom mode
@@ -1229,6 +1229,9 @@ enum
 #define TRIANGLE_TEXTURE_COLOR                  0x11
 #define TRIANGLE_TEXTURE_MINING_MEADOW          0x12
 #define TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR  0x52
+#define TRIANGLE_TEXTURE_WATER__                0x13
+#define TRIANGLE_TEXTURE_STEPPE__               0x80
+#define TRIANGLE_TEXTURE_STEPPE___              0x84
 #define TRIANGLE_TEXTURE_MEADOW_MIXED           0xBF    //this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
 #define TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR   0xFF    //this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
 

@@ -625,212 +625,269 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
         //it's a harbour
         texture_raw -= 0x40;
 
-    switch (texture_raw)
-    {
-        //in case of USD-Triangle "upperX" and "upperY" means "lowerX" and "lowerY"
-        case TRIANGLE_TEXTURE_STEPPE_MEADOW1:   upperX = 17;
-                                                upperY = 96;
-                                                leftX = 0;
-                                                leftY = 126;
-                                                rightX = 35;
-                                                rightY = 126;
-                                                break;
-        case TRIANGLE_TEXTURE_MINING1:          upperX = 17;
-                                                upperY = 48;
-                                                leftX = 0;
-                                                leftY = 78;
-                                                rightX = 35;
-                                                rightY = 78;
-                                                break;
-        case TRIANGLE_TEXTURE_SNOW:             if (P1.y < P2.y)
-                                                {
-                                                    upperX = 17;
-                                                    upperY = 0;
-                                                    leftX = 0;
-                                                    leftY = 30;
-                                                    rightX = 35;
-                                                    rightY = 30;
-                                                }
-                                                else
-                                                {
-                                                    upperX = 17;
-                                                    upperY = 28;
-                                                    leftX = 0;
-                                                    leftY = 0;
-                                                    rightX = 37;
-                                                    rightY = 0;
-                                                }
-                                                if (type == MAP_WINTERLAND)
-                                                {
-                                                    if (P1.y < P2.y)
-                                                    {
-                                                        upperX2 = 231-texture_move;
-                                                        upperY2 = 61+texture_move;
-                                                        leftX2 = 207-texture_move;
-                                                        leftY2 = 62+texture_move;
-                                                        rightX2 = 223-texture_move;
-                                                        rightY2 = 78+texture_move;
-                                                    }
-                                                    else
-                                                    {
-                                                        upperX2 = 224-texture_move;
-                                                        upperY2 = 79+texture_move;
-                                                        leftX2 = 232-texture_move;
-                                                        leftY2 = 62+texture_move;
-                                                        rightX2 = 245-texture_move;
-                                                        rightY2 = 76+texture_move;
-                                                    }
-                                                }
-                                                break;
-        case TRIANGLE_TEXTURE_SWAMP:            upperX = 113;
-                                                upperY = 0;
-                                                leftX = 96;
-                                                leftY = 30;
-                                                rightX = 131;
-                                                rightY = 30;
-                                                if (type == MAP_WINTERLAND)
-                                                {
-                                                    if (P1.y < P2.y)
-                                                    {
-                                                        upperX2 = 231-texture_move;
-                                                        upperY2 = 61+texture_move;
-                                                        leftX2 = 207-texture_move;
-                                                        leftY2 = 62+texture_move;
-                                                        rightX2 = 223-texture_move;
-                                                        rightY2 = 78+texture_move;
-                                                    }
-                                                    else
-                                                    {
-                                                        upperX2 = 224-texture_move;
-                                                        upperY2 = 79+texture_move;
-                                                        leftX2 = 232-texture_move;
-                                                        leftY2 = 62+texture_move;
-                                                        rightX2 = 245-texture_move;
-                                                        rightY2 = 76+texture_move;
-                                                    }
-                                                }
-                                                break;
-        case TRIANGLE_TEXTURE_STEPPE:           upperX = 65;
-                                                upperY = 0;
-                                                leftX = 48;
-                                                leftY = 30;
-                                                rightX = 83;
-                                                rightY = 30;
-                                                break;
-        case TRIANGLE_TEXTURE_WATER:            if (P1.y < P2.y)
-                                                {
-                                                    upperX = 231-texture_move;
-                                                    upperY = 61+texture_move;
-                                                    leftX = 207-texture_move;
-                                                    leftY = 62+texture_move;
-                                                    rightX = 223-texture_move;
-                                                    rightY = 78+texture_move;
-                                                }
-                                                else
-                                                {
-                                                    upperX = 224-texture_move;
-                                                    upperY = 79+texture_move;
-                                                    leftX = 232-texture_move;
-                                                    leftY = 62+texture_move;
-                                                    rightX = 245-texture_move;
-                                                    rightY = 76+texture_move;
-                                                }
-                                                break;
-        case TRIANGLE_TEXTURE_MEADOW1:          upperX = 65;
-                                                upperY = 96;
-                                                leftX = 48;
-                                                leftY = 126;
-                                                rightX = 83;
-                                                rightY = 126;
-                                                break;
-        case TRIANGLE_TEXTURE_MEADOW2:          upperX = 113;
-                                                upperY = 96;
-                                                leftX = 96;
-                                                leftY = 126;
-                                                rightX = 131;
-                                                rightY = 126;
-                                                break;
-        case TRIANGLE_TEXTURE_MEADOW3:          upperX = 161;
-                                                upperY = 96;
-                                                leftX = 144;
-                                                leftY = 126;
-                                                rightX = 179;
-                                                rightY = 126;
-                                                break;
-        case TRIANGLE_TEXTURE_MINING2:          upperX = 65;
-                                                upperY = 48;
-                                                leftX = 48;
-                                                leftY = 78;
-                                                rightX = 83;
-                                                rightY = 78;
-                                                break;
-        case TRIANGLE_TEXTURE_MINING3:          upperX = 113;
-                                                upperY = 48;
-                                                leftX = 96;
-                                                leftY = 78;
-                                                rightX = 131;
-                                                rightY = 78;
-                                                break;
-        case TRIANGLE_TEXTURE_MINING4:          upperX = 161;
-                                                upperY = 48;
-                                                leftX = 144;
-                                                leftY = 78;
-                                                rightX = 179;
-                                                rightY = 78;
-                                                break;
-        case TRIANGLE_TEXTURE_STEPPE_MEADOW2:   upperX = 17;
-                                                upperY = 144;
-                                                leftX = 0;
-                                                leftY = 174;
-                                                rightX = 35;
-                                                rightY = 174;
-                                                break;
-        case TRIANGLE_TEXTURE_FLOWER:           upperX = 161;
-                                                upperY = 0;
-                                                leftX = 144;
-                                                leftY = 30;
-                                                rightX = 179;
-                                                rightY = 30;
-                                                break;
-        case TRIANGLE_TEXTURE_LAVA:             if (P1.y < P2.y)
-                                                {
-                                                    upperX = 231-texture_move;
-                                                    upperY = 117+texture_move;
-                                                    leftX = 207-texture_move;
-                                                    leftY = 118+texture_move;
-                                                    rightX = 223-texture_move;
-                                                    rightY = 134+texture_move;
-                                                }
-                                                else
-                                                {
-                                                    upperX = 224-texture_move;
-                                                    upperY = 135+texture_move;
-                                                    leftX = 232-texture_move;
-                                                    leftY = 118+texture_move;
-                                                    rightX = 245-texture_move;
-                                                    rightY = 132+texture_move;
-                                                }
-                                                break;
-        case TRIANGLE_TEXTURE_MINING_MEADOW:    upperX = 65;
-                                                upperY = 144;
-                                                leftX = 48;
-                                                leftY = 174;
-                                                rightX = 83;
-                                                rightY = 174;
-                                                break;
-        default:                                //TRIANGLE_TEXTURE_FLOWER
-                                                upperX = 161;
-                                                upperY = 0;
-                                                leftX = 144;
-                                                leftY = 30;
-                                                rightX = 179;
-                                                rightY = 30;
-                                                break;
-    }
-
-
     if (drawTextures)
     {
+        switch (texture_raw)
+        {
+            //in case of USD-Triangle "upperX" and "upperY" means "lowerX" and "lowerY"
+            case TRIANGLE_TEXTURE_STEPPE_MEADOW1:   upperX = 17;
+                                                    upperY = 96;
+                                                    leftX = 0;
+                                                    leftY = 126;
+                                                    rightX = 35;
+                                                    rightY = 126;
+                                                    break;
+            case TRIANGLE_TEXTURE_MINING1:          upperX = 17;
+                                                    upperY = 48;
+                                                    leftX = 0;
+                                                    leftY = 78;
+                                                    rightX = 35;
+                                                    rightY = 78;
+                                                    break;
+            case TRIANGLE_TEXTURE_SNOW:             if (P1.y < P2.y)
+                                                    {
+                                                        upperX = 17;
+                                                        upperY = 0;
+                                                        leftX = 0;
+                                                        leftY = 30;
+                                                        rightX = 35;
+                                                        rightY = 30;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX = 17;
+                                                        upperY = 28;
+                                                        leftX = 0;
+                                                        leftY = 0;
+                                                        rightX = 37;
+                                                        rightY = 0;
+                                                    }
+                                                    if (type == MAP_WINTERLAND)
+                                                    {
+                                                        if (P1.y < P2.y)
+                                                        {
+                                                            upperX2 = 231-texture_move;
+                                                            upperY2 = 61+texture_move;
+                                                            leftX2 = 207-texture_move;
+                                                            leftY2 = 62+texture_move;
+                                                            rightX2 = 223-texture_move;
+                                                            rightY2 = 78+texture_move;
+                                                        }
+                                                        else
+                                                        {
+                                                            upperX2 = 224-texture_move;
+                                                            upperY2 = 79+texture_move;
+                                                            leftX2 = 232-texture_move;
+                                                            leftY2 = 62+texture_move;
+                                                            rightX2 = 245-texture_move;
+                                                            rightY2 = 76+texture_move;
+                                                        }
+                                                    }
+                                                    break;
+            case TRIANGLE_TEXTURE_SWAMP:            upperX = 113;
+                                                    upperY = 0;
+                                                    leftX = 96;
+                                                    leftY = 30;
+                                                    rightX = 131;
+                                                    rightY = 30;
+                                                    if (type == MAP_WINTERLAND)
+                                                    {
+                                                        if (P1.y < P2.y)
+                                                        {
+                                                            upperX2 = 231-texture_move;
+                                                            upperY2 = 61+texture_move;
+                                                            leftX2 = 207-texture_move;
+                                                            leftY2 = 62+texture_move;
+                                                            rightX2 = 223-texture_move;
+                                                            rightY2 = 78+texture_move;
+                                                        }
+                                                        else
+                                                        {
+                                                            upperX2 = 224-texture_move;
+                                                            upperY2 = 79+texture_move;
+                                                            leftX2 = 232-texture_move;
+                                                            leftY2 = 62+texture_move;
+                                                            rightX2 = 245-texture_move;
+                                                            rightY2 = 76+texture_move;
+                                                        }
+                                                    }
+                                                    break;
+            case TRIANGLE_TEXTURE_STEPPE:           upperX = 65;
+                                                    upperY = 0;
+                                                    leftX = 48;
+                                                    leftY = 30;
+                                                    rightX = 83;
+                                                    rightY = 30;
+                                                    break;
+            case TRIANGLE_TEXTURE_STEPPE_:          upperX = 65;
+                                                    upperY = 0;
+                                                    leftX = 48;
+                                                    leftY = 30;
+                                                    rightX = 83;
+                                                    rightY = 30;
+                                                    break;
+            case TRIANGLE_TEXTURE_STEPPE__:         upperX = 65;
+                                                    upperY = 0;
+                                                    leftX = 48;
+                                                    leftY = 30;
+                                                    rightX = 83;
+                                                    rightY = 30;
+                                                    break;
+            case TRIANGLE_TEXTURE_STEPPE___:        upperX = 65;
+                                                    upperY = 0;
+                                                    leftX = 48;
+                                                    leftY = 30;
+                                                    rightX = 83;
+                                                    rightY = 30;
+                                                    break;
+            case TRIANGLE_TEXTURE_WATER:            if (P1.y < P2.y)
+                                                    {
+                                                        upperX = 231-texture_move;
+                                                        upperY = 61+texture_move;
+                                                        leftX = 207-texture_move;
+                                                        leftY = 62+texture_move;
+                                                        rightX = 223-texture_move;
+                                                        rightY = 78+texture_move;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX = 224-texture_move;
+                                                        upperY = 79+texture_move;
+                                                        leftX = 232-texture_move;
+                                                        leftY = 62+texture_move;
+                                                        rightX = 245-texture_move;
+                                                        rightY = 76+texture_move;
+                                                    }
+            case TRIANGLE_TEXTURE_WATER_:           if (P1.y < P2.y)
+                                                    {
+                                                        upperX = 231-texture_move;
+                                                        upperY = 61+texture_move;
+                                                        leftX = 207-texture_move;
+                                                        leftY = 62+texture_move;
+                                                        rightX = 223-texture_move;
+                                                        rightY = 78+texture_move;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX = 224-texture_move;
+                                                        upperY = 79+texture_move;
+                                                        leftX = 232-texture_move;
+                                                        leftY = 62+texture_move;
+                                                        rightX = 245-texture_move;
+                                                        rightY = 76+texture_move;
+                                                    }
+                                                    break;
+            case TRIANGLE_TEXTURE_WATER__:          if (P1.y < P2.y)
+                                                    {
+                                                        upperX = 231-texture_move;
+                                                        upperY = 61+texture_move;
+                                                        leftX = 207-texture_move;
+                                                        leftY = 62+texture_move;
+                                                        rightX = 223-texture_move;
+                                                        rightY = 78+texture_move;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX = 224-texture_move;
+                                                        upperY = 79+texture_move;
+                                                        leftX = 232-texture_move;
+                                                        leftY = 62+texture_move;
+                                                        rightX = 245-texture_move;
+                                                        rightY = 76+texture_move;
+                                                    }
+                                                    break;
+            case TRIANGLE_TEXTURE_MEADOW1:          upperX = 65;
+                                                    upperY = 96;
+                                                    leftX = 48;
+                                                    leftY = 126;
+                                                    rightX = 83;
+                                                    rightY = 126;
+                                                    break;
+            case TRIANGLE_TEXTURE_MEADOW2:          upperX = 113;
+                                                    upperY = 96;
+                                                    leftX = 96;
+                                                    leftY = 126;
+                                                    rightX = 131;
+                                                    rightY = 126;
+                                                    break;
+            case TRIANGLE_TEXTURE_MEADOW3:          upperX = 161;
+                                                    upperY = 96;
+                                                    leftX = 144;
+                                                    leftY = 126;
+                                                    rightX = 179;
+                                                    rightY = 126;
+                                                    break;
+            case TRIANGLE_TEXTURE_MINING2:          upperX = 65;
+                                                    upperY = 48;
+                                                    leftX = 48;
+                                                    leftY = 78;
+                                                    rightX = 83;
+                                                    rightY = 78;
+                                                    break;
+            case TRIANGLE_TEXTURE_MINING3:          upperX = 113;
+                                                    upperY = 48;
+                                                    leftX = 96;
+                                                    leftY = 78;
+                                                    rightX = 131;
+                                                    rightY = 78;
+                                                    break;
+            case TRIANGLE_TEXTURE_MINING4:          upperX = 161;
+                                                    upperY = 48;
+                                                    leftX = 144;
+                                                    leftY = 78;
+                                                    rightX = 179;
+                                                    rightY = 78;
+                                                    break;
+            case TRIANGLE_TEXTURE_STEPPE_MEADOW2:   upperX = 17;
+                                                    upperY = 144;
+                                                    leftX = 0;
+                                                    leftY = 174;
+                                                    rightX = 35;
+                                                    rightY = 174;
+                                                    break;
+            case TRIANGLE_TEXTURE_FLOWER:           upperX = 161;
+                                                    upperY = 0;
+                                                    leftX = 144;
+                                                    leftY = 30;
+                                                    rightX = 179;
+                                                    rightY = 30;
+                                                    break;
+            case TRIANGLE_TEXTURE_LAVA:             if (P1.y < P2.y)
+                                                    {
+                                                        upperX = 231-texture_move;
+                                                        upperY = 117+texture_move;
+                                                        leftX = 207-texture_move;
+                                                        leftY = 118+texture_move;
+                                                        rightX = 223-texture_move;
+                                                        rightY = 134+texture_move;
+                                                    }
+                                                    else
+                                                    {
+                                                        upperX = 224-texture_move;
+                                                        upperY = 135+texture_move;
+                                                        leftX = 232-texture_move;
+                                                        leftY = 118+texture_move;
+                                                        rightX = 245-texture_move;
+                                                        rightY = 132+texture_move;
+                                                    }
+                                                    break;
+            case TRIANGLE_TEXTURE_MINING_MEADOW:    upperX = 65;
+                                                    upperY = 144;
+                                                    leftX = 48;
+                                                    leftY = 174;
+                                                    rightX = 83;
+                                                    rightY = 174;
+                                                    break;
+            default:                                //TRIANGLE_TEXTURE_FLOWER
+                                                    upperX = 161;
+                                                    upperY = 0;
+                                                    leftX = 144;
+                                                    leftY = 30;
+                                                    rightX = 179;
+                                                    rightY = 30;
+                                                    break;
+        }
+
         //draw the triangle
         //do not shade water and lava
         if (texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
@@ -851,7 +908,13 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 if (global::s2->getMapObj()->getBitsPerPixel() == 8)
                     sge_PreCalcFadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.shading<<8,P2.shading<<8,P3.shading<<8,gouData[type]);
                 else
-                    sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+                {
+                    //if all three light values are the same, we only need to flat shade
+                    if (P1.i == P2.i && P2.i == P3.i)
+                        sge_FlatFadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i);
+                    else
+                        sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
+                }
             }
         }
         return;
@@ -922,13 +985,13 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 }
                 if (tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
                 {
-                    BorderRect = BorderRectMeadow;
+                    BorderRect = BorderRectSteppe;
                     Border1 = true;
                     Border2 = false;
                 }
                 else if (P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
                 {
-                    BorderRect = BorderRectMeadow;
+                    BorderRect = BorderRectSteppe;
                     Border1 = false;
                     Border2 = true;
                 }
@@ -972,12 +1035,18 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 if (Border1)
                 {
                     //usd-right
-                    sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x+5, P1.y-displayRect.y+3, P2.x-displayRect.x+5, P2.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
+                    if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                        sge_PreCalcFadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x+5, P1.y-displayRect.y+3, P2.x-displayRect.x+5, P2.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.shading<<8,P2.shading<<8,gouData[type]);
+                    else
+                        sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x+5, P1.y-displayRect.y+3, P2.x-displayRect.x+5, P2.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
                 }
                 else if (Border2)
                 {
                     //rsu-left
-                    sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3, P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
+                    if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                        sge_PreCalcFadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3, P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.shading<<8, P2.shading<<8, gouData[type]);
+                    else
+                        sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3, P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
                 }
             }
         }
@@ -1036,13 +1105,13 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 }
                 if (P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
                 {
-                    BorderRect = BorderRectMeadow;
+                    BorderRect = BorderRectSteppe;
                     Border1 = true;
                     Border2 = false;
                 }
                 else if (P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
                 {
-                    BorderRect = BorderRectMeadow;
+                    BorderRect = BorderRectSteppe;
                     Border1 = false;
                     Border2 = true;
                 }
@@ -1086,12 +1155,18 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 if (Border1)
                 {
                     //rsu-right
-                    sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y+2, P2.x-displayRect.x, P2.y-displayRect.y, P1.x-displayRect.x+5, P1.y-displayRect.y-1, P2.x-displayRect.x+5, P2.y-displayRect.y-3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
+                    if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                        sge_PreCalcFadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y+2, P2.x-displayRect.x, P2.y-displayRect.y, P1.x-displayRect.x+5, P1.y-displayRect.y-1, P2.x-displayRect.x+5, P2.y-displayRect.y-3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.shading<<8, P2.shading<<8, gouData[type]);
+                    else
+                        sge_FadedTexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y+2, P2.x-displayRect.x, P2.y-displayRect.y, P1.x-displayRect.x+5, P1.y-displayRect.y-1, P2.x-displayRect.x+5, P2.y-displayRect.y-3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P1.i, P2.i);
                 }
                 else if (Border2)
                 {
                     //usd-left
-                    sge_FadedTexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x-5, P2.y-displayRect.y+1, P1.x-displayRect.x-5, P1.y-displayRect.y+3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P1.i);
+                    if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                        sge_PreCalcFadedTexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x-5, P2.y-displayRect.y+1, P1.x-displayRect.x-5, P1.y-displayRect.y+3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.shading<<8, P1.shading<<8, gouData[type]);
+                    else
+                        sge_FadedTexturedRect(display, P2.x-displayRect.x, P2.y-displayRect.y-2, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x-5, P2.y-displayRect.y+1, P1.x-displayRect.x-5, P1.y-displayRect.y+3, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P1.i);
                 }
             }
 
@@ -1151,13 +1226,13 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 }
                 if (tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
                 {
-                    BorderRect = BorderRectMeadow;
+                    BorderRect = BorderRectSteppe;
                     Border1 = true;
                     Border2 = false;
                 }
                 else if (P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
                 {
-                    BorderRect = BorderRectMeadow;
+                    BorderRect = BorderRectSteppe;
                     Border1 = false;
                     Border2 = true;
                 }
@@ -1201,12 +1276,18 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 if (Border1)
                 {
                     //rsu-down
-                    sge_FadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P3.i);
+                    if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                        sge_PreCalcFadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.shading<<8, P3.shading<<8, gouData[type]);
+                    else
+                        sge_FadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P3.i);
                 }
                 else if (Border2)
                 {
                     //usd-top
-                    sge_FadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5, P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P3.i);
+                    if (global::s2->getMapObj()->getBitsPerPixel() == 8)
+                        sge_PreCalcFadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5, P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.shading<<8, P3.shading<<8, gouData[type]);
+                    else
+                        sge_FadedTexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5, P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h, P2.i, P3.i);
                 }
 
                 ///all border-blit functions for copy&paste

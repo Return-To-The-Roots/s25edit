@@ -183,12 +183,6 @@ void CGame::EventHandling(SDL_Event *Event)
                                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                                     }
                                     break;
-#ifdef _ADMINMODE
-/*#else
-                case SDLK_F3:
-                                    break;
-
-*/#endif
 
 #ifdef _VIEWERMODE
                 case SDLK_RIGHT:    index++;
@@ -305,7 +299,7 @@ void CGame::EventHandling(SDL_Event *Event)
                 if (delivered)
                     break;
             }
-            //if mouse data has been deliverd, stop delivering anymore
+            //if mouse data has been delivered, stop delivering anymore
             if (delivered)
                 break;
 
@@ -321,7 +315,10 @@ void CGame::EventHandling(SDL_Event *Event)
             for (int i = 0; i < MAXMENUS; i++)
             {
                 if (Menus[i] != NULL && Menus[i]->isActive() && !Menus[i]->isWaste())
+                {
                     Menus[i]->setMouseData(Event->motion);
+                    break;
+                }
             }
 
             /*if (Button != NULL)

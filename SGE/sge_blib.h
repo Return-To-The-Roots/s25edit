@@ -30,8 +30,14 @@ DECLSPEC void sge_FadedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,Uint8
 DECLSPEC void sge_TexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2);
 //if destination and source surface have both 32bpp then a few colorkeys will be respected
 DECLSPEC void sge_FadedTexturedLineColorKeys(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i1,Sint32 i2,Uint32 keys[],int keycount);
-//works at the moment only if destination and source surface have both 32bpp (and the colorkey will be respected)
+//works at the moment only if destination and source surface have both 32bpp
 DECLSPEC void sge_FadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i1,Sint32 i2);
+//works at the moment only if destination and source surface have both 32bpp
+DECLSPEC void sge_FlatFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i);
+//works at the moment only if destination and source surface have both 32bpp (and the colorkey will be respected) --> slower
+DECLSPEC void sge_FadedTexturedLineColorKey(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint32 i1,Sint32 i2);
+//works at the moment only if destination and source surface have both 8bpp (and the colorkey will be respected) --> slower
+DECLSPEC void sge_PreCalcFadedTexturedLineColorKey(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Uint16 i1,Uint16 i2,Uint8 PreCalcPalettes[][256]);
 //works at the moment only if destination and source surface have both 8bpp
 DECLSPEC void sge_PreCalcFadedTexturedLine(SDL_Surface *dest,Sint16 x1,Sint16 x2,Sint16 y,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Uint16 i1,Uint16 i2,Uint8 PreCalcPalettes[][256]);
 //if destination and source surface have both 8bpp then a few colorkeys will be respected
@@ -49,6 +55,8 @@ DECLSPEC void sge_FadedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Si
 DECLSPEC void sge_TexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3);
 //works at the moment only if destination and source surface have both 32bpp
 DECLSPEC void sge_FadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint32 I1,Sint32 I2,Sint32 I3);
+//works at the moment only if destination and source surface have both 32bpp
+DECLSPEC void sge_FlatFadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint32 I);
 //works at the moment only if destination and source surface have both 8bpp
 DECLSPEC void sge_PreCalcFadedTexturedTrigon(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Uint16 I1,Uint16 I2,Uint16 I3,Uint8 PreCalcPalettes[][256]);
 //if destination and source surface have both 32bpp then a few colorkeys will be respected
@@ -59,8 +67,10 @@ DECLSPEC void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface *dest,Sint16 x
 //NOTE: Sort of the coords  P1 P2
 //                          P3 P4
 DECLSPEC void sge_TexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,Sint16 x4,Sint16 y4,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 sx4,Sint16 sy4);
-//works at the moment only if destination and source surface have both 32bpp
-DECLSPEC void sge_FadedTexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,Sint16 x4,Sint16 y4,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 sx4,Sint16 sy4,Sint32 i1,Sint32 i2);
+//works at the moment only if destination and source surface have both 32bpp (colorkey will be respected)
+DECLSPEC void sge_FadedTexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,Sint16 x4,Sint16 y4,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 sx4,Sint16 sy4,Sint32 I1,Sint32 I2);
+//works at the moment only if destination and source surface have both 8bpp (colorkey will be respected)
+DECLSPEC void sge_PreCalcFadedTexturedRect(SDL_Surface *dest,Sint16 x1,Sint16 y1,Sint16 x2,Sint16 y2,Sint16 x3,Sint16 y3,Sint16 x4,Sint16 y4,SDL_Surface *source,Sint16 sx1,Sint16 sy1,Sint16 sx2,Sint16 sy2,Sint16 sx3,Sint16 sy3,Sint16 sx4,Sint16 sy4,Uint16 I1,Uint16 I2,Uint8 PreCalcPalettes[][256]);
 
 DECLSPEC int sge_FilledPolygon(SDL_Surface *dest, Uint16 n, Sint16 *x, Sint16 *y, Uint32 color);
 DECLSPEC int sge_FilledPolygonAlpha(SDL_Surface *dest, Uint16 n, Sint16 *x, Sint16 *y, Uint32 color, Uint8 alpha);

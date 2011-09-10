@@ -14,13 +14,7 @@
 #include "globals.h"
 #include "callbacks.h"
 #include "CSurface.h"
-#include "CIO/CFile.h"
-#include "CIO/CFont.h"
-#include "CIO/CButton.h"
-#include "CIO/CMenu.h"
-#include "CIO/CWindow.h"
-#include "CIO/CPicture.h"
-#include "CIO/CTextfield.h"
+#include "CIO/CIO.h"
 #include "CMap.h"
 
 #ifdef _ADMINMODE
