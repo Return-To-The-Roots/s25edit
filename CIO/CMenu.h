@@ -20,6 +20,7 @@ class CMenu
         CFont *texts[MAXTEXTS];
         CPicture *pictures[MAXPICTURES];
         CTextfield *textfields[MAXTEXTFIELDS];
+        CSelectBox *selectboxes[MAXSELECTBOXES];
         struct { int x, y, pic; } static_pictures[MAXPICTURES];
 
     public:

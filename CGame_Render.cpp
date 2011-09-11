@@ -28,7 +28,18 @@ void CGame::Render()
            )
         {
             SDL_FreeSurface(Surf_Display);
-            Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+
+            if (CSurface::useOpenGLBlit)
+            {
+                SDL_FreeSurface(Surf_DisplayGL);
+
+                Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
+                Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
+            }
+            else
+            {
+                Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+            }
         }
     //}
 
@@ -38,7 +49,15 @@ void CGame::Render()
     {
         //CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
         sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w-1, 0, 0, Surf_Display->h-1, Surf_Display->w-1, Surf_Display->h-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w-1, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h-1);
-        SDL_Flip(Surf_Display);
+
+        if (CSurface::useOpenGLBlit)
+        {
+            SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
+            SDL_Flip(Surf_DisplayGL);
+            SDL_GL_SwapBuffers();
+        }
+        else
+            SDL_Flip(Surf_Display);
         return;
     }
 #endif
@@ -101,7 +120,14 @@ void CGame::Render()
     //char text[] = "hasdfsdf34!!!!";
     //CFont::writeText(Surf_Display, (unsigned char*)text, 10, 150, 14, FONT_MINTGREEN, ALIGN_RIGHT);
 
-    SDL_Flip(Surf_Display);
+    if (CSurface::useOpenGLBlit)
+    {
+        SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
+        SDL_Flip(Surf_DisplayGL);
+        SDL_GL_SwapBuffers();
+    }
+    else
+        SDL_Flip(Surf_Display);
 
     SDL_Delay(msWait);
 }

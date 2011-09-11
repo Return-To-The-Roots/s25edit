@@ -25,6 +25,7 @@ class CWindow
         CPicture *pictures[MAXPICTURES];
         struct { int x, y, pic; } static_pictures[MAXPICTURES];
         CTextfield *textfields[MAXTEXTFIELDS];
+        CSelectBox *selectboxes[MAXSELECTBOXES];
         unsigned char *title;
         bool marked;
         bool clicked;

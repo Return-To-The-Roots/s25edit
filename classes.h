@@ -10,6 +10,7 @@ class CSurface;
 class CWindow;
 class CPicture;
 class CTextfield;
+class CSelectBox;
 class CMap;
 #ifdef _ADMINMODE
 class CDebug;

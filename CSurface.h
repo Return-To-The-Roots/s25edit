@@ -25,6 +25,8 @@ class CSurface
         static void get_nodeVectors(bobMAP *myMap);
         static void update_shading(bobMAP *myMap, int VertexX, int VertexY);
 
+        static bool useOpenGLBlit;
+
     private:
         //to decide what to draw, triangle-textures or objects and texture-borders
         static bool drawTextures;

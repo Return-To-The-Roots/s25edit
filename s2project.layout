@@ -8,13 +8,13 @@
 		<Cursor position="1919" topLine="3" />
 	</File>
 	<File name="CGame.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="123" topLine="62" />
+		<Cursor position="1208" topLine="0" />
 	</File>
 	<File name="CGame.h" open="0" top="0" tabpos="10">
-		<Cursor position="1400" topLine="0" />
+		<Cursor position="825" topLine="15" />
 	</File>
 	<File name="CGame_Cleanup.cpp" open="0" top="0" tabpos="3">
-		<Cursor position="860" topLine="0" />
+		<Cursor position="903" topLine="0" />
 	</File>
 	<File name="CGame_Event.cpp" open="1" top="0" tabpos="10">
 		<Cursor position="15096" topLine="288" />
@@ -22,11 +22,11 @@
 	<File name="CGame_GameLoop.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="178" topLine="0" />
 	</File>
-	<File name="CGame_Init.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="477" topLine="2" />
+	<File name="CGame_Init.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="1108" topLine="2" />
 	</File>
 	<File name="CGame_Render.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="1246" topLine="27" />
+		<Cursor position="1734" topLine="2" />
 	</File>
 	<File name="CIO\CButton.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="8621" topLine="265" />
@@ -71,28 +71,28 @@
 		<Cursor position="1735" topLine="7" />
 	</File>
 	<File name="CMap.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="78145" topLine="1670" />
+		<Cursor position="467" topLine="9" />
 	</File>
 	<File name="CMap.h" open="1" top="0" tabpos="5">
 		<Cursor position="5640" topLine="92" />
 	</File>
 	<File name="CSurface.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="35817" topLine="751" />
+		<Cursor position="99" topLine="0" />
 	</File>
 	<File name="CSurface.h" open="0" top="0" tabpos="7">
-		<Cursor position="1746" topLine="0" />
+		<Cursor position="1784" topLine="0" />
 	</File>
 	<File name="callbacks.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="25981" topLine="466" />
+		<Cursor position="4756" topLine="60" />
 	</File>
-	<File name="callbacks.h" open="1" top="0" tabpos="11">
+	<File name="callbacks.h" open="1" top="1" tabpos="11">
 		<Cursor position="543" topLine="0" />
 	</File>
 	<File name="classes.h" open="0" top="0" tabpos="11">
 		<Cursor position="185" topLine="0" />
 	</File>
 	<File name="defines.h" open="1" top="0" tabpos="2">
-		<Cursor position="39332" topLine="1189" />
+		<Cursor position="39332" topLine="1159" />
 	</File>
 	<File name="globals.cpp" open="0" top="0" tabpos="8">
 		<Cursor position="85" topLine="0" />

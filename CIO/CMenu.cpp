@@ -17,6 +17,8 @@ CMenu::CMenu(int pic_background)
     }
     for (int i = 0; i < MAXTEXTFIELDS; i++)
         textfields[i] = NULL;
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+        selectboxes[i] = NULL;
 
     Surf_Menu = NULL;
     needSurface = true;
@@ -47,6 +49,11 @@ CMenu::~CMenu()
     {
         if (textfields[i] != NULL)
             delete textfields[i];
+    }
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] != NULL)
+            delete selectboxes[i];
     }
     SDL_FreeSurface(Surf_Menu);
 }
@@ -334,6 +341,11 @@ bool CMenu::render(void)
     {
         if (textfields[i] != NULL)
             CSurface::Draw(Surf_Menu, textfields[i]->getSurface(), textfields[i]->getX(), textfields[i]->getY());
+    }
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] != NULL)
+            CSurface::Draw(Surf_Menu, selectboxes[i]->getSurface(), selectboxes[i]->getX(), selectboxes[i]->getY());
     }
     for (int i = 0; i < MAXBUTTONS; i++)
     {

@@ -42,6 +42,8 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
     }
     for (int i = 0; i < MAXTEXTFIELDS; i++)
         textfields[i] = NULL;
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+        selectboxes[i] = NULL;
 
     this->title = (unsigned char*) title;
     this->callback = callback;
@@ -76,6 +78,11 @@ CWindow::~CWindow()
     {
         if (textfields[i] != NULL)
             delete textfields[i];
+    }
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] != NULL)
+            delete selectboxes[i];
     }
     SDL_FreeSurface(Surf_Window);
 }
@@ -645,6 +652,11 @@ bool CWindow::render(void)
         {
             if (textfields[i] != NULL && textfields[i]->getX() < Surf_Window->w && textfields[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, textfields[i]->getSurface(), textfields[i]->getX(), textfields[i]->getY());
+        }
+        for (int i = 0; i < MAXSELECTBOXES; i++)
+        {
+            if (selectboxes[i] != NULL)
+                CSurface::Draw(Surf_Window, selectboxes[i]->getSurface(), selectboxes[i]->getX(), selectboxes[i]->getY());
         }
     }
 

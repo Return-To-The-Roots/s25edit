@@ -17,7 +17,7 @@ class CGame
 
         bool Running;
         bool showLoadScreen;
-        SDL_Surface *Surf_Display;
+        SDL_Surface *Surf_Display, *Surf_DisplayGL;
 
 	private:
 #ifdef _ADMINMODE
@@ -84,6 +84,7 @@ class CGame
 		CMap *getMapObj(void) { return MapObj; };
 		void delMapObj(void);
 		SDL_Surface* getDisplaySurface(void) { return Surf_Display; };
+		SDL_Surface* getDisplayGLSurface(void) { return Surf_DisplayGL; };
 		int getResX(void) { return GameResolutionX; }
 		int getResY(void) { return GameResolutionY; }
 };

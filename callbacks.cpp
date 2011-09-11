@@ -126,6 +126,7 @@ void callback::submenuOptions(int Param)
         RES_1024,
         RES_1280,
         RES_1680,
+        RES_1280_720,
         FULLSCREEN
     };
 
@@ -152,11 +153,12 @@ void callback::submenuOptions(int Param)
                 SubMenu->addButton(submenuOptions, RES_640, (int)(global::s2->MenuResolutionX/2-100), 70, 200, 20, BUTTON_RED1, "640*480");
                 SubMenu->addButton(submenuOptions, RES_800, (int)(global::s2->MenuResolutionX/2-100), 90, 200, 20, BUTTON_RED1, "800*600");
                 SubMenu->addButton(submenuOptions, RES_1024, (int)(global::s2->MenuResolutionX/2-100), 110, 200, 20, BUTTON_RED1, "1024*768");
-                SubMenu->addButton(submenuOptions, RES_1280, (int)(global::s2->MenuResolutionX/2-100), 130, 200, 20, BUTTON_RED1, "1280*1024");
-                SubMenu->addButton(submenuOptions, RES_1680, (int)(global::s2->MenuResolutionX/2-100), 150, 200, 20, BUTTON_RED1, "1680*1050");
+                SubMenu->addButton(submenuOptions, RES_1280_720, (int)(global::s2->MenuResolutionX/2-100), 130, 200, 20, BUTTON_RED1, "1280*720");
+                SubMenu->addButton(submenuOptions, RES_1280, (int)(global::s2->MenuResolutionX/2-100), 150, 200, 20, BUTTON_RED1, "1280*1024");
+                SubMenu->addButton(submenuOptions, RES_1680, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, "1680*1050");
                 if (ButtonFullscreen != NULL)
                     SubMenu->delButton(ButtonFullscreen);
-                ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 170, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
+                ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->MenuResolutionX/2-100), 190, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
                 //add video driver name
                 SDL_VideoDriverName(puffer, 80);
                 sprintf(puffer2, "Video-Treiber: %s", puffer);
@@ -190,6 +192,13 @@ void callback::submenuOptions(int Param)
                         sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY, (global::s2->fullscreen ? "Fullscreen" : "Window"));
                         TextResolution = SubMenu->addText(puffer, (int)(global::s2->MenuResolutionX/2-110), 50, 11);
                         break;
+        case RES_1280_720:  global::s2->GameResolutionX = 1280;
+                            global::s2->GameResolutionY = 720;
+                            if (TextResolution != NULL)
+                                SubMenu->delText(TextResolution);
+                            sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY, (global::s2->fullscreen ? "Fullscreen" : "Window"));
+                            TextResolution = SubMenu->addText(puffer, (int)(global::s2->MenuResolutionX/2-110), 50, 11);
+                            break;
         case RES_1280:  global::s2->GameResolutionX = 1280;
                         global::s2->GameResolutionY = 1024;
                         if (TextResolution != NULL)

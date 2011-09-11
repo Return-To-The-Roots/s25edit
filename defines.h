@@ -1188,7 +1188,9 @@ enum
 //maximum number of pictures that can be shown WITHIN a menu or window
 #define MAXPICTURES 100
 //maximum number of textfields that can be created WITHIN a menu or window
-#define MAXTEXTFIELDS 10
+#define MAXTEXTFIELDS 20
+//maximum number of selectboxes that can be created WITHIN a menu or window
+#define MAXSELECTBOXES 20
 
 //maximum players for a map
 #define MAXPLAYERS 16

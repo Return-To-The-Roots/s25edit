@@ -17,20 +17,6 @@
 				</Compiler>
 				<Linker>
 					<Add option="-lmingw32 -lSDLmain -lSDL -mwindows" />
-					<Add library="SGE\bin\Release\libSGE.dll.a" />
-				</Linker>
-			</Target>
-			<Target title="Release64">
-				<Option output="bin64\s25edit" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj64\" />
-				<Option type="1" />
-				<Option compiler="gnu_gcc_compiler_x64" />
-				<Compiler>
-					<Add option="-Wall" />
-					<Add option="-m64" />
-				</Compiler>
-				<Linker>
-					<Add option="-lmingw32 -lSDLmain -lSDL -lSGE -mwindows" />
 				</Linker>
 			</Target>
 		</Build>
@@ -59,6 +45,8 @@
 		<Unit filename="CIO\CMenu.h" />
 		<Unit filename="CIO\CPicture.cpp" />
 		<Unit filename="CIO\CPicture.h" />
+		<Unit filename="CIO\CSelectBox.cpp" />
+		<Unit filename="CIO\CSelectBox.h" />
 		<Unit filename="CIO\CTextfield.cpp" />
 		<Unit filename="CIO\CTextfield.h" />
 		<Unit filename="CIO\CWindow.cpp" />
@@ -67,6 +55,29 @@
 		<Unit filename="CMap.h" />
 		<Unit filename="CSurface.cpp" />
 		<Unit filename="CSurface.h" />
+		<Unit filename="SGE\sge.h" />
+		<Unit filename="SGE\sge_blib.cpp" />
+		<Unit filename="SGE\sge_blib.h" />
+		<Unit filename="SGE\sge_bm_text.cpp" />
+		<Unit filename="SGE\sge_bm_text.h" />
+		<Unit filename="SGE\sge_collision.cpp" />
+		<Unit filename="SGE\sge_collision.h" />
+		<Unit filename="SGE\sge_config.h" />
+		<Unit filename="SGE\sge_internal.h" />
+		<Unit filename="SGE\sge_misc.cpp" />
+		<Unit filename="SGE\sge_misc.h" />
+		<Unit filename="SGE\sge_primitives.cpp" />
+		<Unit filename="SGE\sge_primitives.h" />
+		<Unit filename="SGE\sge_rotation.cpp" />
+		<Unit filename="SGE\sge_rotation.h" />
+		<Unit filename="SGE\sge_shape.cpp" />
+		<Unit filename="SGE\sge_shape.h" />
+		<Unit filename="SGE\sge_surface.cpp" />
+		<Unit filename="SGE\sge_surface.h" />
+		<Unit filename="SGE\sge_textpp.cpp" />
+		<Unit filename="SGE\sge_textpp.h" />
+		<Unit filename="SGE\sge_tt_text.cpp" />
+		<Unit filename="SGE\sge_tt_text.h" />
 		<Unit filename="callbacks.cpp" />
 		<Unit filename="callbacks.h" />
 		<Unit filename="classes.h" />

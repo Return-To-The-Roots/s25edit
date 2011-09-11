@@ -16,11 +16,24 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "\nCreate Window...";
-    Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-    if ( Surf_Display == NULL )
+    if (CSurface::useOpenGLBlit)
     {
-        std::cout << "failure";
-        return false;
+        Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
+        Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
+        if ( Surf_Display == NULL || Surf_DisplayGL == NULL )
+        {
+            std::cout << "failure";
+            return false;
+        }
+    }
+    else
+    {
+        Surf_Display = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+        if ( Surf_Display == NULL )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     SDL_WM_SetCaption("Return to the Roots Mapeditor",0);
