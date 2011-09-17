@@ -10,12 +10,14 @@ class CFont
     private:
         SDL_Surface *Surf_Font;
         Uint16 x;
-        Uint16 y;
+        Sint16 y;
         Uint16 w;
         Uint16 h;
         unsigned char *string;
         int fontsize;   //== Uint16 h;
         int color;
+        void (*callback)(int);
+        int clickedParam;
 
     public:
         //Constructor - Destructor
@@ -33,6 +35,9 @@ class CFont
         void setColor(int color);
         void setText(const char *string);
         void setText(unsigned char *string);
+        void setCallback(void (*callback)(int), int param) { this->callback = callback; clickedParam = param; }
+        void unsetCallback(void) { callback = NULL; clickedParam = 0; }
+        void setMouseData(SDL_MouseButtonEvent button);
         SDL_Surface* getSurface(void) { return Surf_Font; };
         //Methods
         //fontsize can be 9, 11 or 14 (otherwise it will be set to 9) ---- '\n' is possible

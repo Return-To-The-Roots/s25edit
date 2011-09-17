@@ -76,6 +76,11 @@ void CMenu::setMouseData(SDL_MouseMotionEvent motion)
         if (buttons[i] != NULL)
             buttons[i]->setMouseData(motion);
     }
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] != NULL)
+            selectboxes[i]->setMouseData(motion);
+    }
     needRender = true;
 }
 
@@ -95,6 +100,11 @@ void CMenu::setMouseData(SDL_MouseButtonEvent button)
     {
         if (textfields[i] != NULL)
             textfields[i]->setMouseData(button);
+    }
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] != NULL)
+            selectboxes[i]->setMouseData(button);
     }
     needRender = true;
 }
@@ -293,6 +303,41 @@ bool CMenu::delTextfield(CTextfield* TextfieldToDelete)
         {
             delete textfields[i];
             textfields[i] = NULL;
+            needRender = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+CSelectBox* CMenu::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
+{
+    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+        return false;
+
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] == NULL)
+        {
+            selectboxes[i] = new CSelectBox(x, y, w, h, fontsize, text_color, bg_color);
+            needRender = true;
+            return selectboxes[i];
+        }
+    }
+    return NULL;
+}
+
+bool CMenu::delSelectBox(CSelectBox* SelectBoxToDelete)
+{
+    if (SelectBoxToDelete == NULL)
+        return false;
+
+    for (int i = 0; i < MAXSELECTBOXES; i++)
+    {
+        if (selectboxes[i] == SelectBoxToDelete)
+        {
+            delete selectboxes[i];
+            selectboxes[i] = NULL;
             needRender = true;
             return true;
         }

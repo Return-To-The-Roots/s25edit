@@ -45,6 +45,8 @@
 		<Unit filename="CIO\CMenu.h" />
 		<Unit filename="CIO\CPicture.cpp" />
 		<Unit filename="CIO\CPicture.h" />
+		<Unit filename="CIO\CSelectBox.cpp" />
+		<Unit filename="CIO\CSelectBox.h" />
 		<Unit filename="CIO\CTextfield.cpp" />
 		<Unit filename="CIO\CTextfield.h" />
 		<Unit filename="CIO\CWindow.cpp" />

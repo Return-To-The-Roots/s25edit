@@ -5,7 +5,7 @@
 //in viewer mode there is only a window and the user can scoll through all loaden pictures
 //#define _VIEWERMODE
 //in admin mode, there are some key combos to open debugger, resource viewer and so on
-#define _ADMINMODE
+//#define _ADMINMODE
 //in editor mode there is the possibility to load, edit and save created maps
 #define _EDITORMODE
 

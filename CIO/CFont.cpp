@@ -4,7 +4,7 @@ CFont::CFont(const char *string, int x, int y, int fontsize, int color)
 {
     this->x = x;
     this->y = y;
-    this->string = (unsigned char*) string;
+    this->string = (unsigned char*)string;
     //only three sizes are available (in pixels)
     if (fontsize != 9 && fontsize != 11 && fontsize != 14)
         this->fontsize = 9;
@@ -12,6 +12,8 @@ CFont::CFont(const char *string, int x, int y, int fontsize, int color)
         this->fontsize = fontsize;
     this->color = color;
     Surf_Font = NULL;
+    callback = NULL;
+    clickedParam = 0;
     //create surface and write text to it
     writeText(this->string);
 }
@@ -28,6 +30,8 @@ CFont::CFont(unsigned char *string, int x, int y, int fontsize, int color)
         this->fontsize = fontsize;
     this->color = color;
     Surf_Font = NULL;
+    callback = NULL;
+    clickedParam = 0;
     //create surface and write text to it
     writeText(this->string);
 }
@@ -62,6 +66,23 @@ void CFont::setText(unsigned char *string)
     SDL_FreeSurface(Surf_Font);
     this->string = string;
     writeText(this->string);
+}
+
+void CFont::setMouseData(SDL_MouseButtonEvent button)
+{
+    //left button is pressed
+    if (button.button == SDL_BUTTON_LEFT)
+    {
+        //if mouse button is pressed ON the text
+        if ( button.state == SDL_PRESSED )
+        {
+            if ( (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h) )
+            {
+                if (callback != NULL)
+                    callback(clickedParam);
+            }
+        }
+    }
 }
 
 bool CFont::writeText(const char *string)
