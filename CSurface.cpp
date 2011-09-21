@@ -1,7 +1,7 @@
 #include "CSurface.h"
 
 bool CSurface::drawTextures = false;
-bool CSurface::useOpenGLBlit = false;
+bool CSurface::useOpenGL = false;
 
 CSurface::CSurface()
 {

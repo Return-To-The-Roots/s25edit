@@ -50,10 +50,6 @@ class CGame
         //Object for the Map
         CMap *MapObj;
 
-#ifdef _VIEWERMODE
-		//counter for surfing through pics
-		int index;
-#endif
 
     public:
 

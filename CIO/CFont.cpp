@@ -73,12 +73,16 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
     //left button is pressed
     if (button.button == SDL_BUTTON_LEFT)
     {
-        //if mouse button is pressed ON the text
-        if ( button.state == SDL_PRESSED )
+        if ( (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h) )
         {
-            if ( (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h) )
+            //if mouse button is pressed ON the text
+            if ( (button.state == SDL_PRESSED) )
             {
-                if (callback != NULL)
+                setColor(FONT_ORANGE);
+            }
+            else if ( button.state == SDL_RELEASED )
+            {
+                if (color == FONT_ORANGE && callback != NULL)
                     callback(clickedParam);
             }
         }

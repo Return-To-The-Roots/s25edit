@@ -29,7 +29,7 @@ void CGame::Render()
         {
             SDL_FreeSurface(Surf_Display);
 
-            if (CSurface::useOpenGLBlit)
+            if (CSurface::useOpenGL)
             {
                 SDL_FreeSurface(Surf_DisplayGL);
 
@@ -43,14 +43,14 @@ void CGame::Render()
         }
     //}
 
-#ifndef _VIEWERMODE
+
     //if the S2 loading screen is shown, render only this until user clicks a mouse button
     if (showLoadScreen)
     {
         //CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
         sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w-1, 0, 0, Surf_Display->h-1, Surf_Display->w-1, Surf_Display->h-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w-1, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w-1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h-1);
 
-        if (CSurface::useOpenGLBlit)
+        if (CSurface::useOpenGL)
         {
             SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
             SDL_Flip(Surf_DisplayGL);
@@ -60,7 +60,7 @@ void CGame::Render()
             SDL_Flip(Surf_Display);
         return;
     }
-#endif
+
 
     //render the map if active
     if (MapObj != NULL && MapObj->isActive())
@@ -91,14 +91,6 @@ void CGame::Render()
         }
     }
 
-#ifdef _VIEWERMODE
-    SDL_FillRect(Surf_Display, NULL, SDL_MapRGB(Surf_Display->format, 40,40,40));
-    CSurface::Draw(Surf_Display, global::bmpArray[index].surface, 0, 0);
-    static char infos[50];
-    sprintf(infos, "index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w, global::bmpArray[index].h, global::bmpArray[index].nx, global::bmpArray[index].ny);
-    CFont::writeText(Surf_Display, infos, 350, 400, 14);
-#endif
-
     //render mouse cursor
     if (Cursor.clicked == true)
     {
@@ -120,7 +112,7 @@ void CGame::Render()
     //char text[] = "hasdfsdf34!!!!";
     //CFont::writeText(Surf_Display, (unsigned char*)text, 10, 150, 14, FONT_MINTGREEN, ALIGN_RIGHT);
 
-    if (CSurface::useOpenGLBlit)
+    if (CSurface::useOpenGL)
     {
         SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
         SDL_Flip(Surf_DisplayGL);

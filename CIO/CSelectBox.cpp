@@ -121,6 +121,8 @@ void CSelectBox::setMouseData(SDL_MouseMotionEvent motion)
 void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 {
     bool manipulated = false;
+    static bool scroll_up_button_marked = false;
+    static bool scroll_down_button_marked = false;
 
     //left button is pressed
     if (button.button == SDL_BUTTON_LEFT)
@@ -133,34 +135,68 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                 //scroll up button
                 if ( (button.x > x + w - 20) && (button.y < y + 20) )
                 {
-                    //test if first entry is on the most upper position
-                    if (Entries[0] != NULL && Entries[0]->getY() >= 10)
-                        return;
-
-                    for (int i = 0; i < MAXSELECTBOXENTRIES; i++)
-                    {
-                        if (Entries[i] != NULL)
-                            Entries[i]->setY( Entries[i]->getY()+10 );
-                    }
+                    scroll_up_button_marked = true;
                 }
                 //scroll down button
                 else if ( (button.x > x + w - 20) && (button.y > y + h - 20) )
                 {
-                    //test if last entry is on the most lower position
-                    int j;
-                    for (j = 0; j < MAXSELECTBOXENTRIES; j++)
-                    {
-                        if (Entries[j] == NULL)
-                            break;
-                    }
-                    j--;
-                    if (Entries[j] != NULL && Entries[j]->getY() <= h - 10)
-                        return;
+                    scroll_down_button_marked = true;
+                }
 
-                    for (int i = 0; i < MAXSELECTBOXENTRIES; i++)
+                //IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
+                //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
+                button.x -= x;
+                button.y -= y;
+                manipulated = true;
+
+                for (int i = 0; i < MAXSELECTBOXENTRIES; i++)
+                {
+                    if (Entries[i] != NULL)
+                        Entries[i]->setMouseData(button);
+                }
+            }
+        }
+        else if ( button.state == SDL_RELEASED )
+        {
+            if ( (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h) )
+            {
+                //scroll up button
+                if (scroll_up_button_marked)
+                {
+                    if ( (button.x > x + w - 20) && (button.y < y + 20) )
                     {
-                        if (Entries[i] != NULL)
-                            Entries[i]->setY( Entries[i]->getY()-10 );
+                        //test if first entry is on the most upper position
+                        if (Entries[0] != NULL && Entries[0]->getY() < 10)
+                        {
+                            for (int i = 0; i < MAXSELECTBOXENTRIES; i++)
+                            {
+                                if (Entries[i] != NULL)
+                                    Entries[i]->setY( Entries[i]->getY()+10 );
+                            }
+                        }
+                    }
+                }
+                //scroll down button
+                else if (scroll_down_button_marked)
+                {
+                    if ( (button.x > x + w - 20) && (button.y > y + h - 20) )
+                    {
+                        //test if last entry is on the most lower position
+                        int j;
+                        for (j = 0; j < MAXSELECTBOXENTRIES; j++)
+                        {
+                            if (Entries[j] == NULL)
+                                break;
+                        }
+                        j--;
+                        if (Entries[j] != NULL && Entries[j]->getY() > h - 10)
+                        {
+                            for (int i = 0; i < MAXSELECTBOXENTRIES; i++)
+                            {
+                                if (Entries[i] != NULL)
+                                    Entries[i]->setY( Entries[i]->getY()-10 );
+                            }
+                        }
                     }
                 }
 
@@ -176,6 +212,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                         Entries[i]->setMouseData(button);
                 }
             }
+            scroll_up_button_marked = false;
+            scroll_down_button_marked = false;
         }
         //IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox

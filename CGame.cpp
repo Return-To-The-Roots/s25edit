@@ -14,11 +14,9 @@ CGame::CGame()
     RegisteredWindows = 0;
     RegisteredMenus = 0;
 #endif
-#ifdef _VIEWERMODE
-    msWait = 40;
-#else
+
     msWait = 0;
-#endif
+
     Surf_Display = NULL;
     Surf_DisplayGL = NULL;
 	Running = true;
@@ -28,10 +26,6 @@ CGame::CGame()
 	Cursor.clicked = false;
 	Cursor.button.left = false;
 	Cursor.button.right = false;
-
-#ifdef _VIEWERMODE
-	index = 0;
-#endif
 
 	for (int i = 0; i < MAXMENUS; i++)
         Menus[i] = NULL;

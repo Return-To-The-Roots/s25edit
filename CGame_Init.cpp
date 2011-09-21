@@ -16,7 +16,7 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "\nCreate Window...";
-    if (CSurface::useOpenGLBlit)
+    if (CSurface::useOpenGL)
     {
         Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
         Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
@@ -54,26 +54,15 @@ bool CGame::Init()
     if ( CFile::open_file("./GFX/PICS/SETUP997.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP997.LBM doesn't exist, it's probably settlers2+missioncd and there we have SETUP998.LBM instead
+        std::cout << "\nTry to load file: /GFX/PICS/SETUP998.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP998.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
-/*
-#ifndef _VIEWERMODE
-    //now load the 'powered by sdl'-picture to blit this together to the display
-    std::cout << "\nLoading file: sdl_powered.bmp...";
-    SDL_Surface *poweredSDL = NULL;
-    if ( (poweredSDL = SDL_LoadBMP("./sdl_powered.bmp")) == NULL)
-    {
-        std::cout << "failure";
-        return false;
-    }
-    //make white the transparent color in the 'powered by sdl'-picture
-    SDL_SetColorKey(poweredSDL, SDL_SRCCOLORKEY, SDL_MapRGB(poweredSDL->format, 255, 255, 255));
-    //blit the pictures immediately together and show it while loading
-    CSurface::Draw(global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, poweredSDL, 240, 400);
-    //now free the no longer needed poweredSDL surface
-    SDL_FreeSurface(poweredSDL);
-#endif
-*/
+
     //std::cout << "\nShow loading screen...";
     showLoadScreen = true;
     //CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
@@ -85,7 +74,13 @@ bool CGame::Init()
     if ( CFile::open_file("./GFX/PICS/SETUP000.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP000.LBM doesn't exist, it's probably settlers2+missioncd and we simply load SETUP010.LBM instead
+        std::cout << "\nLoading file: /GFX/PICS/SETUP010.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP010.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     std::cout << "\nLoading file: /GFX/PICS/SETUP010.LBM...";
@@ -99,14 +94,26 @@ bool CGame::Init()
     if ( CFile::open_file("./GFX/PICS/SETUP011.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP011.LBM doesn't exist, it's probably settlers2+missioncd and we simply load SETUP010.LBM instead
+        std::cout << "\nLoading file: /GFX/PICS/SETUP010.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP010.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     std::cout << "\nLoading file: /GFX/PICS/SETUP012.LBM...";
     if ( CFile::open_file("./GFX/PICS/SETUP012.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP012.LBM doesn't exist, it's probably settlers2+missioncd and we simply load SETUP010.LBM instead
+        std::cout << "\nLoading file: /GFX/PICS/SETUP010.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP010.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     std::cout << "\nLoading file: /GFX/PICS/SETUP013.LBM...";
@@ -120,7 +127,13 @@ bool CGame::Init()
     if ( CFile::open_file("./GFX/PICS/SETUP014.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP014.LBM doesn't exist, it's probably settlers2+missioncd and we simply load SETUP010.LBM instead
+        std::cout << "\nLoading file: /GFX/PICS/SETUP010.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP010.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     std::cout << "\nLoading file: /GFX/PICS/SETUP015.LBM...";
@@ -218,14 +231,26 @@ bool CGame::Init()
     if ( CFile::open_file("./GFX/PICS/SETUP897.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP897.LBM doesn't exist, it's probably settlers2+missioncd and we simply load SETUP896.LBM instead
+        std::cout << "\nLoading file: /GFX/PICS/SETUP896.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP896.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     std::cout << "\nLoading file: /GFX/PICS/SETUP898.LBM...";
     if ( CFile::open_file("./GFX/PICS/SETUP898.LBM", LBM) == false )
     {
         std::cout << "failure";
-        return false;
+        //if SETUP897.LBM doesn't exist, it's probably settlers2+missioncd and we simply load SETUP896.LBM instead
+        std::cout << "\nLoading file: /GFX/PICS/SETUP896.LBM instead...";
+        if ( CFile::open_file("./GFX/PICS/SETUP896.LBM", LBM) == false )
+        {
+            std::cout << "failure";
+            return false;
+        }
     }
 
     std::cout << "\nLoading file: /GFX/PICS/SETUP899.LBM...";
@@ -439,66 +464,8 @@ bool CGame::Init()
         return false;
     }
 
-#ifdef _VIEWERMODE
-    //load the MAP0x.LST's for all pictures --> in normal mode this is done on map load
-
-    //load only the palette at this time from MAP00.LST
-    std::cout << "\nLoading palette from file: /DATA/MAP00.LST...";
-    if ( CFile::open_file("./DATA/MAP00.LST", LST, true) == false )
-    {
-        std::cout << "failure";
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << "\nLoading file: /DATA/MAP00.LST...";
-    if ( CFile::open_file("./DATA/MAP00.LST", LST) == false )
-    {
-        std::cout << "failure";
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
-
-    //load only the palette at this time from MAP01.LST
-    std::cout << "\nLoading palette from file: /DATA/MAP01.LST...";
-    if ( CFile::open_file("./DATA/MAP01.LST", LST, true) == false )
-    {
-        std::cout << "failure";
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << "\nLoading file: /DATA/MAP01.LST...";
-    if ( CFile::open_file("./DATA/MAP01.LST", LST) == false )
-    {
-        std::cout << "failure";
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
-
-    //load only the palette at this time from MAP02.LST
-    std::cout << "\nLoading palette from file: /DATA/MAP02.LST...";
-    if ( CFile::open_file("./DATA/MAP02.LST", LST, true) == false )
-    {
-        std::cout << "failure";
-    }
-    //set the right palette
-    CFile::set_palActual(CFile::get_palArray()-1);
-    std::cout << "\nLoading file: /DATA/MAP02.LST...";
-    if ( CFile::open_file("./DATA/MAP02.LST", LST) == false )
-    {
-        std::cout << "failure";
-    }
-    //set back palette
-    CFile::set_palActual(CFile::get_palArray());
-#endif
-
-#ifndef _VIEWERMODE
     //create the mainmenu
     callback::mainmenu(INITIALIZING_CALL);
-#endif
-
-#ifdef _VIEWERMODE
-    CSurface::Draw(Surf_Display, global::bmpArray[index].surface, 0, 0);
-#endif
 
 	return true;
 }

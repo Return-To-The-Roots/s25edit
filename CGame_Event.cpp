@@ -184,37 +184,6 @@ void CGame::EventHandling(SDL_Event *Event)
                                     }
                                     break;
 
-#ifdef _VIEWERMODE
-                case SDLK_RIGHT:    index++;
-                                    break;
-
-                case SDLK_LEFT:     (index > 0 ? index-- : 0);
-                                    break;
-
-                case SDLK_UP:       index+=10;
-                                    break;
-
-                case SDLK_DOWN:     (index >= 10 ? index-=10 : index = 0);
-                                    break;
-
-                case SDLK_q:        index+=100;
-                                    break;
-
-                case SDLK_w:        (index >= 100 ? index-=100 : index = 0);
-                                    break;
-/*#else
-                case SDLK_RIGHT:
-                                    break;
-
-                case SDLK_LEFT:
-                                    break;
-
-                case SDLK_UP:
-                                    break;
-
-                case SDLK_DOWN:
-                                    break;
-*/#endif
 
                 default:            break;
             }

@@ -2,10 +2,8 @@
     #define _DEFINES_H
 
 //define the mode to compile (if all is uncommented, the game will compile in normal mode
-//in viewer mode there is only a window and the user can scoll through all loaden pictures
-//#define _VIEWERMODE
 //in admin mode, there are some key combos to open debugger, resource viewer and so on
-//#define _ADMINMODE
+#define _ADMINMODE
 //in editor mode there is the possibility to load, edit and save created maps
 #define _EDITORMODE
 
@@ -1089,14 +1087,8 @@ enum
 {
     PAL_RESOURCE = 0,
     PAL_IO,
-#ifdef _VIEWERMODE
-    PAL_MAP00,
-    PAL_MAP01,
-    PAL_MAP02
-#else
     PAL_MAPxx,
     PAL_xBBM
-#endif
 };
 
 //Button-Colors (after all used by CButton and other Objects using CButton)
@@ -1168,7 +1160,7 @@ enum
 
 //maximum values for global arrays
 //maximum pics
-#define MAXBOBBMP 20000
+#define MAXBOBBMP 5000
 //maximum shadows
 #define MAXBOBSHADOW 5000
 //maximum palettes

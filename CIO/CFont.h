@@ -33,6 +33,7 @@ class CFont
         int getH(void) { return fontsize; };
         void setFontsize(int fontsize);
         void setColor(int color);
+        int getColor(void) { return color; }
         void setText(const char *string);
         void setText(unsigned char *string);
         void setCallback(void (*callback)(int), int param) { this->callback = callback; clickedParam = param; }

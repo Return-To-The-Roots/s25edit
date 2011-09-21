@@ -120,15 +120,15 @@ void callback::submenuOptions(int Param)
     static CMenu *SubMenu = NULL;
     static CFont *TextResolution = NULL;
     static CButton *ButtonFullscreen = NULL;
+    static CButton *ButtonOpenGL = NULL;
     char puffer[80];
-    char puffer2[80];
-    const SDL_VideoInfo* videoinfo = SDL_GetVideoInfo();
     static CSelectBox *SelectBoxRes = NULL;
 
     enum
     {
         MAINMENU = 1,
         FULLSCREEN,
+        OPENGL,
         GRAPHICS_CHANGE,
         SELECTBOX_640_480,
         SELECTBOX_800_480,
@@ -205,13 +205,10 @@ void callback::submenuOptions(int Param)
                 if (ButtonFullscreen != NULL)
                     SubMenu->delButton(ButtonFullscreen);
                 ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolutionX/2-100), 190, 200, 20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-                //add video driver name
-                SDL_VideoDriverName(puffer, 80);
-                sprintf(puffer2, "Video-Treiber: %s", puffer);
-                SubMenu->addText(puffer2, (int)(global::s2->GameResolutionX/2-70), 195, 11);
-                //add video memory
-                sprintf(puffer, "Grafik-Speicher: %d MB", videoinfo->video_mem);
-                SubMenu->addText(puffer, (int)(global::s2->GameResolutionX/2-70), 210, 11);
+                if (ButtonOpenGL != NULL)
+                    SubMenu->delButton(ButtonOpenGL);
+                //ButtonOpenGL = SubMenu->addButton(submenuOptions, OPENGL, (int)(global::s2->GameResolutionX/2-100), 210, 200, 20, BUTTON_RED1, (CSurface::useOpenGL ? "Software-Rendering" : "OpenGL"));
+                //add selectbox for resolutions
                 SelectBoxRes = SubMenu->addSelectBox((int)(global::s2->GameResolutionX/2-100), 70, 200, 110, 11, FONT_YELLOW, BUTTON_GREY);
                 SelectBoxRes->setOption("640 x 480 (VGA)", submenuOptions, SELECTBOX_640_480);
                 SelectBoxRes->setOption("800 x 480 (WVGA)", submenuOptions, SELECTBOX_800_480);
@@ -266,6 +263,7 @@ void callback::submenuOptions(int Param)
         case MAINMENU:  SubMenu->setWaste();
                         TextResolution = NULL;
                         ButtonFullscreen = NULL;
+                        ButtonOpenGL = NULL;
                         SelectBoxRes = NULL;
                         SubMenu = NULL;
                         mainmenu(INITIALIZING_CALL);
@@ -279,346 +277,259 @@ void callback::submenuOptions(int Param)
                         submenuOptions(GRAPHICS_CHANGE);
                         break;
 
+        case OPENGL:    if (CSurface::useOpenGL)
+                            CSurface::useOpenGL = false;
+                        else
+                            CSurface::useOpenGL = true;
+
+                        submenuOptions(GRAPHICS_CHANGE);
+                        break;
+
         case GRAPHICS_CHANGE:       SubMenu->setWaste();
                                     TextResolution = NULL;
                                     ButtonFullscreen = NULL;
+                                    ButtonOpenGL = NULL;
                                     SelectBoxRes = NULL;
                                     SubMenu = NULL;
                                     submenuOptions(INITIALIZING_CALL);
                                     break;
 
-        case SELECTBOX_640_480:     if (global::s2->GameResolutionX == 640 && global::s2->GameResolutionY == 480)
-                                        return;
-                                    global::s2->GameResolutionX = 640;
+        case SELECTBOX_640_480:     global::s2->GameResolutionX = 640;
                                     global::s2->GameResolutionY = 480;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_800_480:     if (global::s2->GameResolutionX == 800 && global::s2->GameResolutionY == 480)
-                                        return;
-                                    global::s2->GameResolutionX = 800;
+        case SELECTBOX_800_480:     global::s2->GameResolutionX = 800;
                                     global::s2->GameResolutionY = 480;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_848_480:     if (global::s2->GameResolutionX == 848 && global::s2->GameResolutionY == 480)
-                                        return;
-                                    global::s2->GameResolutionX = 848;
+        case SELECTBOX_848_480:     global::s2->GameResolutionX = 848;
                                     global::s2->GameResolutionY = 480;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_852_480:     if (global::s2->GameResolutionX == 852 && global::s2->GameResolutionY == 480)
-                                        return;
-                                    global::s2->GameResolutionX = 852;
+        case SELECTBOX_852_480:     global::s2->GameResolutionX = 852;
                                     global::s2->GameResolutionY = 480;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_864_480:     if (global::s2->GameResolutionX == 864 && global::s2->GameResolutionY == 480)
-                                        return;
-                                    global::s2->GameResolutionX = 864;
+        case SELECTBOX_864_480:     global::s2->GameResolutionX = 864;
                                     global::s2->GameResolutionY = 480;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_858_484:     if (global::s2->GameResolutionX == 858 && global::s2->GameResolutionY == 484)
-                                        return;
-                                    global::s2->GameResolutionX = 858;
+        case SELECTBOX_858_484:     global::s2->GameResolutionX = 858;
                                     global::s2->GameResolutionY = 484;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_800_600:     if (global::s2->GameResolutionX == 800 && global::s2->GameResolutionY == 600)
-                                        return;
-                                    global::s2->GameResolutionX = 800;
+        case SELECTBOX_800_600:     global::s2->GameResolutionX = 800;
                                     global::s2->GameResolutionY = 600;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_832_624:     if (global::s2->GameResolutionX == 832 && global::s2->GameResolutionY == 642)
-                                        return;
-                                    global::s2->GameResolutionX = 832;
+        case SELECTBOX_832_624:     global::s2->GameResolutionX = 832;
                                     global::s2->GameResolutionY = 624;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_960_540:     if (global::s2->GameResolutionX == 960 && global::s2->GameResolutionY == 540)
-                                        return;
-                                    global::s2->GameResolutionX = 960;
+        case SELECTBOX_960_540:     global::s2->GameResolutionX = 960;
                                     global::s2->GameResolutionY = 540;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_964_544:     if (global::s2->GameResolutionX == 964 && global::s2->GameResolutionY == 544)
-                                        return;
-                                    global::s2->GameResolutionX = 964;
+        case SELECTBOX_964_544:     global::s2->GameResolutionX = 964;
                                     global::s2->GameResolutionY = 544;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_960_640:     if (global::s2->GameResolutionX == 960 && global::s2->GameResolutionY == 640)
-                                        return;
-                                    global::s2->GameResolutionX = 960;
+        case SELECTBOX_960_640:     global::s2->GameResolutionX = 960;
                                     global::s2->GameResolutionY = 640;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_960_720:     if (global::s2->GameResolutionX == 960 && global::s2->GameResolutionY == 720)
-                                        return;
-                                    global::s2->GameResolutionX = 960;
+        case SELECTBOX_960_720:     global::s2->GameResolutionX = 960;
                                     global::s2->GameResolutionY = 720;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1024_576:    if (global::s2->GameResolutionX == 1024 && global::s2->GameResolutionY == 576)
-                                        return;
-                                    global::s2->GameResolutionX = 1024;
+        case SELECTBOX_1024_576:    global::s2->GameResolutionX = 1024;
                                     global::s2->GameResolutionY = 576;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1024_600:    if (global::s2->GameResolutionX == 1024 && global::s2->GameResolutionY == 600)
-                                        return;
-                                    global::s2->GameResolutionX = 1024;
+        case SELECTBOX_1024_600:    global::s2->GameResolutionX = 1024;
                                     global::s2->GameResolutionY = 600;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1072_600:    if (global::s2->GameResolutionX == 1072 && global::s2->GameResolutionY == 600)
-                                        return;
-                                    global::s2->GameResolutionX = 1072;
+        case SELECTBOX_1072_600:    global::s2->GameResolutionX = 1072;
                                     global::s2->GameResolutionY = 600;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1152_768:    if (global::s2->GameResolutionX == 1152 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1152;
+        case SELECTBOX_1152_768:    global::s2->GameResolutionX = 1152;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1024_768:    if (global::s2->GameResolutionX == 1024 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1024;
+        case SELECTBOX_1024_768:    global::s2->GameResolutionX = 1024;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1152_864:    if (global::s2->GameResolutionX == 1152 && global::s2->GameResolutionY == 864)
-                                        return;
-                                    global::s2->GameResolutionX = 1152;
+        case SELECTBOX_1152_864:    global::s2->GameResolutionX = 1152;
                                     global::s2->GameResolutionY = 864;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1152_870:    if (global::s2->GameResolutionX == 1152 && global::s2->GameResolutionY == 870)
-                                        return;
-                                    global::s2->GameResolutionX = 1152;
+        case SELECTBOX_1152_870:    global::s2->GameResolutionX = 1152;
                                     global::s2->GameResolutionY = 870;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1152_900:    if (global::s2->GameResolutionX == 1152 && global::s2->GameResolutionY == 900)
-                                        return;
-                                    global::s2->GameResolutionX = 1152;
+        case SELECTBOX_1152_900:    global::s2->GameResolutionX = 1152;
                                     global::s2->GameResolutionY = 900;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1200_800:    if (global::s2->GameResolutionX == 1200 && global::s2->GameResolutionY == 800)
-                                        return;
-                                    global::s2->GameResolutionX = 1200;
+        case SELECTBOX_1200_800:    global::s2->GameResolutionX = 1200;
                                     global::s2->GameResolutionY = 800;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1200_900:    if (global::s2->GameResolutionX == 1200 && global::s2->GameResolutionY == 900)
-                                        return;
-                                    global::s2->GameResolutionX = 1200;
+        case SELECTBOX_1200_900:    global::s2->GameResolutionX = 1200;
                                     global::s2->GameResolutionY = 900;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1280_720:    if (global::s2->GameResolutionX == 1280 && global::s2->GameResolutionY == 720)
-                                        return;
-                                    global::s2->GameResolutionX = 1280;
+        case SELECTBOX_1280_720:    global::s2->GameResolutionX = 1280;
                                     global::s2->GameResolutionY = 720;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1280_768:    if (global::s2->GameResolutionX == 1280 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1280;
+        case SELECTBOX_1280_768:    global::s2->GameResolutionX = 1280;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1280_800:    if (global::s2->GameResolutionX == 1280 && global::s2->GameResolutionY == 800)
-                                        return;
-                                    global::s2->GameResolutionX = 1280;
+        case SELECTBOX_1280_800:    global::s2->GameResolutionX = 1280;
                                     global::s2->GameResolutionY = 800;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1280_854:    if (global::s2->GameResolutionX == 1280 && global::s2->GameResolutionY == 854)
-                                        return;
-                                    global::s2->GameResolutionX = 1280;
+        case SELECTBOX_1280_854:    global::s2->GameResolutionX = 1280;
                                     global::s2->GameResolutionY = 854;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1360_768:    if (global::s2->GameResolutionX == 1360 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1360;
+        case SELECTBOX_1360_768:    global::s2->GameResolutionX = 1360;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1366_768:    if (global::s2->GameResolutionX == 1366 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1366;
+        case SELECTBOX_1366_768:    global::s2->GameResolutionX = 1366;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1376_768:    if (global::s2->GameResolutionX == 1376 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1376;
+        case SELECTBOX_1376_768:    global::s2->GameResolutionX = 1376;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1400_900:    if (global::s2->GameResolutionX == 1400 && global::s2->GameResolutionY == 900)
-                                        return;
-                                    global::s2->GameResolutionX = 1400;
+        case SELECTBOX_1400_900:    global::s2->GameResolutionX = 1400;
                                     global::s2->GameResolutionY = 900;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1440_900:    if (global::s2->GameResolutionX == 1440 && global::s2->GameResolutionY == 900)
-                                        return;
-                                    global::s2->GameResolutionX = 1440;
+        case SELECTBOX_1440_900:    global::s2->GameResolutionX = 1440;
                                     global::s2->GameResolutionY = 900;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1440_960:    if (global::s2->GameResolutionX == 1440 && global::s2->GameResolutionY == 960)
-                                        return;
-                                    global::s2->GameResolutionX = 1440;
+        case SELECTBOX_1440_960:    global::s2->GameResolutionX = 1440;
                                     global::s2->GameResolutionY = 960;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1280_960:    if (global::s2->GameResolutionX == 1280 && global::s2->GameResolutionY == 960)
-                                        return;
-                                    global::s2->GameResolutionX = 1280;
+        case SELECTBOX_1280_960:    global::s2->GameResolutionX = 1280;
                                     global::s2->GameResolutionY = 960;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1280_1024:   if (global::s2->GameResolutionX == 1280 && global::s2->GameResolutionY == 1024)
-                                        return;
-                                    global::s2->GameResolutionX = 1280;
+        case SELECTBOX_1280_1024:   global::s2->GameResolutionX = 1280;
                                     global::s2->GameResolutionY = 1024;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1360_1024:   if (global::s2->GameResolutionX == 1360 && global::s2->GameResolutionY == 1024)
-                                        return;
-                                    global::s2->GameResolutionX = 1360;
+        case SELECTBOX_1360_1024:   global::s2->GameResolutionX = 1360;
                                     global::s2->GameResolutionY = 1024;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1366_1024:   if (global::s2->GameResolutionX == 1366 && global::s2->GameResolutionY == 1024)
-                                        return;
-                                    global::s2->GameResolutionX = 1366;
+        case SELECTBOX_1366_1024:   global::s2->GameResolutionX = 1366;
                                     global::s2->GameResolutionY = 1024;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1600_768:    if (global::s2->GameResolutionX == 1600 && global::s2->GameResolutionY == 768)
-                                        return;
-                                    global::s2->GameResolutionX = 1600;
+        case SELECTBOX_1600_768:    global::s2->GameResolutionX = 1600;
                                     global::s2->GameResolutionY = 768;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1600_900:    if (global::s2->GameResolutionX == 1600 && global::s2->GameResolutionY == 900)
-                                        return;
-                                    global::s2->GameResolutionX = 1600;
+        case SELECTBOX_1600_900:    global::s2->GameResolutionX = 1600;
                                     global::s2->GameResolutionY = 900;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1600_1024:   if (global::s2->GameResolutionX == 1600 && global::s2->GameResolutionY == 1024)
-                                        return;
-                                    global::s2->GameResolutionX = 1600;
+        case SELECTBOX_1600_1024:   global::s2->GameResolutionX = 1600;
                                     global::s2->GameResolutionY = 1024;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1400_1050:   if (global::s2->GameResolutionX == 1400 && global::s2->GameResolutionY == 1050)
-                                        return;
-                                    global::s2->GameResolutionX = 1400;
+        case SELECTBOX_1400_1050:   global::s2->GameResolutionX = 1400;
                                     global::s2->GameResolutionY = 1050;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1680_1050:   if (global::s2->GameResolutionX == 1680 && global::s2->GameResolutionY == 1050)
-                                        return;
-                                    global::s2->GameResolutionX = 1680;
+        case SELECTBOX_1680_1050:   global::s2->GameResolutionX = 1680;
                                     global::s2->GameResolutionY = 1050;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1600_1200:   if (global::s2->GameResolutionX == 1600 && global::s2->GameResolutionY == 1200)
-                                        return;
-                                    global::s2->GameResolutionX = 1600;
+        case SELECTBOX_1600_1200:   global::s2->GameResolutionX = 1600;
                                     global::s2->GameResolutionY = 1200;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1920_1080:   if (global::s2->GameResolutionX == 1920 && global::s2->GameResolutionY == 1080)
-                                        return;
-                                    global::s2->GameResolutionX = 1920;
+        case SELECTBOX_1920_1080:   global::s2->GameResolutionX = 1920;
                                     global::s2->GameResolutionY = 1080;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1920_1200:   if (global::s2->GameResolutionX == 1920 && global::s2->GameResolutionY == 1200)
-                                        return;
-                                    global::s2->GameResolutionX = 1920;
+        case SELECTBOX_1920_1200:   global::s2->GameResolutionX = 1920;
                                     global::s2->GameResolutionY = 1200;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1920_1400:   if (global::s2->GameResolutionX == 1920 && global::s2->GameResolutionY == 1400)
-                                        return;
-                                    global::s2->GameResolutionX = 1920;
+        case SELECTBOX_1920_1400:   global::s2->GameResolutionX = 1920;
                                     global::s2->GameResolutionY = 1400;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_1920_1440:   if (global::s2->GameResolutionX == 1920 && global::s2->GameResolutionY == 1440)
-                                        return;
-                                    global::s2->GameResolutionX = 1920;
+        case SELECTBOX_1920_1440:   global::s2->GameResolutionX = 1920;
                                     global::s2->GameResolutionY = 1440;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_2048_1152:   if (global::s2->GameResolutionX == 2048 && global::s2->GameResolutionY == 1152)
-                                        return;
-                                    global::s2->GameResolutionX = 2048;
+        case SELECTBOX_2048_1152:   global::s2->GameResolutionX = 2048;
                                     global::s2->GameResolutionY = 1152;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
 
-        case SELECTBOX_2048_1536:   if (global::s2->GameResolutionX == 2048 && global::s2->GameResolutionY == 1536)
-                                        return;
-                                    global::s2->GameResolutionX = 2048;
+        case SELECTBOX_2048_1536:   global::s2->GameResolutionX = 2048;
                                     global::s2->GameResolutionY = 1536;
                                     submenuOptions(GRAPHICS_CHANGE);
                                     break;
@@ -3281,11 +3192,14 @@ void callback::viewer(int Param)
                             else
                                 index = 0;
                             break;
-        case FORWARD_1:     index++;
+        case FORWARD_1:     if (index < MAXBOBBMP-1)
+                                index++;
                             break;
-        case FORWARD_10:    index += 10;
+        case FORWARD_10:         if (index+10 < MAXBOBBMP-1)
+                                index += 10;
                             break;
-        case FORWARD_100:   index += 100;
+        case FORWARD_100:        if (index+100 < MAXBOBBMP-1)
+                                index += 100;
                             break;
 
         case WINDOWQUIT:
