@@ -16,7 +16,7 @@
 					<Add option="-Wall" />
 				</Compiler>
 				<Linker>
-					<Add option="-lmingw32 -lSDLmain -lSDL -mwindows" />
+					<Add option="-lmingw32 -lSDL -lopengl32 -lglu32" />
 				</Linker>
 			</Target>
 		</Build>

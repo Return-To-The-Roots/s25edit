@@ -212,9 +212,34 @@ void CGame::delMapObj(void)
     MapObj = NULL;
 }
 
+/*
+ *  We want a console application to put stdout to the console, so we need to
+ *  undefine main to get no linker errors like "undefiened reference to WinMain16@"
+ *  an then redirect stdout and stderr to console with freopen.
+ */
+#undef main
 int main(int argc, char* argv[])
 {
-    global::s2 = new CGame;
+    FILE* ctt = fopen("CON", "w" );
+    freopen( "CON", "w", stdout );
+    freopen( "CON", "w", stderr );
 
-    return global::s2->Execute();
+    try
+    {
+        global::s2 = new CGame;
+
+        global::s2->Execute();
+    }
+    catch ( ... )
+    {
+        std::cout << "Unhandled Exception" << std::endl;
+    }
+
+    fclose(ctt);
+    ctt = NULL;
+
+    //fflush(stdin);
+    //getchar();
+
+    return 0;
 }

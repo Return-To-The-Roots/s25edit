@@ -556,8 +556,8 @@ bool CWindow::delTextfield(CTextfield* TextfieldToDelete)
 
 CSelectBox* CWindow::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
-    if (x >= Surf_Window->w || y >= Surf_Window->h)
-        return false;
+    if (Surf_Window != NULL && (x >= Surf_Window->w || y >= Surf_Window->h))
+        return NULL;
 
     for (int i = 0; i < MAXSELECTBOXES; i++)
     {

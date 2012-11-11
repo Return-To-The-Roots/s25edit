@@ -452,13 +452,13 @@
 1299379810 source:c:\users\marc\documents\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
 	"callbacks.h"
 
-1291647789 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cdebug.cpp
+1291644189 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cdebug.cpp
 	"CDebug.h"
 
-1282063201 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cdebug.h
+1282059601 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cdebug.h
 	"includes.h"
 
-1310391836 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
+1347282687 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\includes.h
 	<iostream>
 	<cmath>
 	<SDL/SDL.h>
@@ -474,7 +474,7 @@
 	"CDebug.h"
 	"CGame.h"
 
-1059911074 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge.h
+1059907474 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge.h
 	"sge_surface.h"
 	"sge_primitives.h"
 	"sge_misc.h"
@@ -486,32 +486,32 @@
 	"sge_collision.h"
 	"sge_rotation.h"
 
-1277826496 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_surface.h
+1277822896 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_surface.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1059911060 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_internal.h
+1059907460 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_internal.h
 	"sge_config.h"
 
-1277826740 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_config.h
+1277823140 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_config.h
 
-1277826507 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_primitives.h
+1277822907 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_primitives.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1277826620 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_misc.h
+1277823020 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_misc.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1277826555 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_tt_text.h
+1277822955 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_tt_text.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1277826543 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_bm_text.h
+1277822943 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_bm_text.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1277826558 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_textpp.h
+1277822958 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_textpp.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 	<string>
@@ -520,120 +520,120 @@
 	"sge_bm_text.h"
 	"sge_shape.h"
 
-1277826561 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_shape.h
+1277822961 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_shape.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 	<list>
 	"sge_surface.h"
 	"sge_collision.h"
 
-1277826567 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_collision.h
+1277822967 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_collision.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1315656706 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
+1316683406 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1277826634 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_rotation.h
+1277823034 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_rotation.h
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1316611896 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
+1325868588 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\defines.h
 
-1315743759 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\classes.h
+1315740159 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\classes.h
 
-1295342310 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\globals.h
+1295338710 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\globals.h
 	"includes.h"
 
-1310759059 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.h
+1310755459 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.h
 	"includes.h"
 
-1316515206 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.h
+1316511606 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.h
 	"includes.h"
 
-1296251064 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.h
+1296247464 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.h
 	"../includes.h"
 
-1316510252 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.h
+1316506652 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.h
 	"../includes.h"
 
-1296251072 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.h
+1296247472 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.h
 	"../includes.h"
 
-1315944602 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.h
+1315941002 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.h
 	"../includes.h"
 
-1315770426 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.h
+1315766826 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.h
 	"../includes.h"
 
-1296251093 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.h
+1296247493 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.h
 	"../includes.h"
 
-1296400497 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.h
+1296396897 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.h
 	"../includes.h"
 
-1310505248 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.h
+1328726454 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.h
 	"includes.h"
 
-1316612413 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame.h
+1316608813 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame.h
 	"includes.h"
 
-1316612415 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame.cpp
+1318704400 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame.cpp
 	"CGame.h"
 
-1315671253 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_cleanup.cpp
+1315667653 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_cleanup.cpp
 	"CGame.h"
 
-1316612437 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_event.cpp
+1317039174 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_event.cpp
 	"CGame.h"
 
-1268590839 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_gameloop.cpp
+1268587239 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_gameloop.cpp
 	"CGame.h"
 
-1316613975 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
+1316962416 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_init.cpp
 	"CGame.h"
 
-1316612437 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
+1318787949 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cgame_render.cpp
 	"CGame.h"
 	<stdio.h>
 
-1283254389 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.cpp
+1283250789 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cbutton.cpp
 	"CButton.h"
 
-1310661697 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.cpp
+1318143408 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfile.cpp
 	"CFile.h"
 
-1316514209 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.cpp
+1317054879 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cfont.cpp
 	"CFont.h"
 
-1316249586 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.cpp
+1316245986 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cmenu.cpp
 	"CMenu.h"
 
-1269365549 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.cpp
+1269361949 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cpicture.cpp
 	"CPicture.h"
 
-1309274547 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.cpp
+1309270947 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\ctextfield.cpp
 	"CTextfield.h"
 
-1315834801 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.cpp
+1317054342 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cwindow.cpp
 	"CWindow.h"
 
-1315671976 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.cpp
+1328730054 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cmap.cpp
 	"CMap.h"
 
-1316515184 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.cpp
+1325868728 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\csurface.cpp
 	"CSurface.h"
 
-1295514300 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\globals.cpp
+1318142650 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\globals.cpp
 	"globals.h"
 
-1316612649 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
+1317055059 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
 	"callbacks.h"
 
-1310139675 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\s25edit.rc
+1310136075 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\s25edit.rc
 
-1315737914 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cio.h
+1315734314 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cio.h
 	"CFile.h"
 	"CFont.h"
 	"CButton.h"
@@ -643,13 +643,13 @@
 	"CTextfield.h"
 	"CSelectBox.h"
 
-1315657350 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.cpp
+1318788099 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_blib.cpp
 	<SDL/SDL.h>
 	"sge_surface.h"
 	"sge_primitives.h"
 	"sge_blib.h"
 
-1277826605 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_bm_text.cpp
+1277823005 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_bm_text.cpp
 	<SDL/SDL.h>
 	<stdarg.h>
 	<string.h>
@@ -661,7 +661,7 @@
 	"sge_textpp.h"
 	<SDL/SDL_image.h>
 
-1299425285 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_collision.cpp
+1299421685 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_collision.cpp
 	<SDL/SDL.h>
 	<stdio.h>
 	<string.h>
@@ -670,7 +670,7 @@
 	"sge_surface.h"
 	"sge_shape.h"
 
-1277826615 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_misc.cpp
+1277823015 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_misc.cpp
 	<SDL/SDL.h>
 	<stdlib.h>
 	<stdio.h>
@@ -678,7 +678,7 @@
 	<math.h>
 	"sge_misc.h"
 
-1277826625 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_primitives.cpp
+1277823025 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_primitives.cpp
 	<SDL/SDL.h>
 	<math.h>
 	<string.h>
@@ -687,7 +687,7 @@
 	"sge_primitives.h"
 	"sge_surface.h"
 
-1277826630 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_rotation.cpp
+1277823030 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_rotation.cpp
 	<SDL/SDL.h>
 	<stdio.h>
 	<math.h>
@@ -695,7 +695,7 @@
 	"sge_surface.h"
 	"sge_blib.h"
 
-1277826642 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_shape.cpp
+1277823042 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_shape.cpp
 	<SDL/SDL.h>
 	<stdio.h>
 	<math.h>
@@ -704,21 +704,21 @@
 	"sge_shape.h"
 	"sge_misc.h"
 
-1277826653 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_surface.cpp
+1277823053 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_surface.cpp
 	<SDL/SDL.h>
 	<math.h>
 	<string.h>
 	<stdarg.h>
 	"sge_surface.h"
 
-1277826664 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_textpp.cpp
+1277823064 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_textpp.cpp
 	<SDL/SDL.h>
 	<stdlib.h>
 	<stdarg.h>
 	"sge_surface.h"
 	"sge_textpp.h"
 
-1277826686 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_tt_text.cpp
+1277823086 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sge\sge_tt_text.cpp
 	<SDL/SDL.h>
 	<SDL/SDL_endian.h>
 	<stdlib.h>
@@ -734,9 +734,17 @@
 	<freetype/ttnameid.h>
 	<freetype/internal/ftobjs.h>
 
-1315944847 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cselectbox.h
+1316688717 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cselectbox.h
 	"../includes.h"
 
-1316515010 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cselectbox.cpp
+1316511410 source:c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\cio\cselectbox.cpp
 	"CSelectBox.h"
+
+1316697217 c:\_eigene_dateien\000cpp-skripte\sdl\siedler2\s2project\sdl\src\main\win32\sdl_win32_main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<direct.h>
+	"SDL.h"
+	"SDL_main.h"
 

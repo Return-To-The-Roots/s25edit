@@ -235,6 +235,206 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
     return myMap;
 }
 
+void CMap::rotateMap(void)
+{
+    //we allocate memory for the new triangle field but with x equals the height and y equals the width
+    struct point *new_vertex = NULL;
+    if ( (new_vertex = (struct point*) malloc(map->height*map->width*sizeof(struct point))) == NULL )
+        return;
+
+    //free concatenated list for "undo" and "do"
+    if (CurrPtr_savedVertices != NULL)
+    {
+        //go to the end
+        while (CurrPtr_savedVertices->next != NULL)
+        {
+            CurrPtr_savedVertices = CurrPtr_savedVertices->next;
+        }
+        //and now free all pointers from behind
+        while (CurrPtr_savedVertices->prev != NULL)
+        {
+            CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
+            free(CurrPtr_savedVertices->next);
+        }
+        CurrPtr_savedVertices->next = NULL;
+    }
+
+    //copy old to new while permuting x and y
+    for (int y = 0; y < map->height; y++)
+    {
+        for (int x = 0; x < map->width; x++)
+        {
+            memcpy(&new_vertex[x*map->height+(map->height-1-y)], &map->vertex[y*map->width+x], sizeof(struct point));
+        }
+    }
+
+    //release old map and point to new
+    free(map->vertex);
+    map->vertex = new_vertex;
+
+    //permute width and height
+    Uint16 tmp_height = map->height;
+    Uint16 tmp_height_old = map->height_old;
+    Uint16 tmp_height_pixel = map->height_pixel;
+    Uint16 tmp_width = map->width;
+    Uint16 tmp_width_old = map->width_old;
+    Uint16 tmp_width_pixel = map->width_pixel;
+
+    map->height = tmp_width;
+    map->height_old = tmp_width_old;
+    map->height_pixel = tmp_width_pixel;
+    map->width = tmp_height;
+    map->width_old = tmp_height_old;
+    map->width_pixel = tmp_height_pixel;
+
+    //permute player positions
+    //at first the internal array
+    Uint16 tmpHQ[MAXPLAYERS];
+    for (int i = 0; i < MAXPLAYERS; i++)
+    {
+        tmpHQ[i] = PlayerHQy[i];
+    }
+    for (int i = 0; i < MAXPLAYERS; i++)
+    {
+        PlayerHQy[i] = PlayerHQx[i];
+        PlayerHQx[i] = tmpHQ[i];
+    }
+    //and now the map array
+    for (int i = 0; i < 7; i++)
+    {
+        tmpHQ[i] = map->HQy[i];
+    }
+    for (int i = 0; i < 7; i++)
+    {
+        map->HQy[i] = map->HQx[i];
+        map->HQx[i] = tmpHQ[i];
+    }
+
+    //recalculate some values
+    long int a;
+    long int b = 0;
+    for (int y = 0; y < map->height; y++)
+    {
+        if (y%2 == 0)
+            a = TRIANGLE_WIDTH/2;
+        else
+            a = TRIANGLE_WIDTH;
+
+        for (int x = 0; x < map->width; x++)
+        {
+
+            map->vertex[y*map->width+x].VertexX = x;
+            map->vertex[y*map->width+x].VertexY = y;
+            map->vertex[y*map->width+x].x = a;
+            map->vertex[y*map->width+x].y = b + (-TRIANGLE_INCREASE)*(map->vertex[y*map->width+x].h - 0x0A);
+            map->vertex[y*map->width+x].z = TRIANGLE_INCREASE*(map->vertex[y*map->width+x].h - 0x0A);
+
+            modifyBuild(x, y);
+            modifyShading(x, y);
+            modifyResource(x, y);
+            CSurface::update_shading(map, x, y);
+
+            a += TRIANGLE_WIDTH;
+        }
+        b += TRIANGLE_HEIGHT;
+    }
+
+    //reset mouse and view position to prevent failures
+    VertexX = 12;
+    VertexY = 12;
+    MouseBlitX = correctMouseBlitX(VertexX, VertexY);
+    MouseBlitY = correctMouseBlitY(VertexX, VertexY);
+    calculateVertices();
+    displayRect.x = 0;
+    displayRect.y = 0;
+}
+
+void CMap::MirrorMapOnXAxis(void)
+{
+    for (int y = 1; y < map->height/2; y++)
+    {
+        for (int x = 0; x < map->width; x++)
+        {
+            memcpy(&map->vertex[(map->height-1-y+1)*map->width+x], &map->vertex[y*map->width+x], sizeof(struct point));
+        }
+    }
+
+    //recalculate some values
+    long int a;
+    long int b = 0;
+    for (int y = 0; y < map->height; y++)
+    {
+        if (y%2 == 0)
+            a = TRIANGLE_WIDTH/2;
+        else
+            a = TRIANGLE_WIDTH;
+
+        for (int x = 0; x < map->width; x++)
+        {
+
+            map->vertex[y*map->width+x].VertexX = x;
+            map->vertex[y*map->width+x].VertexY = y;
+            map->vertex[y*map->width+x].x = a;
+            map->vertex[y*map->width+x].y = b + (-TRIANGLE_INCREASE)*(map->vertex[y*map->width+x].h - 0x0A);
+            map->vertex[y*map->width+x].z = TRIANGLE_INCREASE*(map->vertex[y*map->width+x].h - 0x0A);
+
+            modifyBuild(x, y);
+            modifyShading(x, y);
+            modifyResource(x, y);
+            CSurface::update_shading(map, x, y);
+
+            a += TRIANGLE_WIDTH;
+        }
+        b += TRIANGLE_HEIGHT;
+    }
+}
+
+void CMap::MirrorMapOnYAxis(void)
+{
+    for (int y = 0; y < map->height; y++)
+    {
+        for (int x = 0; x < map->width/2; x++)
+        {
+            if (y%2 != 0)
+            {
+                if (x != map->width/2-1)
+                    memcpy(&map->vertex[y*map->width+(map->width-1-x-1)], &map->vertex[y*map->width+x], sizeof(struct point));
+            }
+            else
+                memcpy(&map->vertex[y*map->width+(map->width-1-x)], &map->vertex[y*map->width+x], sizeof(struct point));
+        }
+    }
+
+    //recalculate some values
+    long int a;
+    long int b = 0;
+    for (int y = 0; y < map->height; y++)
+    {
+        if (y%2 == 0)
+            a = TRIANGLE_WIDTH/2;
+        else
+            a = TRIANGLE_WIDTH;
+
+        for (int x = 0; x < map->width; x++)
+        {
+
+            map->vertex[y*map->width+x].VertexX = x;
+            map->vertex[y*map->width+x].VertexY = y;
+            map->vertex[y*map->width+x].x = a;
+            map->vertex[y*map->width+x].y = b + (-TRIANGLE_INCREASE)*(map->vertex[y*map->width+x].h - 0x0A);
+            map->vertex[y*map->width+x].z = TRIANGLE_INCREASE*(map->vertex[y*map->width+x].h - 0x0A);
+
+            modifyBuild(x, y);
+            modifyShading(x, y);
+            modifyResource(x, y);
+            CSurface::update_shading(map, x, y);
+
+            a += TRIANGLE_WIDTH;
+        }
+        b += TRIANGLE_HEIGHT;
+    }
+}
+
 void CMap::loadMapPics(void)
 {
     char outputString1[47], outputString2[34], outputString3[53];
@@ -290,7 +490,7 @@ void CMap::loadMapPics(void)
     CFile::set_palActual(CFile::get_palArray());
     //load palette file for the map (for precalculated shading)
     std::cout << outputString3;
-    if ( CFile::open_file(palFile, LST, true) == false )
+    if ( CFile::open_file(palFile, BBM, true) == false )
     {
         std::cout << "failure";
     }
@@ -312,9 +512,9 @@ void CMap::unloadMapPics(void)
 
 void CMap::setMouseData(SDL_MouseMotionEvent motion)
 {
-#ifdef _WIN32
     //following code important for blitting the right field of the map
     static bool warping = false;
+    //SDL_Event TempEvent;
     //is right mouse button pressed?
     if (SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(3))
     {
@@ -326,8 +526,12 @@ void CMap::setMouseData(SDL_MouseMotionEvent motion)
             if (!VerticalMovementLocked)
                 displayRect.y += motion.yrel;
 
-            warping = true;
+            //warping = true;
+            SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
             SDL_WarpMouse(motion.x-motion.xrel, motion.y-motion.yrel);
+            SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
+            //SDL_PumpEvents();
+            //SDL_PeepEvents(&TempEvent, 1, SDL_GETEVENT, SDL_EVENTMASK(SDL_MOUSEMOTION));
         }
         else
             warping = false;
@@ -343,26 +547,6 @@ void CMap::setMouseData(SDL_MouseMotionEvent motion)
         else if (displayRect.y <= -displayRect.h)
             displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
     }
-#else
-    if (SDL_GetMouseState(NULL,NULL)&SDL_BUTTON(3))
-    {
-        if (!HorizontalMovementLocked)
-            displayRect.x += motion.xrel;
-        if (!VerticalMovementLocked)
-            displayRect.y += motion.yrel;
-
-        //reset coords of displayRects when end of map is reached
-        if (displayRect.x >= map->width*TRIANGLE_WIDTH)
-            displayRect.x = 0;
-        else if (displayRect.x <= -displayRect.w)
-            displayRect.x = map->width*TRIANGLE_WIDTH - displayRect.w;
-
-        if (displayRect.y >= map->height*TRIANGLE_HEIGHT)
-            displayRect.y = 0;
-        else if (displayRect.y <= -displayRect.h)
-            displayRect.y = map->height*TRIANGLE_HEIGHT - displayRect.h;
-    }
-#endif
 
     saveVertex(motion.x, motion.y, motion.state);
 }
@@ -604,6 +788,31 @@ void CMap::setKeyboardData(SDL_KeyboardEvent key)
             ChangeSection = 0;
             setupVerticesActivity();
             mode = EDITOR_MODE_TEXTURE_MAKE_HARBOUR;
+        }
+        else if (key.keysym.sym == SDLK_r)
+        {
+            callback::PleaseWait(INITIALIZING_CALL);
+
+            rotateMap();
+            rotateMap();
+
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+        }
+        else if (key.keysym.sym == SDLK_x)
+        {
+            callback::PleaseWait(INITIALIZING_CALL);
+
+            MirrorMapOnXAxis();
+
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+        }
+        else if (key.keysym.sym == SDLK_y)
+        {
+            callback::PleaseWait(INITIALIZING_CALL);
+
+            MirrorMapOnYAxis();
+
+            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
         }
         else if (key.keysym.sym == SDLK_KP_PLUS)
         {

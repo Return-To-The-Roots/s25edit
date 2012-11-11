@@ -549,8 +549,8 @@ bobMAP* CFile::open_wld(void)
     //go to altitude information (we skip the 16 bytes long map data header that each block has)
     fseek(fp, 16, SEEK_CUR);
 
-    int a;
-    int b = 0;
+    long int a;
+    long int b = 0;
     for (int j = 0; j < myMap->height; j++)
     {
         if (j%2 == 0)

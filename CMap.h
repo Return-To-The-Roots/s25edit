@@ -158,6 +158,9 @@ class CMap
         void modifyResourceRaise(int VertexX, int VertexY, Uint8 resource);
         void modifyResourceReduce(int VertexX, int VertexY, Uint8 resource);
         void modifyPlayer(int VertexX, int VertexY);
+        void rotateMap(void);
+        void MirrorMapOnXAxis(void);
+        void MirrorMapOnYAxis(void);
 };
 
 #endif

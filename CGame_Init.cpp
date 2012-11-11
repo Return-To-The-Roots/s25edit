@@ -4,7 +4,6 @@ bool CGame::Init()
 {
     std::cout << "Return to the Roots Mapeditor\n";
 
-
     std::cout << "\nInitializing SDL...";
     if ( SDL_Init(SDL_INIT_EVERYTHING ) < 0)
     {
@@ -18,7 +17,7 @@ bool CGame::Init()
     std::cout << "\nCreate Window...";
     if (CSurface::useOpenGL)
     {
-        Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
+        Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
         Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
         if ( Surf_Display == NULL || Surf_DisplayGL == NULL )
         {
@@ -300,18 +299,7 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-    /*for (int i = 0; i < 3; i++)
-    {
-        puts("\n--------------------------------------------------------------------------------------------\n");
-        for (int j = 0; j < 256; j++)
-        {
-            puts("");
-            for (int k = 0; k < 256; k++)
-            {
-                printf ("%d ", gouData[i][j][k]);
-            }
-        }
-    }*/
+
 
 #ifdef _EDITORMODE
     //load only the palette at this time from editres.idx

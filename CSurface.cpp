@@ -909,13 +909,7 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                 if (global::s2->getMapObj()->getBitsPerPixel() == 8)
                     sge_PreCalcFadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.shading<<8,P2.shading<<8,P3.shading<<8,gouData[type]);
                 else
-                {
-                    //if all three light values are the same, we only need to flat shade
-                    if (P1.i == P2.i && P2.i == P3.i)
-                        sge_FlatFadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i);
-                    else
-                        sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
-                }
+                    sge_FadedTexturedTrigon(display, (Sint16)(P1.x-displayRect.x), (Sint16)(P1.y-displayRect.y), (Sint16)(P2.x-displayRect.x), (Sint16)(P2.y-displayRect.y), (Sint16)(P3.x-displayRect.x), (Sint16)(P3.y-displayRect.y), Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i,P2.i,P3.i);
             }
         }
         return;
@@ -1433,6 +1427,9 @@ void CSurface::DrawTriangle(SDL_Surface *display, struct DisplayRectangle displa
                                 case 0x13:  objIdx = MAPPIC_SHRUB3;
                                             break;
                                 case 0x14:  objIdx = MAPPIC_SHRUB4;
+                                            break;
+
+                                case 0x16:  objIdx = MAPPIC_DOOR;
                                             break;
 
                                 case 0x18:  objIdx = MIS1BOBS_STONE1;

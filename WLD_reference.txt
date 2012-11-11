@@ -64,7 +64,7 @@ Example 2:
 	area = 0x07000000 = decimal 7
 
 Now you could wonder why meadow is at 7x7 and not 8x8. If you save the map then the editor walks from the top to the
-bottom of the map and if it hits land he walks to the most left position of the land while not changing Y.
+bottom of the map and if it hits land it walks to the most left position of the land while not changing Y.
 Water is only counted if it is surrounded by land (a lake). So we could say every lake is counted, especially the
 biggest lake that is sourrounded by the map edges.
 NOTE: Water is only counted if it is at least a small hexagon. So the vertex has to be surrounded by water to be count.
@@ -133,6 +133,9 @@ TRIANGLE_TEXTURE_LAVA                   0x10
 TRIANGLE_TEXTURE_COLOR                  0x11
 TRIANGLE_TEXTURE_MINING_MEADOW          0x12
 TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR  0x52
+TRIANGLE_TEXTURE_WATER__                0x13
+TRIANGLE_TEXTURE_STEPPE__               0x80
+TRIANGLE_TEXTURE_STEPPE___              0x84
 
 These are the greenland textures. Wasteland and winterland have the same values but other names.
 
@@ -144,7 +147,7 @@ This data block tells us what a road to render from the vertex to its right vert
 
 0x00	no road
 0x01	normal road
-0x02	donkey road
+0x02	main road (darker than normal road)
 0x03	water road
 
 At first the road from the vertex to its lower left vertex:

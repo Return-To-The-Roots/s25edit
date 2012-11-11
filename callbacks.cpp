@@ -548,6 +548,7 @@ void callback::EditorHelpMenu(int Param)
     //      destroy by the gameloop), you don't need to register the window, but register the callback.
 
     static CWindow *WNDHelp;
+    static CSelectBox *SelectBoxHelp;
 
     enum
     {
@@ -558,13 +559,43 @@ void callback::EditorHelpMenu(int Param)
     {
         case INITIALIZING_CALL: if (WNDHelp != NULL)
                                     break;
-                                WNDHelp = new CWindow(EditorHelpMenu, WINDOWQUIT, global::s2->getDisplaySurface()->w/2-320, global::s2->getDisplaySurface()->h/2-240, 640, 480, "Hilfe", WINDOW_GREEN2, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE);
+                                WNDHelp = new CWindow(EditorHelpMenu, WINDOWQUIT, global::s2->getDisplaySurface()->w/2-320, global::s2->getDisplaySurface()->h/2-240, 640, 380, "Hilfe", WINDOW_GREEN2, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE);
                                 if (global::s2->RegisterWindow(WNDHelp))
                                 {
                                     //we don't register this window cause we will destroy it manually if we need
                                     //global::s2->RegisterCallback(PleaseWait);
 
-                                    WNDHelp->addText(   "Hilfe-Menu........................................................................................................F1\n"
+                                    SelectBoxHelp = WNDHelp->addSelectBox(0, 20, 635, 345, 11, FONT_YELLOW, BUTTON_GREEN1);
+                                    SelectBoxHelp->setOption("Hilfe-Menu........................................................................................................F1\n");
+                                    SelectBoxHelp->setOption("Fenster/Vollbild...............................................................................................F2\n");
+                                    SelectBoxHelp->setOption("Zoom in/normal/out (experimentell)................................................................F5/F6/F7\n");
+                                    SelectBoxHelp->setOption("Scrollen............................................................................................................Pfeiltasten\n");
+                                    SelectBoxHelp->setOption("Cursorgrösse 1-9 (von 11).................................................................................1-9\n");
+                                    SelectBoxHelp->setOption("Cursor vergrössern/verkleinern..................................................................+/-\n");
+                                    SelectBoxHelp->setOption("Scheren-Modus................................................................................................Strg\n");
+                                    SelectBoxHelp->setOption("Modus umkehren..............................................................................................Shift\n");
+                                    SelectBoxHelp->setOption("(bspw. Höhe senken, Spieler entfernen, Ressourcen senken)\n");
+                                    SelectBoxHelp->setOption("Planiermodus....................................................................................................Alt\n");
+                                    SelectBoxHelp->setOption("Maximal-Höhe senken/standard/erhöhen......................................................Einf/Pos1/BildAuf\n");
+                                    SelectBoxHelp->setOption("(über dies kann dann nicht erhöht werden)\n");
+                                    SelectBoxHelp->setOption("Minimal-Höhe senken/standard/erhöhen.......................................................Entf/Ende/BildAb\n");
+                                    SelectBoxHelp->setOption("(unter dies kann dann nicht gesenkt werden)\n");
+                                    SelectBoxHelp->setOption("Rückgängig.......................................................................................................Q\n");
+                                    SelectBoxHelp->setOption("(nur Aktionen, die mit dem Cursor durchgeführt wurden)\n");
+                                    SelectBoxHelp->setOption("Bauhilfe an/aus................................................................................................Leertaste\n");
+                                    SelectBoxHelp->setOption("Schloss-Modus..................................................................................................B\n");
+                                    SelectBoxHelp->setOption("(das umliegende Gelände wird so geebnet,\n");
+                                    SelectBoxHelp->setOption(" dass ein grosses Haus gebaut werden kann)\n");
+                                    SelectBoxHelp->setOption("Hafen-Modus.....................................................................................................H\n");
+                                    SelectBoxHelp->setOption("(das umliegende Gelände wird so verändert,\n");
+                                    SelectBoxHelp->setOption(" dass ein Hafen gebaut werden kann)\n");
+                                    SelectBoxHelp->setOption("Map \"on-the-fly\" konvertieren (Grün-/Winter-/Ödland).................................G/W/O\n");
+                                    SelectBoxHelp->setOption("Neue/Originale Schattierung (experimentell).................................................P\n");
+                                    SelectBoxHelp->setOption("Horizontale Bewegung sperren/entsperren...................................................F9\n");
+                                    SelectBoxHelp->setOption("Vertikale Bewegung sperren/entsperren......................................................F10\n");
+                                    SelectBoxHelp->setOption("Ränder an-/abschalten....................................................................................F11\n");
+
+                                    /*WNDHelp->addText(   "Hilfe-Menu........................................................................................................F1\n"
                                                         "Fenster/Vollbild...............................................................................................F2\n"
                                                         "Zoom in/normal/out (experimentell)................................................................F5/F6/F7\n"
                                                         "Scrollen............................................................................................................Pfeiltasten\n"
@@ -592,12 +623,13 @@ void callback::EditorHelpMenu(int Param)
                                                         "Horizontale Bewegung sperren/entsperren...................................................F9\n"
                                                         "Vertikale Bewegung sperren/entsperren......................................................F10\n"
                                                         "Ränder an-/abschalten....................................................................................F11\n"
-                                                    , 10, 10, 11);
+                                                    , 10, 10, 11);*/
                                 }
                                 else
                                 {
                                     delete WNDHelp;
                                     WNDHelp = NULL;
+                                    SelectBoxHelp = NULL;
                                     return;
                                 }
                                 break;
@@ -609,6 +641,7 @@ void callback::EditorHelpMenu(int Param)
                                     {
                                         WNDHelp->setWaste();
                                         WNDHelp = NULL;
+                                        SelectBoxHelp = NULL;
                                     }
                                     break;
 
@@ -617,6 +650,7 @@ void callback::EditorHelpMenu(int Param)
                                     {
                                         WNDHelp->setWaste();
                                         WNDHelp = NULL;
+                                        SelectBoxHelp = NULL;
                                     }
                                     break;
 
@@ -625,6 +659,7 @@ void callback::EditorHelpMenu(int Param)
                                     {
                                         WNDHelp->setWaste();
                                         WNDHelp = NULL;
+                                        SelectBoxHelp = NULL;
                                     }
                                     break;
 
@@ -2132,7 +2167,7 @@ void callback::EditorCreateMenu(int Param)
     static int border = 0;
     static int border_texture = TRIANGLE_TEXTURE_SNOW;
     static char puffer[5];
-    static int PosX = global::s2->GameResolutionX/2-125, PosY = global::s2->GameResolutionY/2-175;
+    int PosX = global::s2->GameResolutionX/2-125, PosY = global::s2->GameResolutionY/2-175;
 
     enum
     {

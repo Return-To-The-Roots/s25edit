@@ -290,12 +290,6 @@ void CGame::EventHandling(SDL_Event *Event)
                 }
             }
 
-            /*if (Button != NULL)
-            {
-                Button->setMouseData(Event->motion);
-                CSurface::Draw(Surf_Display, Button->getSurface(), 100, 100);
-            }*/
-
             break;
         }
 
@@ -370,12 +364,6 @@ void CGame::EventHandling(SDL_Event *Event)
                 if (Menus[i] != NULL && Menus[i]->isActive() && !Menus[i]->isWaste())
                     Menus[i]->setMouseData(Event->button);
             }
-
-            /*if (Button != NULL)
-            {
-                Button->setMouseData(Event->button);
-                CSurface::Draw(Surf_Display, Button->getSurface(), 100, 100);
-            }*/
 
             switch(Event->button.button) {
                 case SDL_BUTTON_LEFT: {
@@ -460,12 +448,6 @@ void CGame::EventHandling(SDL_Event *Event)
                 if (Menus[i] != NULL && Menus[i]->isActive() && !Menus[i]->isWaste())
                     Menus[i]->setMouseData(Event->button);
             }
-
-            /*if (Button != NULL)
-            {
-                Button->setMouseData(Event->button);
-                CSurface::Draw(Surf_Display, Button->getSurface(), 100, 100);
-            }*/
 
             switch(Event->button.button) {
                 case SDL_BUTTON_LEFT: {

@@ -1045,6 +1045,7 @@ enum
     MAPPIC_SHRUB6,
     MAPPIC_SHRUB7,
     MAPPIC_SNOWMAN,
+    MAPPIC_DOOR,
     //some pictures missing here
 #ifdef _EDITORMODE
     MAPPIC_LAST_ENTRY = 1433 + 2070

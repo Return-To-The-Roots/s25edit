@@ -33,7 +33,7 @@ void CGame::Render()
             {
                 SDL_FreeSurface(Surf_DisplayGL);
 
-                Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGLBLIT | (fullscreen ? SDL_FULLSCREEN : 0));
+                Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
                 Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
             }
             else
@@ -52,8 +52,8 @@ void CGame::Render()
 
         if (CSurface::useOpenGL)
         {
-            SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
-            SDL_Flip(Surf_DisplayGL);
+            //SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
+            //SDL_Flip(Surf_DisplayGL);
             SDL_GL_SwapBuffers();
         }
         else

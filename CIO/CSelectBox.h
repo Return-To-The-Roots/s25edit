@@ -4,7 +4,7 @@
 #include "../includes.h"
 
 //maximum number of entries for a selectbox
-#define MAXSELECTBOXENTRIES 200
+#define MAXSELECTBOXENTRIES 20000
 
 class CSelectBox
 {

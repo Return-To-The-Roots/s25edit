@@ -12,7 +12,7 @@ Don't create a subfolder. All files have to be in the same directory as your S2.
 License:
 --------
 
-// Copyright (c) 2009 - 2011 Marc Vester (Xaser)
+// Copyright (c) 2009 - 2012 Marc Vester (XaserLE)
 //
 // This file is part of Return to the Roots Mapeditor.
 //
