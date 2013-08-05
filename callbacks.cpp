@@ -2172,12 +2172,12 @@ void callback::EditorCreateMenu(int Param)
     enum
     {
         REDUCE_WIDTH_128,
-        REDUCE_WIDTH_12,
-        RAISE_WIDTH_12,
+        REDUCE_WIDTH_16,
+        RAISE_WIDTH_16,
         RAISE_WIDTH_128,
         REDUCE_HEIGHT_128,
-        REDUCE_HEIGHT_12,
-        RAISE_HEIGHT_12,
+        REDUCE_HEIGHT_16,
+        RAISE_HEIGHT_16,
         RAISE_HEIGHT_128,
         CHANGE_LANDSCAPE,
         TEXTURE_PREVIOUS,
@@ -2202,18 +2202,20 @@ void callback::EditorCreateMenu(int Param)
 
                         WNDCreate->addText("Breite", 95, 4, 9, FONT_YELLOW);
                         WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_128, 10, 15, 35, 20, BUTTON_GREY, "128<-");
-                        WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_12, 45, 15, 35, 20, BUTTON_GREY, "12<-");
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_16, 45, 15, 35, 20, BUTTON_GREY, "16<-");
                         sprintf(puffer, "%d", width);
                         TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
-                        WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_12, 158, 15, 35, 20, BUTTON_GREY, "->12");
+                        TextWidth->setText(puffer);
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_16, 158, 15, 35, 20, BUTTON_GREY, "->16");
                         WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_128, 193, 15, 35, 20, BUTTON_GREY, "->128");
 
                         WNDCreate->addText("Höhe", 100, 40, 9, FONT_YELLOW);
                         WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_128, 10, 49, 35, 20, BUTTON_GREY, "128<-");
-                        WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_12, 45, 49, 35, 20, BUTTON_GREY, "12<-");
+                        WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_16, 45, 49, 35, 20, BUTTON_GREY, "16<-");
                         sprintf(puffer, "%d", height);
                         TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
-                        WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_12, 158, 49, 35, 20, BUTTON_GREY, "->12");
+                        TextHeight->setText(puffer);
+                        WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_16, 158, 49, 35, 20, BUTTON_GREY, "->16");
                         WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_128, 193, 49, 35, 20, BUTTON_GREY, "->128");
 
                         WNDCreate->addText("Landschaft", 85, 80, 9, FONT_YELLOW);
@@ -2257,18 +2259,18 @@ void callback::EditorCreateMenu(int Param)
                     sprintf(puffer, "%d", width);
                     TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
                     break;
-        case REDUCE_WIDTH_12:
-                    if (width - 12 >= 32)
-                        width -= 12;
+        case REDUCE_WIDTH_16:
+                    if (width - 16 >= 32)
+                        width -= 16;
                     else
                         width = 32;
                     WNDCreate->delText(TextWidth);
                     sprintf(puffer, "%d", width);
                     TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
                     break;
-        case RAISE_WIDTH_12:
-                    if (width + 12 <= MAXMAPWIDTH)
-                        width += 12;
+        case RAISE_WIDTH_16:
+                    if (width + 16 <= MAXMAPWIDTH)
+                        width += 16;
                     else
                         width = MAXMAPWIDTH;
                     WNDCreate->delText(TextWidth);
@@ -2293,18 +2295,18 @@ void callback::EditorCreateMenu(int Param)
                     sprintf(puffer, "%d", height);
                     TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
                     break;
-        case REDUCE_HEIGHT_12:
-                    if (height - 12 >= 32)
-                        height -= 12;
+        case REDUCE_HEIGHT_16:
+                    if (height - 16 >= 32)
+                        height -= 16;
                     else
                         height = 32;
                     WNDCreate->delText(TextHeight);
                     sprintf(puffer, "%d", height);
                     TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
                     break;
-        case RAISE_HEIGHT_12:
-                    if (height + 12 <= MAXMAPHEIGHT)
-                        height += 12;
+        case RAISE_HEIGHT_16:
+                    if (height + 16 <= MAXMAPHEIGHT)
+                        height += 16;
                     else
                         height = MAXMAPHEIGHT;
                     WNDCreate->delText(TextHeight);

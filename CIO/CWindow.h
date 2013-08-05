@@ -86,9 +86,9 @@ class CWindow
         bool delPicture(CPicture *PictureToDelete);
         int addStaticPicture(int x, int y, int picture);
         bool delStaticPicture(int ArrayIndex);
-        CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fonsize = 14, int text_color = FONT_YELLOW, int bg_color = -1, bool button_style = false);
+        CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fontsize = 14, int text_color = FONT_YELLOW, int bg_color = -1, bool button_style = false);
         bool delTextfield(CTextfield* TextfieldToDelete);
-        CSelectBox* addSelectBox(Uint16 x = 0, Uint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fonsize = 14, int text_color = FONT_YELLOW, int bg_color = -1);
+        CSelectBox* addSelectBox(Uint16 x = 0, Uint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fontsize = 14, int text_color = FONT_YELLOW, int bg_color = -1);
         bool delSelectBox(CSelectBox* SelectBoxToDelete);
         bool render(void);
 };
