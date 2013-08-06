@@ -3,7 +3,7 @@
 
 //define the mode to compile (if all is uncommented, the game will compile in normal mode
 //in admin mode, there are some key combos to open debugger, resource viewer and so on
-#define _ADMINMODE
+//#define _ADMINMODE
 //in editor mode there is the possibility to load, edit and save created maps
 #define _EDITORMODE
 

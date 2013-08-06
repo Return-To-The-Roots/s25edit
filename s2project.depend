@@ -835,7 +835,7 @@
 	<SDL/SDL.h>
 	"sge_internal.h"
 
-1325872188 d:\myfiles\000cpp-skripte\sdl\siedler2\s2project\defines.h
+1375779882 d:\myfiles\000cpp-skripte\sdl\siedler2\s2project\defines.h
 
 1315743759 d:\myfiles\000cpp-skripte\sdl\siedler2\s2project\classes.h
 
@@ -1033,6 +1033,6 @@
 	<freetype/ttnameid.h>
 	<freetype/internal/ftobjs.h>
 
-1375719423 source:d:\myfiles\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
+1375779809 source:d:\myfiles\000cpp-skripte\sdl\siedler2\s2project\callbacks.cpp
 	"callbacks.h"
 
