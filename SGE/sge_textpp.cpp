@@ -20,7 +20,7 @@
 
 #include "sge_textpp.h"
 #include "sge_surface.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <stdarg.h>
 #include <stdlib.h>
 

@@ -19,7 +19,7 @@
 #include "sge_misc.h"
 #include "sge_primitives.h"
 #include "sge_surface.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #include <stdio.h>
 

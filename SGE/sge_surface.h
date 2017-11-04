@@ -19,7 +19,7 @@
 #define sge_surface_H
 
 #include "sge_internal.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 /*
  *  Obsolete function names

@@ -12,7 +12,7 @@ private:
     SDL_Surface* Surf_Map;
     SDL_Surface* Surf_RightMenubar;
     bobMAP* map;
-    struct DisplayRectangle displayRect;
+    DisplayRectangle displayRect;
     bool active;
     bool needSurface;
     int VertexX, VertexY;

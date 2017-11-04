@@ -21,6 +21,7 @@
 /* This header is included in all sge_*.h files */
 
 #include "sge_config.h"
+#include <SDL.h>
 
 /*
  *  C compatibility

@@ -25,14 +25,14 @@
 #include "sge_surface.h"
 #include "sge_textpp.h"
 #include "sge_tt_text.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #include <new>
 #include <stdarg.h>
 #include <string.h>
 
 #ifdef _SGE_HAVE_IMG
-#include <SDL/SDL_image.h>
+#include <SDL_image.h>
 #endif
 
 using namespace std;

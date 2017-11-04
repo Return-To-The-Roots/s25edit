@@ -27,8 +27,8 @@
 #include "sge_primitives.h"
 #include "sge_surface.h"
 #include "sge_textpp.h"
-#include <SDL/SDL.h>
-#include <SDL/SDL_endian.h>
+#include <SDL.h>
+#include <SDL_endian.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>

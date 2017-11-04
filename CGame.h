@@ -60,8 +60,6 @@ public:
 
     void EventHandling(SDL_Event* Event);
 
-    void Exit();
-
     void GameLoop();
 
     void Render();

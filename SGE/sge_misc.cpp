@@ -16,7 +16,7 @@
  *********************************************************************/
 
 #include "sge_misc.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +38,7 @@ int sge_Random(int min, int max)
 //==================================================================================
 void sge_Randomize(void)
 {
-    srand(time(NULL));
+    srand(static_cast<unsigned>(time(NULL)));
 }
 
 //==================================================================================

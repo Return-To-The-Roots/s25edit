@@ -3,6 +3,12 @@
 
 #include "../includes.h"
 
+class CButton;
+class CFont;
+class CPicture;
+class CTextfield;
+class CSelectBox;
+
 class CMenu
 {
     friend class CDebug;

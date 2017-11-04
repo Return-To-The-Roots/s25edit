@@ -968,7 +968,7 @@ bool CFile::save_wld(void* data)
     }
 
     // at least write the map footer (ends in 0xFF)
-    temp = 0xFF;
+    temp = char(0xFF);
     fwrite(&temp, 1, 1, fp);
 
     return true;

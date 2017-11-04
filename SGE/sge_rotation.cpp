@@ -18,7 +18,7 @@
 #include "sge_rotation.h"
 #include "sge_blib.h"
 #include "sge_surface.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #include <stdio.h>
 

@@ -19,7 +19,7 @@
 #define sge_primitives_H
 
 #include "sge_internal.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #ifdef _SGE_C
 extern "C" {

@@ -22,7 +22,7 @@
 
 #include "sge_primitives.h"
 #include "sge_surface.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>

@@ -22,7 +22,7 @@
 #include "sge_blib.h"
 #include "sge_primitives.h"
 #include "sge_surface.h"
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #define SWAP(x, y, temp) \
     temp = x;            \

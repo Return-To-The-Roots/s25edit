@@ -1,5 +1,16 @@
 #include "CGame.h"
 
+#ifdef _WIN32
+#include <direct.h>
+// MSDN recommends against using getcwd & chdir names
+#define cwd _getcwd
+#define cd _chdir
+#else
+#include "unistd.h"
+#define cwd getcwd
+#define cd chdir
+#endif
+
 CGame::CGame()
 {
     GameResolutionX = 1024;
@@ -210,7 +221,7 @@ void CGame::delMapObj(void)
 
 /*
  *  We want a console application to put stdout to the console, so we need to
- *  undefine main to get no linker errors like "undefiened reference to WinMain16@"
+ *  undefine main to get no linker errors like "undefined reference to WinMain16@"
  *  an then redirect stdout and stderr to console with freopen.
  */
 #undef main
@@ -219,6 +230,12 @@ int main(int argc, char* argv[])
     FILE* ctt = fopen("CON", "w");
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
+
+    std::string exePath = argv[0];
+    size_t pos = exePath.find_last_of("/\\");
+    if(pos != std::string::npos)
+        exePath = exePath.substr(0, pos);
+    cd(exePath.c_str());
 
     try
     {

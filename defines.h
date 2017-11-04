@@ -5,7 +5,7 @@
 // in admin mode, there are some key combos to open debugger, resource viewer and so on
 //#define _ADMINMODE
 // in editor mode there is the possibility to load, edit and save created maps
-#define _EDITORMODE
+//#define _EDITORMODE
 
 // callback parameters
 enum
@@ -97,8 +97,8 @@ struct point
 {
     Uint16 VertexX; /* number of the vertex on x-axis */
     Uint16 VertexY; /* number of the vertex on y-axis */
-    long int x;
-    long int y; /* calculated with section 1 */
+    Sint32 x;
+    Sint32 y;   /* calculated with section 1 */
     int z;      /* calculated with section 1 */
     Uint8 h;    /* section 1 */
     Sint32 i;   /* calculated light values for new shading by SGE (a 16 bit integer shifted left 16 times --> fixed point math for speed) */
@@ -121,8 +121,12 @@ struct point
 // structure for display, cause SDL_Rect's datatypes are too small
 struct DisplayRectangle
 {
-    long int x, y;
-    long int w, h;
+    Sint32 x, y;
+    Sint32 w, h;
+};
+struct Point16
+{
+    Sint16 x, y;
 };
 // map strutcture
 typedef struct BobtypeMAP
