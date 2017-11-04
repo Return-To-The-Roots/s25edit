@@ -1,12 +1,12 @@
 /*
-*	SDL Graphics Extension
-*	Misc functions (header)
-*
-*	Started 990819
-*
-*	License: LGPL v2+ (see the file LICENSE)
-*	(c)1999-2003 Anders Lindström
-*/
+ *	SDL Graphics Extension
+ *	Misc functions (header)
+ *
+ *	Started 990819
+ *
+ *	License: LGPL v2+ (see the file LICENSE)
+ *	(c)1999-2003 Anders Lindström
+ */
 
 /*********************************************************************
  *  This library is free software; you can redistribute it and/or    *
@@ -18,8 +18,8 @@
 #ifndef sge_misc_H
 #define sge_misc_H
 
-#include <SDL/SDL.h>
 #include "sge_internal.h"
+#include <SDL/SDL.h>
 
 #ifdef _SGE_C
 extern "C" {

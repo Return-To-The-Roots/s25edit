@@ -3,21 +3,21 @@
 CMenu::CMenu(int pic_background)
 {
     this->pic_background = pic_background;
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
         buttons[i] = NULL;
-    for (int i = 0; i < MAXTEXTS; i++)
+    for(int i = 0; i < MAXTEXTS; i++)
         texts[i] = NULL;
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
         pictures[i] = NULL;
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
         static_pictures[i].x = 0;
         static_pictures[i].y = 0;
         static_pictures[i].pic = -1;
     }
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
         textfields[i] = NULL;
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
         selectboxes[i] = NULL;
 
     Surf_Menu = NULL;
@@ -30,29 +30,29 @@ CMenu::CMenu(int pic_background)
 
 CMenu::~CMenu()
 {
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if (buttons[i] != NULL)
+        if(buttons[i] != NULL)
             delete buttons[i];
     }
-    for (int i = 0; i < MAXTEXTS; i++)
+    for(int i = 0; i < MAXTEXTS; i++)
     {
-        if (texts[i] != NULL)
+        if(texts[i] != NULL)
             delete texts[i];
     }
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (pictures[i] != NULL)
+        if(pictures[i] != NULL)
             delete pictures[i];
     }
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if (textfields[i] != NULL)
+        if(textfields[i] != NULL)
             delete textfields[i];
     }
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if (selectboxes[i] != NULL)
+        if(selectboxes[i] != NULL)
             delete selectboxes[i];
     }
     SDL_FreeSurface(Surf_Menu);
@@ -66,19 +66,19 @@ void CMenu::setBackgroundPicture(int pic_background)
 
 void CMenu::setMouseData(SDL_MouseMotionEvent motion)
 {
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (pictures[i] != NULL)
+        if(pictures[i] != NULL)
             pictures[i]->setMouseData(motion);
     }
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if (buttons[i] != NULL)
+        if(buttons[i] != NULL)
             buttons[i]->setMouseData(motion);
     }
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if (selectboxes[i] != NULL)
+        if(selectboxes[i] != NULL)
             selectboxes[i]->setMouseData(motion);
     }
     needRender = true;
@@ -86,24 +86,24 @@ void CMenu::setMouseData(SDL_MouseMotionEvent motion)
 
 void CMenu::setMouseData(SDL_MouseButtonEvent button)
 {
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (pictures[i] != NULL)
+        if(pictures[i] != NULL)
             pictures[i]->setMouseData(button);
     }
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if (buttons[i] != NULL)
+        if(buttons[i] != NULL)
             buttons[i]->setMouseData(button);
     }
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if (textfields[i] != NULL)
+        if(textfields[i] != NULL)
             textfields[i]->setMouseData(button);
     }
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if (selectboxes[i] != NULL)
+        if(selectboxes[i] != NULL)
             selectboxes[i]->setMouseData(button);
     }
     needRender = true;
@@ -111,21 +111,22 @@ void CMenu::setMouseData(SDL_MouseButtonEvent button)
 
 void CMenu::setKeyboardData(SDL_KeyboardEvent key)
 {
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if (textfields[i] != NULL)
+        if(textfields[i] != NULL)
             textfields[i]->setKeyboardData(key);
     }
 }
 
-CButton* CMenu::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color, const char *text, int picture)
+CButton* CMenu::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color, const char* text,
+                          int picture)
 {
-    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+    if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return false;
 
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if (buttons[i] == NULL)
+        if(buttons[i] == NULL)
         {
             buttons[i] = new CButton(callback, clickedParam, x, y, w, h, color, text, picture);
             needRender = true;
@@ -135,14 +136,14 @@ CButton* CMenu::addButton(void callback(int), int clickedParam, Uint16 x, Uint16
     return NULL;
 }
 
-bool CMenu::delButton(CButton *ButtonToDelete)
+bool CMenu::delButton(CButton* ButtonToDelete)
 {
-    if (ButtonToDelete == NULL)
+    if(ButtonToDelete == NULL)
         return false;
 
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if (buttons[i] == ButtonToDelete)
+        if(buttons[i] == ButtonToDelete)
         {
             delete buttons[i];
             buttons[i] = NULL;
@@ -153,14 +154,14 @@ bool CMenu::delButton(CButton *ButtonToDelete)
     return false;
 }
 
-CFont* CMenu::addText(const char *string, int x, int y, int fontsize, int color)
+CFont* CMenu::addText(const char* string, int x, int y, int fontsize, int color)
 {
-    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+    if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return false;
 
-    for (int i = 0; i < MAXTEXTS; i++)
+    for(int i = 0; i < MAXTEXTS; i++)
     {
-        if (texts[i] == NULL)
+        if(texts[i] == NULL)
         {
             texts[i] = new CFont(string, x, y, fontsize, color);
             needRender = true;
@@ -170,14 +171,14 @@ CFont* CMenu::addText(const char *string, int x, int y, int fontsize, int color)
     return NULL;
 }
 
-CFont* CMenu::addText(unsigned char *string, int x, int y, int fontsize, int color)
+CFont* CMenu::addText(unsigned char* string, int x, int y, int fontsize, int color)
 {
-    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+    if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return false;
 
-    for (int i = 0; i < MAXTEXTS; i++)
+    for(int i = 0; i < MAXTEXTS; i++)
     {
-        if (texts[i] == NULL)
+        if(texts[i] == NULL)
         {
             texts[i] = new CFont(string, x, y, fontsize, color);
             needRender = true;
@@ -187,14 +188,14 @@ CFont* CMenu::addText(unsigned char *string, int x, int y, int fontsize, int col
     return NULL;
 }
 
-bool CMenu::delText(CFont *TextToDelete)
+bool CMenu::delText(CFont* TextToDelete)
 {
-    if (TextToDelete == NULL)
+    if(TextToDelete == NULL)
         return false;
 
-    for (int i = 0; i < MAXTEXTS; i++)
+    for(int i = 0; i < MAXTEXTS; i++)
     {
-        if (texts[i] == TextToDelete)
+        if(texts[i] == TextToDelete)
         {
             delete texts[i];
             texts[i] = NULL;
@@ -207,12 +208,12 @@ bool CMenu::delText(CFont *TextToDelete)
 
 CPicture* CMenu::addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
 {
-    if (x >= global::s2->MenuResolutionX || y >= global::s2->MenuResolutionY)
+    if(x >= global::s2->MenuResolutionX || y >= global::s2->MenuResolutionY)
         return false;
 
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (pictures[i] == NULL)
+        if(pictures[i] == NULL)
         {
             pictures[i] = new CPicture(callback, clickedParam, x, y, picture);
             needRender = true;
@@ -222,14 +223,14 @@ CPicture* CMenu::addPicture(void callback(int), int clickedParam, Uint16 x, Uint
     return NULL;
 }
 
-bool CMenu::delPicture(CPicture *PictureToDelete)
+bool CMenu::delPicture(CPicture* PictureToDelete)
 {
-    if (PictureToDelete == NULL)
+    if(PictureToDelete == NULL)
         return false;
 
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (pictures[i] == PictureToDelete)
+        if(pictures[i] == PictureToDelete)
         {
             delete pictures[i];
             pictures[i] = NULL;
@@ -242,15 +243,15 @@ bool CMenu::delPicture(CPicture *PictureToDelete)
 
 int CMenu::addStaticPicture(int x, int y, int picture)
 {
-    if (x >= global::s2->MenuResolutionX || y >= global::s2->MenuResolutionY)
+    if(x >= global::s2->MenuResolutionX || y >= global::s2->MenuResolutionY)
         return false;
 
-    if (picture < 0)
+    if(picture < 0)
         return -1;
 
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (static_pictures[i].pic == -1)
+        if(static_pictures[i].pic == -1)
         {
             static_pictures[i].pic = picture;
             static_pictures[i].x = x;
@@ -264,7 +265,7 @@ int CMenu::addStaticPicture(int x, int y, int picture)
 
 bool CMenu::delStaticPicture(int ArrayIndex)
 {
-    if (ArrayIndex < 0 || ArrayIndex >= MAXPICTURES)
+    if(ArrayIndex < 0 || ArrayIndex >= MAXPICTURES)
         return false;
 
     static_pictures[ArrayIndex].pic = -1;
@@ -277,12 +278,12 @@ bool CMenu::delStaticPicture(int ArrayIndex)
 
 CTextfield* CMenu::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
 {
-    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+    if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return false;
 
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if (textfields[i] == NULL)
+        if(textfields[i] == NULL)
         {
             textfields[i] = new CTextfield(x, y, cols, rows, fontsize, text_color, bg_color, button_style);
             needRender = true;
@@ -294,12 +295,12 @@ CTextfield* CMenu::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, in
 
 bool CMenu::delTextfield(CTextfield* TextfieldToDelete)
 {
-    if (TextfieldToDelete == NULL)
+    if(TextfieldToDelete == NULL)
         return false;
 
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if (textfields[i] == TextfieldToDelete)
+        if(textfields[i] == TextfieldToDelete)
         {
             delete textfields[i];
             textfields[i] = NULL;
@@ -312,12 +313,12 @@ bool CMenu::delTextfield(CTextfield* TextfieldToDelete)
 
 CSelectBox* CMenu::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
-    if (x >= Surf_Menu->w || y >= Surf_Menu->h)
+    if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return false;
 
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if (selectboxes[i] == NULL)
+        if(selectboxes[i] == NULL)
         {
             selectboxes[i] = new CSelectBox(x, y, w, h, fontsize, text_color, bg_color);
             needRender = true;
@@ -329,12 +330,12 @@ CSelectBox* CMenu::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int font
 
 bool CMenu::delSelectBox(CSelectBox* SelectBoxToDelete)
 {
-    if (SelectBoxToDelete == NULL)
+    if(SelectBoxToDelete == NULL)
         return false;
 
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if (selectboxes[i] == SelectBoxToDelete)
+        if(selectboxes[i] == SelectBoxToDelete)
         {
             delete selectboxes[i];
             selectboxes[i] = NULL;
@@ -347,54 +348,57 @@ bool CMenu::delSelectBox(CSelectBox* SelectBoxToDelete)
 
 bool CMenu::render(void)
 {
-    if (pic_background < 0)
+    if(pic_background < 0)
         return false;
 
-    //if we don't need to render, all is up to date, return true
-    if (!needRender)
+    // if we don't need to render, all is up to date, return true
+    if(!needRender)
         return true;
     needRender = false;
-    //if we need a new surface
-    if (needSurface)
+    // if we need a new surface
+    if(needSurface)
     {
         SDL_FreeSurface(Surf_Menu);
         Surf_Menu = NULL;
-        if ( (Surf_Menu = SDL_CreateRGBSurface(SDL_SWSURFACE, global::s2->getResX(), global::s2->getResY(), 32, 0, 0, 0, 0)) == NULL )
+        if((Surf_Menu = SDL_CreateRGBSurface(SDL_SWSURFACE, global::s2->getResX(), global::s2->getResY(), 32, 0, 0, 0, 0)) == NULL)
             return false;
         needSurface = false;
     }
 
-    //CSurface::Draw(Surf_Menu, global::bmpArray[pic_background].surface, 0, 0);
-    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w-1, 0, 0, Surf_Menu->h-1, Surf_Menu->w-1, Surf_Menu->h-1, global::bmpArray[pic_background].surface, 0, 0, global::bmpArray[pic_background].surface->w-1, 0, 0, global::bmpArray[pic_background].surface->h-1, global::bmpArray[pic_background].surface->w-1, global::bmpArray[pic_background].surface->h-1);
+    // CSurface::Draw(Surf_Menu, global::bmpArray[pic_background].surface, 0, 0);
+    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w - 1, 0, 0, Surf_Menu->h - 1, Surf_Menu->w - 1, Surf_Menu->h - 1,
+                     global::bmpArray[pic_background].surface, 0, 0, global::bmpArray[pic_background].surface->w - 1, 0, 0,
+                     global::bmpArray[pic_background].surface->h - 1, global::bmpArray[pic_background].surface->w - 1,
+                     global::bmpArray[pic_background].surface->h - 1);
 
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (static_pictures[i].pic >= 0)
+        if(static_pictures[i].pic >= 0)
             CSurface::Draw(Surf_Menu, global::bmpArray[static_pictures[i].pic].surface, static_pictures[i].x, static_pictures[i].y);
     }
-    for (int i = 0; i < MAXPICTURES; i++)
+    for(int i = 0; i < MAXPICTURES; i++)
     {
-        if (pictures[i] != NULL)
+        if(pictures[i] != NULL)
             CSurface::Draw(Surf_Menu, pictures[i]->getSurface(), pictures[i]->getX(), pictures[i]->getY());
     }
-    for (int i = 0; i < MAXTEXTS; i++)
+    for(int i = 0; i < MAXTEXTS; i++)
     {
-        if (texts[i] != NULL)
+        if(texts[i] != NULL)
             CSurface::Draw(Surf_Menu, texts[i]->getSurface(), texts[i]->getX(), texts[i]->getY());
     }
-    for (int i = 0; i < MAXTEXTFIELDS; i++)
+    for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if (textfields[i] != NULL)
+        if(textfields[i] != NULL)
             CSurface::Draw(Surf_Menu, textfields[i]->getSurface(), textfields[i]->getX(), textfields[i]->getY());
     }
-    for (int i = 0; i < MAXSELECTBOXES; i++)
+    for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if (selectboxes[i] != NULL)
+        if(selectboxes[i] != NULL)
             CSurface::Draw(Surf_Menu, selectboxes[i]->getSurface(), selectboxes[i]->getX(), selectboxes[i]->getY());
     }
-    for (int i = 0; i < MAXBUTTONS; i++)
+    for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if (buttons[i] != NULL)
+        if(buttons[i] != NULL)
             CSurface::Draw(Surf_Menu, buttons[i]->getSurface(), buttons[i]->getX(), buttons[i]->getY());
     }
 

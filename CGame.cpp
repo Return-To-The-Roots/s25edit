@@ -19,57 +19,55 @@ CGame::CGame()
 
     Surf_Display = NULL;
     Surf_DisplayGL = NULL;
-	Running = true;
-	//mouse cursor data
-	Cursor.x = 0;
-	Cursor.y = 0;
-	Cursor.clicked = false;
-	Cursor.button.left = false;
-	Cursor.button.right = false;
+    Running = true;
+    // mouse cursor data
+    Cursor.x = 0;
+    Cursor.y = 0;
+    Cursor.clicked = false;
+    Cursor.button.left = false;
+    Cursor.button.right = false;
 
-	for (int i = 0; i < MAXMENUS; i++)
+    for(int i = 0; i < MAXMENUS; i++)
         Menus[i] = NULL;
-    for (int i = 0; i < MAXWINDOWS; i++)
+    for(int i = 0; i < MAXWINDOWS; i++)
         Windows[i] = NULL;
-    for (int i = 0; i < MAXCALLBACKS; i++)
+    for(int i = 0; i < MAXCALLBACKS; i++)
         Callbacks[i] = NULL;
     MapObj = NULL;
 }
 
-CGame::~CGame()
-{
-}
+CGame::~CGame() {}
 
 int CGame::Execute()
 {
-    if (Init() == false)
-		return -1;
+    if(Init() == false)
+        return -1;
 
     SDL_Event Event;
 
-	while (Running)
-	{
-		while (SDL_PollEvent(&Event))
-			EventHandling(&Event);
+    while(Running)
+    {
+        while(SDL_PollEvent(&Event))
+            EventHandling(&Event);
 
-		GameLoop();
-		Render();
-	}
+        GameLoop();
+        Render();
+    }
 
-	Cleanup();
+    Cleanup();
 
-	return 0;
+    return 0;
 }
 
-bool CGame::RegisterMenu(CMenu *Menu)
+bool CGame::RegisterMenu(CMenu* Menu)
 {
     bool success = false;
 
-    if (Menu == NULL)
+    if(Menu == NULL)
         return success;
-    for (int i = 0; i < MAXMENUS; i++)
+    for(int i = 0; i < MAXMENUS; i++)
     {
-        if (!success && Menus[i] == NULL)
+        if(!success && Menus[i] == NULL)
         {
             Menus[i] = Menu;
             Menus[i]->setActive();
@@ -77,26 +75,25 @@ bool CGame::RegisterMenu(CMenu *Menu)
 #ifdef _ADMINMODE
             RegisteredMenus++;
 #endif
-        }
-        else if (Menus[i] != NULL)
+        } else if(Menus[i] != NULL)
             Menus[i]->setInactive();
     }
     return success;
 }
 
-bool CGame::UnregisterMenu(CMenu *Menu)
+bool CGame::UnregisterMenu(CMenu* Menu)
 {
-    if (Menu == NULL)
+    if(Menu == NULL)
         return false;
-    for (int i = 0; i < MAXMENUS; i++)
+    for(int i = 0; i < MAXMENUS; i++)
     {
-        if (Menus[i] == Menu)
+        if(Menus[i] == Menu)
         {
-            for (int j = i-1; j >= 0; j--)
+            for(int j = i - 1; j >= 0; j--)
             {
-                if (Menus[j] != NULL)
+                if(Menus[j] != NULL)
                 {
-                    Menus[i-1]->setActive();
+                    Menus[i - 1]->setActive();
                     break;
                 }
             }
@@ -111,49 +108,48 @@ bool CGame::UnregisterMenu(CMenu *Menu)
     return false;
 }
 
-bool CGame::RegisterWindow(CWindow *Window)
+bool CGame::RegisterWindow(CWindow* Window)
 {
     bool success = false;
     int highestPriority = 0;
 
-    //first find the highest priority
-    for (int i = 0; i < MAXWINDOWS; i++)
+    // first find the highest priority
+    for(int i = 0; i < MAXWINDOWS; i++)
     {
-        if (Windows[i] != NULL && Windows[i]->getPriority() > highestPriority)
+        if(Windows[i] != NULL && Windows[i]->getPriority() > highestPriority)
             highestPriority = Windows[i]->getPriority();
     }
 
-    if (Window == NULL)
+    if(Window == NULL)
         return success;
-    for (int i = 0; i < MAXWINDOWS; i++)
+    for(int i = 0; i < MAXWINDOWS; i++)
     {
-        if (!success && Windows[i] == NULL)
+        if(!success && Windows[i] == NULL)
         {
             Windows[i] = Window;
             Windows[i]->setActive();
-            Windows[i]->setPriority(highestPriority+1);
+            Windows[i]->setPriority(highestPriority + 1);
             success = true;
 #ifdef _ADMINMODE
             RegisteredWindows++;
 #endif
-        }
-        else if (Windows[i] != NULL)
+        } else if(Windows[i] != NULL)
             Windows[i]->setInactive();
     }
     return success;
 }
 
-bool CGame::UnregisterWindow(CWindow *Window)
+bool CGame::UnregisterWindow(CWindow* Window)
 {
-    if (Window == NULL)
+    if(Window == NULL)
         return false;
-    for (int i = 0; i < MAXWINDOWS; i++)
+    for(int i = 0; i < MAXWINDOWS; i++)
     {
-        if (Windows[i] == Window)
+        if(Windows[i] == Window)
         {
-            for (int j = i-1; j >= 0; j--)
+            for(int j = i - 1; j >= 0; j--)
             {
-                if (Windows[j] != NULL)
+                if(Windows[j] != NULL)
                 {
                     Windows[j]->setActive();
                     break;
@@ -172,11 +168,11 @@ bool CGame::UnregisterWindow(CWindow *Window)
 
 bool CGame::RegisterCallback(void (*callback)(int))
 {
-    if (callback == NULL)
+    if(callback == NULL)
         return false;
-    for (int i = 0; i < MAXCALLBACKS; i++)
+    for(int i = 0; i < MAXCALLBACKS; i++)
     {
-        if (Callbacks[i] == NULL)
+        if(Callbacks[i] == NULL)
         {
             Callbacks[i] = callback;
 #ifdef _ADMINMODE
@@ -190,11 +186,11 @@ bool CGame::RegisterCallback(void (*callback)(int))
 
 bool CGame::UnregisterCallback(void (*callback)(int))
 {
-    if (callback == NULL)
+    if(callback == NULL)
         return false;
-    for (int i = 0; i < MAXCALLBACKS; i++)
+    for(int i = 0; i < MAXCALLBACKS; i++)
     {
-        if (Callbacks[i] == callback)
+        if(Callbacks[i] == callback)
         {
             Callbacks[i] = NULL;
 #ifdef _ADMINMODE
@@ -220,17 +216,16 @@ void CGame::delMapObj(void)
 #undef main
 int main(int argc, char* argv[])
 {
-    FILE* ctt = fopen("CON", "w" );
-    freopen( "CON", "w", stdout );
-    freopen( "CON", "w", stderr );
+    FILE* ctt = fopen("CON", "w");
+    freopen("CON", "w", stdout);
+    freopen("CON", "w", stderr);
 
     try
     {
         global::s2 = new CGame;
 
         global::s2->Execute();
-    }
-    catch ( ... )
+    } catch(...)
     {
         std::cout << "Unhandled Exception" << std::endl;
     }
@@ -238,8 +233,8 @@ int main(int argc, char* argv[])
     fclose(ctt);
     ctt = NULL;
 
-    //fflush(stdin);
-    //getchar();
+    // fflush(stdin);
+    // getchar();
 
     return 0;
 }

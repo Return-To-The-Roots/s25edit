@@ -1,12 +1,12 @@
 /*
-*	SDL Graphics Extension
-*	Misc functions
-*
-*	Started 990819
-*
-*	License: LGPL v2+ (see the file LICENSE)
-*	(c)1999-2003 Anders Lindström
-*/
+ *	SDL Graphics Extension
+ *	Misc functions
+ *
+ *	Started 990819
+ *
+ *	License: LGPL v2+ (see the file LICENSE)
+ *	(c)1999-2003 Anders Lindström
+ */
 
 /*********************************************************************
  *  This library is free software; you can redistribute it and/or    *
@@ -15,24 +15,22 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#include <SDL/SDL.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <math.h>
 #include "sge_misc.h"
+#include <SDL/SDL.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-
-Uint32 delay_res=10;
+Uint32 delay_res = 10;
 
 //==================================================================================
 // Returns a random integer between min and max
 //==================================================================================
 int sge_Random(int min, int max)
 {
-	return min+(rand()%(max-min+1));
+    return min + (rand() % (max - min + 1));
 }
-
 
 //==================================================================================
 // Seed the random number generator with a number from the system clock.
@@ -40,32 +38,29 @@ int sge_Random(int min, int max)
 //==================================================================================
 void sge_Randomize(void)
 {
-	srand(time(NULL));
+    srand(time(NULL));
 }
-
 
 //==================================================================================
 // Test the resolution of SDL_Delay()
 //==================================================================================
 Uint32 sge_CalibrateDelay(void)
 {
-  SDL_Delay(10);
-  delay_res=SDL_GetTicks();
-  SDL_Delay(1);
-  delay_res=SDL_GetTicks()-delay_res;
+    SDL_Delay(10);
+    delay_res = SDL_GetTicks();
+    SDL_Delay(1);
+    delay_res = SDL_GetTicks() - delay_res;
 
-  return delay_res;
+    return delay_res;
 }
-
 
 //==================================================================================
 // Get the resolution of SDL_Delay()
 //==================================================================================
 Uint32 sge_DelayRes(void)
 {
-	return delay_res;
+    return delay_res;
 }
-
 
 //==================================================================================
 // Delay 'ticks' ms.
@@ -74,19 +69,21 @@ Uint32 sge_DelayRes(void)
 //==================================================================================
 Uint32 sge_Delay(Uint32 ticks)
 {
-	Uint32 start = SDL_GetTicks();
-	Sint32 time_left = (Sint32)ticks;
-	Uint32 tmp;
+    Uint32 start = SDL_GetTicks();
+    Sint32 time_left = (Sint32)ticks;
+    Uint32 tmp;
 
-	if(ticks >= delay_res){
-		tmp=ticks-(ticks%delay_res);
-		SDL_Delay(tmp);
-		time_left=(Sint32)(ticks-(SDL_GetTicks()-start));	//Possible error for large ticks... nah
-	}
+    if(ticks >= delay_res)
+    {
+        tmp = ticks - (ticks % delay_res);
+        SDL_Delay(tmp);
+        time_left = (Sint32)(ticks - (SDL_GetTicks() - start)); // Possible error for large ticks... nah
+    }
 
-	while(time_left>0){
-		time_left=ticks-(SDL_GetTicks()-start);
-	}
+    while(time_left > 0)
+    {
+        time_left = ticks - (SDL_GetTicks() - start);
+    }
 
-	return SDL_GetTicks()-start;
+    return SDL_GetTicks() - start;
 }

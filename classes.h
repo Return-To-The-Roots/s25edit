@@ -1,5 +1,5 @@
 #ifndef _CLASSES_H
-    #define _CLASSES_H
+#define _CLASSES_H
 
 class CGame;
 class CFont;

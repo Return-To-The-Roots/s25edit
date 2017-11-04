@@ -1,11 +1,11 @@
 /*
-*	SDL Graphics Extension
-*
-*	Started 990815
-*
-*	License: LGPL v2+ (see the file LICENSE)
-*	(c)1999-2003 Anders Lindström
-*/
+ *	SDL Graphics Extension
+ *
+ *	Started 990815
+ *
+ *	License: LGPL v2+ (see the file LICENSE)
+ *	(c)1999-2003 Anders Lindström
+ */
 
 /*********************************************************************
  *  This library is free software; you can redistribute it and/or    *
@@ -17,15 +17,15 @@
 #ifndef sge_H
 #define sge_H
 
-#include "sge_surface.h"
-#include "sge_primitives.h"
-#include "sge_misc.h"
-#include "sge_tt_text.h"
-#include "sge_bm_text.h"
-#include "sge_textpp.h"
 #include "sge_blib.h"
-#include "sge_shape.h"
+#include "sge_bm_text.h"
 #include "sge_collision.h"
+#include "sge_misc.h"
+#include "sge_primitives.h"
 #include "sge_rotation.h"
+#include "sge_shape.h"
+#include "sge_surface.h"
+#include "sge_textpp.h"
+#include "sge_tt_text.h"
 
 #endif /* sge_H */

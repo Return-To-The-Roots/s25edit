@@ -6,7 +6,7 @@ CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int
     clicked = false;
     this->x = x;
     this->y = y;
-    if (picture >= 0)
+    if(picture >= 0)
         this->picture = picture;
     else
         this->picture = 0;
@@ -28,20 +28,19 @@ CPicture::~CPicture()
 
 void CPicture::setMouseData(SDL_MouseMotionEvent motion)
 {
-    //cursor is on the picture
-    if ( (motion.x >= x) && (motion.x < x + w) && (motion.y >= y) && (motion.y < y + h) )
+    // cursor is on the picture
+    if((motion.x >= x) && (motion.x < x + w) && (motion.y >= y) && (motion.y < y + h))
     {
-        if (motion.state != SDL_PRESSED || motion.state == SDL_RELEASED)
+        if(motion.state != SDL_PRESSED || motion.state == SDL_RELEASED)
         {
             marked = true;
-            if (motionEntryParam >= 0 && callback != NULL)
+            if(motionEntryParam >= 0 && callback != NULL)
                 callback(motionEntryParam);
         }
-    }
-    else
+    } else
     {
-        //picture was marked before and mouse cursor is on the picture now, so do the callback
-        if (motionLeaveParam >= 0  && callback != NULL && marked == true)
+        // picture was marked before and mouse cursor is on the picture now, so do the callback
+        if(motionLeaveParam >= 0 && callback != NULL && marked == true)
             callback(motionLeaveParam);
         marked = false;
     }
@@ -50,20 +49,19 @@ void CPicture::setMouseData(SDL_MouseMotionEvent motion)
 
 void CPicture::setMouseData(SDL_MouseButtonEvent button)
 {
-    //left button is pressed
-    if (button.button == SDL_BUTTON_LEFT)
+    // left button is pressed
+    if(button.button == SDL_BUTTON_LEFT)
     {
-        //if mouse button is pressed ON the button, set marked=true
-        if ( (button.state == SDL_PRESSED) && (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h) )
+        // if mouse button is pressed ON the button, set marked=true
+        if((button.state == SDL_PRESSED) && (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
         {
             marked = true;
             clicked = true;
-        }
-        else if (button.state == SDL_RELEASED)
+        } else if(button.state == SDL_RELEASED)
         {
             clicked = false;
-            //if mouse button is released ON the PICTURE (marked = true), then do the callback
-            if (marked && callback != NULL)
+            // if mouse button is released ON the PICTURE (marked = true), then do the callback
+            if(marked && callback != NULL)
                 callback(clickedParam);
         }
     }
@@ -72,16 +70,16 @@ void CPicture::setMouseData(SDL_MouseButtonEvent button)
 
 bool CPicture::render(void)
 {
-    //if we don't need to render, all is up to date, return true
-    if (!needRender)
+    // if we don't need to render, all is up to date, return true
+    if(!needRender)
         return true;
     needRender = false;
-    //if we need a new surface
-    if (needSurface)
+    // if we need a new surface
+    if(needSurface)
     {
         SDL_FreeSurface(Surf_Picture);
         Surf_Picture = NULL;
-        if ( (Surf_Picture = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL )
+        if((Surf_Picture = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
             return false;
         SDL_SetColorKey(Surf_Picture, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
         needSurface = false;
