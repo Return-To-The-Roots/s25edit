@@ -124,15 +124,15 @@ Uint8 _sge_TTF_AA = 1; // Rendering mode: 0-OFF, 1-AA, 2-Alpha
 //==================================================================================
 // Turns TTF AntiAliasing On/Off or alpha (nice but slow) (Default: On)
 //==================================================================================
-void sge_TTF_AAOff(void)
+void sge_TTF_AAOff()
 {
     _sge_TTF_AA = 0;
 }
-void sge_TTF_AAOn(void)
+void sge_TTF_AAOn()
 {
     _sge_TTF_AA = 1;
 }
-void sge_TTF_AA_Alpha(void)
+void sge_TTF_AA_Alpha()
 {
     _sge_TTF_AA = 2;
 }
@@ -152,7 +152,7 @@ void sge_TTF_ByteSwappedUNICODE(int swapped)
 //==================================================================================
 // Closes the ttf engine, done by exit
 //==================================================================================
-void sge_TTF_Quit(void)
+void sge_TTF_Quit()
 {
     if(_sge_TTF_initialized)
     {
@@ -164,7 +164,7 @@ void sge_TTF_Quit(void)
 //==================================================================================
 // Starts the ttf engine, must be called first
 //==================================================================================
-int sge_TTF_Init(void)
+int sge_TTF_Init()
 {
     FT_Error error;
 

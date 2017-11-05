@@ -38,7 +38,7 @@ private:
         //+ 10 because if we raise a vertex then the other vertices will be raised too after 5 times
         // this ranges up to 10 vertices
         //+ 2 because modifications on a vertex will touch building and shading around
-        struct point PointsArroundVertex[((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1)];
+        point PointsArroundVertex[((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1)];
         struct savedVertices* prev;
         struct savedVertices* next;
     } * CurrPtr_savedVertices;
@@ -81,87 +81,87 @@ public:
     ~CMap();
     void constructMap(char* filename, int width = 32, int height = 32, int type = 0, int texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4,
                       int border_texture = TRIANGLE_TEXTURE_WATER);
-    void destructMap(void);
+    void destructMap();
     bobMAP* generateMap(int width, int height, int type, int texture, int border, int border_texture);
-    void loadMapPics(void);
-    void unloadMapPics(void);
+    void loadMapPics();
+    void unloadMapPics();
 
     void setMouseData(SDL_MouseMotionEvent motion);
     void setMouseData(SDL_MouseButtonEvent button);
     void setKeyboardData(SDL_KeyboardEvent key);
-    void setActive(void) { active = true; }
-    void setInactive(void) { active = false; }
-    bool isActive(void) { return active; }
-    int getVertexX(void) { return VertexX; }
-    int getVertexY(void) { return VertexY; }
-    bool getRenderBuildHelp(void) { return RenderBuildHelp; }
-    bool getRenderBorders(void) { return RenderBorders; }
-    int getBitsPerPixel(void) { return BitsPerPixel; }
+    void setActive() { active = true; }
+    void setInactive() { active = false; }
+    bool isActive() { return active; }
+    int getVertexX() { return VertexX; }
+    int getVertexY() { return VertexY; }
+    bool getRenderBuildHelp() { return RenderBuildHelp; }
+    bool getRenderBorders() { return RenderBorders; }
+    int getBitsPerPixel() { return BitsPerPixel; }
     void setBitsPerPixel(int bbp)
     {
         BitsPerPixel = bbp;
         needSurface = true;
     }
     void setMode(int mode) { this->mode = mode; }
-    int getMode(void) { return mode; }
+    int getMode() { return mode; }
     void setModeContent(int modeContent) { this->modeContent = modeContent; }
     void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; }
-    int getModeContent(void) { return modeContent; }
-    int getModeContent2(void) { return modeContent2; }
-    bobMAP* getMap(void) { return map; }
-    SDL_Surface* getSurface(void)
+    int getModeContent() { return modeContent; }
+    int getModeContent2() { return modeContent2; }
+    bobMAP* getMap() { return map; }
+    SDL_Surface* getSurface()
     {
         render();
         return Surf_Map;
     }
-    DisplayRectangle getDisplayRect(void) { return displayRect; }
+    DisplayRectangle getDisplayRect() { return displayRect; }
     void setDisplayRect(DisplayRectangle displayRect) { this->displayRect = displayRect; }
-    Uint16* getPlayerHQx(void) { return PlayerHQx; }
-    Uint16* getPlayerHQy(void) { return PlayerHQy; }
-    char* getMapname(void) { return map->name; }
+    Uint16* getPlayerHQx() { return PlayerHQx; }
+    Uint16* getPlayerHQy() { return PlayerHQy; }
+    char* getMapname() { return map->name; }
     void setMapname(char* name) { strcpy(map->name, name); }
-    char* getAuthor(void) { return map->author; }
+    char* getAuthor() { return map->author; }
     void setAuthor(char* author) { strcpy(map->author, author); }
 
     void drawMinimap(SDL_Surface* Window);
-    void render(void);
+    void render();
     // get and set some variables necessary for cursor behavior
     void setHexagonMode(bool HexagonMode)
     {
         ChangeSectionHexagonMode = HexagonMode;
         setupVerticesActivity();
     }
-    bool getHexagonMode(void) { return ChangeSectionHexagonMode; }
+    bool getHexagonMode() { return ChangeSectionHexagonMode; }
     void setVertexFillRSU(bool fillRSU)
     {
         VertexFillRSU = fillRSU;
         setupVerticesActivity();
     }
-    bool getVertexFillRSU(void) { return VertexFillRSU; }
+    bool getVertexFillRSU() { return VertexFillRSU; }
     void setVertexFillUSD(bool fillUSD)
     {
         VertexFillUSD = fillUSD;
         setupVerticesActivity();
     }
-    bool getVertexFillUSD(void) { return VertexFillUSD; }
+    bool getVertexFillUSD() { return VertexFillUSD; }
     void setVertexFillRandom(bool fillRandom)
     {
         VertexFillRandom = fillRandom;
         setupVerticesActivity();
     }
-    bool getVertexFillRandom(void) { return VertexFillRandom; }
+    bool getVertexFillRandom() { return VertexFillRandom; }
     void setVertexActivityRandom(bool activityRandom)
     {
         VertexActivityRandom = activityRandom;
         setupVerticesActivity();
     }
-    bool getVertexActivityRandom(void) { return VertexActivityRandom; }
+    bool getVertexActivityRandom() { return VertexActivityRandom; }
 
 private:
     // returns count of the vertices that are involved in changes (editor mode) -->THIS FUNCTION IS OUTDATED
     int getActiveVertices(int tempChangeSection);
     // this will calculate ALL vertices for the whole square
-    void calculateVertices(void);
+    void calculateVertices();
     // this will calculate the vertices two sections around one vertex (like a great hexagon) --> necessary to calculate the possible
     // building for a vertex  view this pic to understand the indices
     //              X=7     X=8     X=9
@@ -169,12 +169,12 @@ private:
     //      X=12    X=3     X=0     X=4     X=13
     //          X=14    X=5     X=6     X=15
     //              X=16    X=17    X=18
-    void calculateVerticesAround(struct cursorPoint Vertices[], int VertexX, int VertexY, int ChangeSection);
+    void calculateVerticesAround(cursorPoint Vertices[], int VertexX, int VertexY, int ChangeSection);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
-    void setupVerticesActivity(void);
+    void setupVerticesActivity();
     int correctMouseBlitX(int VertexX, int VertexY);
     int correctMouseBlitY(int VertexX, int VertexY);
-    void modifyVertex(void);
+    void modifyVertex();
     void modifyHeightRaise(int VertexX, int VertexY);
     void modifyHeightReduce(int VertexX, int VertexY);
     void modifyHeightPlane(int VertexX, int VertexY, Uint8 h);
@@ -189,9 +189,9 @@ private:
     void modifyResourceRaise(int VertexX, int VertexY, Uint8 resource);
     void modifyResourceReduce(int VertexX, int VertexY, Uint8 resource);
     void modifyPlayer(int VertexX, int VertexY);
-    void rotateMap(void);
-    void MirrorMapOnXAxis(void);
-    void MirrorMapOnYAxis(void);
+    void rotateMap();
+    void MirrorMapOnXAxis();
+    void MirrorMapOnYAxis();
 };
 
 #endif

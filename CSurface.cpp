@@ -1,4 +1,7 @@
 #include "CSurface.h"
+#include "CGame.h"
+#include "CMap.h"
+#include "globals.h"
 
 bool CSurface::drawTextures = false;
 bool CSurface::useOpenGL = false;
@@ -275,13 +278,13 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
     }
 }
 
-void CSurface::DrawTriangleField(SDL_Surface* display, struct DisplayRectangle displayRect, bobMAP* myMap)
+void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap)
 {
     Uint16 width = myMap->width;
     Uint16 height = myMap->height;
     Uint8 type = myMap->type;
     struct point* vertex = myMap->vertex;
-    struct point tempP1, tempP2, tempP3;
+    point tempP1, tempP2, tempP3;
 
     int row_start;
     int row_end;
@@ -476,8 +479,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, struct DisplayRectangle d
     }
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, struct point P1,
-                            struct point P2, struct point P3)
+void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, point P1, point P2, point P3)
 {
     // prevent drawing triangles that are not shown
     if(((P1.x < displayRect.x && P2.x < displayRect.x && P3.x < displayRect.x)
@@ -943,40 +945,32 @@ void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displa
         // draw the triangle
         // do not shade water and lava
         if(texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
-            sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                               shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset,
-                               upperX, upperY, leftX, leftY, rightX, rightY);
+            sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset, upperX,
+                               upperY, leftX, leftY, rightX, rightY);
         else
         {
             // draw special winterland textures with moving water (ice floe textures)
             if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
             {
-                sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                                   shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                   Surf_Tileset, upperX2, upperY2, leftX2, leftY2, rightX2, rightY2);
+                sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset,
+                                   upperX2, upperY2, leftX2, leftY2, rightX2, rightY2);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y,
-                                                            shiftedP2.x, shiftedP2.y,
-                                                            shiftedP3.x, shiftedP3.y, Surf_Tileset,
-                                                            upperX, upperY, leftX, leftY, rightX, rightY, P1.shading << 8, P2.shading << 8,
-                                                            P3.shading << 8, gouData[type], colorkeys, keycount);
+                    sge_PreCalcFadedTexturedTrigonColorKeys(
+                      display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset, upperX, upperY,
+                      leftX, leftY, rightX, rightY, P1.shading << 8, P2.shading << 8, P3.shading << 8, gouData[type], colorkeys, keycount);
                 else
-                    sge_FadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y,
-                                                     shiftedP2.x, shiftedP2.y,
-                                                     shiftedP3.x, shiftedP3.y, Surf_Tileset, upperX,
-                                                     upperY, leftX, leftY, rightX, rightY, P1.i, P2.i, P3.i, colorkeys, keycount);
+                    sge_FadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
+                                                     Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i, P2.i, P3.i,
+                                                     colorkeys, keycount);
             } else
             {
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(
-                      display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                      shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset, upperX,
-                      upperY, leftX, leftY, rightX, rightY, P1.shading << 8, P2.shading << 8, P3.shading << 8, gouData[type]);
+                    sge_PreCalcFadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
+                                                   Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.shading << 8,
+                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
                 else
-                    sge_FadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y,
-                                            shiftedP2.x, shiftedP2.y, shiftedP3.x,
-                                            shiftedP3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY,
-                                            P1.i, P2.i, P3.i);
+                    sge_FadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
+                                            Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i, P2.i, P3.i);
             }
         }
         return;
@@ -989,7 +983,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displa
         // we have to decide which border to blit, "left or right" or "top or bottom", therefore we are using two bool variables, the first
         // is left/top, the second is right/bottom
         bool Border1, Border2;
-        struct point tempP;
+        point tempP;
         // RSU-Triangle
         if(P1.y < P2.y)
         {
@@ -1103,37 +1097,32 @@ void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displa
                     Border2 = true;
                 }
 
-
                 if(Border1)
                 {
                     // usd-right
                     if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                                                     shiftedP2.y - 2, shiftedP1.x + 5, shiftedP1.y + 3,
-                                                     shiftedP2.x + 5, shiftedP2.y + 1, Surf_Tileset, BorderRect.x,
+                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x + 5,
+                                                     shiftedP1.y + 3, shiftedP2.x + 5, shiftedP2.y + 1, Surf_Tileset, BorderRect.x,
                                                      BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
                                                      BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
                                                      P1.shading << 8, P2.shading << 8, gouData[type]);
                     else
-                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                                              shiftedP2.y - 2, shiftedP1.x + 5, shiftedP1.y + 3,
-                                              shiftedP2.x + 5, shiftedP2.y + 1, Surf_Tileset, BorderRect.x, BorderRect.y,
+                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x + 5,
+                                              shiftedP1.y + 3, shiftedP2.x + 5, shiftedP2.y + 1, Surf_Tileset, BorderRect.x, BorderRect.y,
                                               BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
                                               BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P1.i, P2.i);
                 } else if(Border2)
                 {
                     // rsu-left
                     if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                                                     shiftedP2.y + 2, shiftedP1.x - 5, shiftedP1.y - 3,
-                                                     shiftedP2.x - 5, shiftedP2.y - 1, Surf_Tileset, BorderRect.x,
+                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y + 2, shiftedP1.x - 5,
+                                                     shiftedP1.y - 3, shiftedP2.x - 5, shiftedP2.y - 1, Surf_Tileset, BorderRect.x,
                                                      BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
                                                      BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
                                                      P1.shading << 8, P2.shading << 8, gouData[type]);
                     else
-                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x,
-                                              shiftedP2.y + 2, shiftedP1.x - 5, shiftedP1.y - 3,
-                                              shiftedP2.x - 5, shiftedP2.y - 1, Surf_Tileset, BorderRect.x, BorderRect.y,
+                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y + 2, shiftedP1.x - 5,
+                                              shiftedP1.y - 3, shiftedP2.x - 5, shiftedP2.y - 1, Surf_Tileset, BorderRect.x, BorderRect.y,
                                               BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
                                               BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P1.i, P2.i);
                 }
@@ -1253,32 +1242,28 @@ void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displa
                 {
                     // rsu-right
                     if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y + 2, shiftedP2.x,
-                                                     shiftedP2.y, shiftedP1.x + 5, shiftedP1.y - 1,
-                                                     shiftedP2.x + 5, shiftedP2.y - 3, Surf_Tileset, BorderRect.x,
+                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y + 2, shiftedP2.x, shiftedP2.y, shiftedP1.x + 5,
+                                                     shiftedP1.y - 1, shiftedP2.x + 5, shiftedP2.y - 3, Surf_Tileset, BorderRect.x,
                                                      BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
                                                      BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
                                                      P1.shading << 8, P2.shading << 8, gouData[type]);
                     else
-                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y + 2, shiftedP2.x,
-                                              shiftedP2.y, shiftedP1.x + 5, shiftedP1.y - 1,
-                                              shiftedP2.x + 5, shiftedP2.y - 3, Surf_Tileset, BorderRect.x, BorderRect.y,
+                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y + 2, shiftedP2.x, shiftedP2.y, shiftedP1.x + 5,
+                                              shiftedP1.y - 1, shiftedP2.x + 5, shiftedP2.y - 3, Surf_Tileset, BorderRect.x, BorderRect.y,
                                               BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
                                               BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P1.i, P2.i);
                 } else if(Border2)
                 {
                     // usd-left
                     if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x,
-                                                     shiftedP1.y, shiftedP2.x - 5, shiftedP2.y + 1,
-                                                     shiftedP1.x - 5, shiftedP1.y + 3, Surf_Tileset, BorderRect.x,
+                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x, shiftedP1.y, shiftedP2.x - 5,
+                                                     shiftedP2.y + 1, shiftedP1.x - 5, shiftedP1.y + 3, Surf_Tileset, BorderRect.x,
                                                      BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
                                                      BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
                                                      P2.shading << 8, P1.shading << 8, gouData[type]);
                     else
-                        sge_FadedTexturedRect(display, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x,
-                                              shiftedP1.y, shiftedP2.x - 5, shiftedP2.y + 1,
-                                              shiftedP1.x - 5, shiftedP1.y + 3, Surf_Tileset, BorderRect.x, BorderRect.y,
+                        sge_FadedTexturedRect(display, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x, shiftedP1.y, shiftedP2.x - 5,
+                                              shiftedP2.y + 1, shiftedP1.x - 5, shiftedP1.y + 3, Surf_Tileset, BorderRect.x, BorderRect.y,
                                               BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
                                               BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P2.i, P1.i);
                 }
@@ -1399,32 +1384,28 @@ void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displa
                 {
                     // rsu-down
                     if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2,
-                                                     shiftedP3.y, shiftedP2.x - 2, shiftedP2.y + 5,
-                                                     shiftedP3.x + 2, shiftedP3.y + 5, Surf_Tileset, BorderRect.x,
+                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
+                                                     shiftedP2.y + 5, shiftedP3.x + 2, shiftedP3.y + 5, Surf_Tileset, BorderRect.x,
                                                      BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
                                                      BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
                                                      P2.shading << 8, P3.shading << 8, gouData[type]);
                     else
-                        sge_FadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2,
-                                              shiftedP3.y, shiftedP2.x - 2, shiftedP2.y + 5,
-                                              shiftedP3.x + 2, shiftedP3.y + 5, Surf_Tileset, BorderRect.x, BorderRect.y,
+                        sge_FadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
+                                              shiftedP2.y + 5, shiftedP3.x + 2, shiftedP3.y + 5, Surf_Tileset, BorderRect.x, BorderRect.y,
                                               BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
                                               BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P2.i, P3.i);
                 } else if(Border2)
                 {
                     // usd-top
                     if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2,
-                                                     shiftedP3.y, shiftedP2.x - 2, shiftedP2.y - 5,
-                                                     shiftedP3.x + 2, shiftedP3.y - 5, Surf_Tileset, BorderRect.x,
+                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
+                                                     shiftedP2.y - 5, shiftedP3.x + 2, shiftedP3.y - 5, Surf_Tileset, BorderRect.x,
                                                      BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
                                                      BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
                                                      P2.shading << 8, P3.shading << 8, gouData[type]);
                     else
-                        sge_FadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2,
-                                              shiftedP3.y, shiftedP2.x - 2, shiftedP2.y - 5,
-                                              shiftedP3.x + 2, shiftedP3.y - 5, Surf_Tileset, BorderRect.x, BorderRect.y,
+                        sge_FadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
+                                              shiftedP2.y - 5, shiftedP3.x + 2, shiftedP3.y - 5, Surf_Tileset, BorderRect.x, BorderRect.y,
                                               BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
                                               BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P2.i, P3.i);
                 }
@@ -1433,25 +1414,25 @@ void CSurface::DrawTriangle(SDL_Surface* display, struct DisplayRectangle displa
                 // rsu-down
                 // sge_TexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y,
                 // P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x,
-                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w,
-                // BorderRect.y+BorderRect.h);  rsu-left  sge_TexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y, P2.x-displayRect.x,
-                // P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3, P2.x-displayRect.x-5, P2.y-displayRect.y-1,
-                // Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x,
-                // BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  rsu-right  sge_TexturedRect(display,
-                // P3.x-displayRect.x, P3.y-displayRect.y+2, P1.x-displayRect.x, P1.y-displayRect.y, P3.x-displayRect.x+5,
-                // P3.y-displayRect.y-1, P1.x-displayRect.x+5, P1.y-displayRect.y-3, Surf_Tileset, BorderRect.x, BorderRect.y,
-                // BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w,
-                // BorderRect.y+BorderRect.h);  usd-top  sge_TexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y,
-                // P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5, P3.x-displayRect.x+2,
-                // P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x,
-                // BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-left  sge_TexturedRect(display,
-                // P1.x-displayRect.x, P1.y-displayRect.y-2, P2.x-displayRect.x, P2.y-displayRect.y, P1.x-displayRect.x-5,
-                // P1.y-displayRect.y+1, P2.x-displayRect.x-5, P2.y-displayRect.y+3, Surf_Tileset, BorderRect.x, BorderRect.y,
-                // BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w,
-                // BorderRect.y+BorderRect.h);  usd-right  sge_TexturedRect(display, P3.x-displayRect.x, P3.y-displayRect.y,
-                // P1.x-displayRect.x, P1.y-displayRect.y-2, P3.x-displayRect.x+5, P3.y-displayRect.y+3, P1.x-displayRect.x+5,
-                // P1.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x,
-                // BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h,
+                // BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  rsu-left  sge_TexturedRect(display, P1.x-displayRect.x,
+                // P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3,
+                // P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w,
+                // BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  rsu-right
+                // sge_TexturedRect(display, P3.x-displayRect.x, P3.y-displayRect.y+2, P1.x-displayRect.x, P1.y-displayRect.y,
+                // P3.x-displayRect.x+5, P3.y-displayRect.y-1, P1.x-displayRect.x+5, P1.y-displayRect.y-3, Surf_Tileset, BorderRect.x,
+                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h,
+                // BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-top  sge_TexturedRect(display, P2.x-displayRect.x-2,
+                // P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5,
+                // P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w,
+                // BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-left
+                // sge_TexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y-2, P2.x-displayRect.x, P2.y-displayRect.y,
+                // P1.x-displayRect.x-5, P1.y-displayRect.y+1, P2.x-displayRect.x-5, P2.y-displayRect.y+3, Surf_Tileset, BorderRect.x,
+                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h,
+                // BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-right  sge_TexturedRect(display, P3.x-displayRect.x,
+                // P3.y-displayRect.y, P1.x-displayRect.x, P1.y-displayRect.y-2, P3.x-displayRect.x+5, P3.y-displayRect.y+3,
+                // P1.x-displayRect.x+5, P1.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w,
+                // BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
             }
         }
     }
@@ -1786,19 +1767,19 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
     }
 }
 
-Sint32 CSurface::get_LightIntensity(struct vector node)
+Sint32 CSurface::get_LightIntensity(vector node)
 {
     // we calculate the light intensity right now
     float I, Ip = 1.1f, kd = 1, light_const = 1.0f;
-    struct vector L = {-10, 5, 0.5f};
+    vector L = {-10, 5, 0.5f};
     L = get_normVector(L);
     I = Ip * kd * (node.x * L.x + node.y * L.y + node.z * L.z) + light_const;
     return (Sint32)(I * pow(2, 16));
 }
 
-struct vector CSurface::get_nodeVector(struct vector v1, struct vector v2, struct vector v3)
+vector CSurface::get_nodeVector(vector v1, vector v2, vector v3)
 {
-    struct vector node;
+    vector node;
     // deviding through 3 is not necessary cause normal vector would be the same
     node.x = v1.x + v2.x + v3.x;
     node.y = v1.y + v2.y + v3.y;
@@ -1807,9 +1788,9 @@ struct vector CSurface::get_nodeVector(struct vector v1, struct vector v2, struc
     return node;
 }
 
-struct vector CSurface::get_normVector(struct vector v)
+vector CSurface::get_normVector(vector v)
 {
-    struct vector normal;
+    vector normal;
     float length = sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
     // in case vector length equals 0 (should not happen)
     if(length == 0)
@@ -1828,12 +1809,12 @@ struct vector CSurface::get_normVector(struct vector v)
     return normal;
 }
 
-struct vector CSurface::get_flatVector(struct point* P1, struct point* P2, struct point* P3)
+vector CSurface::get_flatVector(struct point* P1, struct point* P2, struct point* P3)
 {
     // vector components
     float vax, vay, vaz, vbx, vby, vbz;
     // cross product
-    struct vector cross;
+    vector cross;
 
     vax = static_cast<float>(P1->x - P2->x);
     vay = static_cast<float>(P1->y - P2->y);

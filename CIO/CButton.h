@@ -19,7 +19,7 @@ private:
     int pic_marked;
     int pic_background;
     int button_picture;
-    unsigned char* button_text;
+    const char* button_text;
     int button_text_color;
     bool marked;
     bool clicked;
@@ -34,19 +34,18 @@ public:
             const char* text = NULL, int picture = -1);
     ~CButton();
     // Access
-    int getX(void) { return x; };
-    int getY(void) { return y; };
-    int getW(void) { return w; };
-    int getH(void) { return h; };
+    int getX() { return x; };
+    int getY() { return y; };
+    int getW() { return w; };
+    int getH() { return h; };
     void setX(int x) { this->x = x; };
     void setY(int y) { this->y = y; };
     void setButtonPicture(int picture);
     void setButtonText(const char* text);
-    void setButtonText(unsigned char* text);
     void setMouseData(SDL_MouseMotionEvent motion);
     void setMouseData(SDL_MouseButtonEvent button);
-    bool render(void);
-    SDL_Surface* getSurface(void)
+    bool render();
+    SDL_Surface* getSurface()
     {
         render();
         return Surf_Button;

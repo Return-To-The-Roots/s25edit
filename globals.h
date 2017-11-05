@@ -2,15 +2,18 @@
 #define _GLOBALS_H
 
 #include "includes.h"
+#include <vector>
+
+class CGame;
 
 namespace global {
 // array for all pictures
-extern bobBMP bmpArray[];
+extern std::vector<bobBMP> bmpArray;
 // array for all shadows
-extern bobSHADOW shadowArray[];
+extern std::vector<bobSHADOW> shadowArray;
 // array for all palettes
-extern bobPAL palArray[];
-// the game object
+extern std::vector<bobPAL> palArray;
+// the game objec
 extern CGame* s2;
 } // namespace global
 

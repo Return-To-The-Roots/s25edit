@@ -53,30 +53,30 @@ enum
 };
 
 // Structure for Bobtypes 2 (RLE-Bitmaps), 4 (specific Bitmaps), 14 (uncompressed Bitmaps)
-typedef struct BobtypeBMP
+struct bobBMP
 {
     Uint16 nx;
     Uint16 ny;
     Uint16 w;
     Uint16 h;
     SDL_Surface* surface;
-} bobBMP;
+};
 
 // Structure for Bobtype 5 (Palette)
-typedef struct BobtypePAL
+struct bobPAL
 {
     SDL_Color colors[256];
-} bobPAL;
+};
 
 // Structure for Bobtype 7 (Shadow-Bitmaps)
-typedef struct BobtypeSHADOW
+struct bobSHADOW
 {
     Uint16 nx;
     Uint16 ny;
     Uint16 w;
     Uint16 h;
     SDL_Surface* surface;
-} bobSHADOW;
+};
 
 // Datatypes for the Map
 // vector structure
@@ -98,12 +98,12 @@ struct point
     Uint16 VertexX; /* number of the vertex on x-axis */
     Uint16 VertexY; /* number of the vertex on y-axis */
     Sint32 x;
-    Sint32 y;   /* calculated with section 1 */
-    int z;      /* calculated with section 1 */
-    Uint8 h;    /* section 1 */
-    Sint32 i;   /* calculated light values for new shading by SGE (a 16 bit integer shifted left 16 times --> fixed point math for speed) */
-    struct vector flatVector;
-    struct vector normVector;
+    Sint32 y; /* calculated with section 1 */
+    int z;    /* calculated with section 1 */
+    Uint8 h;  /* section 1 */
+    Sint32 i; /* calculated light values for new shading by SGE (a 16 bit integer shifted left 16 times --> fixed point math for speed) */
+    vector flatVector;
+    vector normVector;
     Uint8 rsuTexture; /* section 2 */
     Uint8 usdTexture; /* section 3 */
     Uint8 road;       /* section 4 */
@@ -129,7 +129,7 @@ struct Point16
     Sint16 x, y;
 };
 // map strutcture
-typedef struct BobtypeMAP
+struct bobMAP
 {
     char name[20];
     Uint16 height;
@@ -147,7 +147,7 @@ typedef struct BobtypeMAP
     // 250 items from the big map header
     MapHeaderItem header[250];
     struct point* vertex;
-} bobMAP;
+};
 // map types
 #define MAP_GREENLAND 0x00
 #define MAP_WASTELAND 0x01
@@ -322,122 +322,122 @@ enum
     ///             ONLY THE START-VALUES (FONT9_SPACE, FONT11_SPACE, FONT14_SPACE) HAVE THE RIGHT INDEX!
 
     // fontsize 11
-    FONT11_SPACE,               // spacebar
-    FONT11_EXCLAMATION_POINT,   // !
-    FONT11_DOUBLE_QUOTES,       // "
-    FONT11_SHARP,               // #
-    FONT11_DOLLAR,              // $
-    FONT11_PERCENT,             // %
-    FONT11_AMPERSAND,           // &
-    FONT11_SINGLE_QUOTES,       // '
-    FONT11_ROUND_BRACKET_OPEN,  // (
-    FONT11_ROUND_BRACKET_CLOSE, // )
-    FONT11_STAR,                // *
-    FONT11_PLUS,                // +
-    FONT11_COMMA,               // ,
-    FONT11_MINUS,               // -
-    FONT11_DOT,                 // .
-    FONT11_SLASH,               // /
-    FONT11_0,                   // 0
-    FONT11_1,                   // 1
-    FONT11_2,                   // 2
-    FONT11_3,                   // 3
-    FONT11_4,                   // 4
-    FONT11_5,                   // 5
-    FONT11_6,                   // 6
-    FONT11_7,                   // 7
-    FONT11_8,                   // 8
-    FONT11_9,                   // 9
-    FONT11_COLON,               // :
-    FONT11_SEMICOLON,           // ;
-    FONT11_ARROW_BRACKET_OPEN,  // <
-    FONT11_EQUAL,               // =
-    FONT11_ARROW_BRACKET_CLOSE, // >
-    FONT11_INTERROGATION_POINT, // ?
-    FONT11_AT,                  // @
-    FONT11_A,                   // A
-    FONT11_B,                   // B
-    FONT11_C,                   // C
-    FONT11_D,                   // D
-    FONT11_E,                   // E
-    FONT11_F,                   // F
-    FONT11_G,                   // G
-    FONT11_H,                   // H
-    FONT11_I,                   // I
-    FONT11_J,                   // J
-    FONT11_K,                   // K
-    FONT11_L,                   // L
-    FONT11_M,                   // M
-    FONT11_N,                   // N
-    FONT11_O,                   // O
-    FONT11_P,                   // P
-    FONT11_Q,                   // Q
-    FONT11_R,                   // R
-    FONT11_S,                   // S
-    FONT11_T,                   // T
-    FONT11_U,                   // U
-    FONT11_V,                   // V
-    FONT11_W,                   // W
-    FONT11_X,                   // X
-    FONT11_Y,                   // Y
-    FONT11_Z,                   // Z
-    FONT11_BACKSLASH,           /* \ */
-    FONT11_UNDERSCORE,          // _
-    FONT11_a,                   // a
-    FONT11_b,                   // b
-    FONT11_c,                   // c
-    FONT11_d,                   // d
-    FONT11_e,                   // e
-    FONT11_f,                   // f
-    FONT11_g,                   // g
-    FONT11_h,                   // h
-    FONT11_i,                   // i
-    FONT11_j,                   // j
-    FONT11_k,                   // k
-    FONT11_l,                   // l
-    FONT11_m,                   // m
-    FONT11_n,                   // n
-    FONT11_o,                   // o
-    FONT11_p,                   // p
-    FONT11_q,                   // q
-    FONT11_r,                   // r
-    FONT11_s,                   // s
-    FONT11_t,                   // t
-    FONT11_u,                   // u
-    FONT11_v,                   // v
-    FONT11_w,                   // w
-    FONT11_x,                   // x
-    FONT11_y,                   // y
-    FONT11_z,                   // z
-    FONT11_ANSI_199,            // Ç
-    FONT11_ANSI_252,            // ü
-    FONT11_ANSI_233,            // é
-    FONT11_ANSI_226,            // â
-    FONT11_ANSI_228,            // ä
-    FONT11_ANSI_224,            // à
-    FONT11_ANSI_231,            // ç
-    FONT11_ANSI_234,            // ê
-    FONT11_ANSI_235,            // ë
-    FONT11_ANSI_232,            // è
-    FONT11_ANSI_239,            // ï
-    FONT11_ANSI_238,            // î
-    FONT11_ANSI_236,            // ì
-    FONT11_ANSI_196,            // Ä
-    FONT11_ANSI_244,            // ô
-    FONT11_ANSI_246,            // ö
-    FONT11_ANSI_242,            // ò
-    FONT11_ANSI_251,            // û
-    FONT11_ANSI_249,            // ù
-    FONT11_ANSI_214,            // Ö
-    FONT11_ANSI_220,            // Ü
-    FONT11_ANSI_225,            // á
-    FONT11_ANSI_237,            // í
-    FONT11_ANSI_243,            // ó
-    FONT11_ANSI_250,            // ú
-    FONT11_ANSI_241,            // ñ
-    FONT11_ANSI_223,            // ß
-    FONT11_ANSI_169,            // ©
-                     // fontsize 9
+    FONT11_SPACE,                                        // spacebar
+    FONT11_EXCLAMATION_POINT,                            // !
+    FONT11_DOUBLE_QUOTES,                                // "
+    FONT11_SHARP,                                        // #
+    FONT11_DOLLAR,                                       // $
+    FONT11_PERCENT,                                      // %
+    FONT11_AMPERSAND,                                    // &
+    FONT11_SINGLE_QUOTES,                                // '
+    FONT11_ROUND_BRACKET_OPEN,                           // (
+    FONT11_ROUND_BRACKET_CLOSE,                          // )
+    FONT11_STAR,                                         // *
+    FONT11_PLUS,                                         // +
+    FONT11_COMMA,                                        // ,
+    FONT11_MINUS,                                        // -
+    FONT11_DOT,                                          // .
+    FONT11_SLASH,                                        // /
+    FONT11_0,                                            // 0
+    FONT11_1,                                            // 1
+    FONT11_2,                                            // 2
+    FONT11_3,                                            // 3
+    FONT11_4,                                            // 4
+    FONT11_5,                                            // 5
+    FONT11_6,                                            // 6
+    FONT11_7,                                            // 7
+    FONT11_8,                                            // 8
+    FONT11_9,                                            // 9
+    FONT11_COLON,                                        // :
+    FONT11_SEMICOLON,                                    // ;
+    FONT11_ARROW_BRACKET_OPEN,                           // <
+    FONT11_EQUAL,                                        // =
+    FONT11_ARROW_BRACKET_CLOSE,                          // >
+    FONT11_INTERROGATION_POINT,                          // ?
+    FONT11_AT,                                           // @
+    FONT11_A,                                            // A
+    FONT11_B,                                            // B
+    FONT11_C,                                            // C
+    FONT11_D,                                            // D
+    FONT11_E,                                            // E
+    FONT11_F,                                            // F
+    FONT11_G,                                            // G
+    FONT11_H,                                            // H
+    FONT11_I,                                            // I
+    FONT11_J,                                            // J
+    FONT11_K,                                            // K
+    FONT11_L,                                            // L
+    FONT11_M,                                            // M
+    FONT11_N,                                            // N
+    FONT11_O,                                            // O
+    FONT11_P,                                            // P
+    FONT11_Q,                                            // Q
+    FONT11_R,                                            // R
+    FONT11_S,                                            // S
+    FONT11_T,                                            // T
+    FONT11_U,                                            // U
+    FONT11_V,                                            // V
+    FONT11_W,                                            // W
+    FONT11_X,                                            // X
+    FONT11_Y,                                            // Y
+    FONT11_Z,                                            // Z
+    FONT11_BACKSLASH,                                    /* \ */
+    FONT11_UNDERSCORE,                                   // _
+    FONT11_a,                                            // a
+    FONT11_b,                                            // b
+    FONT11_c,                                            // c
+    FONT11_d,                                            // d
+    FONT11_e,                                            // e
+    FONT11_f,                                            // f
+    FONT11_g,                                            // g
+    FONT11_h,                                            // h
+    FONT11_i,                                            // i
+    FONT11_j,                                            // j
+    FONT11_k,                                            // k
+    FONT11_l,                                            // l
+    FONT11_m,                                            // m
+    FONT11_n,                                            // n
+    FONT11_o,                                            // o
+    FONT11_p,                                            // p
+    FONT11_q,                                            // q
+    FONT11_r,                                            // r
+    FONT11_s,                                            // s
+    FONT11_t,                                            // t
+    FONT11_u,                                            // u
+    FONT11_v,                                            // v
+    FONT11_w,                                            // w
+    FONT11_x,                                            // x
+    FONT11_y,                                            // y
+    FONT11_z,                                            // z
+    FONT11_ANSI_199,                                     // Ç
+    FONT11_ANSI_252,                                     // ü
+    FONT11_ANSI_233,                                     // é
+    FONT11_ANSI_226,                                     // â
+    FONT11_ANSI_228,                                     // ä
+    FONT11_ANSI_224,                                     // à
+    FONT11_ANSI_231,                                     // ç
+    FONT11_ANSI_234,                                     // ê
+    FONT11_ANSI_235,                                     // ë
+    FONT11_ANSI_232,                                     // è
+    FONT11_ANSI_239,                                     // ï
+    FONT11_ANSI_238,                                     // î
+    FONT11_ANSI_236,                                     // ì
+    FONT11_ANSI_196,                                     // Ä
+    FONT11_ANSI_244,                                     // ô
+    FONT11_ANSI_246,                                     // ö
+    FONT11_ANSI_242,                                     // ò
+    FONT11_ANSI_251,                                     // û
+    FONT11_ANSI_249,                                     // ù
+    FONT11_ANSI_214,                                     // Ö
+    FONT11_ANSI_220,                                     // Ü
+    FONT11_ANSI_225,                                     // á
+    FONT11_ANSI_237,                                     // í
+    FONT11_ANSI_243,                                     // ó
+    FONT11_ANSI_250,                                     // ú
+    FONT11_ANSI_241,                                     // ñ
+    FONT11_ANSI_223,                                     // ß
+    FONT11_ANSI_169,                                     // ©
+                                                         // fontsize 9
     FONT9_SPACE = FONT11_SPACE + FONT_COLOR_COUNT * 115, // spacebar
     FONT9_EXCLAMATION_POINT,                             // !
     FONT9_DOUBLE_QUOTES,                                 // "
@@ -553,7 +553,7 @@ enum
     FONT9_ANSI_241,                                      // ñ
     FONT9_ANSI_223,                                      // ß
     FONT9_ANSI_169,                                      // ©
-                    // fontsize 14
+                                                         // fontsize 14
     FONT14_SPACE = FONT9_SPACE + FONT_COLOR_COUNT * 115, // spacebar
     FONT14_EXCLAMATION_POINT,                            // !
     FONT14_DOUBLE_QUOTES,                                // "
@@ -669,7 +669,7 @@ enum
     FONT14_ANSI_241,                                     // ñ
     FONT14_ANSI_223,                                     // ß
     FONT14_ANSI_169,                                     // ©
-                     // END: FONT
+                                                         // END: FONT
 
     // now the main resources will follow (frames, cursor, ...)
     // resolution behind means not resolution of the pic but window resolution the pic belongs to
@@ -730,7 +730,7 @@ enum
 // END: /DATA/RESOURCE.IDX (AND /DATA/RESOURCE.DAT) OR /DATA/EDITRES.IDX (AND /DATA/EDITRES.DAT)
 
 #ifdef _EDITORMODE
-    // BEGIN: /DATA/IO/EDITIO.IDX (AND /DATA/IO/EDITIO.DAT)
+                                                // BEGIN: /DATA/IO/EDITIO.IDX (AND /DATA/IO/EDITIO.DAT)
     BUTTON_GREY_BRIGHT,
     BUTTON_GREY_DARK,
     BUTTON_RED1_BRIGHT,
@@ -901,7 +901,7 @@ enum
     PICTURE_SMALL_SHEEP,
 // END: /DATA/EDITBOB.LST
 #else
-    // BEGIN: /DATA/IO/IO.IDX (AND /DATA/IO/IO.DAT)
+                                                // BEGIN: /DATA/IO/IO.IDX (AND /DATA/IO/IO.DAT)
     BUTTON_GREY_BRIGHT,
     BUTTON_GREY_DARK,
     BUTTON_RED1_BRIGHT,

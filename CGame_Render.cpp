@@ -1,4 +1,9 @@
 #include "CGame.h"
+#include "CIO/CMenu.h"
+#include "CIO/CWindow.h"
+#include "CMap.h"
+#include "CSurface.h"
+#include "globals.h"
 #include <stdio.h>
 
 void CGame::Render()
@@ -28,6 +33,7 @@ void CGame::Render()
        || ((fullscreen && !(Surf_Display->flags & SDL_FULLSCREEN)) || (!fullscreen && (Surf_Display->flags & SDL_FULLSCREEN))))
     {
         SDL_FreeSurface(Surf_Display);
+        Surf_Display = NULL;
 
         if(CSurface::useOpenGL)
         {
@@ -105,13 +111,6 @@ void CGame::Render()
 #ifdef _ADMINMODE
     FrameCounter++;
 #endif
-
-    // CSurface::Draw(Surf_Display, bmpArray[0].surface, 0, 0);
-    // CFont::writeText(Surf_Display,
-    // "!@#$%&*()-_=+,<.>/?;:'\"\\1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ©ÄÇÖÜßàáâäçèéêëìíîïñòóôöùúûü", 10, 150, 9);
-    // CFont::writeText(Surf_Display, "!!!!", 10, 150, 14, FONT_YELLOW);
-    // char text[] = "hasdfsdf34!!!!";
-    // CFont::writeText(Surf_Display, (unsigned char*)text, 10, 150, 14, FONT_MINTGREEN, ALIGN_RIGHT);
 
     if(CSurface::useOpenGL)
     {

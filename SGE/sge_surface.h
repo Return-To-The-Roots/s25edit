@@ -34,12 +34,12 @@
 #ifdef _SGE_C
 extern "C" {
 #endif
-DECLSPEC void sge_Update_OFF(void);
-DECLSPEC void sge_Update_ON(void);
-DECLSPEC void sge_Lock_OFF(void);
-DECLSPEC void sge_Lock_ON(void);
-DECLSPEC Uint8 sge_getUpdate(void);
-DECLSPEC Uint8 sge_getLock(void);
+DECLSPEC void sge_Update_OFF();
+DECLSPEC void sge_Update_ON();
+DECLSPEC void sge_Lock_OFF();
+DECLSPEC void sge_Lock_ON();
+DECLSPEC Uint8 sge_getUpdate();
+DECLSPEC Uint8 sge_getLock();
 DECLSPEC void sge_UpdateRect(SDL_Surface* screen, Sint16 x, Sint16 y, Uint16 w, Uint16 h);
 DECLSPEC SDL_Surface* sge_CreateAlphaSurface(Uint32 flags, int width, int height);
 DECLSPEC Uint32 sge_MapAlpha(Uint8 R, Uint8 G, Uint8 B, Uint8 A);

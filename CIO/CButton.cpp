@@ -1,4 +1,7 @@
 #include "CButton.h"
+#include "../CSurface.h"
+#include "../globals.h"
+#include "CFont.h"
 
 CButton::CButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color, const char* text,
                  int button_picture)
@@ -11,7 +14,7 @@ CButton::CButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint1
     this->h = h;
     setColor(color);
     this->button_picture = button_picture;
-    button_text = (unsigned char*)text;
+    button_text = text;
     button_text_color = FONT_YELLOW;
     this->callback = callback;
     this->clickedParam = clickedParam;
@@ -35,13 +38,7 @@ void CButton::setButtonPicture(int picture)
 
 void CButton::setButtonText(const char* text)
 {
-    button_text = (unsigned char*)text;
-    needRender = true;
-}
-
-void CButton::setButtonText(unsigned char* text)
-{
-    button_text = (unsigned char*)text;
+    button_text = text;
     needRender = true;
 }
 
@@ -137,7 +134,7 @@ void CButton::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
-bool CButton::render(void)
+bool CButton::render()
 {
     // position in the Surface 'Surf_Button'
     Uint16 pos_x = 0;
@@ -312,7 +309,7 @@ bool CButton::render(void)
         } else
         {
             button_picture = -1;
-            button_text = (unsigned char*)"PIC";
+            button_text = "PIC";
         }
     } else if(button_text != NULL)
         CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), 11, button_text_color, ALIGN_MIDDLE);

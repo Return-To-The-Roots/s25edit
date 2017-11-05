@@ -1,4 +1,8 @@
 #include "CGame.h"
+#include "CIO/CMenu.h"
+#include "CIO/CWindow.h"
+#include "CMap.h"
+#include "globals.h"
 
 #ifdef _WIN32
 #include <direct.h>
@@ -10,6 +14,7 @@
 #define cwd getcwd
 #define cd chdir
 #endif
+#include <iostream>
 
 CGame::CGame()
 {
@@ -213,7 +218,7 @@ bool CGame::UnregisterCallback(void (*callback)(int))
     return false;
 }
 
-void CGame::delMapObj(void)
+void CGame::delMapObj()
 {
     delete MapObj;
     MapObj = NULL;

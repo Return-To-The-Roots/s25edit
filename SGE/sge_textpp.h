@@ -70,25 +70,25 @@ protected:
 
 public:
     // Creator
-    sge_TextEditor(void);
+    sge_TextEditor();
     // Destructor
-    virtual ~sge_TextEditor(void);
+    virtual ~sge_TextEditor();
 
     // Adds an char before the cursor
     bool insert(Uint16 c);
     // Removes the char left of cursor
-    bool remove_left(void);
+    bool remove_left();
     // Removes the char right of cursor
-    bool remove_right(void);
+    bool remove_right();
 
     // Move cursor left
-    inline bool move_left(void);
+    inline bool move_left();
     // Move cursor right
-    inline bool move_right(void);
+    inline bool move_right();
     // Move cursor to the start
-    bool move_start(void);
+    bool move_start();
     // Move cursor to the end
-    bool move_end(void);
+    bool move_end();
 
     // Returns text as latin1 or unicode with or without the cursor char
     std::string get_string(bool wCursor = true);
@@ -108,7 +108,7 @@ public:
     }
 
     // Change the text
-    void clear_text(void);
+    void clear_text();
     void change_text(const std::string s);
     // void change_utext(const std::basic_string<Uint16> s);
     void change_uctext(Uint16* text);
@@ -118,7 +118,7 @@ public:
     void max_chars(unsigned int c) { mChars = c; }
 
     // Returns the number of characters in the current string
-    unsigned int get_chars(void) { return chars; }
+    unsigned int get_chars() { return chars; }
 };
 
 //==================================================================================
@@ -152,7 +152,7 @@ protected:
 
 public:
     // Constructor
-    sge_text(void)
+    sge_text()
     {
         tt_font = NULL;
         bm_font = NULL;
@@ -162,7 +162,7 @@ public:
         sCursor = false;
         alpha_level = SDL_ALPHA_OPAQUE;
     }
-    virtual ~sge_text(void)
+    virtual ~sge_text()
     {
         if(text_surface)
         {
@@ -220,14 +220,14 @@ public:
     // Render text to a surface
     SDL_Rect render_text(SDL_Surface* surface, Sint16 x, Sint16 y);
 
-    void use_TTrender(void)
+    void use_TTrender()
     {
         if(tt_font)
         {
             use_tt = true;
         }
     }
-    void use_BMrender(void)
+    void use_BMrender()
     {
         if(bm_font)
         {
@@ -264,7 +264,7 @@ public:
         current_pos.h = 0;
     }
 
-    virtual void draw(void);
+    virtual void draw();
 };
 
 class DECLSPEC sge_TextSsprite : public sge_text, public sge_ssprite
@@ -287,7 +287,7 @@ public:
         current_pos.h = 0;
     }
 
-    virtual void draw(void);
+    virtual void draw();
 };
 
 class DECLSPEC sge_TextSprite : public sge_text, public sge_sprite
@@ -310,7 +310,7 @@ public:
         current_pos.h = 0;
     }
 
-    virtual void draw(void);
+    virtual void draw();
 };
 
 //==================================================================================

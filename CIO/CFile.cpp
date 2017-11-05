@@ -1,10 +1,12 @@
 #include "CFile.h"
+#include "../CSurface.h"
+#include "../globals.h"
 
 FILE* CFile::fp = NULL;
-bobBMP* CFile::bmpArray = global::bmpArray;
-bobSHADOW* CFile::shadowArray = global::shadowArray;
-bobPAL* CFile::palArray = global::palArray;
-bobPAL* CFile::palActual = global::palArray;
+bobBMP* CFile::bmpArray = &global::bmpArray[0];
+bobSHADOW* CFile::shadowArray = &global::shadowArray[0];
+bobPAL* CFile::palArray = &global::palArray[0];
+bobPAL* CFile::palActual = &global::palArray[0];
 bool CFile::loadPAL = false;
 
 CFile::CFile() {}
@@ -89,7 +91,7 @@ void* CFile::open_file(const char* filename, char filetype, bool only_loadPAL)
     return open_file(file, filetype, only_loadPAL);
 }
 
-bool CFile::open_lst(void)
+bool CFile::open_lst()
 {
     // type of entry (used or unused entry)
     Uint16 entrytype;
@@ -158,7 +160,7 @@ bool CFile::open_lst(void)
     return true;
 }
 
-bool CFile::open_bob(void)
+bool CFile::open_bob()
 {
     return false;
 }
@@ -285,7 +287,7 @@ bool CFile::open_idx(char* filename)
     return true;
 }
 
-bool CFile::open_bbm(void)
+bool CFile::open_bbm()
 {
     // skip header (48 Bytes)
     fseek(fp, 48, SEEK_CUR);
@@ -485,7 +487,7 @@ bool CFile::open_lbm(char* filename)
     return true;
 }
 
-bool CFile::open_gou(void)
+bool CFile::open_gou()
 {
     static int internalArrayCtr = 0; // maximum is two cause there are only 3 GOUx.DAT-Files
 
@@ -498,7 +500,7 @@ bool CFile::open_gou(void)
     return true;
 }
 
-bobMAP* CFile::open_wld(void)
+bobMAP* CFile::open_wld()
 {
     bobMAP* myMap = (bobMAP*)malloc(sizeof(bobMAP));
     Uint8 heightFactor;
@@ -695,7 +697,7 @@ bobMAP* CFile::open_wld(void)
     return myMap;
 }
 
-bobMAP* CFile::open_swd(void)
+bobMAP* CFile::open_swd()
 {
     return open_wld();
 }
@@ -748,27 +750,27 @@ bool CFile::save_file(const char* filename, char filetype, void* data)
 
 bool CFile::save_lst(void* data)
 {
-    return true;
+    return false;
 }
 
 bool CFile::save_bob(void* data)
 {
-    return true;
+    return false;
 }
 
 bool CFile::save_idx(void* data, char* filename)
 {
-    return true;
+    return false;
 }
 
 bool CFile::save_bbm(void* data)
 {
-    return true;
+    return false;
 }
 
 bool CFile::save_lbm(void* data)
 {
-    return true;
+    return false;
 }
 
 bool CFile::save_wld(void* data)
@@ -979,12 +981,12 @@ bool CFile::save_swd(void* data)
     return save_wld(data);
 }
 
-bool CFile::read_bob01(void)
+bool CFile::read_bob01()
 {
-    return true;
+    return false;
 }
 
-bool CFile::read_bob02(void)
+bool CFile::read_bob02()
 {
     // length of data block
     Uint32 length;
@@ -1105,7 +1107,7 @@ bool CFile::read_bob02(void)
     return true;
 }
 
-bool CFile::read_bob03(void)
+bool CFile::read_bob03()
 {
     // bobtype of the entry
     Uint16 bobtype;
@@ -1280,7 +1282,7 @@ bool CFile::read_bob04(int player_color)
     return true;
 }
 
-bool CFile::read_bob05(void)
+bool CFile::read_bob05()
 {
     // skip: unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
@@ -1297,7 +1299,7 @@ bool CFile::read_bob05(void)
     return true;
 }
 
-bool CFile::read_bob07(void)
+bool CFile::read_bob07()
 {
     // length of data block
     Uint32 length;
@@ -1419,7 +1421,7 @@ bool CFile::read_bob07(void)
     return true;
 }
 
-bool CFile::read_bob14(void)
+bool CFile::read_bob14()
 {
     // length of data block
     Uint32 length;

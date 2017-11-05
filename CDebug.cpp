@@ -1,4 +1,8 @@
 #include "CDebug.h"
+#include "CGame.h"
+#include "CIO/CWindow.h"
+#include "CMap.h"
+#include "globals.h"
 
 #ifdef _ADMINMODE
 
@@ -99,7 +103,7 @@ void CDebug::sendParam(int Param)
     }
 }
 
-void CDebug::actualizeData(void)
+void CDebug::actualizeData()
 {
     // del FrameCounterText before drawing new
     if(FrameCounterText != NULL)

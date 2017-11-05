@@ -1,4 +1,6 @@
 #include "CPicture.h"
+#include "../CSurface.h"
+#include "../globals.h"
 
 CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
 {
@@ -68,7 +70,7 @@ void CPicture::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
-bool CPicture::render(void)
+bool CPicture::render()
 {
     // if we don't need to render, all is up to date, return true
     if(!needRender)

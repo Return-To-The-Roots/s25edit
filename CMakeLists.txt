@@ -45,6 +45,9 @@ include_directories(SYSTEM ${SDL_INCLUDE_DIR})
 
 file(GLOB MAIN_SOURCES *.cpp *.h)
 file(GLOB CIO_SOURCES CIO/*.cpp CIO/*.h)
+SOURCE_GROUP(Main FILES ${MAIN_SOURCES})
+SOURCE_GROUP(CIO FILES ${CIO_SOURCES})
+
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES})
 
 target_link_libraries(s25edit SGE ${SDL_LIBRARY})

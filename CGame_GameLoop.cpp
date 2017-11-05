@@ -1,4 +1,6 @@
 #include "CGame.h"
+#include "CIO/CMenu.h"
+#include "CIO/CWindow.h"
 
 void CGame::GameLoop()
 {

@@ -36,7 +36,7 @@ int sge_Random(int min, int max)
 // Seed the random number generator with a number from the system clock.
 // Should be called once before the first use of sge_Random.
 //==================================================================================
-void sge_Randomize(void)
+void sge_Randomize()
 {
     srand(static_cast<unsigned>(time(NULL)));
 }
@@ -44,7 +44,7 @@ void sge_Randomize(void)
 //==================================================================================
 // Test the resolution of SDL_Delay()
 //==================================================================================
-Uint32 sge_CalibrateDelay(void)
+Uint32 sge_CalibrateDelay()
 {
     SDL_Delay(10);
     delay_res = SDL_GetTicks();
@@ -57,7 +57,7 @@ Uint32 sge_CalibrateDelay(void)
 //==================================================================================
 // Get the resolution of SDL_Delay()
 //==================================================================================
-Uint32 sge_DelayRes(void)
+Uint32 sge_DelayRes()
 {
     return delay_res;
 }

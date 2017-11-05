@@ -124,14 +124,14 @@ void sge_screen::remove_shape_p(sge_shape* shape)
     shapes_p.remove(shape);
 }
 
-void sge_screen::clear_all(void)
+void sge_screen::clear_all()
 {
     shapes.clear();
     shapes_p.clear();
     rects.clear();
 }
 
-void sge_screen::update(void)
+void sge_screen::update()
 {
     SI i;
 
@@ -194,12 +194,12 @@ sge_surface::sge_surface(SDL_Surface* dest, SDL_Surface* src, Sint16 x, Sint16 y
     warp_border = false;
 }
 
-sge_surface::~sge_surface(void)
+sge_surface::~sge_surface()
 {
     // Nothing for now...
 }
 
-bool sge_surface::check_warp(void)
+bool sge_surface::check_warp()
 {
     bool flag = false;
 
@@ -298,7 +298,7 @@ int sge_surface::get_warp(SDL_Rect rec, SDL_Rect& r1, SDL_Rect& r2, SDL_Rect& r3
     return rects;
 }
 
-void sge_surface::warp_draw(void)
+void sge_surface::warp_draw()
 {
     SDL_Rect r1, r2, r3, r4;
     int rects = get_warp(current_pos, r1, r2, r3, r4);
@@ -389,7 +389,7 @@ void sge_surface::warp_clear(SDL_Surface* src, Sint16 srcX, Sint16 srcY)
 }
 
 // Draws the surface
-void sge_surface::draw(void)
+void sge_surface::draw()
 {
     if(!surface)
         return;
@@ -406,7 +406,7 @@ void sge_surface::draw(void)
     last_pos = current_pos;
 }
 
-void sge_surface::UpdateRects(void)
+void sge_surface::UpdateRects()
 {
     Sint16 xoffs = last_pos.x - prev_pos.x, yoffs = last_pos.y - prev_pos.y;
 
@@ -525,7 +525,7 @@ sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata
     bounce_border = true;
 }
 
-sge_ssprite::~sge_ssprite(void)
+sge_ssprite::~sge_ssprite()
 {
     // Empty the list
     for(FI i = frames.begin(); i != frames.end(); i++)
@@ -534,7 +534,7 @@ sge_ssprite::~sge_ssprite(void)
     frames.clear();
 }
 
-bool sge_ssprite::check_border(void)
+bool sge_ssprite::check_border()
 {
     if(!bounce_border)
         return sge_surface::check_border();
@@ -632,7 +632,7 @@ void sge_ssprite::skip_frame(int skips)
     current_pos.h = surface->h;
 }
 
-bool sge_ssprite::update(void)
+bool sge_ssprite::update()
 {
     move(xvel, yvel);
     return !((xvel == 0) && (yvel == 0));
@@ -677,7 +677,7 @@ void sge_ssprite::set_seq(int start, int stop, playing_mode mode)
     current_pos.h = surface->h;
 }
 
-void sge_ssprite::reset_seq(void)
+void sge_ssprite::reset_seq()
 {
     fi_start = frames.begin();
     fi_stop = frames.end();
@@ -695,7 +695,7 @@ void sge_ssprite::reset_seq(void)
         seq_mode = stop;
 }
 
-void sge_ssprite::first_frame(void)
+void sge_ssprite::first_frame()
 {
     current_fi = fi_start;
 
@@ -705,7 +705,7 @@ void sge_ssprite::first_frame(void)
     current_pos.h = surface->h;
 }
 
-void sge_ssprite::last_frame(void)
+void sge_ssprite::last_frame()
 {
     current_fi = fi_stop;
     current_fi--;
@@ -775,7 +775,7 @@ bool sge_sprite::update(Uint32 ticks)
     return ret;
 }
 
-bool sge_sprite::check_border(void)
+bool sge_sprite::check_border()
 {
     if(warp_border)
     {

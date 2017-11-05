@@ -3,6 +3,10 @@
 
 #include "includes.h"
 
+class CFont;
+class CWindow;
+class CMap;
+
 class CDebug
 {
 private:
@@ -83,7 +87,7 @@ public:
     ~CDebug();
     // Methods
     void sendParam(int Param);
-    void actualizeData(void);
+    void actualizeData();
 };
 
 #endif

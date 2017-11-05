@@ -3960,7 +3960,7 @@ public:
 
     pline* next;
 
-    virtual void update(void)
+    virtual void update()
     {
         x = Sint16(fx >> 16);
         fx += fm;
@@ -4406,7 +4406,7 @@ public:
 
     Uint8 r, g, b;
 
-    virtual void update(void)
+    virtual void update()
     {
         x = Sint16(fx >> 16);
         fx += fm;

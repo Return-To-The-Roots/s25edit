@@ -1,4 +1,8 @@
 #include "CGame.h"
+#include "CIO/CMenu.h"
+#include "CIO/CWindow.h"
+#include "CSurface.h"
+#include "globals.h"
 
 void CGame::Cleanup()
 {

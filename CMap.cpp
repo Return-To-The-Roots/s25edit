@@ -1,4 +1,11 @@
 #include "CMap.h"
+#include "CGame.h"
+#include "CIO/CFile.h"
+#include "CIO/CFont.h"
+#include "CSurface.h"
+#include "callbacks.h"
+#include "globals.h"
+#include <iostream>
 
 CMap::CMap(char* filename)
 {
@@ -126,7 +133,7 @@ void CMap::constructMap(char* filename, int width, int height, int type, int tex
     HorizontalMovementLocked = false;
     VerticalMovementLocked = false;
 }
-void CMap::destructMap(void)
+void CMap::destructMap()
 {
     // free all surfaces that MAP0x.LST needed
     unloadMapPics();
@@ -148,8 +155,10 @@ void CMap::destructMap(void)
     }
     // free the map surface
     SDL_FreeSurface(Surf_Map);
+    Surf_Map = NULL;
     // free the surface of the right menubar
     SDL_FreeSurface(Surf_RightMenubar);
+    Surf_RightMenubar = NULL;
     // free vertex array
     free(Vertices);
     // free vertex memory
@@ -234,7 +243,7 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
     return myMap;
 }
 
-void CMap::rotateMap(void)
+void CMap::rotateMap()
 {
     // we allocate memory for the new triangle field but with x equals the height and y equals the width
     struct point* new_vertex = NULL;
@@ -347,7 +356,7 @@ void CMap::rotateMap(void)
     displayRect.y = 0;
 }
 
-void CMap::MirrorMapOnXAxis(void)
+void CMap::MirrorMapOnXAxis()
 {
     for(int y = 1; y < map->height / 2; y++)
     {
@@ -386,7 +395,7 @@ void CMap::MirrorMapOnXAxis(void)
     }
 }
 
-void CMap::MirrorMapOnYAxis(void)
+void CMap::MirrorMapOnYAxis()
 {
     for(int y = 0; y < map->height; y++)
     {
@@ -430,7 +439,7 @@ void CMap::MirrorMapOnYAxis(void)
     }
 }
 
-void CMap::loadMapPics(void)
+void CMap::loadMapPics()
 {
     char outputString1[47], outputString2[34], outputString3[53];
     char picFile[17], palFile[23];
@@ -495,7 +504,7 @@ void CMap::loadMapPics(void)
     }
 }
 
-void CMap::unloadMapPics(void)
+void CMap::unloadMapPics()
 {
     for(int i = MAPPIC_ARROWCROSS_YELLOW; i <= MAPPIC_LAST_ENTRY; i++)
     {
@@ -503,7 +512,7 @@ void CMap::unloadMapPics(void)
         global::bmpArray[i].surface = NULL;
     }
     // set back bmpArray-pointer, cause MAP0x.LST is no longer needed
-    CFile::set_bmpArray(global::bmpArray + MAPPIC_ARROWCROSS_YELLOW);
+    CFile::set_bmpArray(&global::bmpArray[MAPPIC_ARROWCROSS_YELLOW]);
     // set back palArray-pointer, cause PALx.BBM is no longer needed
     CFile::set_palActual(&global::palArray[PAL_IO]);
     CFile::set_palArray(&global::palArray[PAL_IO + 1]);
@@ -656,7 +665,11 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
         {
             // the bugkill picture was clicked for quicksave
             callback::PleaseWait(INITIALIZING_CALL);
-            CFile::save_file("WORLDS/quicksave.swd", SWD, map);
+            if(!CFile::save_file("WORLDS/quicksave.swd", SWD, map))
+            {
+                callback::ShowStatus(INITIALIZING_CALL);
+                callback::ShowStatus(2);
+            }
             callback::PleaseWait(WINDOW_QUIT_MESSAGE);
             return;
         } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w - 37) && button.x <= (displayRect.w)
@@ -1123,7 +1136,7 @@ int CMap::correctMouseBlitY(int VertexX, int VertexY)
     return MouseBlitY;
 }
 
-void CMap::render(void)
+void CMap::render()
 {
     char textBuffer[100];
 
@@ -1195,20 +1208,20 @@ void CMap::render(void)
     sprintf(textBuffer, "%d    %d", VertexX, VertexY);
     CFont::writeText(Surf_Map, textBuffer, 20, 20);
     // text for MinReduceHeight and MaxRaiseHeight
-    sprintf(textBuffer, "min. Höhe: %#04x/0x3C  max. Höhe: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
+    sprintf(textBuffer, "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
     CFont::writeText(Surf_Map, textBuffer, 100, 20);
     // text for MovementLocked
     if(HorizontalMovementLocked && VerticalMovementLocked)
     {
-        sprintf(textBuffer, "Bewegung gesperrt (F9 oder F10 zum entsperren)");
+        sprintf(textBuffer, "Movement locked (F9 or F10 to unlock)");
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     } else if(HorizontalMovementLocked)
     {
-        sprintf(textBuffer, "Horizontale Bewegung gesperrt (F9 zum entsperren)");
+        sprintf(textBuffer, "Horizontal movement locked (F9 to unlock)");
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     } else if(VerticalMovementLocked)
     {
-        sprintf(textBuffer, "Vertikale Bewegung gesperrt (F10 zum entsperren)");
+        sprintf(textBuffer, "Vertikal mvement locked (F10 to unlock)");
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     }
 
@@ -1502,7 +1515,7 @@ void CMap::drawMinimap(SDL_Surface* Window)
                    20 + (displayRect.y + displayRect.h / 2) / TRIANGLE_HEIGHT / num_y - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
 }
 
-void CMap::modifyVertex(void)
+void CMap::modifyVertex()
 {
     static Uint32 TimeOfLastModification = SDL_GetTicks();
 
@@ -1642,7 +1655,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     int X, Y;
     struct point* tempP = &map->vertex[VertexY * map->width + VertexX];
     // this is to setup the building depending on the vertices around
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
 
     bool even = false;
@@ -1733,7 +1746,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     int X, Y;
     struct point* tempP = &map->vertex[VertexY * map->width + VertexX];
     // this is to setup the building depending on the vertices around
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
 
     bool even = false;
@@ -1830,7 +1843,7 @@ void CMap::modifyHeightPlane(int VertexX, int VertexY, Uint8 h)
 void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
 {
     // at first save all vertices we need to calculate the new building
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
 
     Uint8 height = map->vertex[VertexY * map->width + VertexX].h;
@@ -1884,7 +1897,7 @@ void CMap::modifyShading(int VertexX, int VertexY)
     // temporary to keep the lines short
     int X, Y;
     // this is to setup the shading depending on the vertices around (2 sections from the cursor)
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
 
     // shading stakes
@@ -1953,7 +1966,7 @@ void CMap::modifyTexture(int VertexX, int VertexY, bool rsu, bool usd)
     }
 
     // at least setup the possible building and the resources at the vertex and 1 section/2 sections around
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
     for(int i = 0; i < 19; i++)
     {
@@ -2134,7 +2147,7 @@ void CMap::modifyObject(int VertexX, int VertexY)
         }
     }
     // at least setup the possible building at the vertex and 1 section around
-    struct cursorPoint tempVertices[7];
+    cursorPoint tempVertices[7];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 1);
     for(int i = 0; i < 7; i++)
         modifyBuild(tempVertices[i].x, tempVertices[i].y);
@@ -2159,7 +2172,7 @@ void CMap::modifyAnimal(int VertexX, int VertexY)
 void CMap::modifyBuild(int VertexX, int VertexY)
 {
     // at first save all vertices we need to calculate the new building
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
 
     /// evtl. keine festen werte sondern addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine 0x00 sondern 0x68)
@@ -2443,7 +2456,7 @@ void CMap::modifyBuild(int VertexX, int VertexY)
 void CMap::modifyResource(int VertexX, int VertexY)
 {
     // at first save all vertices we need to check
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
 
     // SPECIAL CASE: test if we should set water only
@@ -2702,7 +2715,7 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
     }
 
     // at least setup the possible building at the vertex and 2 sections around
-    struct cursorPoint tempVertices[19];
+    cursorPoint tempVertices[19];
     calculateVerticesAround(tempVertices, VertexX, VertexY, 2);
     for(int i = 0; i < 19; i++)
         modifyBuild(tempVertices[i].x, tempVertices[i].y);
@@ -2773,7 +2786,7 @@ void CMap::calculateVertices()
         setupVerticesActivity();
 }
 
-void CMap::calculateVerticesAround(struct cursorPoint Vertices[], int VertexX, int VertexY, int ChangeSection)
+void CMap::calculateVerticesAround(cursorPoint Vertices[], int VertexX, int VertexY, int ChangeSection)
 {
     bool even = false;
     if(VertexY % 2 == 0)
@@ -2924,7 +2937,7 @@ void CMap::calculateVerticesAround(struct cursorPoint Vertices[], int VertexX, i
     }
 }
 
-void CMap::setupVerticesActivity(void)
+void CMap::setupVerticesActivity()
 {
     int index = 0;
     for(int i = -MAX_CHANGE_SECTION; i <= MAX_CHANGE_SECTION; i++)

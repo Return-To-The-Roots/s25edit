@@ -1,4 +1,17 @@
 #include "callbacks.h"
+#include "CDebug.h"
+#include "CGame.h"
+#include "CIO/CButton.h"
+#include "CIO/CFile.h"
+#include "CIO/CFont.h"
+#include "CIO/CMenu.h"
+#include "CIO/CPicture.h"
+#include "CIO/CSelectBox.h"
+#include "CIO/CTextfield.h"
+#include "CIO/CWindow.h"
+#include "CMap.h"
+#include "CSurface.h"
+#include "globals.h"
 
 void callback::PleaseWait(int Param)
 {
@@ -19,13 +32,13 @@ void callback::PleaseWait(int Param)
             if(WNDWait != NULL)
                 break;
             WNDWait = new CWindow(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106,
-                                  global::s2->getDisplaySurface()->h / 2 - 35, 212, 70, "Bitte warten");
+                                  global::s2->getDisplaySurface()->h / 2 - 35, 212, 70, "Please wait");
             if(global::s2->RegisterWindow(WNDWait))
             {
                 // we don't register this window cause we will destroy it manually if we need
                 // global::s2->RegisterCallback(PleaseWait);
 
-                WNDWait->addText("Bitte warten ...", 10, 10, 14);
+                WNDWait->addText("Please wait ...", 10, 10, 14);
                 // we need to render this window NOW, cause the render loop will do it too late (when the operation
                 // is done and we don't need the "Please wait"-window anymore)
                 CSurface::Draw(global::s2->getDisplaySurface(), WNDWait->getSurface(), global::s2->getDisplaySurface()->w / 2 - 106,
@@ -63,6 +76,58 @@ void callback::PleaseWait(int Param)
     }
 }
 
+void callback::ShowStatus(int Param)
+{
+    static CWindow* WND = NULL;
+    static CFont* txt = NULL;
+
+    enum
+    {
+        WINDOWQUIT,
+        SHOW_SUCCESS,
+        SHOW_FAILURE
+    };
+
+    switch(Param)
+    {
+        case INITIALIZING_CALL:
+            if(WND != NULL)
+                break;
+            WND =
+              new CWindow(ShowStatus, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, global::s2->getDisplaySurface()->h / 2 - 35,
+                          250, 90, "Status", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
+            if(global::s2->RegisterWindow(WND))
+            {
+                txt = WND->addText("", 26, 20, 14, FONT_YELLOW);
+            } else
+            {
+                delete WND;
+                WND = NULL;
+                return;
+            }
+            break;
+        case SHOW_SUCCESS:
+            txt->setText("Operation finished successfully");
+            txt->setColor(FONT_GREEN);
+            break;
+        case SHOW_FAILURE:
+            txt->setText("Operation failed! :(");
+            txt->setColor(FONT_RED_BRIGHT);
+            break;
+
+        case WINDOWQUIT:
+        case MAP_QUIT:
+            if(WND != NULL)
+            {
+                WND->setWaste();
+                WND = NULL;
+            }
+            break;
+
+        default: break;
+    }
+}
+
 void callback::mainmenu(int Param)
 {
     static CMenu* MainMenu = NULL;
@@ -84,12 +149,12 @@ void callback::mainmenu(int Param)
                 MainMenu = NULL;
                 return;
             }
-            MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Programm Verlassen");
+            MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Quit program");
 #ifdef _ADMINMODE
             MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 200, 200, 20, BUTTON_GREY, "Submenu_1");
 #endif
-            MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Editor starten");
-            MainMenu->addButton(mainmenu, OPTIONS, 50, 370, 200, 20, BUTTON_GREEN2, "Optionen");
+            MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Start editor");
+            MainMenu->addButton(mainmenu, OPTIONS, 50, 370, 200, 20, BUTTON_GREEN2, "Options");
             break;
 
         case CALL_FROM_GAMELOOP: break;
@@ -132,12 +197,6 @@ void callback::submenuOptions(int Param)
         FULLSCREEN,
         OPENGL,
         GRAPHICS_CHANGE,
-        SELECTBOX_640_480,
-        SELECTBOX_800_480,
-        SELECTBOX_848_480,
-        SELECTBOX_852_480,
-        SELECTBOX_864_480,
-        SELECTBOX_858_484,
         SELECTBOX_800_600,
         SELECTBOX_832_624,
         SELECTBOX_960_540,
@@ -196,9 +255,9 @@ void callback::submenuOptions(int Param)
                 return;
             }
             // add button for "back to main menu"
-            SubMenu->addButton(submenuOptions, MAINMENU, (int)(global::s2->GameResolutionX / 2 - 100), 440, 200, 20, BUTTON_RED1, "zurück");
+            SubMenu->addButton(submenuOptions, MAINMENU, (int)(global::s2->GameResolutionX / 2 - 100), 440, 200, 20, BUTTON_RED1, "back");
             // add menu title
-            SubMenu->addText("Optionen", (int)(global::s2->GameResolutionX / 2 - 20), 10, 14);
+            SubMenu->addText("Options", (int)(global::s2->GameResolutionX / 2 - 20), 10, 14);
             // add screen resolution
             if(TextResolution != NULL)
                 SubMenu->delText(TextResolution);
@@ -214,12 +273,6 @@ void callback::submenuOptions(int Param)
             // ButtonOpenGL = SubMenu->addButton(submenuOptions, OPENGL, (int)(global::s2->GameResolutionX/2-100), 210, 200, 20,
             // BUTTON_RED1, (CSurface::useOpenGL ? "Software-Rendering" : "OpenGL"));  add selectbox for resolutions
             SelectBoxRes = SubMenu->addSelectBox((int)(global::s2->GameResolutionX / 2 - 100), 70, 200, 110, 11, FONT_YELLOW, BUTTON_GREY);
-            SelectBoxRes->setOption("640 x 480 (VGA)", submenuOptions, SELECTBOX_640_480);
-            SelectBoxRes->setOption("800 x 480 (WVGA)", submenuOptions, SELECTBOX_800_480);
-            SelectBoxRes->setOption("848 x 480 (WVGA)", submenuOptions, SELECTBOX_848_480);
-            SelectBoxRes->setOption("852 x 480 (WVGA)", submenuOptions, SELECTBOX_852_480);
-            SelectBoxRes->setOption("864 x 480 (WVGA)", submenuOptions, SELECTBOX_864_480);
-            SelectBoxRes->setOption("858 x 484 (WVGA)", submenuOptions, SELECTBOX_858_484);
             SelectBoxRes->setOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->setOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
             SelectBoxRes->setOption("960 x 540 (QHD)", submenuOptions, SELECTBOX_960_540);
@@ -300,42 +353,6 @@ void callback::submenuOptions(int Param)
             SelectBoxRes = NULL;
             SubMenu = NULL;
             submenuOptions(INITIALIZING_CALL);
-            break;
-
-        case SELECTBOX_640_480:
-            global::s2->GameResolutionX = 640;
-            global::s2->GameResolutionY = 480;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_800_480:
-            global::s2->GameResolutionX = 800;
-            global::s2->GameResolutionY = 480;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_848_480:
-            global::s2->GameResolutionX = 848;
-            global::s2->GameResolutionY = 480;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_852_480:
-            global::s2->GameResolutionX = 852;
-            global::s2->GameResolutionY = 480;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_864_480:
-            global::s2->GameResolutionX = 864;
-            global::s2->GameResolutionY = 480;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_858_484:
-            global::s2->GameResolutionX = 858;
-            global::s2->GameResolutionY = 484;
-            submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_800_600:
@@ -626,88 +643,55 @@ void callback::EditorHelpMenu(int Param)
 
                 SelectBoxHelp = WNDHelp->addSelectBox(0, 20, 635, 345, 11, FONT_YELLOW, BUTTON_GREEN1);
                 SelectBoxHelp->setOption(
-                  "Hilfe-Menu........................................................................................................F1\n");
+                  "Help-Menu......................................................................................................F1\n");
                 SelectBoxHelp->setOption(
-                  "Fenster/Vollbild...............................................................................................F2\n");
+                  "Window/Fullscreen........................................................................................F2\n");
+                SelectBoxHelp->setOption("Zoom in/normal/out "
+                                         "(experimental)..............................................................F5/F6/"
+                                         "F7\n");
+                SelectBoxHelp->setOption("Scroll..........................................................................................."
+                                         "..................Arrow keys\n");
                 SelectBoxHelp->setOption(
-                  "Zoom in/normal/out (experimentell)................................................................F5/F6/F7\n");
-                SelectBoxHelp->setOption("Scrollen........................................................................................."
-                                         "...................Pfeiltasten\n");
+                  "Cursor size 1-9 (of 11)....................................................................................1-9\n");
                 SelectBoxHelp->setOption(
-                  "Cursorgrösse 1-9 (von 11).................................................................................1-9\n");
+                  "Make Cursor bigger/smaller........................................................................+/-\n");
                 SelectBoxHelp->setOption(
-                  "Cursor vergrössern/verkleinern..................................................................+/-\n");
+                  "Scissors-Mode...............................................................................................Ctrl\n");
                 SelectBoxHelp->setOption(
-                  "Scheren-Modus................................................................................................Strg\n");
+                  "Invert mode....................................................................................................Shift\n");
+                SelectBoxHelp->setOption("(e.g. Lower altitude, remove player, lower resources)\n");
                 SelectBoxHelp->setOption(
-                  "Modus umkehren..............................................................................................Shift\n");
-                SelectBoxHelp->setOption("(bspw. Höhe senken, Spieler entfernen, Ressourcen senken)\n");
+                  "Plane mode.....................................................................................................Alt\n");
                 SelectBoxHelp->setOption(
-                  "Planiermodus....................................................................................................Alt\n");
+                  "Reduce/default/enlarge maximum height.....................................................Ins/Pos1/"
+                  "PageUp\n");
+                SelectBoxHelp->setOption("(can't increase beyond this)\n");
+                SelectBoxHelp->setOption("Reduce/default/enlarge minimum "
+                                         "height......................................................Del/End/"
+                                         "PageDown\n");
+                SelectBoxHelp->setOption("(can't decrease below this)\n");
+                SelectBoxHelp->setOption("Undo............................................................................................."
+                                         "...................Q\n");
+                SelectBoxHelp->setOption("(just actions made with the cursor)\n");
                 SelectBoxHelp->setOption(
-                  "Maximal-Höhe senken/standard/erhöhen......................................................Einf/Pos1/BildAuf\n");
-                SelectBoxHelp->setOption("(über dies kann dann nicht erhöht werden)\n");
+                  "Build help on/off.............................................................................................Space\n");
                 SelectBoxHelp->setOption(
-                  "Minimal-Höhe senken/standard/erhöhen.......................................................Entf/Ende/BildAb\n");
-                SelectBoxHelp->setOption("(unter dies kann dann nicht gesenkt werden)\n");
+                  "Castle-Mode....................................................................................................B\n");
+                SelectBoxHelp->setOption("(planes the surrounding terrain\n");
+                SelectBoxHelp->setOption(" so a castle can be build)\n");
                 SelectBoxHelp->setOption(
-                  "Rückgängig.......................................................................................................Q\n");
-                SelectBoxHelp->setOption("(nur Aktionen, die mit dem Cursor durchgeführt wurden)\n");
+                  "Harbour-Mode................................................................................................H\n");
+                SelectBoxHelp->setOption("(changes the surrounding terrian,\n");
+                SelectBoxHelp->setOption(" so that a harbour can be build)\n");
+                SelectBoxHelp->setOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland..................G/W/O\n");
                 SelectBoxHelp->setOption(
-                  "Bauhilfe "
-                  "an/aus................................................................................................Leertaste\n");
+                  "New/Original shadows (experimental)..........................................................P\n");
                 SelectBoxHelp->setOption(
-                  "Schloss-Modus..................................................................................................B\n");
-                SelectBoxHelp->setOption("(das umliegende Gelände wird so geebnet,\n");
-                SelectBoxHelp->setOption(" dass ein grosses Haus gebaut werden kann)\n");
+                  "Lock/Unlock horizontal movement................................................................F9\n");
                 SelectBoxHelp->setOption(
-                  "Hafen-Modus.....................................................................................................H\n");
-                SelectBoxHelp->setOption("(das umliegende Gelände wird so verändert,\n");
-                SelectBoxHelp->setOption(" dass ein Hafen gebaut werden kann)\n");
-                SelectBoxHelp->setOption("Map \"on-the-fly\" konvertieren (Grün-/Winter-/Ödland).................................G/W/O\n");
-                SelectBoxHelp->setOption("Neue/Originale Schattierung (experimentell).................................................P\n");
-                SelectBoxHelp->setOption("Horizontale Bewegung sperren/entsperren...................................................F9\n");
+                  "Lock/Unlock vertical movement....................................................................F10\n");
                 SelectBoxHelp->setOption(
-                  "Vertikale Bewegung sperren/entsperren......................................................F10\n");
-                SelectBoxHelp->setOption(
-                  "Ränder an-/abschalten....................................................................................F11\n");
-
-                /*WNDHelp->addText(
-                   "Hilfe-Menu........................................................................................................F1\n"
-                                    "Fenster/Vollbild...............................................................................................F2\n"
-                                    "Zoom in/normal/out
-                   (experimentell)................................................................F5/F6/F7\n"
-                                    "Scrollen............................................................................................................Pfeiltasten\n"
-                                    "Cursorgrösse 1-9 (von
-                   11).................................................................................1-9\n" "Cursor
-                   vergrössern/verkleinern..................................................................+/-\n"
-                                    "Scheren-Modus................................................................................................Strg\n"
-                                    "Modus
-                   umkehren..............................................................................................Shift\n"
-                                    "(bspw. Höhe senken, Spieler entfernen, Ressourcen senken)\n"
-                                    "Planiermodus....................................................................................................Alt\n"
-                                    "Maximal-Höhe
-                   senken/standard/erhöhen......................................................Einf/Pos1/BildAuf\n"
-                                    "(über dies kann dann nicht erhöht werden)\n"
-                                    "Minimal-Höhe
-                   senken/standard/erhöhen.......................................................Entf/Ende/BildAb\n"
-                                    "(unter dies kann dann nicht gesenkt werden)\n"
-                                    "Rückgängig.......................................................................................................Q\n"
-                                    "(nur Aktionen, die mit dem Cursor durchgeführt wurden)\n"
-                                    "Bauhilfe
-                   an/aus................................................................................................Leertaste\n"
-                                    "Schloss-Modus..................................................................................................B\n"
-                                    "(das umliegende Gelände wird so geebnet,\n"
-                                    " dass ein grosses Haus gebaut werden kann)\n"
-                                    "Hafen-Modus.....................................................................................................H\n"
-                                    "(das umliegende Gelände wird so verändert,\n"
-                                    " dass ein Hafen gebaut werden kann)\n"
-                                    "Map \"on-the-fly\" konvertieren (Grün-/Winter-/Ödland).................................G/W/O\n"
-                                    "Neue/Originale Schattierung (experimentell).................................................P\n"
-                                    "Horizontale Bewegung sperren/entsperren...................................................F9\n"
-                                    "Vertikale Bewegung sperren/entsperren......................................................F10\n"
-                                    "Ränder
-                   an-/abschalten....................................................................................F11\n" , 10, 10, 11);*/
+                  "Turn borders on/off......................................................................................F11\n");
             } else
             {
                 delete WNDHelp;
@@ -769,13 +753,13 @@ void callback::EditorMainMenu(int Param)
             if(WNDMain != NULL)
                 break;
             WNDMain = new CWindow(EditorMainMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 110, global::s2->GameResolutionY / 2 - 160,
-                                  220, 320, "Hauptmenu", WINDOW_GREEN1, WINDOW_CLOSE);
+                                  220, 320, "Main menu", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDMain))
             {
-                WNDMain->addButton(EditorMainMenu, LOADMENU, 8, 100, 190, 20, BUTTON_GREEN2, "Karte laden");
-                WNDMain->addButton(EditorMainMenu, SAVEMENU, 8, 125, 190, 20, BUTTON_GREEN2, "Karte speichern");
+                WNDMain->addButton(EditorMainMenu, LOADMENU, 8, 100, 190, 20, BUTTON_GREEN2, "Load map");
+                WNDMain->addButton(EditorMainMenu, SAVEMENU, 8, 125, 190, 20, BUTTON_GREEN2, "Save map");
 
-                WNDMain->addButton(EditorMainMenu, QUITMENU, 8, 260, 190, 20, BUTTON_GREEN2, "Editor verlassen");
+                WNDMain->addButton(EditorMainMenu, QUITMENU, 8, 260, 190, 20, BUTTON_GREEN2, "Leave editor");
             } else
             {
                 delete WNDMain;
@@ -828,15 +812,15 @@ void callback::EditorLoadMenu(int Param)
             if(WNDLoad != NULL)
                 break;
             WNDLoad = new CWindow(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 140, global::s2->GameResolutionY / 2 - 45,
-                                  280, 120, "Laden", WINDOW_GREEN1, WINDOW_CLOSE);
+                                  280, 120, "Load", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDLoad))
             {
                 MapObj = global::s2->getMapObj();
 
                 TXTF_Filename = WNDLoad->addTextfield(10, 10, 21, 1);
                 TXTF_Filename->setText("WORLDS/");
-                WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Laden");
-                WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "Abbrechen");
+                WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Load");
+                WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "ABort");
             } else
             {
                 delete WNDLoad;
@@ -919,22 +903,22 @@ void callback::EditorSaveMenu(int Param)
             if(WNDSave != NULL)
                 break;
             WNDSave = new CWindow(EditorSaveMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 140, global::s2->GameResolutionY / 2 - 100,
-                                  280, 200, "Speichern", WINDOW_GREEN1, WINDOW_CLOSE);
+                                  280, 200, "Save", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDSave))
             {
                 MapObj = global::s2->getMapObj();
 
-                WNDSave->addText("Dateiname", 100, 2, 9);
+                WNDSave->addText("Filename", 100, 2, 9);
                 TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
                 TXTF_Filename->setText("WORLDS/");
-                WNDSave->addText("Kartenname", 98, 38, 9);
+                WNDSave->addText("Mapname", 98, 38, 9);
                 TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
                 TXTF_Mapname->setText(MapObj->getMapname());
                 WNDSave->addText("Author", 110, 75, 9);
                 TXTF_Author = WNDSave->addTextfield(10, 87, 19, 1);
                 TXTF_Author->setText(MapObj->getAuthor());
-                WNDSave->addButton(EditorSaveMenu, SAVEMAP, 170, 120, 90, 20, BUTTON_GREY, "Speichern");
-                WNDSave->addButton(EditorSaveMenu, WINDOWQUIT, 170, 145, 90, 20, BUTTON_RED1, "Abbrechen");
+                WNDSave->addButton(EditorSaveMenu, SAVEMAP, 170, 120, 90, 20, BUTTON_GREY, "Save");
+                WNDSave->addButton(EditorSaveMenu, WINDOWQUIT, 170, 145, 90, 20, BUTTON_RED1, "Abort");
             } else
             {
                 delete WNDSave;
@@ -966,15 +950,20 @@ void callback::EditorSaveMenu(int Param)
             break;
 
         case SAVEMAP:
+        {
             PleaseWait(INITIALIZING_CALL);
 
             MapObj->setMapname((char*)TXTF_Mapname->getText());
             MapObj->setAuthor((char*)TXTF_Author->getText());
-            CFile::save_file((char*)TXTF_Filename->getText(), WLD, MapObj->getMap());
+            bool result = CFile::save_file((char*)TXTF_Filename->getText(), WLD, MapObj->getMap());
+
+            ShowStatus(INITIALIZING_CALL);
+            ShowStatus(result ? 1 : 2);
 
             PleaseWait(WINDOW_QUIT_MESSAGE);
             EditorSaveMenu(WINDOWQUIT);
             break;
+        }
 
         default: break;
     }
@@ -997,7 +986,7 @@ void callback::EditorQuitMenu(int Param)
             if(WNDBackToMainMenu != NULL)
                 break;
             WNDBackToMainMenu = new CWindow(EditorQuitMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 106,
-                                            global::s2->GameResolutionY / 2 - 55, 212, 110, "Beenden?");
+                                            global::s2->GameResolutionY / 2 - 55, 212, 110, "Exit?");
             if(global::s2->RegisterWindow(WNDBackToMainMenu))
             {
                 WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, 0, 0, 100, 80, BUTTON_GREEN2, NULL, PICTURE_SMALL_TICK);
@@ -1577,7 +1566,7 @@ void callback::EditorResourceMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDResource != NULL)
                 break;
-            WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, PosX, PosY, 148, 55, "Rohstoffe", WINDOW_GREEN1,
+            WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, PosX, PosY, 148, 55, "Resources", WINDOW_GREEN1,
                                       WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
             if(global::s2->RegisterWindow(WNDResource))
             {
@@ -1685,7 +1674,7 @@ void callback::EditorLandscapeMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDLandscape != NULL)
                 break;
-            WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, PosX, PosY, 112, 174, "Landschaft", WINDOW_GREEN1,
+            WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, PosX, PosY, 112, 174, "Landscape", WINDOW_GREEN1,
                                        WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
             if(global::s2->RegisterWindow(WNDLandscape))
             {
@@ -1877,7 +1866,7 @@ void callback::EditorAnimalMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDAnimal != NULL)
                 break;
-            WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, PosX, PosY, 116, 106, "Tiere", WINDOW_GREEN1,
+            WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, PosX, PosY, 116, 106, "Animals", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
             if(global::s2->RegisterWindow(WNDAnimal))
             {
@@ -1990,7 +1979,7 @@ void callback::EditorPlayerMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDPlayer != NULL)
                 break;
-            WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, PosX, PosY, 100, 80, "Spieler", WINDOW_GREEN1,
+            WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, PosX, PosY, 100, 80, "Players", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
             if(global::s2->RegisterWindow(WNDPlayer))
             {
@@ -2007,7 +1996,7 @@ void callback::EditorPlayerMenu(int Param)
                 sprintf(puffer, "%d", PlayerNumber + 1);
                 PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
                 WNDPlayer->addButton(EditorPlayerMenu, PLAYER_RAISE, 40, 0, 20, 20, BUTTON_GREY, "+");
-                WNDPlayer->addButton(EditorPlayerMenu, GOTO_PLAYER, 0, 20, 60, 20, BUTTON_GREY, "Gehe zu");
+                WNDPlayer->addButton(EditorPlayerMenu, GOTO_PLAYER, 0, 20, 60, 20, BUTTON_GREY, "Go to");
             } else
             {
                 delete WNDPlayer;
@@ -2133,7 +2122,7 @@ void callback::EditorCursorMenu(int Param)
                 trianglePictureArrowDown = WNDCursor->addStaticPicture(17, 77, CURSOR_SYMBOL_ARROW_DOWN);
                 CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, 2, 2, 96, 32, BUTTON_GREY, "Hexagon");
                 CursorRandomButton =
-                  WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Aktivität: statisch");
+                  WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Activity: static");
                 if(MapObj != NULL)
                 {
                     MapObj->setVertexFillRSU(true);
@@ -2218,7 +2207,7 @@ void callback::EditorCursorMenu(int Param)
             }
             if(MapObj->getHexagonMode())
             {
-                CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, 2, 2, 96, 32, BUTTON_GREY, "Quadrat");
+                CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, 2, 2, 96, 32, BUTTON_GREY, "Square");
                 MapObj->setHexagonMode(false);
             } else
             {
@@ -2235,12 +2224,12 @@ void callback::EditorCursorMenu(int Param)
             if(MapObj->getVertexActivityRandom())
             {
                 CursorRandomButton =
-                  WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Aktivität: statisch");
+                  WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Activity: static");
                 MapObj->setVertexActivityRandom(false);
             } else
             {
                 CursorRandomButton =
-                  WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Aktivität: zufällig");
+                  WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Activity: random");
                 MapObj->setVertexActivityRandom(true);
             }
             break;
@@ -2338,7 +2327,7 @@ void callback::EditorCreateMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDCreate != NULL)
                 break;
-            WNDCreate = new CWindow(EditorCreateMenu, WINDOWQUIT, PosX, PosY, 250, 350, "Welt erschaffen", WINDOW_GREEN1,
+            WNDCreate = new CWindow(EditorCreateMenu, WINDOWQUIT, PosX, PosY, 250, 350, "Create world", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE);
             if(global::s2->RegisterWindow(WNDCreate))
             {
@@ -2366,27 +2355,28 @@ void callback::EditorCreateMenu(int Param)
                 WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_16, 168, 49, 35, 20, BUTTON_GREY, "->16");
                 WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_128, 203, 49, 35, 20, BUTTON_GREY, "->128");
 
-                WNDCreate->addText("Landschaft", 85, 80, 9, FONT_YELLOW);
-                ButtonLandscape = WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, 64, 93, 110, 20, BUTTON_GREY,
-                                                       (LandscapeType == 0 ? "Grünland" : (LandscapeType == 1 ? "Ödland" : "Winterwelt")));
+                WNDCreate->addText("Landscape", 85, 80, 9, FONT_YELLOW);
+                ButtonLandscape =
+                  WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, 64, 93, 110, 20, BUTTON_GREY,
+                                       (LandscapeType == 0 ? "Greenland" : (LandscapeType == 1 ? "Wasteland" : "Winterworld")));
 
-                WNDCreate->addText("Grundfläche", 82, 120, 9, FONT_YELLOW);
+                WNDCreate->addText("Main area", 82, 120, 9, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, TEXTURE_PREVIOUS, 45, 139, 35, 20, BUTTON_GREY, "-");
                 PicTextureIndex = WNDCreate->addStaticPicture(102, 133, PicTextureIndexGlobal);
                 WNDCreate->addButton(EditorCreateMenu, TEXTURE_NEXT, 158, 139, 35, 20, BUTTON_GREY, "+");
 
-                WNDCreate->addText("Rand", 103, 175, 9, FONT_YELLOW);
+                WNDCreate->addText("Border size", 103, 175, 9, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_BORDER, 45, 186, 35, 20, BUTTON_GREY, "-");
                 sprintf(puffer, "%d", border);
                 TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, RAISE_BORDER, 158, 186, 35, 20, BUTTON_GREY, "+");
 
-                WNDCreate->addText("Rand-Grundfläche", 65, 215, 9, FONT_YELLOW);
+                WNDCreate->addText("Border area", 65, 215, 9, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_PREVIOUS, 45, 234, 35, 20, BUTTON_GREY, "-");
                 PicBorderTextureIndex = WNDCreate->addStaticPicture(102, 228, PicBorderTextureIndexGlobal);
                 WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_NEXT, 158, 234, 35, 20, BUTTON_GREY, "+");
 
-                WNDCreate->addButton(EditorCreateMenu, CREATE_WORLD, 44, 275, 150, 40, BUTTON_GREY, "Welt erschaffen");
+                WNDCreate->addButton(EditorCreateMenu, CREATE_WORLD, 44, 275, 150, 40, BUTTON_GREY, "Create world");
             } else
             {
                 delete WNDCreate;
@@ -2512,7 +2502,7 @@ void callback::EditorCreateMenu(int Param)
                 LandscapeType = 0;
             WNDCreate->delButton(ButtonLandscape);
             ButtonLandscape = WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, 64, 93, 110, 20, BUTTON_GREY,
-                                                   (LandscapeType == 0 ? "Grünland" : (LandscapeType == 1 ? "Ödland" : "Winterwelt")));
+                                                   (LandscapeType == 0 ? "Greenland" : (LandscapeType == 1 ? "Wasteland" : "Winterworld")));
             switch(LandscapeType)
             {
                 case 0:
@@ -3057,10 +3047,10 @@ void callback::GameMenu(int Param)
                 break;
             WNDBackToMainMenu =
               new CWindow(GameMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 125, global::s2->GameResolutionY / 2 - 60, 250, 140,
-                          "Zurueck zum Hauptmenu?", WINDOW_GREEN1, WINDOW_CLOSE);
+                          "Back to the main menu?", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDBackToMainMenu))
             {
-                WNDBackToMainMenu->addButton(GameMenu, BACKTOMAIN, 20, 20, 200, 80, BUTTON_RED2, "Ja");
+                WNDBackToMainMenu->addButton(GameMenu, BACKTOMAIN, 20, 20, 200, 80, BUTTON_RED2, "Yes");
             } else
             {
                 delete WNDBackToMainMenu;
@@ -3125,8 +3115,8 @@ void callback::MinimapMenu(int Param)
             if((global::s2->getDisplaySurface()->w - 12 < width) || (global::s2->getDisplaySurface()->h - 30 < height))
                 break;
             WNDMinimap = new CWindow(MinimapMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - width / 2 - 6,
-                                     global::s2->GameResolutionY / 2 - height / 2 - 15, width + 12, height + 30, "Übersicht",
-                                     WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE);
+                                     global::s2->GameResolutionY / 2 - height / 2 - 15, width + 12, height + 30, "Overview", WINDOW_NOTHING,
+                                     WINDOW_CLOSE | WINDOW_MOVE);
             if(global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(MinimapMenu))
             {
                 WndSurface = WNDMinimap->getSurface();
@@ -3392,14 +3382,14 @@ void callback::submenu1(int Param)
                 SubMenu = NULL;
                 return;
             }
-            toMain = SubMenu->addButton(submenu1, MAINMENU, 400, 440, 200, 20, BUTTON_RED1, "zurück");
+            toMain = SubMenu->addButton(submenu1, MAINMENU, 400, 440, 200, 20, BUTTON_RED1, "back");
             greatMoon = SubMenu->addButton(submenu1, GREATMOON, 100, 100, 200, 200, BUTTON_STONE, NULL, MOON);
             greatMoon->setMotionParams(GREATMOONENTRY, GREATMOONLEAVE);
             smallMoon = SubMenu->addButton(submenu1, SMALLMOON, 100, 350, global::bmpArray[MOON].w, global::bmpArray[MOON].h, BUTTON_STONE,
                                            NULL, MOON);
             toosmall = SubMenu->addButton(submenu1, TOOSMALL, 100, 400, global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1,
                                           BUTTON_STONE, NULL, MOON);
-            createWindow = SubMenu->addButton(submenu1, CREATEWINDOW, 500, 10, 130, 30, BUTTON_GREEN1, "Fenster erzeugen");
+            createWindow = SubMenu->addButton(submenu1, CREATEWINDOW, 500, 10, 130, 30, BUTTON_GREEN1, "Create window");
             picObject = SubMenu->addPicture(submenu1, PICOBJECT, 200, 30, MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
             // text block with \n
@@ -3446,8 +3436,8 @@ void callback::submenu1(int Param)
             break;
 
         case GREATMOON:
-            ueberschrift = SubMenu->addText("Überschrift!", 300, 10, 14);
-            sprintf(puffer, "Fenster X: %d Fenster Y: %d", global::s2->GameResolutionX, global::s2->GameResolutionY);
+            ueberschrift = SubMenu->addText("Title!", 300, 10, 14);
+            sprintf(puffer, "Window X: %d Window Y: %d", global::s2->GameResolutionX, global::s2->GameResolutionY);
             resolution = SubMenu->addText(puffer, 10, 10, 14);
             break;
 
@@ -3465,7 +3455,7 @@ void callback::submenu1(int Param)
         case CREATEWINDOW:
             if(testWindow == NULL)
             {
-                testWindow = new CWindow(submenu1, TESTWINDOWQUITMESSAGE, 5, 5, 350, 240, "Fenster", WINDOW_GREEN1,
+                testWindow = new CWindow(submenu1, TESTWINDOWQUITMESSAGE, 5, 5, 350, 240, "Window", WINDOW_GREEN1,
                                          WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
                 if(global::s2->RegisterWindow(testWindow))
                 {
@@ -3502,7 +3492,7 @@ void callback::submenu1(int Param)
 
         case GREATMOONENTRY:
             if(greatMoonText == NULL)
-                greatMoonText = SubMenu->addText("Test-Textöäüß", 100, 10, 14);
+                greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
             break;
 
         case GREATMOONLEAVE:
@@ -3582,7 +3572,7 @@ void callback::submenu1(int Param)
                 }
                 if(counterText == NULL)
                 {
-                    sprintf(puffer, "zaehler: %d", counter);
+                    sprintf(puffer, "counter: %d", counter);
                     counterText = SubMenu->addText(puffer, 100, 20, 9);
                 }
 

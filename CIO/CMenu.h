@@ -41,22 +41,21 @@ public:
     void setMouseData(SDL_MouseMotionEvent motion);
     void setMouseData(SDL_MouseButtonEvent button);
     void setKeyboardData(SDL_KeyboardEvent key);
-    SDL_Surface* getSurface(void)
+    SDL_Surface* getSurface()
     {
         render();
         return Surf_Menu;
     };
-    void setActive(void) { active = true; };
-    void setInactive(void) { active = false; };
-    bool isActive(void) { return active; };
-    void setWaste(void) { waste = true; };
-    bool isWaste(void) { return waste; };
+    void setActive() { active = true; };
+    void setInactive() { active = false; };
+    bool isActive() { return active; };
+    void setWaste() { waste = true; };
+    bool isWaste() { return waste; };
     // Methods
     CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20,
                        int color = BUTTON_GREY, const char* text = NULL, int picture = -1);
     bool delButton(CButton* ButtonToDelete);
     CFont* addText(const char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
-    CFont* addText(unsigned char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
     bool delText(CFont* TextToDelete);
     CPicture* addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture);
     bool delPicture(CPicture* PictureToDelete);
@@ -68,7 +67,7 @@ public:
     CSelectBox* addSelectBox(Uint16 x = 0, Uint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fonsize = 14, int text_color = FONT_YELLOW,
                              int bg_color = -1);
     bool delSelectBox(CSelectBox* SelectBoxToDelete);
-    bool render(void);
+    bool render();
 };
 
 #endif

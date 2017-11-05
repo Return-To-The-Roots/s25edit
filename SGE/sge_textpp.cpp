@@ -98,7 +98,7 @@ bool sge_TextEditor::nswap(node* one, node* two)
     return true;
 }
 
-sge_TextEditor::sge_TextEditor(void)
+sge_TextEditor::sge_TextEditor()
 {
     chars = 0;
     mChars = 0;
@@ -107,7 +107,7 @@ sge_TextEditor::sge_TextEditor(void)
     text_changed = false;
 }
 
-sge_TextEditor::~sge_TextEditor(void)
+sge_TextEditor::~sge_TextEditor()
 {
     node* tmp;
 
@@ -138,7 +138,7 @@ bool sge_TextEditor::insert(Uint16 c)
     return true;
 }
 
-bool sge_TextEditor::remove_left(void)
+bool sge_TextEditor::remove_left()
 {
     if(cursor->prev)
     {
@@ -158,7 +158,7 @@ bool sge_TextEditor::remove_left(void)
     return false;
 }
 
-bool sge_TextEditor::remove_right(void)
+bool sge_TextEditor::remove_right()
 {
     if(cursor->next)
     {
@@ -178,17 +178,17 @@ bool sge_TextEditor::remove_right(void)
     return false;
 }
 
-bool sge_TextEditor::move_left(void)
+bool sge_TextEditor::move_left()
 {
     return nswap(cursor, cursor->prev);
 }
 
-bool sge_TextEditor::move_right(void)
+bool sge_TextEditor::move_right()
 {
     return nswap(cursor, cursor->next);
 }
 
-bool sge_TextEditor::move_start(void)
+bool sge_TextEditor::move_start()
 {
     if(cursor->prev)
     {
@@ -210,7 +210,7 @@ bool sge_TextEditor::move_start(void)
     return false;
 }
 
-bool sge_TextEditor::move_end(void)
+bool sge_TextEditor::move_end()
 {
     if(cursor->next)
     {
@@ -312,7 +312,7 @@ bool sge_TextEditor::check(SDL_Event* event)
     return false;
 }
 
-void sge_TextEditor::clear_text(void)
+void sge_TextEditor::clear_text()
 {
     if(!chars)
         return;
@@ -569,7 +569,7 @@ void sge_TextSurface::set_textSurface(SDL_Surface* new_surf)
     current_pos.h = surface->h;
 }
 
-void sge_TextSurface::draw(void)
+void sge_TextSurface::draw()
 {
     if(bm_font)
     {
@@ -620,7 +620,7 @@ void sge_TextSsprite::set_textSurface(SDL_Surface* new_surf)
     tmp->img = new_surf;
 }
 
-void sge_TextSsprite::draw(void)
+void sge_TextSsprite::draw()
 {
     if(bm_font)
     {
@@ -673,7 +673,7 @@ void sge_TextSprite::set_textSurface(SDL_Surface* new_surf)
     tmp->img = new_surf;
 }
 
-void sge_TextSprite::draw(void)
+void sge_TextSprite::draw()
 {
     if(bm_font)
     {

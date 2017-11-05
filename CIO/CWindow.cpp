@@ -1,4 +1,12 @@
 #include "CWindow.h"
+#include "../CGame.h"
+#include "../CSurface.h"
+#include "../globals.h"
+#include "CButton.h"
+#include "CFont.h"
+#include "CPicture.h"
+#include "CSelectBox.h"
+#include "CTextfield.h"
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y, Uint16 w, Uint16 h, const char* title, int color,
                  Uint8 flags)
@@ -48,7 +56,7 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
     for(int i = 0; i < MAXSELECTBOXES; i++)
         selectboxes[i] = NULL;
 
-    this->title = (unsigned char*)title;
+    this->title = title;
     this->callback = callback;
     this->callbackQuitMessage = callbackQuitMessage;
     Surf_Window = NULL;
@@ -92,13 +100,7 @@ CWindow::~CWindow()
 
 void CWindow::setTitle(const char* title)
 {
-    this->title = (unsigned char*)title;
-    needRender = true;
-}
-
-void CWindow::setTitle(unsigned char* title)
-{
-    this->title = (unsigned char*)title;
+    this->title = title;
     needRender = true;
 }
 
@@ -108,7 +110,7 @@ void CWindow::setColor(int color)
     needRender = true;
 }
 
-bool CWindow::hasActiveInputElement(void)
+bool CWindow::hasActiveInputElement()
 {
     for(int i = 0; i < MAXTEXTFIELDS; i++)
         if(textfields[i] != NULL && textfields[i]->isActive())
@@ -419,24 +421,6 @@ CFont* CWindow::addText(const char* string, int x, int y, int fontsize, int colo
     return NULL;
 }
 
-CFont* CWindow::addText(unsigned char* string, int x, int y, int fontsize, int color)
-{
-    // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
-    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
-    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
-
-    for(int i = 0; i < MAXTEXTS; i++)
-    {
-        if(texts[i] == NULL)
-        {
-            texts[i] = new CFont(string, x_abs, y_abs, fontsize, color);
-            needRender = true;
-            return texts[i];
-        }
-    }
-    return NULL;
-}
-
 bool CWindow::delText(CFont* TextToDelete)
 {
     if(TextToDelete == NULL)
@@ -599,7 +583,7 @@ bool CWindow::delSelectBox(CSelectBox* SelectBoxToDelete)
     return false;
 }
 
-bool CWindow::render(void)
+bool CWindow::render()
 {
     // position in the Surface 'Surf_Window'
     Uint16 pos_x = 0;
@@ -838,7 +822,7 @@ bool CWindow::render(void)
     return true;
 }
 
-void CWindow::setInactive(void)
+void CWindow::setInactive()
 {
     active = false;
     clicked = false;

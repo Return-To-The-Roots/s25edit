@@ -1,4 +1,7 @@
 #include "CTextfield.h"
+#include "../CSurface.h"
+#include "../globals.h"
+#include "CFont.h"
 
 CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
 {
@@ -16,27 +19,23 @@ CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsiz
     this->text_color = text_color;
     setColor(bg_color);
     // allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
-    text = (unsigned char*)malloc(((this->cols + 1) * this->rows + 2) * sizeof(unsigned char));
-    // initialize memory
-    for(int i = 0; i <= (this->cols + 1) * this->rows + 1; i++)
-        *(text + i) = '\0';
+    text.resize((this->cols + 1) * this->rows + 2);
 
     Surf_Text = NULL;
     needSurface = true;
     needRender = true;
     rendered = false;
     this->button_style = button_style;
-    textObj = new CFont((unsigned char*)NULL, x, y, fontsize, text_color);
+    textObj = new CFont((const char*)NULL, x, y, fontsize, text_color);
 }
 
 CTextfield::~CTextfield()
 {
-    free(text);
     SDL_FreeSurface(Surf_Text);
     delete textObj;
 }
 
-bool CTextfield::hasRendered(void)
+bool CTextfield::hasRendered()
 {
     if(rendered)
     {
@@ -91,17 +90,12 @@ void CTextfield::setColor(int color)
 
 void CTextfield::setText(const char* text)
 {
-    setText((unsigned char*)text);
-}
-
-void CTextfield::setText(unsigned char* text)
-{
-    unsigned char* txtPtr = this->text;
+    char* txtPtr = &this->text[0];
     int col_ctr = 1, row_ctr = 1;
 
     while(*text != '\0')
     {
-        if(txtPtr >= this->text + (this->cols + 1) * this->rows - 1)
+        if(txtPtr >= &this->text.back() - 2)
             break;
 
         if(col_ctr > cols)
@@ -143,7 +137,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
 void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
 {
     unsigned char chiffre = '\0';
-    unsigned char* txtPtr = text;
+    char* txtPtr = &text[0];
     int col_ctr = 1, row_ctr = 1;
 
     if(!active)
@@ -166,7 +160,7 @@ void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
         col_ctr--;
         // end of text memory reached? ( 'cols'-chiffres from the user + '\n' in each row * rows + blinking chiffre + '\0' -1 for pointer
         // adress range
-        if(txtPtr >= text + ((cols + 1) * rows - 1))
+        if(txtPtr >= &text.back() - 2)
         {
             // end reached, user may only delete chiffres
             if(key.keysym.sym != SDLK_BACKSPACE)
@@ -176,7 +170,7 @@ void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
         switch(key.keysym.sym)
         {
             case SDLK_BACKSPACE:
-                if(txtPtr > text)
+                if(txtPtr > &text[0])
                 {
                     txtPtr--;
                     *txtPtr = '\0';
@@ -234,7 +228,7 @@ void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
     }
 }
 
-bool CTextfield::render(void)
+bool CTextfield::render()
 {
     // position in the Surface 'Surf_Button'
     Uint16 pos_x = 0;
@@ -246,11 +240,6 @@ bool CTextfield::render(void)
     static Uint32 currentTime;
     static Uint32 lastTime = SDL_GetTicks();
     static bool blinking_chiffre = false;
-    unsigned char* txtPtr = text;
-
-    // go to '\0'
-    while(*txtPtr != '\0')
-        txtPtr++;
     // if the textfield is active, we need to render to show the blinking chiffre
     if(active)
     {
@@ -431,6 +420,11 @@ bool CTextfield::render(void)
     } else
         SDL_FillRect(Surf_Text, NULL, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
 
+    char* txtPtr = &text[0];
+
+    // go to '\0'
+    while(*txtPtr != '\0')
+        txtPtr++;
     // add blinking chiffre if necessary
     if(blinking_chiffre && active)
     {
@@ -443,7 +437,7 @@ bool CTextfield::render(void)
     // textObj->setText(text);
     delete textObj;
     textObj = NULL;
-    textObj = new CFont(text, x, y, fontsize, text_color);
+    textObj = new CFont(&text[0], x, y, fontsize, text_color);
 
     // delete blinking chiffre (otherwise it could be written between user input chiffres)
     if(blinking_chiffre && active)

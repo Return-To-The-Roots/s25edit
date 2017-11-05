@@ -13,6 +13,7 @@
 namespace callback {
 // PleaseWait creates a small window (not moveable, not resizeable, not minimizable, not closeable) with the String "Please wait..."
 void PleaseWait(int Param);
+void ShowStatus(int Param);
 void mainmenu(int Param);
 void submenuOptions(int Param);
 void MinimapMenu(int Param);

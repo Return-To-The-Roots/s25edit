@@ -17,20 +17,20 @@ private:
 public:
     // Access Methods
     static void set_palActual(bobPAL* Actual) { palActual = Actual; }
-    static bobPAL* get_palArray(void) { return palArray; }
+    static bobPAL* get_palArray() { return palArray; }
     static void set_palArray(bobPAL* Array) { palArray = Array; }
     static void set_bmpArray(bobBMP* new_bmpArray) { bmpArray = new_bmpArray; }
 
 private:
     // Methods
-    static bool open_lst(void);
-    static bool open_bob(void); // not implemented yet
+    static bool open_lst();
+    static bool open_bob(); // not implemented yet
     static bool open_idx(char* filename);
-    static bool open_bbm(void);
+    static bool open_bbm();
     static bool open_lbm(char* filename);
-    static bool open_gou(void);
-    static bobMAP* open_wld(void);
-    static bobMAP* open_swd(void);
+    static bool open_gou();
+    static bobMAP* open_wld();
+    static bobMAP* open_swd();
     static bool save_lst(void* data);                 // not implemented yet
     static bool save_bob(void* data);                 // not implemented yet
     static bool save_idx(void* data, char* filename); // not implemented yet
@@ -38,13 +38,13 @@ private:
     static bool save_lbm(void* data);                 // not implemented yet
     static bool save_wld(void* data);
     static bool save_swd(void* data);
-    static bool read_bob01(void); // not implemented yet
-    static bool read_bob02(void);
-    static bool read_bob03(void);
+    static bool read_bob01(); // not implemented yet
+    static bool read_bob02();
+    static bool read_bob03();
     static bool read_bob04(int player_color = PLAYER_BLUE);
-    static bool read_bob05(void);
-    static bool read_bob07(void);
-    static bool read_bob14(void);
+    static bool read_bob05();
+    static bool read_bob07();
+    static bool read_bob14();
     // convert between big- and little-endian
     static inline void endian_swap(Uint16& x);
     static inline void endian_swap(Uint32& x);

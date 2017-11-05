@@ -1,4 +1,8 @@
 #include "CSelectBox.h"
+#include "../CSurface.h"
+#include "../globals.h"
+#include "CButton.h"
+#include "CFont.h"
 
 CSelectBox::CSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
@@ -40,11 +44,6 @@ CSelectBox::~CSelectBox()
 
 void CSelectBox::setOption(const char* string, void (*callback)(int), int param)
 {
-    setOption((unsigned char*)string, callback, param);
-}
-
-void CSelectBox::setOption(unsigned char* string, void (*callback)(int), int param)
-{
     // explanation: row_height = row_separator + fontsize
     int row_height = (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4)) + fontsize;
 
@@ -60,7 +59,7 @@ void CSelectBox::setOption(unsigned char* string, void (*callback)(int), int par
     }
 }
 
-bool CSelectBox::hasRendered(void)
+bool CSelectBox::hasRendered()
 {
     if(rendered)
     {
@@ -234,7 +233,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
-bool CSelectBox::render(void)
+bool CSelectBox::render()
 {
     // position in the Surface 'Surf_Button'
     Uint16 pos_x = 0;

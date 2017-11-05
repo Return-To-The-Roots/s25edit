@@ -1,8 +1,0 @@
-#include "CButton.h"
-#include "CFile.h"
-#include "CFont.h"
-#include "CMenu.h"
-#include "CPicture.h"
-#include "CSelectBox.h"
-#include "CTextfield.h"
-#include "CWindow.h"

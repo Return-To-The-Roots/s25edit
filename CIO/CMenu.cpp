@@ -1,4 +1,12 @@
 #include "CMenu.h"
+#include "../CGame.h"
+#include "../CSurface.h"
+#include "../globals.h"
+#include "CButton.h"
+#include "CFont.h"
+#include "CPicture.h"
+#include "CSelectBox.h"
+#include "CTextfield.h"
 
 CMenu::CMenu(int pic_background)
 {
@@ -155,23 +163,6 @@ bool CMenu::delButton(CButton* ButtonToDelete)
 }
 
 CFont* CMenu::addText(const char* string, int x, int y, int fontsize, int color)
-{
-    if(x >= Surf_Menu->w || y >= Surf_Menu->h)
-        return false;
-
-    for(int i = 0; i < MAXTEXTS; i++)
-    {
-        if(texts[i] == NULL)
-        {
-            texts[i] = new CFont(string, x, y, fontsize, color);
-            needRender = true;
-            return texts[i];
-        }
-    }
-    return NULL;
-}
-
-CFont* CMenu::addText(unsigned char* string, int x, int y, int fontsize, int color)
 {
     if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return false;
@@ -346,7 +337,7 @@ bool CMenu::delSelectBox(CSelectBox* SelectBoxToDelete)
     return false;
 }
 
-bool CMenu::render(void)
+bool CMenu::render()
 {
     if(pic_background < 0)
         return false;

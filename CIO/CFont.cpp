@@ -1,24 +1,8 @@
 #include "CFont.h"
+#include "../CSurface.h"
+#include "../globals.h"
 
 CFont::CFont(const char* string, int x, int y, int fontsize, int color)
-{
-    this->x = x;
-    this->y = y;
-    this->string = (unsigned char*)string;
-    // only three sizes are available (in pixels)
-    if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        this->fontsize = 9;
-    else
-        this->fontsize = fontsize;
-    this->color = color;
-    Surf_Font = NULL;
-    callback = NULL;
-    clickedParam = 0;
-    // create surface and write text to it
-    writeText(this->string);
-}
-
-CFont::CFont(unsigned char* string, int x, int y, int fontsize, int color)
 {
     this->x = x;
     this->y = y;
@@ -58,12 +42,8 @@ void CFont::setColor(int color)
 
 void CFont::setText(const char* string)
 {
-    setText((unsigned char*)string);
-}
-
-void CFont::setText(unsigned char* string)
-{
     SDL_FreeSurface(Surf_Font);
+    Surf_Font = NULL;
     this->string = string;
     writeText(this->string);
 }
@@ -100,7 +80,7 @@ bool CFont::writeText(const char* string)
     // the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
     // pointer to the chiffres
-    unsigned char* chiffre = (string == NULL ? this->string : (unsigned char*)string);
+    const char* chiffre = (string == NULL ? this->string : string);
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = 0;
     int pos_y = 0;
@@ -298,11 +278,6 @@ bool CFont::writeText(const char* string)
     return true;
 }
 
-bool CFont::writeText(unsigned char* string)
-{
-    return CFont::writeText((const char*)string);
-}
-
 bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, int fontsize, int color, int align)
 {
     // data for necessary counting pixels depending on alignment
@@ -316,7 +291,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
     int pos_x = x;
     int pos_y = y;
 
-    if(global::bmpArray == NULL || Surf_Dest == NULL || string == NULL)
+    if(Surf_Dest == NULL || string == NULL)
         return false;
 
     // only three sizes are available (in pixels)
@@ -512,9 +487,4 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
     }
 
     return true;
-}
-
-bool CFont::writeText(SDL_Surface* Surf_Dest, unsigned char* string, int x, int y, int fontsize, int color, int align)
-{
-    return CFont::writeText(Surf_Dest, (const char*)string, x, y, fontsize, color, align);
 }

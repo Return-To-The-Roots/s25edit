@@ -25,10 +25,10 @@
 extern "C" {
 #endif
 DECLSPEC int sge_Random(int min, int max);
-DECLSPEC void sge_Randomize(void);
+DECLSPEC void sge_Randomize();
 
-DECLSPEC Uint32 sge_CalibrateDelay(void);
-DECLSPEC Uint32 sge_DelayRes(void);
+DECLSPEC Uint32 sge_CalibrateDelay();
+DECLSPEC Uint32 sge_DelayRes();
 DECLSPEC Uint32 sge_Delay(Uint32 ticks);
 #ifdef _SGE_C
 }

@@ -3,6 +3,10 @@
 
 #include "includes.h"
 
+class CWindow;
+class CMap;
+class CMenu;
+
 class CGame
 {
     friend class CDebug;
@@ -73,12 +77,12 @@ public:
     bool RegisterCallback(void (*callback)(int));
     bool UnregisterCallback(void (*callback)(int));
     void setMapObj(CMap* MapObj) { this->MapObj = MapObj; };
-    CMap* getMapObj(void) { return MapObj; };
-    void delMapObj(void);
-    SDL_Surface* getDisplaySurface(void) { return Surf_Display; };
-    SDL_Surface* getDisplayGLSurface(void) { return Surf_DisplayGL; };
-    int getResX(void) { return GameResolutionX; }
-    int getResY(void) { return GameResolutionY; }
+    CMap* getMapObj() { return MapObj; };
+    void delMapObj();
+    SDL_Surface* getDisplaySurface() { return Surf_Display; };
+    SDL_Surface* getDisplayGLSurface() { return Surf_DisplayGL; };
+    int getResX() { return GameResolutionX; }
+    int getResY() { return GameResolutionY; }
 };
 
 #endif

@@ -3,6 +3,9 @@
 
 #include "../includes.h"
 
+class CFont;
+class CButton;
+
 // maximum number of entries for a selectbox
 #define MAXSELECTBOXENTRIES 20000
 
@@ -35,17 +38,17 @@ public:
                int bg_color = -1);
     ~CSelectBox();
     // Access;
-    int getX(void) { return x; }
-    int getY(void) { return y; }
-    int getW(void) { return w; }
-    int getH(void) { return h; }
+    int getX() { return x; }
+    int getY() { return y; }
+    int getW() { return w; }
+    int getH() { return h; }
     void setX(int x) { this->x = x; }
     void setY(int y) { this->y = y; }
-    bool hasRendered(void);
+    bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
     void setMouseData(SDL_MouseMotionEvent motion);
-    bool render(void);
-    SDL_Surface* getSurface(void)
+    bool render();
+    SDL_Surface* getSurface()
     {
         render();
         return Surf_SelectBox;
@@ -57,7 +60,6 @@ public:
         needRender = true;
     }
     void setOption(const char* string, void (*callback)(int) = NULL, int param = 0);
-    void setOption(unsigned char* string, void (*callback)(int) = NULL, int param = 0);
 };
 
 #endif

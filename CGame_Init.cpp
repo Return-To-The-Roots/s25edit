@@ -1,4 +1,9 @@
 #include "CGame.h"
+#include "CIO/CFile.h"
+#include "CSurface.h"
+#include "callbacks.h"
+#include "globals.h"
+#include <iostream>
 
 bool CGame::Init()
 {
@@ -35,7 +40,7 @@ bool CGame::Init()
         }
     }
 
-    SDL_WM_SetCaption("Return to the Roots Mapeditor", 0);
+    SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", 0);
 
     /*NOTE: its important to load a palette at first,
      *      otherwise all images will be black (in exception of the LBM-Files, they have their own palette).

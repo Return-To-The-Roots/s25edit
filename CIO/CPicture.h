@@ -28,16 +28,16 @@ public:
     CPicture(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, int picture = -1);
     ~CPicture();
     // Access
-    int getX(void) { return x; };
-    int getY(void) { return y; };
-    int getW(void) { return w; };
-    int getH(void) { return h; };
+    int getX() { return x; };
+    int getY() { return y; };
+    int getW() { return w; };
+    int getH() { return h; };
     void setX(int x) { this->x = x; };
     void setY(int y) { this->y = y; };
     void setMouseData(SDL_MouseMotionEvent motion);
     void setMouseData(SDL_MouseButtonEvent button);
-    bool render(void);
-    SDL_Surface* getSurface(void)
+    bool render();
+    SDL_Surface* getSurface()
     {
         render();
         return Surf_Picture;

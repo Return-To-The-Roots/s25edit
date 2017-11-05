@@ -2,6 +2,9 @@
 #define _CTEXTFIELD_H
 
 #include "../includes.h"
+#include <vector>
+
+class CFont;
 
 class CTextfield
 {
@@ -21,7 +24,7 @@ private:
     int fontsize;
     int pic_background;
     int pic_foreground;
-    unsigned char* text;
+    std::vector<char> text;
     int text_color;
     // if active, keyboard data will be delivered and the cursor is blinking
     bool active;
@@ -36,24 +39,23 @@ public:
                int bg_color = -1, bool button_style = false);
     ~CTextfield();
     // Access
-    int getX(void) { return x; };
-    int getY(void) { return y; };
-    int getW(void) { return w; };
-    int getH(void) { return h; };
-    int getCols(void) { return cols; };
-    int getRows(void) { return rows; };
+    int getX() { return x; };
+    int getY() { return y; };
+    int getW() { return w; };
+    int getH() { return h; };
+    int getCols() { return cols; };
+    int getRows() { return rows; };
     void setX(int x) { this->x = x; }
     void setY(int y) { this->y = y; }
-    void setText(unsigned char* text);
     void setText(const char* text);
-    void setActive(void) { active = true; }
-    void setInactive(void) { active = false; }
-    bool isActive(void) { return active; }
-    bool hasRendered(void);
+    void setActive() { active = true; }
+    void setInactive() { active = false; }
+    bool isActive() { return active; }
+    bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
     void setKeyboardData(SDL_KeyboardEvent key);
-    bool render(void);
-    SDL_Surface* getSurface(void)
+    bool render();
+    SDL_Surface* getSurface()
     {
         render();
         return Surf_Text;
@@ -64,7 +66,7 @@ public:
         text_color = color;
         needRender = true;
     }
-    unsigned char* getText(void) { return text; }
+    const char* getText() { return &text[0]; }
 };
 
 #endif

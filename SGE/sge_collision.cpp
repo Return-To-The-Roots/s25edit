@@ -339,11 +339,11 @@ int sge_cmcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2,
 //==================================================================================
 // Get the position of the last collision
 //==================================================================================
-Sint16 sge_get_cx(void)
+Sint16 sge_get_cx()
 {
     return _cx;
 }
-Sint16 sge_get_cy(void)
+Sint16 sge_get_cy()
 {
     return _cy;
 }

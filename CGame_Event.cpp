@@ -1,4 +1,10 @@
 #include "CGame.h"
+#include "CIO/CMenu.h"
+#include "CIO/CWindow.h"
+#include "CMap.h"
+#include "CSurface.h"
+#include "callbacks.h"
+#include "globals.h"
 
 void CGame::EventHandling(SDL_Event* Event)
 {

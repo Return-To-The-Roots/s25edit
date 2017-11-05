@@ -50,12 +50,12 @@ typedef struct _sge_TTFont sge_TTFont;
 extern "C" {
 #endif
 #ifndef _SGE_NOTTF
-DECLSPEC void sge_TTF_AAOff(void);
-DECLSPEC void sge_TTF_AAOn(void);
-DECLSPEC void sge_TTF_AA_Alpha(void);
+DECLSPEC void sge_TTF_AAOff();
+DECLSPEC void sge_TTF_AAOn();
+DECLSPEC void sge_TTF_AA_Alpha();
 DECLSPEC void sge_TTF_ByteSwappedUNICODE(int swapped);
 
-DECLSPEC int sge_TTF_Init(void);
+DECLSPEC int sge_TTF_Init();
 DECLSPEC sge_TTFont* sge_TTF_OpenFont(const char* file, int ptsize);
 DECLSPEC sge_TTFont* sge_TTF_OpenFontRW(SDL_RWops* src, int freesrc, int ptsize, int xdpi, int ydpi);
 DECLSPEC sge_TTFont* sge_TTF_OpenFontIndex(const char* file, int ptsize, long index, int xdpi, int ydpi);
