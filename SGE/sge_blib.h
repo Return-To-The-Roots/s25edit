@@ -5,7 +5,7 @@
  *	Started 000428
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)2000-2003 Anders Lindström & Johan E. Thelin
+ *	(c)2000-2003 Anders LindstrÃ¶m & Johan E. Thelin
  */
 
 /*********************************************************************

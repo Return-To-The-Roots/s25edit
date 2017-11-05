@@ -8,6 +8,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 
+//#include <vld.h>
+
 CGame::CGame()
 {
     GameResolutionX = 1024;
@@ -229,9 +231,9 @@ int main(int argc, char* argv[])
     global::userMapsPath = RTTRCONFIG.ExpandPath(FILE_PATHS[41]);
     boost::system::error_code ec;
     boost::filesystem::create_directories(global::userMapsPath, ec);
-    if(!ec)
+    if(ec)
     {
-        std::cerr << "Could not create " << global::userMapsPath << std::endl;
+        std::cerr << "Could not create " << global::userMapsPath << ": " << ec << std::endl;
         return 1;
     }
 
@@ -243,8 +245,10 @@ int main(int argc, char* argv[])
     } catch(...)
     {
         std::cerr << "Unhandled Exception" << std::endl;
+        delete global::s2;
         return 1;
     }
+    delete global::s2;
 
     return 0;
 }

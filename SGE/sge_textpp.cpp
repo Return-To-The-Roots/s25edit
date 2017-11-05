@@ -5,7 +5,7 @@
  *	Started 990826 / 010207 (new version)
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)1999-2003 Anders Lindström
+ *	(c)1999-2003 Anders LindstrÃ¶m
  *
  *	Uses the excellent FreeType 2 library, available at:
  *	http://www.freetype.org/
@@ -716,6 +716,7 @@ int sge_text_input(sge_TextSurface* tc, Uint8 flags)
     SDL_Surface* buffer = NULL;
 
     SDL_Color bg;
+    bg.r = bg.g = bg.b = 0;
     bool is_ttf = tc->get_bg(&bg); /* No bc color indicates bitmap font */
 
     if(flags & SGE_FLAG1 || !is_ttf)

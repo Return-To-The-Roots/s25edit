@@ -5,7 +5,7 @@
  *	Started 000430
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)2000-2003 Anders Lindström
+ *	(c)2000-2003 Anders LindstrÃ¶m
  */
 
 /*********************************************************************
@@ -153,19 +153,8 @@ void sge_screen::update()
     // Updates the list of rectangles on screen
     if(!(HW || DB))
     {
-        int j = 0;
-
-        SDL_Rect* r = new SDL_Rect[rects.size()]; // ANSI C++
-
-        /* Copy every element in the linked list to the array */
-        for(RI i = rects.begin(); i != rects.end(); i++)
-        {
-            r[j++] = *i;
-        }
-
-        SDL_UpdateRects(screen, rects.size(), r); // Let SDL update the rectangles
-
-        delete[] r;
+        if(!rects.empty())
+            SDL_UpdateRects(screen, static_cast<int>(rects.size()), &rects[0]); // Let SDL update the rectangles
 
         rects.clear(); // Empty the list
     } else if(DB)      // double-buffered

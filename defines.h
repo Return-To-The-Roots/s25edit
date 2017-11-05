@@ -1,4 +1,4 @@
-#ifndef _DEFINES_H
+ï»¿#ifndef _DEFINES_H
 #define _DEFINES_H
 
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
@@ -409,34 +409,34 @@ enum
     FONT11_x,                                            // x
     FONT11_y,                                            // y
     FONT11_z,                                            // z
-    FONT11_ANSI_199,                                     // Ç
-    FONT11_ANSI_252,                                     // ü
-    FONT11_ANSI_233,                                     // é
-    FONT11_ANSI_226,                                     // â
-    FONT11_ANSI_228,                                     // ä
-    FONT11_ANSI_224,                                     // à
-    FONT11_ANSI_231,                                     // ç
-    FONT11_ANSI_234,                                     // ê
-    FONT11_ANSI_235,                                     // ë
-    FONT11_ANSI_232,                                     // è
-    FONT11_ANSI_239,                                     // ï
-    FONT11_ANSI_238,                                     // î
-    FONT11_ANSI_236,                                     // ì
-    FONT11_ANSI_196,                                     // Ä
-    FONT11_ANSI_244,                                     // ô
-    FONT11_ANSI_246,                                     // ö
-    FONT11_ANSI_242,                                     // ò
-    FONT11_ANSI_251,                                     // û
-    FONT11_ANSI_249,                                     // ù
-    FONT11_ANSI_214,                                     // Ö
-    FONT11_ANSI_220,                                     // Ü
-    FONT11_ANSI_225,                                     // á
-    FONT11_ANSI_237,                                     // í
-    FONT11_ANSI_243,                                     // ó
-    FONT11_ANSI_250,                                     // ú
-    FONT11_ANSI_241,                                     // ñ
-    FONT11_ANSI_223,                                     // ß
-    FONT11_ANSI_169,                                     // ©
+    FONT11_ANSI_199,                                     // Ã‡
+    FONT11_ANSI_252,                                     // Ã¼
+    FONT11_ANSI_233,                                     // Ã©
+    FONT11_ANSI_226,                                     // Ã¢
+    FONT11_ANSI_228,                                     // Ã¤
+    FONT11_ANSI_224,                                     // Ã 
+    FONT11_ANSI_231,                                     // Ã§
+    FONT11_ANSI_234,                                     // Ãª
+    FONT11_ANSI_235,                                     // Ã«
+    FONT11_ANSI_232,                                     // Ã¨
+    FONT11_ANSI_239,                                     // Ã¯
+    FONT11_ANSI_238,                                     // Ã®
+    FONT11_ANSI_236,                                     // Ã¬
+    FONT11_ANSI_196,                                     // Ã„
+    FONT11_ANSI_244,                                     // Ã´
+    FONT11_ANSI_246,                                     // Ã¶
+    FONT11_ANSI_242,                                     // Ã²
+    FONT11_ANSI_251,                                     // Ã»
+    FONT11_ANSI_249,                                     // Ã¹
+    FONT11_ANSI_214,                                     // Ã–
+    FONT11_ANSI_220,                                     // Ãœ
+    FONT11_ANSI_225,                                     // Ã¡
+    FONT11_ANSI_237,                                     // Ã­
+    FONT11_ANSI_243,                                     // Ã³
+    FONT11_ANSI_250,                                     // Ãº
+    FONT11_ANSI_241,                                     // Ã±
+    FONT11_ANSI_223,                                     // ÃŸ
+    FONT11_ANSI_169,                                     // Â©
                                                          // fontsize 9
     FONT9_SPACE = FONT11_SPACE + FONT_COLOR_COUNT * 115, // spacebar
     FONT9_EXCLAMATION_POINT,                             // !
@@ -525,34 +525,34 @@ enum
     FONT9_x,                                             // x
     FONT9_y,                                             // y
     FONT9_z,                                             // z
-    FONT9_ANSI_199,                                      // Ç
-    FONT9_ANSI_252,                                      // ü
-    FONT9_ANSI_233,                                      // é
-    FONT9_ANSI_226,                                      // â
-    FONT9_ANSI_228,                                      // ä
-    FONT9_ANSI_224,                                      // à
-    FONT9_ANSI_231,                                      // ç
-    FONT9_ANSI_234,                                      // ê
-    FONT9_ANSI_235,                                      // ë
-    FONT9_ANSI_232,                                      // è
-    FONT9_ANSI_239,                                      // ï
-    FONT9_ANSI_238,                                      // î
-    FONT9_ANSI_236,                                      // ì
-    FONT9_ANSI_196,                                      // Ä
-    FONT9_ANSI_244,                                      // ô
-    FONT9_ANSI_246,                                      // ö
-    FONT9_ANSI_242,                                      // ò
-    FONT9_ANSI_251,                                      // û
-    FONT9_ANSI_249,                                      // ù
-    FONT9_ANSI_214,                                      // Ö
-    FONT9_ANSI_220,                                      // Ü
-    FONT9_ANSI_225,                                      // á
-    FONT9_ANSI_237,                                      // í
-    FONT9_ANSI_243,                                      // ó
-    FONT9_ANSI_250,                                      // ú
-    FONT9_ANSI_241,                                      // ñ
-    FONT9_ANSI_223,                                      // ß
-    FONT9_ANSI_169,                                      // ©
+    FONT9_ANSI_199,                                      // Ã‡
+    FONT9_ANSI_252,                                      // Ã¼
+    FONT9_ANSI_233,                                      // Ã©
+    FONT9_ANSI_226,                                      // Ã¢
+    FONT9_ANSI_228,                                      // Ã¤
+    FONT9_ANSI_224,                                      // Ã 
+    FONT9_ANSI_231,                                      // Ã§
+    FONT9_ANSI_234,                                      // Ãª
+    FONT9_ANSI_235,                                      // Ã«
+    FONT9_ANSI_232,                                      // Ã¨
+    FONT9_ANSI_239,                                      // Ã¯
+    FONT9_ANSI_238,                                      // Ã®
+    FONT9_ANSI_236,                                      // Ã¬
+    FONT9_ANSI_196,                                      // Ã„
+    FONT9_ANSI_244,                                      // Ã´
+    FONT9_ANSI_246,                                      // Ã¶
+    FONT9_ANSI_242,                                      // Ã²
+    FONT9_ANSI_251,                                      // Ã»
+    FONT9_ANSI_249,                                      // Ã¹
+    FONT9_ANSI_214,                                      // Ã–
+    FONT9_ANSI_220,                                      // Ãœ
+    FONT9_ANSI_225,                                      // Ã¡
+    FONT9_ANSI_237,                                      // Ã­
+    FONT9_ANSI_243,                                      // Ã³
+    FONT9_ANSI_250,                                      // Ãº
+    FONT9_ANSI_241,                                      // Ã±
+    FONT9_ANSI_223,                                      // ÃŸ
+    FONT9_ANSI_169,                                      // Â©
                                                          // fontsize 14
     FONT14_SPACE = FONT9_SPACE + FONT_COLOR_COUNT * 115, // spacebar
     FONT14_EXCLAMATION_POINT,                            // !
@@ -641,34 +641,34 @@ enum
     FONT14_x,                                            // x
     FONT14_y,                                            // y
     FONT14_z,                                            // z
-    FONT14_ANSI_199,                                     // Ç
-    FONT14_ANSI_252,                                     // ü
-    FONT14_ANSI_233,                                     // é
-    FONT14_ANSI_226,                                     // â
-    FONT14_ANSI_228,                                     // ä
-    FONT14_ANSI_224,                                     // à
-    FONT14_ANSI_231,                                     // ç
-    FONT14_ANSI_234,                                     // ê
-    FONT14_ANSI_235,                                     // ë
-    FONT14_ANSI_232,                                     // è
-    FONT14_ANSI_239,                                     // ï
-    FONT14_ANSI_238,                                     // î
-    FONT14_ANSI_236,                                     // ì
-    FONT14_ANSI_196,                                     // Ä
-    FONT14_ANSI_244,                                     // ô
-    FONT14_ANSI_246,                                     // ö
-    FONT14_ANSI_242,                                     // ò
-    FONT14_ANSI_251,                                     // û
-    FONT14_ANSI_249,                                     // ù
-    FONT14_ANSI_214,                                     // Ö
-    FONT14_ANSI_220,                                     // Ü
-    FONT14_ANSI_225,                                     // á
-    FONT14_ANSI_237,                                     // í
-    FONT14_ANSI_243,                                     // ó
-    FONT14_ANSI_250,                                     // ú
-    FONT14_ANSI_241,                                     // ñ
-    FONT14_ANSI_223,                                     // ß
-    FONT14_ANSI_169,                                     // ©
+    FONT14_ANSI_199,                                     // Ã‡
+    FONT14_ANSI_252,                                     // Ã¼
+    FONT14_ANSI_233,                                     // Ã©
+    FONT14_ANSI_226,                                     // Ã¢
+    FONT14_ANSI_228,                                     // Ã¤
+    FONT14_ANSI_224,                                     // Ã 
+    FONT14_ANSI_231,                                     // Ã§
+    FONT14_ANSI_234,                                     // Ãª
+    FONT14_ANSI_235,                                     // Ã«
+    FONT14_ANSI_232,                                     // Ã¨
+    FONT14_ANSI_239,                                     // Ã¯
+    FONT14_ANSI_238,                                     // Ã®
+    FONT14_ANSI_236,                                     // Ã¬
+    FONT14_ANSI_196,                                     // Ã„
+    FONT14_ANSI_244,                                     // Ã´
+    FONT14_ANSI_246,                                     // Ã¶
+    FONT14_ANSI_242,                                     // Ã²
+    FONT14_ANSI_251,                                     // Ã»
+    FONT14_ANSI_249,                                     // Ã¹
+    FONT14_ANSI_214,                                     // Ã–
+    FONT14_ANSI_220,                                     // Ãœ
+    FONT14_ANSI_225,                                     // Ã¡
+    FONT14_ANSI_237,                                     // Ã­
+    FONT14_ANSI_243,                                     // Ã³
+    FONT14_ANSI_250,                                     // Ãº
+    FONT14_ANSI_241,                                     // Ã±
+    FONT14_ANSI_223,                                     // ÃŸ
+    FONT14_ANSI_169,                                     // Â©
                                                          // END: FONT
 
     // now the main resources will follow (frames, cursor, ...)

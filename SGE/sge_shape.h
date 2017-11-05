@@ -5,7 +5,7 @@
  *	Started 000430
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)2000-2003 Anders Lindström
+ *	(c)2000-2003 Anders LindstrÃ¶m
  */
 
 /*********************************************************************
@@ -33,6 +33,7 @@
 #include "sge_collision.h"
 #include "sge_surface.h"
 #include <list>
+#include <vector>
 
 class DECLSPEC sge_shape;
 
@@ -42,8 +43,8 @@ class DECLSPEC sge_shape;
 class DECLSPEC sge_screen
 {
 protected:
-    SDL_Surface* screen;       // The SDL screen surface
-    std::list<SDL_Rect> rects; // The list of rectangles to be updated
+    SDL_Surface* screen;         // The SDL screen surface
+    std::vector<SDL_Rect> rects; // The list of rectangles to be updated
 
     std::list<sge_shape*> shapes;   // The list of shapes to draw on screen
     std::list<sge_shape*> shapes_p; // The list of permanent shapes to draw on screen

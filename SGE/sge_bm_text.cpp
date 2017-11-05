@@ -5,7 +5,7 @@
  *	Started 990815
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)1999-2003 Anders Lindström
+ *	(c)1999-2003 Anders LindstrÃ¶m
  */
 
 /*********************************************************************
@@ -246,7 +246,7 @@ SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, S
         if(x > surface->w || y > surface->h)
             return ret;
 
-    characters = strlen(string);
+    characters = static_cast<int>(strlen(string));
 
     xdest = x;
 

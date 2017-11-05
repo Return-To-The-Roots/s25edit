@@ -274,7 +274,7 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
         case 4: return *(Uint32*)p;
 
         default:
-            return 0; /* shouldn’t happen, but avoids warnings */
+            return 0; /* shouldn't happen, but avoids warnings */
     }
 }
 

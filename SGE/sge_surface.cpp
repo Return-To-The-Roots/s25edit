@@ -5,7 +5,7 @@
  *	Started 990815 (split from sge_draw 010611)
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)1999-2003 Anders Lindström
+ *	(c)1999-2003 Anders LindstrÃ¶m
  */
 
 /*********************************************************************
@@ -1041,70 +1041,70 @@ void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 }
 
 /* Macro for 8/16/32 bpp */
-#define DO_FILL(UintXX, label)                                                                                         \
+#define DO_FILL(UintXX, label)                                                                                             \
     \
-{                                                                                                                 \
-        Sint16 l, x1, x2, dy;                                                                                          \
-        Uint32 oc;                   /* old pixel color */                                                             \
-        seg stack[MAX], *sp = stack; /* stack of filled segments */                                                    \
-        Uint16 pitch = dst->pitch / dst->format->BytesPerPixel;                                                        \
-        UintXX* row = (UintXX*)dst->pixels + y * pitch;                                                                \
-        UintXX* pixel = row + x;                                                                                       \
-                                                                                                                       \
-        if(x < sge_clip_xmin(dst) || x > sge_clip_xmax(dst) || y < sge_clip_ymin(dst) || y > sge_clip_ymax(dst))       \
-            return;                                                                                                    \
-                                                                                                                       \
-        oc = *pixel; /* read color at seed point */                                                                    \
-                                                                                                                       \
-        if(oc == color)                                                                                                \
-            return;                                                                                                    \
-                                                                                                                       \
-        PUSH(y, x, x, 1);      /* needed in some cases */                                                              \
-        PUSH(y + 1, x, x, -1); /* seed segment (popped 1st) */                                                         \
-                                                                                                                       \
-        while(sp > stack)                                                                                              \
-        {                                                                                                              \
-            /* pop segment off stack and fill a neighboring scan line */                                               \
-            POP(y, x1, x2, dy);                                                                                        \
-            row = (UintXX*)dst->pixels + y * pitch;                                                                    \
-            pixel = row + x1;                                                                                          \
-                                                                                                                       \
-            /*\                                                                                                  \ \ \ \
-             * segment of scan line y-dy for x1<=x<=x2 was previously filled,                                    \ \ \ \
-             * now explore adjacent pixels in scan line y                                                        \ \ \ \
-             */                                                                                                        \
-            for(x = x1; x >= sge_clip_xmin(dst) && *pixel == oc; x--, pixel--)                                         \
-                *pixel = color;                                                                                        \
-                                                                                                                       \
-            if(x >= x1)                                                                                                \
-                goto label;                                                                                            \
-                                                                                                                       \
-            l = x + 1;                                                                                                 \
-            if(l < x1)                                                                                                 \
-                PUSH(y, l, x1 - 1, -dy); /* leak on left? */                                                           \
-                                                                                                                       \
-            x = x1 + 1;                                                                                                \
-            pixel = row + x;                                                                                           \
-                                                                                                                       \
-            do                                                                                                         \
-            {                                                                                                          \
-                for(; x <= sge_clip_xmax(dst) && *pixel == oc; x++, pixel++)                                           \
-                    *pixel = color;                                                                                    \
-                                                                                                                       \
-                PUSH(y, l, x - 1, dy);                                                                                 \
-                                                                                                                       \
-                if(x > x2 + 1)                                                                                         \
-                    PUSH(y, x2 + 1, x - 1, -dy); /* leak on right? */                                                  \
+{                                                                                                                     \
+        Sint16 l, x1, x2, dy;                                                                                              \
+        Uint32 oc;                   /* old pixel color */                                                                 \
+        seg stack[MAX], *sp = stack; /* stack of filled segments */                                                        \
+        Uint16 pitch = dst->pitch / dst->format->BytesPerPixel;                                                            \
+        UintXX* row = (UintXX*)dst->pixels + y * pitch;                                                                    \
+        UintXX* pixel = row + x;                                                                                           \
+                                                                                                                           \
+        if(x < sge_clip_xmin(dst) || x > sge_clip_xmax(dst) || y < sge_clip_ymin(dst) || y > sge_clip_ymax(dst))           \
+            return;                                                                                                        \
+                                                                                                                           \
+        oc = *pixel; /* read color at seed point */                                                                        \
+                                                                                                                           \
+        if(oc == color)                                                                                                    \
+            return;                                                                                                        \
+                                                                                                                           \
+        PUSH(y, x, x, 1);      /* needed in some cases */                                                                  \
+        PUSH(y + 1, x, x, -1); /* seed segment (popped 1st) */                                                             \
+                                                                                                                           \
+        while(sp > stack)                                                                                                  \
+        {                                                                                                                  \
+            /* pop segment off stack and fill a neighboring scan line */                                                   \
+            POP(y, x1, x2, dy);                                                                                            \
+            row = (UintXX*)dst->pixels + y * pitch;                                                                        \
+            pixel = row + x1;                                                                                              \
+                                                                                                                           \
+            /*\                                                                                                  \ \ \ \ \ \
+             * segment of scan line y-dy for x1<=x<=x2 was previously filled,                                    \ \ \ \ \ \
+             * now explore adjacent pixels in scan line y                                                        \ \ \ \ \ \
+             */                                                                                                            \
+            for(x = x1; x >= sge_clip_xmin(dst) && *pixel == oc; x--, pixel--)                                             \
+                *pixel = color;                                                                                            \
+                                                                                                                           \
+            if(x >= x1)                                                                                                    \
+                goto label;                                                                                                \
+                                                                                                                           \
+            l = x + 1;                                                                                                     \
+            if(l < x1)                                                                                                     \
+                PUSH(y, l, x1 - 1, -dy); /* leak on left? */                                                               \
+                                                                                                                           \
+            x = x1 + 1;                                                                                                    \
+            pixel = row + x;                                                                                               \
+                                                                                                                           \
+            do                                                                                                             \
+            {                                                                                                              \
+                for(; x <= sge_clip_xmax(dst) && *pixel == oc; x++, pixel++)                                               \
+                    *pixel = color;                                                                                        \
+                                                                                                                           \
+                PUSH(y, l, x - 1, dy);                                                                                     \
+                                                                                                                           \
+                if(x > x2 + 1)                                                                                             \
+                    PUSH(y, x2 + 1, x - 1, -dy); /* leak on right? */                                                      \
             \
-label:                                                                                                                 \
-                pixel++;                                                                                               \
-                                                                                                                       \
-                for(x++; x <= x2 && *pixel != oc; x++, pixel++)                                                        \
-                    ;                                                                                                  \
-                                                                                                                       \
-                l = x;                                                                                                 \
-            } while(x <= x2);                                                                                          \
-        }                                                                                                              \
+label:                                                                                                                     \
+                pixel++;                                                                                                   \
+                                                                                                                           \
+                for(x++; x <= x2 && *pixel != oc; pixel++)                                                                 \
+                    x++;                                                                                                   \
+                                                                                                                           \
+                l = x;                                                                                                     \
+            } while(x <= x2);                                                                                              \
+        }                                                                                                                  \
     \
 }
 

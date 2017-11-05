@@ -5,7 +5,7 @@
  *	Started 990815
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)1999-2003 Anders Lindström
+ *	(c)1999-2003 Anders LindstrÃ¶m
  *
  *	Uses the excellent FreeType 2 library, available at:
  *	http://www.freetype.org/
@@ -854,7 +854,7 @@ Uint16* sge_Latin1_Uni(const char* text)
     int i, unicode_len;
 
     /* Copy the Latin-1 text to a UNICODE text buffer */
-    unicode_len = strlen(text);
+    unicode_len = static_cast<int>(strlen(text));
     unicode_text = (Uint16*)malloc((unicode_len + 1) * (sizeof *unicode_text));
     if(unicode_text == NULL)
     {
@@ -910,7 +910,7 @@ Uint16* sge_UTF8_Uni(const char* text)
     int unicode_len;
 
     /* Copy the UTF-8 text to a UNICODE text buffer */
-    unicode_len = strlen(text);
+    unicode_len = static_cast<int>(strlen(text));
     unicode_text = (Uint16*)malloc((unicode_len + 1) * (sizeof *unicode_text));
     if(unicode_text == NULL)
     {

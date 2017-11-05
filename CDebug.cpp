@@ -242,11 +242,11 @@ void CDebug::actualizeData()
         }
         if(VertexDataText == NULL)
         {
-            sprintf(
-              puffer1, "Vertex Data: x=%ld, y=%ld, z=%d i=%.2f h=%#04x", map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].x,
-              map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].y, map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].z,
-              ((float)map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].i) / pow(2, 16),
-              map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].h);
+            sprintf(puffer1, "Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].x,
+                    map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].y,
+                    map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].z,
+                    ((float)map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].i) / pow(2, 16),
+                    map->vertex[MapObj->VertexY * map->width + MapObj->VertexX].h);
             VertexDataText = dbgWnd->addText(puffer1, 260, 70, fontsize);
         }
         if(VertexVectorText != NULL)

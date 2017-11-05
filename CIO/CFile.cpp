@@ -2,6 +2,8 @@
 #include "../CSurface.h"
 #include "../globals.h"
 #include <boost/nowide/cstdio.hpp>
+#include <iostream>
+#include <stdexcept>
 
 // Hard coded file format :(
 #if SDL_BYTEORDER != SDL_LIL_ENDIAN
@@ -15,13 +17,19 @@ bobPAL* CFile::palArray = &global::palArray[0];
 bobPAL* CFile::palActual = &global::palArray[0];
 bool CFile::loadPAL = false;
 
+inline void freadChecked(void* buf, size_t elSize, size_t elCt, FILE* file)
+{
+    if(fread(buf, elSize, elCt, file) != elCt && !feof(file))
+        throw std::runtime_error("Read failed");
+}
+
 CFile::CFile() {}
 
 CFile::~CFile() {}
 
 void* CFile::open_file(const std::string& filename, char filetype, bool only_loadPAL)
 {
-    void* return_value = (int*)(-1);
+    void* return_value = NULL;
 
     if(filename.empty() || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL)
         return NULL;
@@ -32,52 +40,56 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
     if(only_loadPAL)
         loadPAL = true;
 
-    switch(filetype)
+    try
     {
-        case LST:
-            if(open_lst() == false)
-                return_value = NULL;
+        switch(filetype)
+        {
+            case LST:
+                if(open_lst())
+                    return_value = (void*)-1;
 
-            break;
+                break;
 
-        case BOB:
-            if(open_bob() == false)
-                return_value = NULL;
+            case BOB:
+                if(open_bob())
+                    return_value = (void*)-1;
 
-            break;
+                break;
 
-        case IDX:
-            if(open_idx(filename) == false)
-                return_value = NULL;
+            case IDX:
+                if(open_idx(filename))
+                    return_value = (void*)-1;
 
-            break;
+                break;
 
-        case BBM:
-            if(open_bbm() == false)
-                return_value = NULL;
+            case BBM:
+                if(open_bbm())
+                    return_value = (void*)-1;
 
-            break;
+                break;
 
-        case LBM:
-            if(open_lbm(filename) == false)
-                return_value = NULL;
+            case LBM:
+                if(open_lbm(filename))
+                    return_value = (void*)-1;
 
-            break;
+                break;
 
-        case GOU:
-            if(open_gou() == false)
-                return_value = NULL;
+            case GOU:
+                if(open_gou())
+                    return_value = (void*)-1;
 
-            break;
+                break;
 
-        case WLD: return_value = open_wld(); break;
+            case WLD: return_value = open_wld(); break;
 
-        case SWD: return_value = open_swd(); break;
+            case SWD: return_value = open_swd(); break;
 
-        default: // no valid data type
-            return_value = NULL;
-
-            break;
+            default: // no valid data type
+                break;
+        }
+    } catch(const std::exception& e)
+    {
+        std::cerr << "Error while reading " << filename << ": " << e.what() << std::endl;
     }
 
     if(fp != NULL)
@@ -105,7 +117,7 @@ bool CFile::open_lst()
     while(!feof(fp))
     {
         // entry type (2 Bytes) - unused (=0x0000) or used (=0x0001) -
-        fread(&entrytype, 2, 1, fp);
+        freadChecked(&entrytype, 2, 1, fp);
 
         // if entry is unused, go back to 'while' --- and by the way: after the last entry there are always zeros in the file,
         // so the following case will happen till we have reached the end of the file and the 'while' will break - PERFECT!
@@ -113,7 +125,7 @@ bool CFile::open_lst()
             continue;
 
         // bobtype (2 Bytes)
-        fread(&bobtype, 2, 1, fp);
+        freadChecked(&bobtype, 2, 1, fp);
 
         switch(bobtype)
         {
@@ -174,7 +186,7 @@ bool CFile::open_idx(const std::string& filename)
     // pointer to corresponding '******.DAT'-File
     FILE* fp_dat;
     // array index for the first letter of the file ending ( the 'I' in 'IDX' ) to overwrite IDX with DAT
-    int fileending;
+    unsigned fileending;
     // starting adress of data in the corresponding '******.DAT'-File
     Uint32 offset;
     // bobtype of the entry
@@ -192,7 +204,7 @@ bool CFile::open_idx(const std::string& filename)
     std::string filename_dat = filename;
     // if strlen = n, so array walks von 0 to n-1. n-1 is the last letter of the file ending ( the 'X' in 'IDX' ), so we have to walk back
     // one time to be at the last letter and then two times to be at the 'I' = walk back 3 times
-    fileending = filename.size() - 3;
+    fileending = static_cast<unsigned>(filename.size() - 3);
     // now overwrite 'IDX' with 'DAT'
     filename_dat[fileending] = 'D';
     filename_dat[fileending + 1] = 'A';
@@ -211,15 +223,15 @@ bool CFile::open_idx(const std::string& filename)
         // skip: name (1x 16 Bytes)
         fseek(fp_idx, 16, SEEK_CUR);
         // offset (4 Bytes)
-        fread(&offset, 4, 1, fp_idx);
+        freadChecked(&offset, 4, 1, fp_idx);
         // skip unknown data (6x 1 Byte)
         fseek(fp_idx, 6, SEEK_CUR);
         // bobtype (2 Bytes)
-        fread(&bobtype, 2, 1, fp_idx);
+        freadChecked(&bobtype, 2, 1, fp_idx);
         // set fp_dat to the position in 'offset'
         fseek(fp_dat, offset, SEEK_SET);
         // read bobtype again, now from 'DAT'-File
-        fread(&bobtype_check, 2, 1, fp_dat);
+        freadChecked(&bobtype_check, 2, 1, fp_dat);
         // check if data in 'DAT'-File is the data that it should be (bobtypes are equal)
         if(bobtype != bobtype_check)
             return false;
@@ -288,9 +300,9 @@ bool CFile::open_bbm()
 
     for(int i = 0; i < 256; i++)
     {
-        fread(&((palArray->colors[i]).r), 1, 1, fp);
-        fread(&((palArray->colors[i]).g), 1, 1, fp);
-        fread(&((palArray->colors[i]).b), 1, 1, fp);
+        freadChecked(&((palArray->colors[i]).r), 1, 1, fp);
+        freadChecked(&((palArray->colors[i]).g), 1, 1, fp);
+        freadChecked(&((palArray->colors[i]).b), 1, 1, fp);
     }
 
     palArray++;
@@ -325,26 +337,26 @@ bool CFile::open_lbm(const std::string& filename)
     /* READ FIRST CHUNK "BMHD" */
 
     // chunk-identifier (4 Bytes)
-    fread(chunk_identifier, 4, 1, fp);
+    freadChecked(chunk_identifier, 4, 1, fp);
     chunk_identifier[4] = '\0';
     // should be "BMHD" at this time
     if(strcmp(chunk_identifier, "BMHD") != 0)
         return false;
     // length of data block
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     endian_swap(length);
     // width of picture (2 Bytes)
-    fread(&(bmpArray->w), 2, 1, fp);
+    freadChecked(&(bmpArray->w), 2, 1, fp);
     endian_swap(bmpArray->w);
     // heigth of picture (2 Bytes)
-    fread(&(bmpArray->h), 2, 1, fp);
+    freadChecked(&(bmpArray->h), 2, 1, fp);
     endian_swap(bmpArray->h);
     // skip unknown data (4x 1 Bytes)
     fseek(fp, 4, SEEK_CUR);
     // color depth of the picture (1x 2 Bytes)
-    fread(&color_depth, 2, 1, fp);
+    freadChecked(&color_depth, 2, 1, fp);
     // compression_flag (1x 2 Bytes)
-    fread(&compression_flag, 2, 1, fp);
+    freadChecked(&compression_flag, 2, 1, fp);
     // skip unknown data (length - 20 x 1 Byte)
     // fseek(fp, length-20, SEEK_CUR);
 
@@ -354,7 +366,7 @@ bool CFile::open_lbm(const std::string& filename)
     // search for the "CMAP" and skip other chunk-types
     while(!feof(fp))
     {
-        fread(chunk_identifier, 4, 1, fp);
+        freadChecked(chunk_identifier, 4, 1, fp);
 
         if(strcmp(chunk_identifier, "CMAP") == 0)
             break;
@@ -364,7 +376,7 @@ bool CFile::open_lbm(const std::string& filename)
     if(feof(fp))
         return false;
     // length of data block
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     endian_swap(length);
     // must be 768 (RGB = 3 Byte x 256 Colors)
     if(length != 768)
@@ -372,9 +384,9 @@ bool CFile::open_lbm(const std::string& filename)
     // palette
     for(int i = 0; i < 256; i++)
     {
-        fread(&colors[i].r, 1, 1, fp);
-        fread(&colors[i].g, 1, 1, fp);
-        fread(&colors[i].b, 1, 1, fp);
+        freadChecked(&colors[i].r, 1, 1, fp);
+        freadChecked(&colors[i].g, 1, 1, fp);
+        freadChecked(&colors[i].b, 1, 1, fp);
     }
 
     /* READ THIRD CHUNK "BODY" */
@@ -383,7 +395,7 @@ bool CFile::open_lbm(const std::string& filename)
     // search for the "BODY" and skip other chunk-types
     while(!feof(fp))
     {
-        fread(chunk_identifier, 4, 1, fp);
+        freadChecked(chunk_identifier, 4, 1, fp);
 
         if(strcmp(chunk_identifier, "BODY") == 0)
             break;
@@ -393,7 +405,7 @@ bool CFile::open_lbm(const std::string& filename)
     if(feof(fp))
         return false;
     // length of data block
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     endian_swap(length);
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
@@ -411,7 +423,7 @@ bool CFile::open_lbm(const std::string& filename)
             for(int x = 0; x < bmpArray->w; x++)
             {
                 // read color value (1 Byte)
-                fread(&color_value, 1, 1, fp);
+                freadChecked(&color_value, 1, 1, fp);
                 // draw
                 CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
             }
@@ -430,7 +442,7 @@ bool CFile::open_lbm(const std::string& filename)
             for(int x = 0; x < bmpArray->w;)
             {
                 // read compression type
-                fread(&ctype, 1, 1, fp);
+                freadChecked(&ctype, 1, 1, fp);
 
                 if(ctype >= 0)
                 {
@@ -438,14 +450,14 @@ bool CFile::open_lbm(const std::string& filename)
                     for(int k = 0; k < ctype + 1; k++, x++)
                     {
                         // read color value (1 Byte)
-                        fread(&color_value, 1, 1, fp);
+                        freadChecked(&color_value, 1, 1, fp);
                         // draw
                         CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
                     }
                 } else if(ctype < 0 && ctype >= -127)
                 {
                     // draw the following byte '-ctype + 1' times to the surface
-                    fread(&color_value, 1, 1, fp);
+                    freadChecked(&color_value, 1, 1, fp);
 
                     for(int k = 0; k < -ctype + 1; k++, x++)
                         CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
@@ -488,7 +500,7 @@ bool CFile::open_gou()
     if(internalArrayCtr > 2)
         return false;
 
-    fread(gouData[internalArrayCtr], 256, 256, fp);
+    freadChecked(gouData[internalArrayCtr], 256, 256, fp);
     internalArrayCtr++;
 
     return true;
@@ -510,30 +522,30 @@ bobMAP* CFile::open_wld()
     }
 
     fseek(fp, 10, SEEK_SET);
-    fread(myMap->name, 20, 1, fp);
-    fread(&myMap->width_old, 2, 1, fp);
-    fread(&myMap->height_old, 2, 1, fp);
-    fread(&myMap->type, 1, 1, fp);
-    fread(&myMap->player, 1, 1, fp);
-    fread(myMap->author, 20, 1, fp);
-    fread(myMap->HQx, 2, 7, fp);
-    fread(myMap->HQy, 2, 7, fp);
+    freadChecked(myMap->name, 20, 1, fp);
+    freadChecked(&myMap->width_old, 2, 1, fp);
+    freadChecked(&myMap->height_old, 2, 1, fp);
+    freadChecked(&myMap->type, 1, 1, fp);
+    freadChecked(&myMap->player, 1, 1, fp);
+    freadChecked(myMap->author, 20, 1, fp);
+    freadChecked(myMap->HQx, 2, 7, fp);
+    freadChecked(myMap->HQy, 2, 7, fp);
 
     // go to big map header and read it
     fseek(fp, 92, SEEK_SET);
     for(int i = 0; i < 250; i++)
     {
-        fread(&myMap->header[i].type, 1, 1, fp);
-        fread(&myMap->header[i].x, 1, 2, fp);
-        fread(&myMap->header[i].y, 1, 2, fp);
-        fread(&myMap->header[i].area, 1, 4, fp);
+        freadChecked(&myMap->header[i].type, 1, 1, fp);
+        freadChecked(&myMap->header[i].x, 1, 2, fp);
+        freadChecked(&myMap->header[i].y, 1, 2, fp);
+        freadChecked(&myMap->header[i].area, 1, 4, fp);
     }
 
     // go to real map height and width
     fseek(fp, 2348, SEEK_SET);
-    fread(&myMap->width, 2, 1, fp);
+    freadChecked(&myMap->width, 2, 1, fp);
     myMap->width_pixel = myMap->width * TRIANGLE_WIDTH;
-    fread(&myMap->height, 2, 1, fp);
+    freadChecked(&myMap->height, 2, 1, fp);
     myMap->height_pixel = myMap->height * TRIANGLE_HEIGHT;
 
     if((myMap->vertex = (struct point*)malloc(sizeof(struct point) * myMap->width * myMap->height)) == NULL)
@@ -558,7 +570,7 @@ bobMAP* CFile::open_wld()
         {
             myMap->vertex[j * myMap->width + i].VertexX = i;
             myMap->vertex[j * myMap->width + i].VertexY = j;
-            fread(&heightFactor, 1, 1, fp);
+            freadChecked(&heightFactor, 1, 1, fp);
             myMap->vertex[j * myMap->width + i].h = heightFactor;
             myMap->vertex[j * myMap->width + i].x = a;
             myMap->vertex[j * myMap->width + i].y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
@@ -577,7 +589,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].rsuTexture, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].rsuTexture, 1, 1, fp);
     }
 
     // go to texture information for UpSideDown-Triangles
@@ -586,7 +598,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].usdTexture, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].usdTexture, 1, 1, fp);
     }
 
     // go to road data
@@ -595,7 +607,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].road, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].road, 1, 1, fp);
     }
 
     // go to object type data
@@ -604,7 +616,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].objectType, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].objectType, 1, 1, fp);
     }
 
     // go to object info data
@@ -613,7 +625,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].objectInfo, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].objectInfo, 1, 1, fp);
     }
 
     // go to animal data
@@ -622,7 +634,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].animal, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].animal, 1, 1, fp);
     }
 
     // go to unknown1 data
@@ -631,7 +643,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].unknown1, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].unknown1, 1, 1, fp);
     }
 
     // go to build data
@@ -640,7 +652,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].build, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].build, 1, 1, fp);
     }
 
     // go to unknown2 data
@@ -649,7 +661,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].unknown2, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].unknown2, 1, 1, fp);
     }
 
     // go to unknown3 data
@@ -658,7 +670,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].unknown3, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].unknown3, 1, 1, fp);
     }
 
     // go to resource data
@@ -667,7 +679,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].resource, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].resource, 1, 1, fp);
     }
 
     // go to shading data
@@ -676,7 +688,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].shading, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].shading, 1, 1, fp);
     }
 
     // go to unknown5 data
@@ -685,7 +697,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fread(&myMap->vertex[j * myMap->width + i].unknown5, 1, 1, fp);
+            freadChecked(&myMap->vertex[j * myMap->width + i].unknown5, 1, 1, fp);
     }
 
     return myMap;
@@ -996,19 +1008,19 @@ bool CFile::read_bob02()
     Uint8 color_value;
 
     // coordinate for zeropoint x (2 Bytes)
-    fread(&(bmpArray->nx), 2, 1, fp);
+    freadChecked(&(bmpArray->nx), 2, 1, fp);
     // coordinate for zeropoint y (2 Bytes)
-    fread(&(bmpArray->ny), 2, 1, fp);
+    freadChecked(&(bmpArray->ny), 2, 1, fp);
     // skip unknown data (4x 1 Byte)
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
-    fread(&(bmpArray->w), 2, 1, fp);
+    freadChecked(&(bmpArray->w), 2, 1, fp);
     // heigth of picture (2 Bytes)
-    fread(&(bmpArray->h), 2, 1, fp);
+    freadChecked(&(bmpArray->h), 2, 1, fp);
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
     next_entry = starting_point + length;
@@ -1026,7 +1038,7 @@ bool CFile::read_bob02()
 
     // read start adresses
     for(int y = 0; y < bmpArray->h; y++)
-        fread(&starts[y], 2, 1, fp);
+        freadChecked(&starts[y], 2, 1, fp);
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -1047,19 +1059,19 @@ bool CFile::read_bob02()
         for(int x = 0; x < bmpArray->w;)
         {
             // number of following colored pixels (1 Byte)
-            fread(&count_color, 1, 1, fp);
+            freadChecked(&count_color, 1, 1, fp);
 
             // loop for drawing the colored pixels to the surface
             for(int k = 0; k < count_color; k++, x++)
             {
                 // read color value (1 Byte)
-                fread(&color_value, 1, 1, fp);
+                freadChecked(&color_value, 1, 1, fp);
                 // draw
                 CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
             }
 
             // number of transparent pixels to draw now (1 Byte)
-            fread(&count_trans, 1, 1, fp);
+            freadChecked(&count_trans, 1, 1, fp);
 
             // loop for drawing the transparent pixels to the surface
             for(int k = 0; k < count_trans; k++, x++)
@@ -1069,13 +1081,13 @@ bool CFile::read_bob02()
         }
 
         // the end of line should be 0xFF, otherwise an error has ocurred (1 Byte)
-        fread(&endmark, 1, 1, fp);
+        freadChecked(&endmark, 1, 1, fp);
         if(endmark != 0xFF)
             return false;
     }
 
     // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has ocurred (1 Byte)
-    fread(&endmark, 1, 1, fp);
+    freadChecked(&endmark, 1, 1, fp);
     if(endmark != 0xFF)
         return false;
 
@@ -1111,14 +1123,14 @@ bool CFile::read_bob03()
     for(int i = 1; i <= 115; i++)
     {
         // following data blocks are bobtype04 for some ascii chars, bobtype is repeated at the beginning of each data block
-        fread(&bobtype, 2, 1, fp);
+        freadChecked(&bobtype, 2, 1, fp);
 
         // bobtype should be 04. if not, it's possible that there are a lot of zeros till the next block begins
         if(bobtype != BOBTYPE04)
         {
             // read the zeros (2 Bytes for each zero)
             while(bobtype == 0)
-                fread(&bobtype, 2, 1, fp);
+                freadChecked(&bobtype, 2, 1, fp);
 
             // at the end of all the zeros --> if bobtype is STILL NOT 04, an error has occured
             if(bobtype != BOBTYPE04)
@@ -1167,19 +1179,19 @@ bool CFile::read_bob04(int player_color)
     Uint8 color_value;
 
     // coordinate for zeropoint x (2 Bytes)
-    fread(&(bmpArray->nx), 2, 1, fp);
+    freadChecked(&(bmpArray->nx), 2, 1, fp);
     // coordinate for zeropoint y (2 Bytes)
-    fread(&(bmpArray->ny), 2, 1, fp);
+    freadChecked(&(bmpArray->ny), 2, 1, fp);
     // skip unknown data (4x 1 Byte)
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
-    fread(&(bmpArray->w), 2, 1, fp);
+    freadChecked(&(bmpArray->w), 2, 1, fp);
     // heigth of picture (2 Bytes)
-    fread(&(bmpArray->h), 2, 1, fp);
+    freadChecked(&(bmpArray->h), 2, 1, fp);
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
     next_entry = starting_point + length;
@@ -1197,7 +1209,7 @@ bool CFile::read_bob04(int player_color)
 
     // read start adresses
     for(int y = 0; y < bmpArray->h; y++)
-        fread(&starts[y], 2, 1, fp);
+        freadChecked(&starts[y], 2, 1, fp);
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -1218,7 +1230,7 @@ bool CFile::read_bob04(int player_color)
         for(int x = 0; x < bmpArray->w;)
         {
             // read our 'shift' (1 Byte)
-            fread(&shift, 1, 1, fp);
+            freadChecked(&shift, 1, 1, fp);
 
             if(shift < 0x41)
             {
@@ -1228,7 +1240,7 @@ bool CFile::read_bob04(int player_color)
                 }
             } else if(shift >= 0x41 && shift < 0x81)
             {
-                fread(&color_value, 1, 1, fp);
+                freadChecked(&color_value, 1, 1, fp);
 
                 for(int i = 1; i <= shift - 0x40; i++, x++)
                 {
@@ -1236,7 +1248,7 @@ bool CFile::read_bob04(int player_color)
                 }
             } else if(shift >= 0x81 && shift < 0xC1)
             {
-                fread(&color_value, 1, 1, fp);
+                freadChecked(&color_value, 1, 1, fp);
 
                 for(int i = 1; i <= shift - 0x80; i++, x++)
                 {
@@ -1244,7 +1256,7 @@ bool CFile::read_bob04(int player_color)
                 }
             } else // if (shift > 0xC0)
             {
-                fread(&color_value, 1, 1, fp);
+                freadChecked(&color_value, 1, 1, fp);
 
                 for(int i = 1; i <= shift - 0xC0; i++, x++)
                 {
@@ -1277,9 +1289,9 @@ bool CFile::read_bob05()
 
     for(int i = 0; i < 256; i++)
     {
-        fread(&((palArray->colors[i]).r), 1, 1, fp);
-        fread(&((palArray->colors[i]).g), 1, 1, fp);
-        fread(&((palArray->colors[i]).b), 1, 1, fp);
+        freadChecked(&((palArray->colors[i]).r), 1, 1, fp);
+        freadChecked(&((palArray->colors[i]).g), 1, 1, fp);
+        freadChecked(&((palArray->colors[i]).b), 1, 1, fp);
     }
 
     palArray++;
@@ -1307,19 +1319,19 @@ bool CFile::read_bob07()
     Uint8 count_trans;
 
     // coordinate for zeropoint x (2 Bytes)
-    fread(&(shadowArray->nx), 2, 1, fp);
+    freadChecked(&(shadowArray->nx), 2, 1, fp);
     // coordinate for zeropoint y (2 Bytes)
-    fread(&(shadowArray->ny), 2, 1, fp);
+    freadChecked(&(shadowArray->ny), 2, 1, fp);
     // skip unknown data (4x 1 Byte)
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
-    fread(&(shadowArray->w), 2, 1, fp);
+    freadChecked(&(shadowArray->w), 2, 1, fp);
     // heigth of picture (2 Bytes)
-    fread(&(shadowArray->h), 2, 1, fp);
+    freadChecked(&(shadowArray->h), 2, 1, fp);
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
     next_entry = starting_point + length;
@@ -1337,7 +1349,7 @@ bool CFile::read_bob07()
 
     // read start adresses
     for(int y = 0; y < shadowArray->h; y++)
-        fread(&starts[y], 2, 1, fp);
+        freadChecked(&starts[y], 2, 1, fp);
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((shadowArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -1357,7 +1369,7 @@ bool CFile::read_bob07()
         for(int x = 0; x < shadowArray->w;)
         {
             // number of half-transparent black (alpha value = 0x40) pixels (1 Byte)
-            fread(&count_black, 1, 1, fp);
+            freadChecked(&count_black, 1, 1, fp);
 
             // loop for drawing the black pixels to the surface
             for(int k = 0; k < count_black; k++, x++)
@@ -1367,7 +1379,7 @@ bool CFile::read_bob07()
             }
 
             // number of transparent pixels to draw now (1 Byte)
-            fread(&count_trans, 1, 1, fp);
+            freadChecked(&count_trans, 1, 1, fp);
 
             // loop for drawing the transparent pixels to the surface
             for(int k = 0; k < count_trans; k++, x++)
@@ -1377,13 +1389,13 @@ bool CFile::read_bob07()
         }
 
         // the end of line should be 0xFF, otherwise an error has ocurred (1 Byte)
-        fread(&endmark, 1, 1, fp);
+        freadChecked(&endmark, 1, 1, fp);
         if(endmark != 0xFF)
             return false;
     }
 
     // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has ocurred (1 Byte)
-    fread(&endmark, 1, 1, fp);
+    freadChecked(&endmark, 1, 1, fp);
     if(endmark != 0xFF)
         return false;
 
@@ -1425,19 +1437,19 @@ bool CFile::read_bob14()
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    fread(&length, 4, 1, fp);
+    freadChecked(&length, 4, 1, fp);
     // start offset of data block
     data_start = ftell(fp);
     // jump to first offset after data block
     fseek(fp, length, SEEK_CUR);
     // coordinate for zeropoint x (2 Bytes)
-    fread(&(bmpArray->nx), 2, 1, fp);
+    freadChecked(&(bmpArray->nx), 2, 1, fp);
     // coordinate for zeropoint y (2 Bytes)
-    fread(&(bmpArray->ny), 2, 1, fp);
+    freadChecked(&(bmpArray->ny), 2, 1, fp);
     // width of picture (2 Bytes)
-    fread(&(bmpArray->w), 2, 1, fp);
+    freadChecked(&(bmpArray->w), 2, 1, fp);
     // heigth of picture (2 Bytes)
-    fread(&(bmpArray->h), 2, 1, fp);
+    freadChecked(&(bmpArray->h), 2, 1, fp);
     // skip unknown data (8x 1 Byte)
     fseek(fp, 8, SEEK_CUR);
 
@@ -1463,7 +1475,7 @@ bool CFile::read_bob14()
         for(int x = 0; x < bmpArray->w; x++)
         {
             // read color value (1 Byte)
-            fread(&color_value, 1, 1, fp);
+            freadChecked(&color_value, 1, 1, fp);
             // draw
             CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
         }

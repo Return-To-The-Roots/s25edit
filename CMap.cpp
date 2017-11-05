@@ -28,7 +28,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     displayRect.w = global::s2->GameResolutionX;
     displayRect.h = global::s2->GameResolutionY;
 
-    if(filename.empty())
+    if(!filename.empty())
         map = (bobMAP*)CFile::open_file(filename, WLD);
 
     if(map == NULL)
@@ -476,21 +476,21 @@ void CMap::loadMapPics()
     }
     // load only the palette at this time from MAP0x.LST
     std::cout << outputString1;
-    if(CFile::open_file(global::gameDataFilePath + picFile, LST, true) == false)
+    if(!CFile::open_file(global::gameDataFilePath + picFile, LST, true))
     {
         std::cout << "failure";
     }
     // set the right palette
     CFile::set_palActual(CFile::get_palArray() - 1);
     std::cout << outputString2;
-    if(CFile::open_file(global::gameDataFilePath + picFile, LST) == false)
+    if(!CFile::open_file(global::gameDataFilePath + picFile, LST))
     {
         std::cout << "failure";
     }
     // set back palette
     // CFile::set_palActual(CFile::get_palArray());
     // std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
-    // if ( CFile::open_file(global::gameDataFilePath + "/DATA/MBOB/ROM_BOBS.LST", LST) == false )
+    // if ( !CFile::open_file(global::gameDataFilePath + "/DATA/MBOB/ROM_BOBS.LST", LST) )
     //{
     //    std::cout << "failure";
     //}
@@ -498,7 +498,7 @@ void CMap::loadMapPics()
     CFile::set_palActual(CFile::get_palArray());
     // load palette file for the map (for precalculated shading)
     std::cout << outputString3;
-    if(CFile::open_file(global::gameDataFilePath + palFile, BBM, true) == false)
+    if(!CFile::open_file(global::gameDataFilePath + palFile, BBM, true))
     {
         std::cout << "failure";
     }

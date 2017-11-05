@@ -5,7 +5,7 @@
  *	Started 990815 (split from sge_draw 010611)
  *
  *	License: LGPL v2+ (see the file LICENSE)
- *	(c)1999-2003 Anders Lindström
+ *	(c)1999-2003 Anders LindstrÃ¶m
  */
 
 /*********************************************************************

@@ -80,7 +80,9 @@ bool CFont::writeText(const char* string)
     // the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
     // pointer to the chiffres
-    const char* chiffre = (string == NULL ? this->string : string);
+    if(!string)
+        string = this->string;
+    const unsigned char* chiffre = reinterpret_cast<const unsigned char*>(string);
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = 0;
     int pos_y = 0;
@@ -120,88 +122,88 @@ bool CFont::writeText(const char* string)
         // between 'a' and 'z'
         else if(*chiffre >= 97 && *chiffre <= 122)
             chiffre_index += (*chiffre - 32 - 4) * FONT_COLOR_COUNT + color;
-        // ©
+        // Â©
         else if(*chiffre == 169)
             chiffre_index += 114 * FONT_COLOR_COUNT + color;
-        // Ä
+        // Ã„
         else if(*chiffre == 196)
             chiffre_index += 100 * FONT_COLOR_COUNT + color;
-        // Ç
+        // Ã‡
         else if(*chiffre == 199)
             chiffre_index += 87 * FONT_COLOR_COUNT + color;
-        // Ö
+        // Ã–
         else if(*chiffre == 214)
             chiffre_index += 106 * FONT_COLOR_COUNT + color;
-        // Ü
+        // Ãœ
         else if(*chiffre == 220)
             chiffre_index += 107 * FONT_COLOR_COUNT + color;
-        // ß
+        // ÃŸ
         else if(*chiffre == 223)
             chiffre_index += 113 * FONT_COLOR_COUNT + color;
-        // à
+        // Ã 
         else if(*chiffre == 224)
             chiffre_index += 92 * FONT_COLOR_COUNT + color;
-        // á
+        // Ã¡
         else if(*chiffre == 225)
             chiffre_index += 108 * FONT_COLOR_COUNT + color;
-        // â
+        // Ã¢
         else if(*chiffre == 226)
             chiffre_index += 90 * FONT_COLOR_COUNT + color;
-        // ä
+        // Ã¤
         else if(*chiffre == 228)
             chiffre_index += 91 * FONT_COLOR_COUNT + color;
-        // ç
+        // Ã§
         else if(*chiffre == 231)
             chiffre_index += 93 * FONT_COLOR_COUNT + color;
-        // è
+        // Ã¨
         else if(*chiffre == 232)
             chiffre_index += 96 * FONT_COLOR_COUNT + color;
-        // é
+        // Ã©
         else if(*chiffre == 233)
             chiffre_index += 89 * FONT_COLOR_COUNT + color;
-        // ê
+        // Ãª
         else if(*chiffre == 234)
             chiffre_index += 94 * FONT_COLOR_COUNT + color;
-        // ë
+        // Ã«
         else if(*chiffre == 235)
             chiffre_index += 95 * FONT_COLOR_COUNT + color;
-        // ì
+        // Ã¬
         else if(*chiffre == 236)
             chiffre_index += 99 * FONT_COLOR_COUNT + color;
-        // í
+        // Ã­
         else if(*chiffre == 237)
             chiffre_index += 109 * FONT_COLOR_COUNT + color;
-        // î
+        // Ã®
         else if(*chiffre == 238)
             chiffre_index += 98 * FONT_COLOR_COUNT + color;
-        // ï
+        // Ã¯
         else if(*chiffre == 239)
             chiffre_index += 97 * FONT_COLOR_COUNT + color;
-        // ñ
+        // Ã±
         else if(*chiffre == 241)
             chiffre_index += 112 * FONT_COLOR_COUNT + color;
-        // ò
+        // Ã²
         else if(*chiffre == 242)
             chiffre_index += 103 * FONT_COLOR_COUNT + color;
-        // ó
+        // Ã³
         else if(*chiffre == 243)
             chiffre_index += 110 * FONT_COLOR_COUNT + color;
-        // ô
+        // Ã´
         else if(*chiffre == 244)
             chiffre_index += 101 * FONT_COLOR_COUNT + color;
-        // ö
+        // Ã¶
         else if(*chiffre == 246)
             chiffre_index += 102 * FONT_COLOR_COUNT + color;
-        // ù
+        // Ã¹
         else if(*chiffre == 249)
             chiffre_index += 105 * FONT_COLOR_COUNT + color;
-        // ú
+        // Ãº
         else if(*chiffre == 250)
             chiffre_index += 111 * FONT_COLOR_COUNT + color;
-        // û
+        // Ã»
         else if(*chiffre == 251)
             chiffre_index += 104 * FONT_COLOR_COUNT + color;
-        // ü
+        // Ã¼
         else if(*chiffre == 252)
             chiffre_index += 88 * FONT_COLOR_COUNT + color;
         // chiffre not available, use '_' instead
@@ -236,7 +238,7 @@ bool CFont::writeText(const char* string)
                 if((Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
                     return false;
                 SDL_SetColorKey(Surf_Font, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
-                chiffre = this->string;
+                chiffre = reinterpret_cast<const unsigned char*>(string);
                 pixel_count_loop = false;
                 continue;
             } else
@@ -265,8 +267,8 @@ bool CFont::writeText(const char* string)
         CSurface::Draw(Surf_Font, global::bmpArray[chiffre_index].surface, pos_x, pos_y);
 
         // set position for next chiffre depending on the width of the actual drawn
-        // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
-        // 'í' instead
+        // NOTE: there is a bug in the ansi 236 'Ã¬' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
+        // 'Ã­' instead
         if(fontsize == 9 && *chiffre == 236)
             pos_x += global::bmpArray[FONT9_SPACE + 109 * FONT_COLOR_COUNT + color].w;
         else
@@ -348,88 +350,88 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
         // between 'a' and 'z'
         else if(*chiffre >= 97 && *chiffre <= 122)
             chiffre_index += (*chiffre - 32 - 4) * FONT_COLOR_COUNT + color;
-        // ©
+        // Â©
         else if(*chiffre == 169)
             chiffre_index += 114 * FONT_COLOR_COUNT + color;
-        // Ä
+        // Ã„
         else if(*chiffre == 196)
             chiffre_index += 100 * FONT_COLOR_COUNT + color;
-        // Ç
+        // Ã‡
         else if(*chiffre == 199)
             chiffre_index += 87 * FONT_COLOR_COUNT + color;
-        // Ö
+        // Ã–
         else if(*chiffre == 214)
             chiffre_index += 106 * FONT_COLOR_COUNT + color;
-        // Ü
+        // Ãœ
         else if(*chiffre == 220)
             chiffre_index += 107 * FONT_COLOR_COUNT + color;
-        // ß
+        // ÃŸ
         else if(*chiffre == 223)
             chiffre_index += 113 * FONT_COLOR_COUNT + color;
-        // à
+        // Ã 
         else if(*chiffre == 224)
             chiffre_index += 92 * FONT_COLOR_COUNT + color;
-        // á
+        // Ã¡
         else if(*chiffre == 225)
             chiffre_index += 108 * FONT_COLOR_COUNT + color;
-        // â
+        // Ã¢
         else if(*chiffre == 226)
             chiffre_index += 90 * FONT_COLOR_COUNT + color;
-        // ä
+        // Ã¤
         else if(*chiffre == 228)
             chiffre_index += 91 * FONT_COLOR_COUNT + color;
-        // ç
+        // Ã§
         else if(*chiffre == 231)
             chiffre_index += 93 * FONT_COLOR_COUNT + color;
-        // è
+        // Ã¨
         else if(*chiffre == 232)
             chiffre_index += 96 * FONT_COLOR_COUNT + color;
-        // é
+        // Ã©
         else if(*chiffre == 233)
             chiffre_index += 89 * FONT_COLOR_COUNT + color;
-        // ê
+        // Ãª
         else if(*chiffre == 234)
             chiffre_index += 94 * FONT_COLOR_COUNT + color;
-        // ë
+        // Ã«
         else if(*chiffre == 235)
             chiffre_index += 95 * FONT_COLOR_COUNT + color;
-        // ì
+        // Ã¬
         else if(*chiffre == 236)
             chiffre_index += 99 * FONT_COLOR_COUNT + color;
-        // í
+        // Ã­
         else if(*chiffre == 237)
             chiffre_index += 109 * FONT_COLOR_COUNT + color;
-        // î
+        // Ã®
         else if(*chiffre == 238)
             chiffre_index += 98 * FONT_COLOR_COUNT + color;
-        // ï
+        // Ã¯
         else if(*chiffre == 239)
             chiffre_index += 97 * FONT_COLOR_COUNT + color;
-        // ñ
+        // Ã±
         else if(*chiffre == 241)
             chiffre_index += 112 * FONT_COLOR_COUNT + color;
-        // ò
+        // Ã²
         else if(*chiffre == 242)
             chiffre_index += 103 * FONT_COLOR_COUNT + color;
-        // ó
+        // Ã³
         else if(*chiffre == 243)
             chiffre_index += 110 * FONT_COLOR_COUNT + color;
-        // ô
+        // Ã´
         else if(*chiffre == 244)
             chiffre_index += 101 * FONT_COLOR_COUNT + color;
-        // ö
+        // Ã¶
         else if(*chiffre == 246)
             chiffre_index += 102 * FONT_COLOR_COUNT + color;
-        // ù
+        // Ã¹
         else if(*chiffre == 249)
             chiffre_index += 105 * FONT_COLOR_COUNT + color;
-        // ú
+        // Ãº
         else if(*chiffre == 250)
             chiffre_index += 111 * FONT_COLOR_COUNT + color;
-        // û
+        // Ã»
         else if(*chiffre == 251)
             chiffre_index += 104 * FONT_COLOR_COUNT + color;
-        // ü
+        // Ã¼
         else if(*chiffre == 252)
             chiffre_index += 88 * FONT_COLOR_COUNT + color;
         // chiffre not available, use '_' instead
@@ -475,8 +477,8 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
         CSurface::Draw(Surf_Dest, global::bmpArray[chiffre_index].surface, pos_x, pos_y);
 
         // set position for next chiffre depending on the width of the actual drawn
-        // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
-        // 'í' instead
+        // NOTE: there is a bug in the ansi 236 'Ã¬' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
+        // 'Ã­' instead
         if(fontsize == 9 && *chiffre == 236)
             pos_x += global::bmpArray[FONT9_SPACE + 109 * FONT_COLOR_COUNT + color].w;
         else

@@ -31,7 +31,7 @@ CSelectBox::~CSelectBox()
 {
     for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
     {
-        if(Entries[i] == NULL)
+        if(Entries[i])
         {
             delete Entries[i];
             Entries[i] = NULL;

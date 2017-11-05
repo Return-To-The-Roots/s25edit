@@ -167,7 +167,7 @@ void callback::mainmenu(int Param)
 
         case STARTEDITOR:
             PleaseWait(INITIALIZING_CALL);
-            global::s2->setMapObj(new CMap(NULL));
+            global::s2->setMapObj(new CMap(""));
             MainMenu->setWaste();
             MainMenu = NULL;
             PleaseWait(WINDOW_QUIT_MESSAGE);
@@ -1371,7 +1371,7 @@ void callback::EditorTreeMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDTree != NULL)
                 break;
-            WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, PosX, PosY, 148, 140, "Bäume", WINDOW_GREEN1,
+            WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, PosX, PosY, 148, 140, "Trees", WINDOW_GREEN1,
                                   WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
             if(global::s2->RegisterWindow(WNDTree))
             {
@@ -2325,7 +2325,7 @@ void callback::EditorCreateMenu(int Param)
             {
                 MapObj = global::s2->getMapObj();
 
-                WNDCreate->addText("Breite", 95, 4, 9, FONT_YELLOW);
+                WNDCreate->addText("Width", 95, 4, 9, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_128, 0, 15, 35, 20, BUTTON_GREY, "128<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_16, 35, 15, 35, 20, BUTTON_GREY, "16<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_2, 70, 15, 25, 20, BUTTON_GREY, "2<-");
@@ -2336,7 +2336,7 @@ void callback::EditorCreateMenu(int Param)
                 WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_16, 168, 15, 35, 20, BUTTON_GREY, "->16");
                 WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_128, 203, 15, 35, 20, BUTTON_GREY, "->128");
 
-                WNDCreate->addText("Höhe", 100, 40, 9, FONT_YELLOW);
+                WNDCreate->addText("Height", 100, 40, 9, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_128, 0, 49, 35, 20, BUTTON_GREY, "128<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_16, 35, 49, 35, 20, BUTTON_GREY, "16<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_2, 70, 49, 25, 20, BUTTON_GREY, "2<-");
@@ -2948,7 +2948,7 @@ void callback::EditorCreateMenu(int Param)
             EditorPlayerMenu(MAP_QUIT);
 
             MapObj->destructMap();
-            MapObj->constructMap(NULL, width, height, LandscapeType, texture, border, border_texture);
+            MapObj->constructMap("", width, height, LandscapeType, texture, border, border_texture);
 
             // we need to check which of these windows was active before
             /*
@@ -3314,13 +3314,7 @@ void callback::viewer(int Param)
 void callback::submenu1(int Param)
 {
     static CMenu* SubMenu = NULL;
-    static CButton* toMain = NULL;
     static CButton* greatMoon = NULL;
-    static CButton* smallMoon = NULL;
-    static CButton* toosmall = NULL;
-    static CButton* createWindow = NULL;
-    static CFont* ueberschrift = NULL;
-    static CFont* resolution = NULL;
     static CFont* greatMoonText = NULL;
     static CFont* counterText = NULL;
     static CPicture* picObject = NULL;
@@ -3374,14 +3368,13 @@ void callback::submenu1(int Param)
                 SubMenu = NULL;
                 return;
             }
-            toMain = SubMenu->addButton(submenu1, MAINMENU, 400, 440, 200, 20, BUTTON_RED1, "back");
+            SubMenu->addButton(submenu1, MAINMENU, 400, 440, 200, 20, BUTTON_RED1, "back");
             greatMoon = SubMenu->addButton(submenu1, GREATMOON, 100, 100, 200, 200, BUTTON_STONE, NULL, MOON);
             greatMoon->setMotionParams(GREATMOONENTRY, GREATMOONLEAVE);
-            smallMoon = SubMenu->addButton(submenu1, SMALLMOON, 100, 350, global::bmpArray[MOON].w, global::bmpArray[MOON].h, BUTTON_STONE,
-                                           NULL, MOON);
-            toosmall = SubMenu->addButton(submenu1, TOOSMALL, 100, 400, global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1,
-                                          BUTTON_STONE, NULL, MOON);
-            createWindow = SubMenu->addButton(submenu1, CREATEWINDOW, 500, 10, 130, 30, BUTTON_GREEN1, "Create window");
+            SubMenu->addButton(submenu1, SMALLMOON, 100, 350, global::bmpArray[MOON].w, global::bmpArray[MOON].h, BUTTON_STONE, NULL, MOON);
+            SubMenu->addButton(submenu1, TOOSMALL, 100, 400, global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1, BUTTON_STONE, NULL,
+                               MOON);
+            SubMenu->addButton(submenu1, CREATEWINDOW, 500, 10, 130, 30, BUTTON_GREEN1, "Create window");
             picObject = SubMenu->addPicture(submenu1, PICOBJECT, 200, 30, MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
             // text block with \n
@@ -3397,13 +3390,7 @@ void callback::submenu1(int Param)
         case MAINMENU:
             SubMenu->setWaste();
             SubMenu = NULL;
-            toMain = NULL;
             greatMoon = NULL;
-            smallMoon = NULL;
-            toosmall = NULL;
-            createWindow = NULL;
-            ueberschrift = NULL;
-            resolution = NULL;
             greatMoonText = NULL;
             counterText = NULL;
             testWindowPicture = NULL;
@@ -3428,9 +3415,9 @@ void callback::submenu1(int Param)
             break;
 
         case GREATMOON:
-            ueberschrift = SubMenu->addText("Title!", 300, 10, 14);
+            SubMenu->addText("Title!", 300, 10, 14);
             sprintf(puffer, "Window X: %d Window Y: %d", global::s2->GameResolutionX, global::s2->GameResolutionY);
-            resolution = SubMenu->addText(puffer, 10, 10, 14);
+            SubMenu->addText(puffer, 10, 10, 14);
             break;
 
         case SMALLMOON:
@@ -3451,13 +3438,13 @@ void callback::submenu1(int Param)
                                          WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
                 if(global::s2->RegisterWindow(testWindow))
                 {
-                    testWindow->addText("Text innerhalb des Fensters", 10, 10, 14);
-                    testWindow->addButton(submenu1, -10, 150, 100, 210, 30, BUTTON_GREEN2, "Button innerhalb des Fensters");
+                    testWindow->addText("Text inside the window", 10, 10, 14);
+                    testWindow->addButton(submenu1, -10, 150, 100, 210, 30, BUTTON_GREEN2, "Button inside the window");
                     testWindowPicture = testWindow->addPicture(submenu1, TESTWINDOWPICTURE, 10, 60, MIS2BOBS_FORTRESS);
                     testWindowPicture->setMotionParams(TESTWINDOWPICTUREENTRY, TESTWINDOWPICTURELEAVE);
                     testTextfield_testWindow = testWindow->addTextfield(130, 30, 10, 3, 14, FONT_RED, BUTTON_GREY, true);
                     testTextfield_testWindow->setText(
-                      "Die ist ein sehr langer Testtext in der Hoffnung, das Textfeld ein für alle mal zu sprengen");
+                      "This is a very long test text in order to destroy the text field completely once and for all");
                 } else
                 {
                     delete testWindow;
@@ -3467,11 +3454,11 @@ void callback::submenu1(int Param)
             }
             if(testWindow2 == NULL)
             {
-                testWindow2 = new CWindow(submenu1, TESTWINDOW2QUITMESSAGE, 200, 5, 350, 240, "Noch ein Fenster", WINDOW_GREEN1,
+                testWindow2 = new CWindow(submenu1, TESTWINDOW2QUITMESSAGE, 200, 5, 350, 240, "Another Window", WINDOW_GREEN1,
                                           WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
                 if(global::s2->RegisterWindow(testWindow2))
                 {
-                    testWindow2->addText("Text innerhalb des Fensters", 50, 40, 9);
+                    testWindow2->addText("Text inside the window", 50, 40, 9);
                     testWindow2->addButton(submenu1, -10, 100, 100, 100, 20, BUTTON_GREEN2, "Button");
                 } else
                 {
@@ -3505,7 +3492,7 @@ void callback::submenu1(int Param)
 
         case PICOBJECTENTRY:
             if(greatMoonText == NULL)
-                greatMoonText = SubMenu->addText("Test-Textöäüß", 100, 10, 14);
+                greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
             break;
 
         case PICOBJECTLEAVE:
@@ -3518,7 +3505,7 @@ void callback::submenu1(int Param)
 
         case TESTWINDOWPICTURE:
             if(testWindowText == NULL)
-                testWindowText = testWindow->addText("Auf Festung geklickt", 10, 200, 11);
+                testWindowText = testWindow->addText("Clicked on castle", 10, 200, 11);
             else
             {
                 testWindow->delText(testWindowText);
