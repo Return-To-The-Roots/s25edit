@@ -1,6 +1,7 @@
 #include "CFile.h"
 #include "../CSurface.h"
 #include "../globals.h"
+#include <boost/nowide/cstdio.hpp>
 
 // Hard coded file format :(
 #if SDL_BYTEORDER != SDL_LIL_ENDIAN
@@ -25,7 +26,7 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
     if(filename.empty() || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL)
         return NULL;
 
-    else if((fp = fopen(filename.c_str(), "rb")) == NULL)
+    else if((fp = boost::nowide::fopen(filename.c_str(), "rb")) == NULL)
         return NULL;
 
     if(only_loadPAL)
@@ -184,7 +185,7 @@ bool CFile::open_idx(const std::string& filename)
     // save global filepointer
     fp_tmp = fp;
     // get a new filepointer to the '.IDX'-File
-    if((fp_idx = fopen(filename.c_str(), "rb")) == NULL)
+    if((fp_idx = boost::nowide::fopen(filename.c_str(), "rb")) == NULL)
         return false;
     // following code will open the corresponding '******.DAT'-File
     // allocate memory for new name
@@ -197,7 +198,7 @@ bool CFile::open_idx(const std::string& filename)
     filename_dat[fileending + 1] = 'A';
     filename_dat[fileending + 2] = 'T';
     // get the filepointer of the corresponging '******.DAT'-File
-    if((fp_dat = fopen(filename_dat.c_str(), "rb")) == NULL)
+    if((fp_dat = boost::nowide::fopen(filename_dat.c_str(), "rb")) == NULL)
         return false;
     // we are finished opening the 'DAT'-File, now we can handle the content
 
@@ -702,7 +703,7 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
     if(filename.empty() || data == NULL)
         return return_value;
 
-    if((fp = fopen(filename.c_str(), "wb")) == NULL)
+    if((fp = boost::nowide::fopen(filename.c_str(), "wb")) == NULL)
         return return_value;
 
     switch(filetype)

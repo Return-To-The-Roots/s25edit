@@ -77,7 +77,11 @@ ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
 
-target_link_libraries(s25edit SGE ${SDL_LIBRARY})
+target_link_libraries(s25edit SGE rttrConfig nowide-static ${SDL_LIBRARY})
+
+if(RTTR_BINDIR)
+	INSTALL(TARGETS s25edit RUNTIME DESTINATION ${RTTR_BINDIR})
+endif()
 
 if(ClangFormat_FOUND)
     add_clangFormat_files(${MAIN_SOURCES} ${CIO_SOURCES})

@@ -2,18 +2,10 @@
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
+#include "RttrConfig.h"
+#include "files.h"
 #include "globals.h"
-
-#ifdef _WIN32
-#include <direct.h>
-// MSDN recommends against using getcwd & chdir names
-#define cwd _getcwd
-#define cd _chdir
-#else
-#include "unistd.h"
-#define cwd getcwd
-#define cd chdir
-#endif
+#include <boost/filesystem/operations.hpp>
 #include <iostream>
 
 CGame::CGame()
@@ -224,23 +216,24 @@ void CGame::delMapObj()
     MapObj = NULL;
 }
 
-/*
- *  We want a console application to put stdout to the console, so we need to
- *  undefine main to get no linker errors like "undefined reference to WinMain16@"
- *  an then redirect stdout and stderr to console with freopen.
- */
 #undef main
 int main(int argc, char* argv[])
 {
-    FILE* ctt = fopen("CON", "w");
-    freopen("CON", "w", stdout);
-    freopen("CON", "w", stderr);
+    if(!RTTRCONFIG.Init())
+    {
+        std::cerr << "Failed to init program!" << std::endl;
+        return 1;
+    }
 
-    std::string exePath = argv[0];
-    size_t pos = exePath.find_last_of("/\\");
-    if(pos != std::string::npos)
-        exePath = exePath.substr(0, pos);
-    cd(exePath.c_str());
+    global::gameDataFilePath = RTTRCONFIG.ExpandPath("<RTTR_GAME>");
+    global::userMapsPath = RTTRCONFIG.ExpandPath(FILE_PATHS[41]);
+    boost::system::error_code ec;
+    boost::filesystem::create_directories(global::userMapsPath, ec);
+    if(!ec)
+    {
+        std::cerr << "Could not create " << global::userMapsPath << std::endl;
+        return 1;
+    }
 
     try
     {
@@ -249,14 +242,9 @@ int main(int argc, char* argv[])
         global::s2->Execute();
     } catch(...)
     {
-        std::cout << "Unhandled Exception" << std::endl;
+        std::cerr << "Unhandled Exception" << std::endl;
+        return 1;
     }
-
-    fclose(ctt);
-    ctt = NULL;
-
-    // fflush(stdin);
-    // getchar();
 
     return 0;
 }
