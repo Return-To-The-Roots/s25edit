@@ -4,6 +4,7 @@
 #define _CFILE_H
 
 #include "../includes.h"
+#include <string>
 
 class CFile
 {
@@ -25,17 +26,17 @@ private:
     // Methods
     static bool open_lst();
     static bool open_bob(); // not implemented yet
-    static bool open_idx(char* filename);
+    static bool open_idx(const std::string& filename);
     static bool open_bbm();
-    static bool open_lbm(char* filename);
+    static bool open_lbm(const std::string& filename);
     static bool open_gou();
     static bobMAP* open_wld();
     static bobMAP* open_swd();
-    static bool save_lst(void* data);                 // not implemented yet
-    static bool save_bob(void* data);                 // not implemented yet
-    static bool save_idx(void* data, char* filename); // not implemented yet
-    static bool save_bbm(void* data);                 // not implemented yet
-    static bool save_lbm(void* data);                 // not implemented yet
+    static bool save_lst(void* data);                              // not implemented yet
+    static bool save_bob(void* data);                              // not implemented yet
+    static bool save_idx(void* data, const std::string& filename); // not implemented yet
+    static bool save_bbm(void* data);                              // not implemented yet
+    static bool save_lbm(void* data);                              // not implemented yet
     static bool save_wld(void* data);
     static bool save_swd(void* data);
     static bool read_bob01(); // not implemented yet
@@ -52,10 +53,8 @@ private:
 public:
     CFile();
     ~CFile();
-    static void* open_file(char* filename, char filetype, bool only_loadPAL = false);
-    static void* open_file(const char* filename, char filetype, bool only_loadPAL = false);
-    static bool save_file(char* filename, char filetype, void* data);
-    static bool save_file(const char* filename, char filetype, void* data);
+    static void* open_file(const std::string& filename, char filetype, bool only_loadPAL = false);
+    static bool save_file(const std::string& filename, char filetype, void* data);
 };
 
 #endif

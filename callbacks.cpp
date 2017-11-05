@@ -818,9 +818,9 @@ void callback::EditorLoadMenu(int Param)
                 MapObj = global::s2->getMapObj();
 
                 TXTF_Filename = WNDLoad->addTextfield(10, 10, 21, 1);
-                TXTF_Filename->setText("WORLDS/");
+                TXTF_Filename->setText("MyMap.WLD");
                 WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Load");
-                WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "ABort");
+                WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "Abort");
             } else
             {
                 delete WNDLoad;
@@ -861,7 +861,7 @@ void callback::EditorLoadMenu(int Param)
             EditorPlayerMenu(MAP_QUIT);
 
             MapObj->destructMap();
-            MapObj->constructMap((char*)TXTF_Filename->getText());
+            MapObj->constructMap(global::userMapsPath + "/" + TXTF_Filename->getText());
 
             // we need to check which of these windows was active before
             /*
@@ -910,7 +910,7 @@ void callback::EditorSaveMenu(int Param)
 
                 WNDSave->addText("Filename", 100, 2, 9);
                 TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
-                TXTF_Filename->setText("WORLDS/");
+                TXTF_Filename->setText("MyMap.WLD");
                 WNDSave->addText("Mapname", 98, 38, 9);
                 TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
                 TXTF_Mapname->setText(MapObj->getMapname());
@@ -953,9 +953,9 @@ void callback::EditorSaveMenu(int Param)
         {
             PleaseWait(INITIALIZING_CALL);
 
-            MapObj->setMapname((char*)TXTF_Mapname->getText());
-            MapObj->setAuthor((char*)TXTF_Author->getText());
-            bool result = CFile::save_file((char*)TXTF_Filename->getText(), WLD, MapObj->getMap());
+            MapObj->setMapname(TXTF_Mapname->getText());
+            MapObj->setAuthor(TXTF_Author->getText());
+            bool result = CFile::save_file(global::userMapsPath + "/" + TXTF_Filename->getText(), WLD, MapObj->getMap());
 
             ShowStatus(INITIALIZING_CALL);
             ShowStatus(result ? 1 : 2);

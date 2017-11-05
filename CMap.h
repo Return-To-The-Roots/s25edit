@@ -2,6 +2,7 @@
 #define _CMAP_H
 
 #include "includes.h"
+#include <string>
 
 class CMap
 {
@@ -77,10 +78,10 @@ private:
     bool VerticalMovementLocked;
 
 public:
-    CMap(char* filename);
+    CMap(const std::string& filename);
     ~CMap();
-    void constructMap(char* filename, int width = 32, int height = 32, int type = 0, int texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4,
-                      int border_texture = TRIANGLE_TEXTURE_WATER);
+    void constructMap(const std::string& filename, int width = 32, int height = 32, int type = 0, int texture = TRIANGLE_TEXTURE_MEADOW1,
+                      int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
     void destructMap();
     bobMAP* generateMap(int width, int height, int type, int texture, int border, int border_texture);
     void loadMapPics();
@@ -118,10 +119,10 @@ public:
     void setDisplayRect(DisplayRectangle displayRect) { this->displayRect = displayRect; }
     Uint16* getPlayerHQx() { return PlayerHQx; }
     Uint16* getPlayerHQy() { return PlayerHQy; }
-    char* getMapname() { return map->name; }
-    void setMapname(char* name) { strcpy(map->name, name); }
-    char* getAuthor() { return map->author; }
-    void setAuthor(char* author) { strcpy(map->author, author); }
+    const char* getMapname() { return map->name; }
+    void setMapname(const char* name) { strcpy(map->name, name); }
+    const char* getAuthor() { return map->author; }
+    void setAuthor(const char* author) { strcpy(map->author, author); }
 
     void drawMinimap(SDL_Surface* Window);
     void render();
@@ -186,8 +187,6 @@ private:
     void modifyAnimal(int VertexX, int VertexY);
     void modifyBuild(int VertexX, int VertexY);
     void modifyResource(int VertexX, int VertexY);
-    void modifyResourceRaise(int VertexX, int VertexY, Uint8 resource);
-    void modifyResourceReduce(int VertexX, int VertexY, Uint8 resource);
     void modifyPlayer(int VertexX, int VertexY);
     void rotateMap();
     void MirrorMapOnXAxis();

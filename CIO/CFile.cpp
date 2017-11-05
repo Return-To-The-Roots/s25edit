@@ -2,6 +2,11 @@
 #include "../CSurface.h"
 #include "../globals.h"
 
+// Hard coded file format :(
+#if SDL_BYTEORDER != SDL_LIL_ENDIAN
+#error "Only little endian systems are supported"
+#endif
+
 FILE* CFile::fp = NULL;
 bobBMP* CFile::bmpArray = &global::bmpArray[0];
 bobSHADOW* CFile::shadowArray = &global::shadowArray[0];
@@ -13,14 +18,14 @@ CFile::CFile() {}
 
 CFile::~CFile() {}
 
-void* CFile::open_file(char* filename, char filetype, bool only_loadPAL)
+void* CFile::open_file(const std::string& filename, char filetype, bool only_loadPAL)
 {
     void* return_value = (int*)(-1);
 
-    if(filename == NULL || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL)
+    if(filename.empty() || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL)
         return NULL;
 
-    else if((fp = fopen(filename, "rb")) == NULL)
+    else if((fp = fopen(filename.c_str(), "rb")) == NULL)
         return NULL;
 
     if(only_loadPAL)
@@ -83,12 +88,6 @@ void* CFile::open_file(char* filename, char filetype, bool only_loadPAL)
     loadPAL = false;
 
     return return_value;
-}
-
-void* CFile::open_file(const char* filename, char filetype, bool only_loadPAL)
-{
-    char* file = (char*)filename;
-    return open_file(file, filetype, only_loadPAL);
 }
 
 bool CFile::open_lst()
@@ -165,7 +164,7 @@ bool CFile::open_bob()
     return false;
 }
 
-bool CFile::open_idx(char* filename)
+bool CFile::open_idx(const std::string& filename)
 {
     // temporary filepointer to save global fp until this function has finished
     FILE* fp_tmp;
@@ -173,8 +172,6 @@ bool CFile::open_idx(char* filename)
     FILE* fp_idx;
     // pointer to corresponding '******.DAT'-File
     FILE* fp_dat;
-    // name of corresponging '******.DAT'-File
-    char* filename_dat;
     // array index for the first letter of the file ending ( the 'I' in 'IDX' ) to overwrite IDX with DAT
     int fileending;
     // starting adress of data in the corresponding '******.DAT'-File
@@ -187,23 +184,20 @@ bool CFile::open_idx(char* filename)
     // save global filepointer
     fp_tmp = fp;
     // get a new filepointer to the '.IDX'-File
-    if((fp_idx = fopen(filename, "rb")) == NULL)
+    if((fp_idx = fopen(filename.c_str(), "rb")) == NULL)
         return false;
     // following code will open the corresponding '******.DAT'-File
     // allocate memory for new name
-    if((filename_dat = (char*)malloc(strlen(filename) + 1)) == NULL)
-        return false;
-    // fill new allocated memory with name of 'IDX'-File
-    strcpy(filename_dat, filename);
+    std::string filename_dat = filename;
     // if strlen = n, so array walks von 0 to n-1. n-1 is the last letter of the file ending ( the 'X' in 'IDX' ), so we have to walk back
     // one time to be at the last letter and then two times to be at the 'I' = walk back 3 times
-    fileending = strlen(filename) - 3;
+    fileending = filename.size() - 3;
     // now overwrite 'IDX' with 'DAT'
     filename_dat[fileending] = 'D';
     filename_dat[fileending + 1] = 'A';
     filename_dat[fileending + 2] = 'T';
     // get the filepointer of the corresponging '******.DAT'-File
-    if((fp_dat = fopen(filename_dat, "rb")) == NULL)
+    if((fp_dat = fopen(filename_dat.c_str(), "rb")) == NULL)
         return false;
     // we are finished opening the 'DAT'-File, now we can handle the content
 
@@ -282,7 +276,6 @@ bool CFile::open_idx(char* filename)
 
     fclose(fp_idx);
     fclose(fp_dat);
-    free(filename_dat);
 
     return true;
 }
@@ -304,7 +297,7 @@ bool CFile::open_bbm()
     return true;
 }
 
-bool CFile::open_lbm(char* filename)
+bool CFile::open_lbm(const std::string& filename)
 {
     // IMPORTANT NOTE: LBM (also ILBM) is the Interchange File Format (IFF) and the 4-byte-blocks are originally organized as Big Endian, so
     // a convertion is needed
@@ -431,7 +424,7 @@ bool CFile::open_lbm(char* filename)
         for(int y = 0; y < bmpArray->h; y++)
         {
             // loop for reading pixels of the actual picture line
-            //(cause of a kind of RLE-Compression we cannot read the pixels sequentielly)
+            //(cause of a kind of RLE-Compression we cannot read the pixels sequentially)
             //'x' will be incremented WITHIN the loop
             for(int x = 0; x < bmpArray->w;)
             {
@@ -465,9 +458,9 @@ bool CFile::open_lbm(char* filename)
         return false;
 
     // if this is a texture file, we need a secondary 32-bit surface for SGE and we set a color key at both surfaces
-    if(strcmp(filename, "./GFX/TEXTURES/TEX5.LBM") == 0 || strcmp(filename, "./GFX/TEXTURES/TEX6.LBM") == 0
-       || strcmp(filename, "./GFX/TEXTURES/TEX7.LBM") == 0 || strcmp(filename, "./GFX/TEXTURES/TEXTUR_0.LBM") == 0
-       || strcmp(filename, "./GFX/TEXTURES/TEXTUR_3.LBM") == 0)
+    if(filename.find("TEX5.LBM") != std::string::npos || filename.find("TEX6.LBM") != std::string::npos
+       || filename.find("TEX7.LBM") != std::string::npos || filename.find("TEXTUR_0.LBM") != std::string::npos
+       || filename.find("TEXTUR_3.LBM") != std::string::npos)
     {
         SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
@@ -702,14 +695,14 @@ bobMAP* CFile::open_swd()
     return open_wld();
 }
 
-bool CFile::save_file(char* filename, char filetype, void* data)
+bool CFile::save_file(const std::string& filename, char filetype, void* data)
 {
     bool return_value = false;
 
-    if(filename == NULL || data == NULL)
+    if(filename.empty() || data == NULL)
         return return_value;
 
-    if((fp = fopen(filename, "wb")) == NULL)
+    if((fp = fopen(filename.c_str(), "wb")) == NULL)
         return return_value;
 
     switch(filetype)
@@ -742,12 +735,6 @@ bool CFile::save_file(char* filename, char filetype, void* data)
     return return_value;
 }
 
-bool CFile::save_file(const char* filename, char filetype, void* data)
-{
-    char* file = (char*)filename;
-    return save_file(file, filetype, data);
-}
-
 bool CFile::save_lst(void* data)
 {
     return false;
@@ -758,7 +745,7 @@ bool CFile::save_bob(void* data)
     return false;
 }
 
-bool CFile::save_idx(void* data, char* filename)
+bool CFile::save_idx(void* data, const std::string& filename)
 {
     return false;
 }
@@ -1493,10 +1480,10 @@ bool CFile::read_bob14()
 
 inline void CFile::endian_swap(Uint16& x)
 {
-    x = (x >> 8) | (x << 8);
+    x = SDL_Swap16(x);
 }
 
 inline void CFile::endian_swap(Uint32& x)
 {
-    x = (x >> 24) | ((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00) | (x << 24);
+    x = SDL_Swap32(x);
 }

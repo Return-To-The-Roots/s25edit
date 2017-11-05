@@ -15,6 +15,10 @@ extern std::vector<bobSHADOW> shadowArray;
 extern std::vector<bobPAL> palArray;
 // the game objec
 extern CGame* s2;
+// Path to game data (must not be empty!)
+extern std::string gameDataFilePath;
+// Path where maps will be stored (must not be empty!)
+extern std::string userMapsPath;
 } // namespace global
 
 extern unsigned char TRIANGLE_HEIGHT;

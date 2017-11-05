@@ -6,8 +6,9 @@
 #include "callbacks.h"
 #include "globals.h"
 #include <iostream>
+#include <string>
 
-CMap::CMap(char* filename)
+CMap::CMap(const std::string& filename)
 {
     constructMap(filename);
 }
@@ -17,7 +18,7 @@ CMap::~CMap()
     destructMap();
 }
 
-void CMap::constructMap(char* filename, int width, int height, int type, int texture, int border, int border_texture)
+void CMap::constructMap(const std::string& filename, int width, int height, int type, int texture, int border, int border_texture)
 {
     map = NULL;
     Surf_Map = NULL;
@@ -27,7 +28,7 @@ void CMap::constructMap(char* filename, int width, int height, int type, int tex
     displayRect.w = global::s2->GameResolutionX;
     displayRect.h = global::s2->GameResolutionY;
 
-    if(filename != NULL)
+    if(filename.empty())
         map = (bobMAP*)CFile::open_file(filename, WLD);
 
     if(map == NULL)
@@ -441,56 +442,55 @@ void CMap::MirrorMapOnYAxis()
 
 void CMap::loadMapPics()
 {
-    char outputString1[47], outputString2[34], outputString3[53];
-    char picFile[17], palFile[23];
+    std::string outputString1, outputString2, outputString3, picFile, palFile;
     switch(map->type)
     {
         case 0:
-            strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
-            strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
-            strcpy(picFile, "./DATA/MAP00.LST");
-            strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...");
-            strcpy(palFile, "./GFX/PALETTE/PAL5.BBM");
+            outputString1 = "\nLoading palette from file: /DATA/MAP00.LST...";
+            outputString2 = "\nLoading file: /DATA/MAP00.LST...";
+            picFile = "/DATA/MAP00.LST";
+            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...";
+            palFile = "/GFX/PALETTE/PAL5.BBM";
             break;
         case 1:
-            strcpy(outputString1, "\nLoading palette from file: /DATA/MAP01.LST...");
-            strcpy(outputString2, "\nLoading file: /DATA/MAP01.LST...");
-            strcpy(picFile, "./DATA/MAP01.LST");
-            strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL6.BBM...");
-            strcpy(palFile, "./GFX/PALETTE/PAL6.BBM");
+            outputString1 = "\nLoading palette from file: /DATA/MAP01.LST...";
+            outputString2 = "\nLoading file: /DATA/MAP01.LST...";
+            picFile = "/DATA/MAP01.LST";
+            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL6.BBM...";
+            palFile = "/GFX/PALETTE/PAL6.BBM";
             break;
         case 2:
-            strcpy(outputString1, "\nLoading palette from file: /DATA/MAP02.LST...");
-            strcpy(outputString2, "\nLoading file: /DATA/MAP02.LST...");
-            strcpy(picFile, "./DATA/MAP02.LST");
-            strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL7.BBM...");
-            strcpy(palFile, "./GFX/PALETTE/PAL7.BBM");
+            outputString1 = "\nLoading palette from file: /DATA/MAP02.LST...";
+            outputString2 = "\nLoading file: /DATA/MAP02.LST...";
+            picFile = "/DATA/MAP02.LST";
+            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL7.BBM...";
+            palFile = "/GFX/PALETTE/PAL7.BBM";
             break;
         default:
-            strcpy(outputString1, "\nLoading palette from file: /DATA/MAP00.LST...");
-            strcpy(outputString2, "\nLoading file: /DATA/MAP00.LST...");
-            strcpy(picFile, "./DATA/MAP00.LST");
-            strcpy(outputString3, "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...");
-            strcpy(palFile, "./GFX/PALETTE/PAL5.BBM");
+            outputString1 = "\nLoading palette from file: /DATA/MAP00.LST...";
+            outputString2 = "\nLoading file: /DATA/MAP00.LST...";
+            picFile = "/DATA/MAP00.LST";
+            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...";
+            palFile = "/GFX/PALETTE/PAL5.BBM";
             break;
     }
     // load only the palette at this time from MAP0x.LST
     std::cout << outputString1;
-    if(CFile::open_file(picFile, LST, true) == false)
+    if(CFile::open_file(global::gameDataFilePath + picFile, LST, true) == false)
     {
         std::cout << "failure";
     }
     // set the right palette
     CFile::set_palActual(CFile::get_palArray() - 1);
     std::cout << outputString2;
-    if(CFile::open_file(picFile, LST) == false)
+    if(CFile::open_file(global::gameDataFilePath + picFile, LST) == false)
     {
         std::cout << "failure";
     }
     // set back palette
     // CFile::set_palActual(CFile::get_palArray());
     // std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
-    // if ( CFile::open_file("./DATA/MBOB/ROM_BOBS.LST", LST) == false )
+    // if ( CFile::open_file(global::gameDataFilePath + "/DATA/MBOB/ROM_BOBS.LST", LST) == false )
     //{
     //    std::cout << "failure";
     //}
@@ -498,7 +498,7 @@ void CMap::loadMapPics()
     CFile::set_palActual(CFile::get_palArray());
     // load palette file for the map (for precalculated shading)
     std::cout << outputString3;
-    if(CFile::open_file(palFile, BBM, true) == false)
+    if(CFile::open_file(global::gameDataFilePath + palFile, BBM, true) == false)
     {
         std::cout << "failure";
     }
@@ -657,7 +657,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
             callback::EditorPlayerMenu(MAP_QUIT);
 
             destructMap();
-            constructMap((char*)"WORLDS/quicksave.swd");
+            constructMap(global::userMapsPath + "/quicksave.swd");
             callback::PleaseWait(WINDOW_QUIT_MESSAGE);
             return;
         } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w - 37) && button.x <= (displayRect.w)
@@ -665,7 +665,7 @@ void CMap::setMouseData(SDL_MouseButtonEvent button)
         {
             // the bugkill picture was clicked for quicksave
             callback::PleaseWait(INITIALIZING_CALL);
-            if(!CFile::save_file("WORLDS/quicksave.swd", SWD, map))
+            if(!CFile::save_file(global::userMapsPath + "/quicksave.swd", SWD, map))
             {
                 callback::ShowStatus(INITIALIZING_CALL);
                 callback::ShowStatus(2);
