@@ -1,1 +1,3 @@
-MY_ICON ICON "s25edit.ico"
+#include "s25editResource.h"
+
+IDI_SYMBOL              ICON                    "s25edit.ico"

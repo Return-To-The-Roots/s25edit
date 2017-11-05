@@ -4,7 +4,30 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
-#include <stdio.h>
+#include <SDL_syswm.h>
+#include <cstdio>
+#ifdef _WIN32
+#include "s25editResource.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
+void CGame::SetAppIcon()
+{
+#ifdef _WIN32
+    LPARAM icon = (LPARAM)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SYMBOL));
+    SendMessage(GetConsoleWindow(), WM_SETICON, ICON_BIG, icon);
+    SendMessage(GetConsoleWindow(), WM_SETICON, ICON_SMALL, icon);
+
+    SDL_SysWMinfo info;
+    // get window handle from SDL
+    SDL_VERSION(&info.version);
+    if(SDL_GetWMInfo(&info) != 1)
+        return;
+    SendMessage(info.window, WM_SETICON, ICON_BIG, icon);
+    SendMessage(info.window, WM_SETICON, ICON_SMALL, icon);
+#endif // _WIN32
+}
 
 void CGame::Render()
 {
@@ -46,6 +69,7 @@ void CGame::Render()
             Surf_Display =
               SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
         }
+        SetAppIcon();
     }
     //}
 

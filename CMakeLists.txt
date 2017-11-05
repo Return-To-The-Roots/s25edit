@@ -48,7 +48,23 @@ file(GLOB CIO_SOURCES CIO/*.cpp CIO/*.h)
 SOURCE_GROUP(Main FILES ${MAIN_SOURCES})
 SOURCE_GROUP(CIO FILES ${CIO_SOURCES})
 
-add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES})
+if(WIN32)
+    if(CMAKE_HOST_WIN32)
+        SET(icon_RC "${CMAKE_CURRENT_SOURCE_DIR}/s25edit.rc")
+        if(MSVC)
+            ADD_FLAGS(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
+        endif()
+    else()
+        ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/s25edit.res.o
+                           COMMAND ${CMAKE_RC_COMPILER} -I${CMAKE_CURRENT_SOURCE_DIR}/ -i${CMAKE_CURRENT_SOURCE_DIR}/s25edit.rc -o ${CMAKE_CURRENT_BINARY_DIR}/s25edit.res.o)
+
+        SET(icon_RC ${CMAKE_CURRENT_BINARY_DIR}/s25edit.res.o)
+    endif()
+ELSE()
+	SET(icon_RC "")
+ENDIF()
+
+add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
 
 target_link_libraries(s25edit SGE ${SDL_LIBRARY})
 
