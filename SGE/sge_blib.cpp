@@ -366,7 +366,7 @@ void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surfac
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -376,7 +376,6 @@ void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surfac
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -626,7 +625,7 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -636,7 +635,6 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -872,7 +870,7 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -882,7 +880,6 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -1123,7 +1120,7 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -1133,7 +1130,6 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -1380,7 +1376,7 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -1390,7 +1386,6 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -1647,7 +1642,7 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2,
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -1657,7 +1652,6 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2,
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -1905,7 +1899,7 @@ void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
+                Uint8* pixel;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dest->format->Rshift / 8;
@@ -1915,7 +1909,6 @@ void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + (srcy >> 16) * source->pitch + (srcx >> 16) * 3;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
 
@@ -4406,7 +4399,7 @@ public:
 
     Uint8 r, g, b;
 
-    virtual void update()
+    virtual void update() override
     {
         x = Sint16(fx >> 16);
         fx += fm;

@@ -130,7 +130,7 @@ CButton* CMenu::addButton(void callback(int), int clickedParam, Uint16 x, Uint16
                           int picture)
 {
     if(x >= Surf_Menu->w || y >= Surf_Menu->h)
-        return false;
+        return NULL;
 
     for(int i = 0; i < MAXBUTTONS; i++)
     {
@@ -165,7 +165,7 @@ bool CMenu::delButton(CButton* ButtonToDelete)
 CFont* CMenu::addText(const char* string, int x, int y, int fontsize, int color)
 {
     if(x >= Surf_Menu->w || y >= Surf_Menu->h)
-        return false;
+        return NULL;
 
     for(int i = 0; i < MAXTEXTS; i++)
     {
@@ -200,7 +200,7 @@ bool CMenu::delText(CFont* TextToDelete)
 CPicture* CMenu::addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
 {
     if(x >= global::s2->MenuResolutionX || y >= global::s2->MenuResolutionY)
-        return false;
+        return NULL;
 
     for(int i = 0; i < MAXPICTURES; i++)
     {
@@ -235,7 +235,7 @@ bool CMenu::delPicture(CPicture* PictureToDelete)
 int CMenu::addStaticPicture(int x, int y, int picture)
 {
     if(x >= global::s2->MenuResolutionX || y >= global::s2->MenuResolutionY)
-        return false;
+        return -1;
 
     if(picture < 0)
         return -1;
@@ -270,7 +270,7 @@ bool CMenu::delStaticPicture(int ArrayIndex)
 CTextfield* CMenu::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
 {
     if(x >= Surf_Menu->w || y >= Surf_Menu->h)
-        return false;
+        return NULL;
 
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
@@ -305,7 +305,7 @@ bool CMenu::delTextfield(CTextfield* TextfieldToDelete)
 CSelectBox* CMenu::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
     if(x >= Surf_Menu->w || y >= Surf_Menu->h)
-        return false;
+        return NULL;
 
     for(int i = 0; i < MAXSELECTBOXES; i++)
     {

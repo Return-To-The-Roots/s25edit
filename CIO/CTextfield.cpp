@@ -113,7 +113,6 @@ void CTextfield::setText(const char* text)
         *txtPtr++ = *text++;
         col_ctr++;
     }
-    *txtPtr++;
     *txtPtr = '\0';
 }
 

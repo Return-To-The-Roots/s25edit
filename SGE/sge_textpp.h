@@ -247,7 +247,7 @@ public:
 class DECLSPEC sge_TextSurface : public sge_text, public sge_surface
 {
 protected:
-    virtual void set_textSurface(SDL_Surface* new_surf);
+    virtual void set_textSurface(SDL_Surface* new_surf) override;
 
 public:
     sge_TextSurface(SDL_Surface* screen, Sint16 x = 0, Sint16 y = 0) : sge_surface(screen, screen, x, y)
@@ -264,13 +264,13 @@ public:
         current_pos.h = 0;
     }
 
-    virtual void draw();
+    virtual void draw() override;
 };
 
 class DECLSPEC sge_TextSsprite : public sge_text, public sge_ssprite
 {
 protected:
-    virtual void set_textSurface(SDL_Surface* new_surf);
+    virtual void set_textSurface(SDL_Surface* new_surf) override;
 
 public:
     sge_TextSsprite(SDL_Surface* screen, Sint16 x = 0, Sint16 y = 0) : sge_ssprite(screen, screen, x, y)
@@ -287,13 +287,13 @@ public:
         current_pos.h = 0;
     }
 
-    virtual void draw();
+    virtual void draw() override;
 };
 
 class DECLSPEC sge_TextSprite : public sge_text, public sge_sprite
 {
 protected:
-    virtual void set_textSurface(SDL_Surface* new_surf);
+    virtual void set_textSurface(SDL_Surface* new_surf) override;
 
 public:
     sge_TextSprite(SDL_Surface* screen, Sint16 x = 0, Sint16 y = 0) : sge_sprite(screen, screen, x, y)
@@ -310,7 +310,7 @@ public:
         current_pos.h = 0;
     }
 
-    virtual void draw();
+    virtual void draw() override;
 };
 
 //==================================================================================

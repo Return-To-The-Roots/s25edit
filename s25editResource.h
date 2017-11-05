@@ -1,1 +1,1 @@
-#define IDI_SYMBOL                      101
+#define IDI_SYMBOL 101

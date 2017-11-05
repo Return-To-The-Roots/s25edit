@@ -1957,7 +1957,6 @@ void callback::EditorPlayerMenu(int Param)
 {
     static CWindow* WNDPlayer = NULL;
     static CMap* MapObj = NULL;
-    static bobMAP* map = NULL;
     static int PlayerNumber = 0x00;
     static CFont* PlayerNumberText = NULL;
     char puffer[30];
@@ -1984,7 +1983,6 @@ void callback::EditorPlayerMenu(int Param)
             if(global::s2->RegisterWindow(WNDPlayer))
             {
                 MapObj = global::s2->getMapObj();
-                map = MapObj->getMap();
                 tempRect = MapObj->getDisplayRect();
                 PlayerHQx = MapObj->getPlayerHQx();
                 PlayerHQy = MapObj->getPlayerHQy();
@@ -2057,7 +2055,6 @@ void callback::EditorPlayerMenu(int Param)
             MapObj->setModeContent(0x00);
             MapObj->setModeContent2(0x00);
             MapObj = NULL;
-            map = NULL;
             PlayerNumber = 0x01;
             PlayerNumberText = NULL;
             PlayerHQx = NULL;
@@ -2074,7 +2071,6 @@ void callback::EditorPlayerMenu(int Param)
                 WNDPlayer = NULL;
             }
             MapObj = NULL;
-            map = NULL;
             PlayerNumber = 0x01;
             PlayerNumberText = NULL;
             PlayerHQx = NULL;
@@ -2089,7 +2085,6 @@ void callback::EditorCursorMenu(int Param)
 {
     static CWindow* WNDCursor = NULL;
     static CMap* MapObj = NULL;
-    static bobMAP* map = NULL;
     static int trianglePictureArrowUp = -1;
     static int trianglePictureArrowDown = -1;
     static int trianglePictureRandom = -1;
@@ -2115,7 +2110,6 @@ void callback::EditorCursorMenu(int Param)
             if(global::s2->RegisterWindow(WNDCursor))
             {
                 MapObj = global::s2->getMapObj();
-                map = MapObj->getMap();
 
                 WNDCursor->addButton(EditorCursorMenu, TRIANGLE, 2, 66, 32, 32, BUTTON_GREY, NULL);
                 trianglePictureArrowUp = WNDCursor->addStaticPicture(8, 74, CURSOR_SYMBOL_ARROW_UP);
@@ -2245,7 +2239,6 @@ void callback::EditorCursorMenu(int Param)
                 WNDCursor = NULL;
             }
             MapObj = NULL;
-            map = NULL;
             trianglePictureArrowUp = -1;
             trianglePictureArrowDown = -1;
             trianglePictureRandom = -1;
@@ -2263,7 +2256,6 @@ void callback::EditorCursorMenu(int Param)
                 WNDCursor = NULL;
             }
             MapObj = NULL;
-            map = NULL;
             trianglePictureArrowUp = -1;
             trianglePictureArrowDown = -1;
             trianglePictureRandom = -1;

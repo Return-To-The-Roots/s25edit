@@ -55,6 +55,7 @@ private:
     CMap* MapObj;
 
     void SetAppIcon();
+
 public:
     CGame();
     ~CGame();

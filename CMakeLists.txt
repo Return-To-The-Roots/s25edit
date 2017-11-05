@@ -29,6 +29,17 @@ if(WIN32)
     ADD_DEFINITIONS(-DNOMINMAX)
 endif()
 
+if(NOT MSVC)
+    CHECK_CXX_SOURCE_COMPILES("
+        #if __cplusplus >= 201103L
+        int main() {}
+        #endif" COMPILER_IN_CXX11_MODE)
+
+    IF (NOT COMPILER_IN_CXX11_MODE)
+        ADD_DEFINITIONS(-Doverride=)
+    endif()
+ENDIF()
+
 add_subdirectory(SGE)
 
 option(RTTR_EDITOR_EDITORMODE "In editor mode it is possible to load, edit and save created maps" ON)

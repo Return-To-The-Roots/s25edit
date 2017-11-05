@@ -1780,7 +1780,7 @@ Sint32 CSurface::get_LightIntensity(vector node)
 vector CSurface::get_nodeVector(vector v1, vector v2, vector v3)
 {
     vector node;
-    // deviding through 3 is not necessary cause normal vector would be the same
+    // dividing through 3 is not necessary cause normal vector would be the same
     node.x = v1.x + v2.x + v3.x;
     node.y = v1.y + v2.y + v3.y;
     node.z = v1.z + v2.z + v3.z;
@@ -1791,7 +1791,7 @@ vector CSurface::get_nodeVector(vector v1, vector v2, vector v3)
 vector CSurface::get_normVector(vector v)
 {
     vector normal;
-    float length = sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
+    float length = static_cast<float>(sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2)));
     // in case vector length equals 0 (should not happen)
     if(length == 0)
     {

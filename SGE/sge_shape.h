@@ -181,22 +181,22 @@ public:
     ~sge_surface();
 
     // Draws the surface
-    virtual void draw();
+    virtual void draw() override;
 
-    virtual inline void clear(Uint32 color);
-    virtual inline void clear(SDL_Surface* src, Sint16 srcX, Sint16 srcY);
-    // virtual inline void clear(SDL_Surface *src){clear(src,last_pos.x,last_pos.y);}
+    virtual void clear(Uint32 color) override;
+    virtual void clear(SDL_Surface* src, Sint16 srcX, Sint16 srcY) override;
+    // virtual void clear(SDL_Surface *src){clear(src,last_pos.x,last_pos.y);}
 
-    virtual void UpdateRects();
+    virtual void UpdateRects() override;
 
     // Move the surface
-    virtual inline void move_to(Sint16 x, Sint16 y)
+    virtual void move_to(Sint16 x, Sint16 y)
     {
         current_pos.x = x;
         current_pos.y = y;
         check_border();
     }
-    virtual inline void move(Sint16 x_step, Sint16 y_step)
+    virtual void move(Sint16 x_step, Sint16 y_step)
     {
         current_pos.x += x_step;
         current_pos.y += y_step;
@@ -253,7 +253,7 @@ protected:
     Sint16 xvel, yvel;
 
     bool bounce_border; // Do we want the sprite to bounce at the border?
-    virtual bool check_border();
+    virtual bool check_border() override;
 
     // Playing sequence mode
     playing_mode seq_mode;
@@ -266,7 +266,7 @@ public:
 
     // Updates the internal status
     // Returns true if the sprite moved
-    virtual inline bool update();
+    virtual bool update();
 
     // Sets the speed
     void set_vel(Sint16 x, Sint16 y)
@@ -353,7 +353,7 @@ protected:
     // Ticks since last pos update
     Uint32 tlast;
 
-    virtual bool check_border();
+    virtual bool check_border() override;
 
 public:
     // Constructor
@@ -393,16 +393,16 @@ public:
     // Update position and frame
     // Returns true if something changed
     bool update(Uint32 ticks);
-    bool update() { return update(SDL_GetTicks()); }
+    bool update() override { return update(SDL_GetTicks()); }
 
     // Correct move members for this class
-    void move_to(Sint16 x, Sint16 y)
+    void move_to(Sint16 x, Sint16 y) override
     {
         sge_surface::move_to(x, y);
         xpos = current_pos.x;
         ypos = current_pos.y;
     }
-    void move(Sint16 x_step, Sint16 y_step)
+    void move(Sint16 x_step, Sint16 y_step) override
     {
         sge_surface::move(x_step, y_step);
         xpos = current_pos.x;
