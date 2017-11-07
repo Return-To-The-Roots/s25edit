@@ -4,10 +4,10 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
-#include <SDL_syswm.h>
 #include <cstdio>
 #ifdef _WIN32
 #include "s25editResource.h"
+#include <SDL_syswm.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
