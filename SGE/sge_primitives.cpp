@@ -2472,90 +2472,90 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Ui
 // Draws a bezier line
 //==================================================================================
 /* Macro to do the line... 'function' is the line drawing routine */
-#define DO_BEZIER(function)                                                                                           \
-    /*                                                                                                          \ \ \ \
-     *  Note: I don't think there is any great performance win in translating this to fixed-point integer math, \ \ \ \
-     *  most of the time is spent in the line drawing routine.                                                  \ \ \ \
-     */                                                                                                               \
-    float x = float(x1), y = float(y1);                                                                               \
-    float xp = x, yp = y;                                                                                             \
-    float delta;                                                                                                      \
-    float dx, d2x, d3x;                                                                                               \
-    float dy, d2y, d3y;                                                                                               \
-    float a, b, c;                                                                                                    \
-    int i;                                                                                                            \
-    int n = 1;                                                                                                        \
-    Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;                                                                \
-                                                                                                                      \
-    /* compute number of iterations */                                                                                \
-    if(level < 1)                                                                                                     \
-        level = 1;                                                                                                    \
-    if(level >= 15)                                                                                                   \
-        level = 15;                                                                                                   \
-    while(level-- > 0)                                                                                                \
-        n *= 2;                                                                                                       \
-    delta = float(1.0 / float(n));                                                                                    \
-                                                                                                                      \
-    /* compute finite differences */                                                                                  \
-    /* a, b, c are the coefficient of the polynom in t defining the parametric curve */                               \
-    /* The computation is done independently for x and y */                                                           \
-    a = float(-x1 + 3 * x2 - 3 * x3 + x4);                                                                            \
-    b = float(3 * x1 - 6 * x2 + 3 * x3);                                                                              \
-    c = float(-3 * x1 + 3 * x2);                                                                                      \
-                                                                                                                      \
-    d3x = 6 * a * delta * delta * delta;                                                                              \
-    d2x = d3x + 2 * b * delta * delta;                                                                                \
-    dx = a * delta * delta * delta + b * delta * delta + c * delta;                                                   \
-                                                                                                                      \
-    a = float(-y1 + 3 * y2 - 3 * y3 + y4);                                                                            \
-    b = float(3 * y1 - 6 * y2 + 3 * y3);                                                                              \
-    c = float(-3 * y1 + 3 * y2);                                                                                      \
-                                                                                                                      \
-    d3y = 6 * a * delta * delta * delta;                                                                              \
-    d2y = d3y + 2 * b * delta * delta;                                                                                \
-    dy = a * delta * delta * delta + b * delta * delta + c * delta;                                                   \
-                                                                                                                      \
-    if(SDL_MUSTLOCK(surface) && _sge_lock)                                                                            \
-    {                                                                                                                 \
-        if(SDL_LockSurface(surface) < 0)                                                                              \
-            return;                                                                                                   \
-    }                                                                                                                 \
-                                                                                                                      \
-    /* iterate */                                                                                                     \
-    for(i = 0; i < n; i++)                                                                                            \
-    {                                                                                                                 \
-        x += dx;                                                                                                      \
-        dx += d2x;                                                                                                    \
-        d2x += d3x;                                                                                                   \
-        y += dy;                                                                                                      \
-        dy += d2y;                                                                                                    \
-        d2y += d3y;                                                                                                   \
-        if(Sint16(xp) != Sint16(x) || Sint16(yp) != Sint16(y))                                                        \
-        {                                                                                                             \
-            function;                                                                                                 \
-            if(_sge_update == 1)                                                                                      \
-            {                                                                                                         \
-                xmax = (xmax > Sint16(xp)) ? xmax : Sint16(xp);                                                       \
-                ymax = (ymax > Sint16(yp)) ? ymax : Sint16(yp);                                                       \
-                xmin = (xmin < Sint16(xp)) ? xmin : Sint16(xp);                                                       \
-                ymin = (ymin < Sint16(yp)) ? ymin : Sint16(yp);                                                       \
-                xmax = (xmax > Sint16(x)) ? xmax : Sint16(x);                                                         \
-                ymax = (ymax > Sint16(y)) ? ymax : Sint16(y);                                                         \
-                xmin = (xmin < Sint16(x)) ? xmin : Sint16(x);                                                         \
-                ymin = (ymin < Sint16(y)) ? ymin : Sint16(y);                                                         \
-            }                                                                                                         \
-        }                                                                                                             \
-        xp = x;                                                                                                       \
-        yp = y;                                                                                                       \
-    }                                                                                                                 \
-                                                                                                                      \
-    /* unlock the display */                                                                                          \
-    if(SDL_MUSTLOCK(surface) && _sge_lock)                                                                            \
-    {                                                                                                                 \
-        SDL_UnlockSurface(surface);                                                                                   \
-    }                                                                                                                 \
-                                                                                                                      \
-    /* Update the area */                                                                                             \
+#define DO_BEZIER(function)                                                                                        \
+    /*                                                                                                          */ \
+    /*  Note: I don't think there is any great performance win in translating this to fixed-point integer math, */ \
+    /*  most of the time is spent in the line drawing routine.                                                  */ \
+    /*                                                                                                          */ \
+    float x = float(x1), y = float(y1);                                                                            \
+    float xp = x, yp = y;                                                                                          \
+    float delta;                                                                                                   \
+    float dx, d2x, d3x;                                                                                            \
+    float dy, d2y, d3y;                                                                                            \
+    float a, b, c;                                                                                                 \
+    int i;                                                                                                         \
+    int n = 1;                                                                                                     \
+    Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;                                                             \
+                                                                                                                   \
+    /* compute number of iterations */                                                                             \
+    if(level < 1)                                                                                                  \
+        level = 1;                                                                                                 \
+    if(level >= 15)                                                                                                \
+        level = 15;                                                                                                \
+    while(level-- > 0)                                                                                             \
+        n *= 2;                                                                                                    \
+    delta = float(1.0 / float(n));                                                                                 \
+                                                                                                                   \
+    /* compute finite differences */                                                                               \
+    /* a, b, c are the coefficient of the polynom in t defining the parametric curve */                            \
+    /* The computation is done independently for x and y */                                                        \
+    a = float(-x1 + 3 * x2 - 3 * x3 + x4);                                                                         \
+    b = float(3 * x1 - 6 * x2 + 3 * x3);                                                                           \
+    c = float(-3 * x1 + 3 * x2);                                                                                   \
+                                                                                                                   \
+    d3x = 6 * a * delta * delta * delta;                                                                           \
+    d2x = d3x + 2 * b * delta * delta;                                                                             \
+    dx = a * delta * delta * delta + b * delta * delta + c * delta;                                                \
+                                                                                                                   \
+    a = float(-y1 + 3 * y2 - 3 * y3 + y4);                                                                         \
+    b = float(3 * y1 - 6 * y2 + 3 * y3);                                                                           \
+    c = float(-3 * y1 + 3 * y2);                                                                                   \
+                                                                                                                   \
+    d3y = 6 * a * delta * delta * delta;                                                                           \
+    d2y = d3y + 2 * b * delta * delta;                                                                             \
+    dy = a * delta * delta * delta + b * delta * delta + c * delta;                                                \
+                                                                                                                   \
+    if(SDL_MUSTLOCK(surface) && _sge_lock)                                                                         \
+    {                                                                                                              \
+        if(SDL_LockSurface(surface) < 0)                                                                           \
+            return;                                                                                                \
+    }                                                                                                              \
+                                                                                                                   \
+    /* iterate */                                                                                                  \
+    for(i = 0; i < n; i++)                                                                                         \
+    {                                                                                                              \
+        x += dx;                                                                                                   \
+        dx += d2x;                                                                                                 \
+        d2x += d3x;                                                                                                \
+        y += dy;                                                                                                   \
+        dy += d2y;                                                                                                 \
+        d2y += d3y;                                                                                                \
+        if(Sint16(xp) != Sint16(x) || Sint16(yp) != Sint16(y))                                                     \
+        {                                                                                                          \
+            function;                                                                                              \
+            if(_sge_update == 1)                                                                                   \
+            {                                                                                                      \
+                xmax = (xmax > Sint16(xp)) ? xmax : Sint16(xp);                                                    \
+                ymax = (ymax > Sint16(yp)) ? ymax : Sint16(yp);                                                    \
+                xmin = (xmin < Sint16(xp)) ? xmin : Sint16(xp);                                                    \
+                ymin = (ymin < Sint16(yp)) ? ymin : Sint16(yp);                                                    \
+                xmax = (xmax > Sint16(x)) ? xmax : Sint16(x);                                                      \
+                ymax = (ymax > Sint16(y)) ? ymax : Sint16(y);                                                      \
+                xmin = (xmin < Sint16(x)) ? xmin : Sint16(x);                                                      \
+                ymin = (ymin < Sint16(y)) ? ymin : Sint16(y);                                                      \
+            }                                                                                                      \
+        }                                                                                                          \
+        xp = x;                                                                                                    \
+        yp = y;                                                                                                    \
+    }                                                                                                              \
+                                                                                                                   \
+    /* unlock the display */                                                                                       \
+    if(SDL_MUSTLOCK(surface) && _sge_lock)                                                                         \
+    {                                                                                                              \
+        SDL_UnlockSurface(surface);                                                                                \
+    }                                                                                                              \
+                                                                                                                   \
+    /* Update the area */                                                                                          \
     sge_UpdateRect(surface, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
 
 //==================================================================================
