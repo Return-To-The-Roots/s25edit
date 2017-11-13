@@ -504,7 +504,7 @@ void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
     static bool warping = false;
     // SDL_Event TempEvent;
     // is right mouse button pressed?
-    if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))
+    if(motion.state & SDL_BUTTON(3))
     {
         // this whole "warping-thing" is to prevent cursor-moving WITHIN the window while user moves over the map
         if(warping == false)
@@ -1029,23 +1029,24 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
     // if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE) )
     // return;
 
-    int X = 0, Xeven = 0, Xuneven = 0;
+    int X = 0, Xeven = 0, Xodd = 0;
     int Y = 0, MousePosY = 0;
 
     // get X
-    // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor) we substract
+    // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor) we subtract
     // "TRIANGLE_WIDTH/2"  Xeven = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
     Xeven = (MouseX + displayRect.x - TRIANGLE_WIDTH / 2) / TRIANGLE_WIDTH;
     if(Xeven < 0)
         Xeven += (map->width);
     else if(Xeven > map->width - 1)
         Xeven -= (map->width - 1);
-    Xuneven = (MouseX + displayRect.x + TRIANGLE_WIDTH / 2) / TRIANGLE_WIDTH;
-    // Xuneven = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
-    if(Xuneven < 0)
-        Xuneven += (map->width - 1);
-    else if(Xuneven > map->width - 1)
-        Xuneven -= (map->width);
+    // Add rows are already shifted by TRIANGLE_WIDTH / 2
+    Xodd = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
+    // Xodd = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
+    if(Xodd < 0)
+        Xodd += (map->width - 1);
+    else if(Xodd > map->width - 1)
+        Xodd -= (map->width);
 
     MousePosY = MouseY + displayRect.y;
     // correct mouse position Y if displayRect is outside map edges
@@ -1059,17 +1060,17 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
     {
         if(j % 2 == 0)
         {
-            // substract "TRIANGLE_HEIGHT/2" is for tolerance, we did the same for X
+            // subtract "TRIANGLE_HEIGHT/2" is for tolerance, we did the same for X
             if((MousePosY - TRIANGLE_HEIGHT / 2) > map->getVertex(Xeven, j).y)
                 Y++;
             else
             {
-                X = Xuneven;
+                X = Xodd;
                 break;
             }
         } else
         {
-            if((MousePosY - TRIANGLE_HEIGHT / 2) > map->getVertex(Xuneven, j).y)
+            if((MousePosY - TRIANGLE_HEIGHT / 2) > map->getVertex(Xodd, j).y)
                 Y++;
             else
             {
@@ -1078,10 +1079,11 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
             }
         }
     }
-    if(Y < 0)
-        Y += (map->height - 1);
-    else if(Y > map->height - 1)
-        Y -= (map->height - 1);
+    if(Y >= map->height)
+    {
+        Y -= map->height;
+        X = Y % 2 == 0 ? Xeven : Xodd;
+    }
 
     VertexX_ = X;
     VertexY_ = Y;
@@ -1200,7 +1202,7 @@ void CMap::render()
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     } else if(VerticalMovementLocked)
     {
-        sprintf(textBuffer, "Vertikal mvement locked (F10 to unlock)");
+        sprintf(textBuffer, "Vertikal movement locked (F10 to unlock)");
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     }
 
@@ -2626,6 +2628,13 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
             map->getVertex(VertexX, VertexY).objectType = modeContent;
             map->getVertex(VertexX, VertexY).objectInfo = 0x80;
 
+            // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the first 7 players)
+            if(modeContent >= 0 && modeContent < 7)
+            {
+                map->HQx[modeContent] = VertexX;
+                map->HQy[modeContent] = VertexY;
+            }
+
             // save old position if exists
             if(PlayerHQx[modeContent] != 0xFFFF && PlayerHQy[modeContent] != 0xFFFF)
             {
@@ -2637,13 +2646,6 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
             }
             PlayerHQx[modeContent] = VertexX;
             PlayerHQy[modeContent] = VertexY;
-
-            // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the first 7 players)
-            if(modeContent >= 0 && modeContent < 7)
-            {
-                map->HQx[modeContent] = VertexX;
-                map->HQy[modeContent] = VertexY;
-            }
 
             // setup number of players in map header
             if(!PlayerRePositioned)

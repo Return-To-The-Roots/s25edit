@@ -302,10 +302,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
     for(int i = 0; i < 2; i++)
     {
-        if(i == 0)
-            drawTextures = true;
-        else /*if (i == 1)*/
-            drawTextures = false;
+        drawTextures = (i == 0);
 
         for(int k = 0; k < 4; k++)
         {
@@ -385,106 +382,84 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
             assert(col_start <= col_end);
             assert(row_start <= row_end);
 
-            for(int j = row_start; j < height - 1 && j <= row_end; j++)
+            for(unsigned y = row_start; y < height - 1u && y <= static_cast<unsigned>(row_end); y++)
             {
-                if(j % 2 == 0)
+                if(y % 2 == 0)
                 {
                     // first RightSideUp
+                    tempP2 = myMap->getVertex(width - 1, y + 1);
                     tempP2.x = 0;
-                    tempP2.y = myMap->getVertex(width - 1, j + 1).y;
-                    tempP2.z = myMap->getVertex(width - 1, j + 1).z;
-                    tempP2.i = myMap->getVertex(width - 1, j + 1).i;
-                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(0, j), tempP2, myMap->getVertex(0, j + 1));
-                    for(int i = std::max(col_start, 1); i < width && i <= col_end; i++)
+                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(0, y), tempP2, myMap->getVertex(0, y + 1));
+                    for(unsigned x = std::max(col_start, 1); x < width && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, j), myMap->getVertex(i - 1, j + 1),
-                                     myMap->getVertex(i, j + 1));
+                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x, y), myMap->getVertex(x - 1, y + 1),
+                                     myMap->getVertex(x, y + 1));
                         // UpSideDown
-                        if(i < width)
-                            DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i - 1, j + 1), myMap->getVertex(i - 1, j),
-                                         myMap->getVertex(i, j));
+                        if(x < width)
+                            DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x - 1, y + 1), myMap->getVertex(x - 1, y),
+                                         myMap->getVertex(x, y));
                     }
                     // last UpSideDown
-                    tempP3.x = myMap->getVertex(width - 1, j).x + TRIANGLE_WIDTH;
-                    tempP3.y = myMap->getVertex(0, j).y;
-                    tempP3.z = myMap->getVertex(0, j).z;
-                    tempP3.i = myMap->getVertex(0, j).i;
-                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, j + 1), myMap->getVertex(width - 1, j),
+                    tempP3 = myMap->getVertex(0, y);
+                    tempP3.x = myMap->getVertex(width - 1, y).x + TRIANGLE_WIDTH;
+                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, y + 1), myMap->getVertex(width - 1, y),
                                  tempP3);
                 } else
                 {
-                    for(int i = col_start; i < width - 1 && i <= col_end; i++)
+                    for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, j), myMap->getVertex(i, j + 1),
-                                     myMap->getVertex(i + 1, j + 1));
+                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x, y), myMap->getVertex(x, y + 1),
+                                     myMap->getVertex(x + 1, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i + 1, j + 1), myMap->getVertex(i, j),
-                                     myMap->getVertex(i + 1, j));
+                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x + 1, y + 1), myMap->getVertex(x, y),
+                                     myMap->getVertex(x + 1, y));
                     }
                     // last RightSideUp
-                    tempP3.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
-                    tempP3.y = myMap->getVertex(0, j + 1).y;
-                    tempP3.z = myMap->getVertex(0, j + 1).z;
-                    tempP3.i = myMap->getVertex(0, j + 1).i;
-                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, j), myMap->getVertex(width - 1, j + 1),
+                    tempP3 = myMap->getVertex(0, y + 1);
+                    tempP3.x = myMap->getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
+                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, y), myMap->getVertex(width - 1, y + 1),
                                  tempP3);
                     // last UpSideDown
-                    tempP1.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
-                    tempP1.y = myMap->getVertex(0, j + 1).y;
-                    tempP1.z = myMap->getVertex(0, j + 1).z;
-                    tempP1.i = myMap->getVertex(0, j + 1).i;
-                    tempP3.x = myMap->getVertex(width - 1, j).x + TRIANGLE_WIDTH;
-                    tempP3.y = myMap->getVertex(0, j).y;
-                    tempP3.z = myMap->getVertex(0, j).z;
-                    tempP3.i = myMap->getVertex(0, j).i;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, j), tempP3);
+                    tempP1 = myMap->getVertex(0, y + 1);
+                    tempP1.x = myMap->getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
+                    tempP3 = myMap->getVertex(0, y);
+                    tempP3.x = myMap->getVertex(width - 1, y).x + TRIANGLE_WIDTH;
+                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, y), tempP3);
                 }
             }
 
             // draw last line
-            for(int i = col_start; i < width - 1 && i <= col_end; i++)
+            for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
             {
                 // RightSideUp
-                tempP2.x = myMap->getVertex(i, 0).x;
-                tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i, 0).y;
-                tempP2.z = myMap->getVertex(i, 0).z;
-                tempP2.i = myMap->getVertex(i, 0).i;
-                tempP3.x = myMap->getVertex(i + 1, 0).x;
-                tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i + 1, 0).y;
-                tempP3.z = myMap->getVertex(i + 1, 0).z;
-                tempP3.i = myMap->getVertex(i + 1, 0).i;
-                DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, height - 1), tempP2, tempP3);
+                tempP2 = myMap->getVertex(x, 0);
+                tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(x, 0).y;
+                tempP3 = myMap->getVertex(x + 1, 0);
+                tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(x + 1, 0).y;
+                DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x, height - 1), tempP2, tempP3);
                 // UpSideDown
-                tempP1.x = myMap->getVertex(i + 1, 0).x;
-                tempP1.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i + 1, 0).y;
-                tempP1.z = myMap->getVertex(i + 1, 0).z;
-                tempP1.i = myMap->getVertex(i + 1, 0).i;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(i, height - 1),
-                             myMap->getVertex(i + 1, height - 1));
+                tempP1 = myMap->getVertex(x + 1, 0);
+                tempP1.y = height * TRIANGLE_HEIGHT + myMap->getVertex(x + 1, 0).y;
+                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(x, height - 1),
+                             myMap->getVertex(x + 1, height - 1));
             }
         }
 
         // last RightSideUp
-        tempP2.x = myMap->getVertex(width - 1, 0).x;
+        tempP2 = myMap->getVertex(width - 1, 0);
         tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(width - 1, 0).y;
-        tempP2.z = myMap->getVertex(width - 1, 0).z;
-        tempP2.i = myMap->getVertex(width - 1, 0).i;
+        tempP3 = myMap->getVertex(0, 0);
         tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
-        tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
-        tempP3.z = myMap->getVertex(0, 0).z;
-        tempP3.i = myMap->getVertex(0, 0).i;
+        tempP3.y += height * TRIANGLE_HEIGHT;
         DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, height - 1), tempP2, tempP3);
         // last UpSideDown
+        tempP1 = myMap->getVertex(0, 0);
         tempP1.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
-        tempP1.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
-        tempP1.z = myMap->getVertex(0, 0).z;
-        tempP1.i = myMap->getVertex(0, 0).i;
+        tempP1.y += height * TRIANGLE_HEIGHT;
+        tempP3 = myMap->getVertex(0, height - 1);
         tempP3.x = myMap->getVertex(width - 1, height - 1).x + TRIANGLE_WIDTH;
-        tempP3.y = myMap->getVertex(0, height - 1).y;
-        tempP3.z = myMap->getVertex(0, height - 1).z;
-        tempP3.i = myMap->getVertex(0, height - 1).i;
         DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, height - 1), tempP3);
     }
 }

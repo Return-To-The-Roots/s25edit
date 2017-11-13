@@ -155,6 +155,8 @@ public:
     sge_text()
     {
         tt_font = NULL;
+        color.r = color.b = color.g = 0;
+        background.r = background.b = background.g = 0;
         bm_font = NULL;
         alpha_level = SDL_ALPHA_OPAQUE;
         text_surface = NULL;
