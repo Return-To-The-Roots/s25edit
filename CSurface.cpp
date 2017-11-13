@@ -3,6 +3,7 @@
 #include "CMap.h"
 #include "globals.h"
 #include <algorithm>
+#include <cassert>
 
 bool CSurface::drawTextures = false;
 bool CSurface::useOpenGL = false;
@@ -279,7 +280,7 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
     }
 }
 
-void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap)
+void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap)
 {
     Uint16 width = myMap->width;
     Uint16 height = myMap->height;
@@ -339,7 +340,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
                         row_start = height - 3;
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.y + displayRect.h) >= (myMap->height_pixel - 8u * TRIANGLE_HEIGHT))
+                    } else if((displayRect.y + displayRect.h) >= (myMap->height_pixel - 8 * TRIANGLE_HEIGHT))
                     {
                         // this is for draw triangles that are raised over the upper map edge (have negative y-coords)
                         row_start = 0;
@@ -356,7 +357,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
                         col_start = width - 1 - (-displayRect.x / TRIANGLE_WIDTH) - 1;
                         col_end = width - 1;
                         view_outside_edges = true;
-                    } else if(displayRect.x > 0 && displayRect.x < TRIANGLE_WIDTH)
+                    } else if(displayRect.x < TRIANGLE_WIDTH)
                     {
                         col_start = width - 2;
                         col_end = width - 1;
@@ -374,7 +375,12 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
                     continue;
             }
 
-            for(int j = /*0*/ row_start; j < height - 1 && j <= row_end; j++)
+            assert(col_start >= 0);
+            assert(row_start >= 0);
+            assert(col_start <= col_end);
+            assert(row_start <= row_end);
+
+            for(int j = row_start; j < height - 1 && j <= row_end; j++)
             {
                 if(j % 2 == 0)
                 {
@@ -403,7 +409,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
                                  tempP3);
                 } else
                 {
-                    for(int i = /*0*/ col_start; i < width - 1 && i <= col_end; i++)
+                    for(int i = col_start; i < width - 1 && i <= col_end; i++)
                     {
                         // RightSideUp
                         DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, j), myMap->getVertex(i, j + 1),
@@ -433,7 +439,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
             }
 
             // draw last line
-            for(int i = /*0*/ col_start; i < width - 1 && i <= col_end; i++)
+            for(int i = col_start; i < width - 1 && i <= col_end; i++)
             {
                 // RightSideUp
                 tempP2.x = myMap->getVertex(i, 0).x;
@@ -501,7 +507,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 P3.x -= myMap->width_pixel;
                 triangle_shown = true;
             }
-        } else if(displayRect.x > 0 && displayRect.x < TRIANGLE_WIDTH)
+        } else if(displayRect.x < TRIANGLE_WIDTH)
         {
             int outside_x = displayRect.x;
             int outside_w = TRIANGLE_WIDTH;
@@ -802,6 +808,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                     rightX = 245 - texture_move;
                     rightY = 76 + texture_move;
                 }
+                break;
             case TRIANGLE_TEXTURE_WATER_:
                 if(P1.y < P2.y)
                 {
@@ -1612,10 +1619,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                      (int)(P2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
                      (int)(P2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
         }
-    }
-    // blit animals
-    if(P2.y < P1.y)
-    {
+        // blit animals
         if(P2.animal > 0x00 && P2.animal <= 0x06)
         {
             Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].surface,
@@ -1765,7 +1769,7 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
     }
 }
 
-Sint32 CSurface::get_LightIntensity(vector node)
+Sint32 CSurface::get_LightIntensity(const vector& node)
 {
     // we calculate the light intensity right now
     float I, Ip = 1.1f, kd = 1, light_const = 1.0f;
@@ -1775,7 +1779,7 @@ Sint32 CSurface::get_LightIntensity(vector node)
     return (Sint32)(I * pow(2, 16));
 }
 
-vector CSurface::get_nodeVector(vector v1, vector v2, vector v3)
+vector CSurface::get_nodeVector(const vector& v1, const vector& v2, const vector& v3)
 {
     vector node;
     // dividing through 3 is not necessary cause normal vector would be the same
@@ -1786,7 +1790,7 @@ vector CSurface::get_nodeVector(vector v1, vector v2, vector v3)
     return node;
 }
 
-vector CSurface::get_normVector(vector v)
+vector CSurface::get_normVector(const vector& v)
 {
     vector normal;
     float length = static_cast<float>(sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2)));

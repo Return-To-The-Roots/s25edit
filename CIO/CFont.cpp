@@ -4,20 +4,20 @@
 
 CFont::CFont(const char* string, int x, int y, int fontsize, int color)
 {
-    this->x = x;
-    this->y = y;
-    this->string = string;
+    this->x_ = x;
+    this->y_ = y;
+    this->string_ = string;
     // only three sizes are available (in pixels)
     if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        this->fontsize = 9;
+        this->fontsize_ = 9;
     else
-        this->fontsize = fontsize;
-    this->color = color;
+        this->fontsize_ = fontsize;
+    this->color_ = color;
     Surf_Font = NULL;
     callback = NULL;
     clickedParam = 0;
     // create surface and write text to it
-    writeText(this->string);
+    writeText(this->string_);
 }
 
 CFont::~CFont()
@@ -28,24 +28,24 @@ CFont::~CFont()
 void CFont::setFontsize(int fontsize)
 {
     if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        this->fontsize = 9;
+        this->fontsize_ = 9;
     else
-        this->fontsize = fontsize;
-    writeText(string);
+        this->fontsize_ = fontsize;
+    writeText(string_);
 }
 
 void CFont::setColor(int color)
 {
-    this->color = color;
-    writeText(string);
+    this->color_ = color;
+    writeText(string_);
 }
 
 void CFont::setText(const char* string)
 {
     SDL_FreeSurface(Surf_Font);
     Surf_Font = NULL;
-    this->string = string;
-    writeText(this->string);
+    this->string_ = string;
+    writeText(this->string_);
 }
 
 void CFont::setMouseData(SDL_MouseButtonEvent button)
@@ -53,7 +53,7 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
     {
-        if((button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+        if((button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
         {
             // if mouse button is pressed ON the text
             if((button.state == SDL_PRESSED) && callback != NULL)
@@ -61,7 +61,7 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
                 setColor(FONT_ORANGE);
             } else if(button.state == SDL_RELEASED)
             {
-                if(color == FONT_ORANGE && callback != NULL)
+                if(color_ == FONT_ORANGE && callback != NULL)
                     callback(clickedParam);
             }
         }
@@ -74,27 +74,27 @@ bool CFont::writeText(const char* string)
     unsigned int pixel_ctr_w = 0;
     unsigned int pixel_ctr_w_tmp = 0;
     // ROW_SEPARATOR IS ALSO USED IN CTEXTFIELD-CLASS, SO DO NOT CHANGE!!
-    int row_separator = (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4));
-    unsigned int pixel_ctr_h = fontsize + row_separator;
+    int row_separator = (fontsize_ == 9 ? 1 : (fontsize_ == 11 ? 3 : 4));
+    unsigned int pixel_ctr_h = fontsize_ + row_separator;
     bool pixel_count_loop = true;
     // the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
     // pointer to the chiffres
     if(!string)
-        string = this->string;
+        string = this->string_;
     const unsigned char* chiffre = reinterpret_cast<const unsigned char*>(string);
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = 0;
     int pos_y = 0;
 
-    if(string == NULL && this->string == NULL)
+    if(string == NULL && this->string_ == NULL)
         return false;
 
     // now lets draw the chiffres
     while(*chiffre != '\0')
     {
         // set chiffre_index to the first chiffre (spacebar) depending on the fontsize
-        switch(fontsize)
+        switch(fontsize_)
         {
             case 9: chiffre_index = FONT9_SPACE; break;
 
@@ -112,110 +112,110 @@ bool CFont::writeText(const char* string)
 
         // between 'spacebar' and the 'Z'
         if(*chiffre >= 32 && *chiffre <= 90)
-            chiffre_index += (*chiffre - 32) * FONT_COLOR_COUNT + color;
+            chiffre_index += (*chiffre - 32) * FONT_COLOR_COUNT + color_;
         /* \ */
         else if(*chiffre == 92)
-            chiffre_index += 59 * FONT_COLOR_COUNT + color;
+            chiffre_index += 59 * FONT_COLOR_COUNT + color_;
         // _
         else if(*chiffre == 95)
-            chiffre_index += 60 * FONT_COLOR_COUNT + color;
+            chiffre_index += 60 * FONT_COLOR_COUNT + color_;
         // between 'a' and 'z'
         else if(*chiffre >= 97 && *chiffre <= 122)
-            chiffre_index += (*chiffre - 32 - 4) * FONT_COLOR_COUNT + color;
+            chiffre_index += (*chiffre - 32 - 4) * FONT_COLOR_COUNT + color_;
         // ©
         else if(*chiffre == 169)
-            chiffre_index += 114 * FONT_COLOR_COUNT + color;
+            chiffre_index += 114 * FONT_COLOR_COUNT + color_;
         // Ä
         else if(*chiffre == 196)
-            chiffre_index += 100 * FONT_COLOR_COUNT + color;
+            chiffre_index += 100 * FONT_COLOR_COUNT + color_;
         // Ç
         else if(*chiffre == 199)
-            chiffre_index += 87 * FONT_COLOR_COUNT + color;
+            chiffre_index += 87 * FONT_COLOR_COUNT + color_;
         // Ö
         else if(*chiffre == 214)
-            chiffre_index += 106 * FONT_COLOR_COUNT + color;
+            chiffre_index += 106 * FONT_COLOR_COUNT + color_;
         // Ü
         else if(*chiffre == 220)
-            chiffre_index += 107 * FONT_COLOR_COUNT + color;
+            chiffre_index += 107 * FONT_COLOR_COUNT + color_;
         // ß
         else if(*chiffre == 223)
-            chiffre_index += 113 * FONT_COLOR_COUNT + color;
+            chiffre_index += 113 * FONT_COLOR_COUNT + color_;
         // à
         else if(*chiffre == 224)
-            chiffre_index += 92 * FONT_COLOR_COUNT + color;
+            chiffre_index += 92 * FONT_COLOR_COUNT + color_;
         // á
         else if(*chiffre == 225)
-            chiffre_index += 108 * FONT_COLOR_COUNT + color;
+            chiffre_index += 108 * FONT_COLOR_COUNT + color_;
         // â
         else if(*chiffre == 226)
-            chiffre_index += 90 * FONT_COLOR_COUNT + color;
+            chiffre_index += 90 * FONT_COLOR_COUNT + color_;
         // ä
         else if(*chiffre == 228)
-            chiffre_index += 91 * FONT_COLOR_COUNT + color;
+            chiffre_index += 91 * FONT_COLOR_COUNT + color_;
         // ç
         else if(*chiffre == 231)
-            chiffre_index += 93 * FONT_COLOR_COUNT + color;
+            chiffre_index += 93 * FONT_COLOR_COUNT + color_;
         // è
         else if(*chiffre == 232)
-            chiffre_index += 96 * FONT_COLOR_COUNT + color;
+            chiffre_index += 96 * FONT_COLOR_COUNT + color_;
         // é
         else if(*chiffre == 233)
-            chiffre_index += 89 * FONT_COLOR_COUNT + color;
+            chiffre_index += 89 * FONT_COLOR_COUNT + color_;
         // ê
         else if(*chiffre == 234)
-            chiffre_index += 94 * FONT_COLOR_COUNT + color;
+            chiffre_index += 94 * FONT_COLOR_COUNT + color_;
         // ë
         else if(*chiffre == 235)
-            chiffre_index += 95 * FONT_COLOR_COUNT + color;
+            chiffre_index += 95 * FONT_COLOR_COUNT + color_;
         // ì
         else if(*chiffre == 236)
-            chiffre_index += 99 * FONT_COLOR_COUNT + color;
+            chiffre_index += 99 * FONT_COLOR_COUNT + color_;
         // í
         else if(*chiffre == 237)
-            chiffre_index += 109 * FONT_COLOR_COUNT + color;
+            chiffre_index += 109 * FONT_COLOR_COUNT + color_;
         // î
         else if(*chiffre == 238)
-            chiffre_index += 98 * FONT_COLOR_COUNT + color;
+            chiffre_index += 98 * FONT_COLOR_COUNT + color_;
         // ï
         else if(*chiffre == 239)
-            chiffre_index += 97 * FONT_COLOR_COUNT + color;
+            chiffre_index += 97 * FONT_COLOR_COUNT + color_;
         // ñ
         else if(*chiffre == 241)
-            chiffre_index += 112 * FONT_COLOR_COUNT + color;
+            chiffre_index += 112 * FONT_COLOR_COUNT + color_;
         // ò
         else if(*chiffre == 242)
-            chiffre_index += 103 * FONT_COLOR_COUNT + color;
+            chiffre_index += 103 * FONT_COLOR_COUNT + color_;
         // ó
         else if(*chiffre == 243)
-            chiffre_index += 110 * FONT_COLOR_COUNT + color;
+            chiffre_index += 110 * FONT_COLOR_COUNT + color_;
         // ô
         else if(*chiffre == 244)
-            chiffre_index += 101 * FONT_COLOR_COUNT + color;
+            chiffre_index += 101 * FONT_COLOR_COUNT + color_;
         // ö
         else if(*chiffre == 246)
-            chiffre_index += 102 * FONT_COLOR_COUNT + color;
+            chiffre_index += 102 * FONT_COLOR_COUNT + color_;
         // ù
         else if(*chiffre == 249)
-            chiffre_index += 105 * FONT_COLOR_COUNT + color;
+            chiffre_index += 105 * FONT_COLOR_COUNT + color_;
         // ú
         else if(*chiffre == 250)
-            chiffre_index += 111 * FONT_COLOR_COUNT + color;
+            chiffre_index += 111 * FONT_COLOR_COUNT + color_;
         // û
         else if(*chiffre == 251)
-            chiffre_index += 104 * FONT_COLOR_COUNT + color;
+            chiffre_index += 104 * FONT_COLOR_COUNT + color_;
         // ü
         else if(*chiffre == 252)
-            chiffre_index += 88 * FONT_COLOR_COUNT + color;
+            chiffre_index += 88 * FONT_COLOR_COUNT + color_;
         // chiffre not available, use '_' instead
         else
-            chiffre_index += 60 * FONT_COLOR_COUNT + color;
+            chiffre_index += 60 * FONT_COLOR_COUNT + color_;
 
         // if we only count pixels in this round
         if(pixel_count_loop)
         {
             if(*chiffre == '\n')
             {
-                pixel_ctr_h += row_separator + fontsize;
+                pixel_ctr_h += row_separator + fontsize_;
                 if(pixel_ctr_w_tmp > pixel_ctr_w)
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 pixel_ctr_w_tmp = 0;
@@ -250,7 +250,7 @@ bool CFont::writeText(const char* string)
         // test for new line
         if(*chiffre == '\n')
         {
-            pos_y += row_separator + fontsize;
+            pos_y += row_separator + fontsize_;
             pos_x = 0;
             chiffre++;
             continue;
@@ -269,8 +269,8 @@ bool CFont::writeText(const char* string)
         // set position for next chiffre depending on the width of the actual drawn
         // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
         // 'í' instead
-        if(fontsize == 9 && *chiffre == 236)
-            pos_x += global::bmpArray[FONT9_SPACE + 109 * FONT_COLOR_COUNT + color].w;
+        if(fontsize_ == 9 && *chiffre == 236)
+            pos_x += global::bmpArray[FONT9_SPACE + 109 * FONT_COLOR_COUNT + color_].w;
         else
             pos_x += global::bmpArray[chiffre_index].w;
 

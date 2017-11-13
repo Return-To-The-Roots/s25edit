@@ -61,6 +61,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
         if(font->FontSurface == NULL)
         {
             SDL_SetError("SGE - Out of memory");
+            delete font;
             return NULL;
         }
 

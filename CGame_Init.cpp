@@ -74,11 +74,9 @@ bool CGame::Init()
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
     // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-    sge_TexturedRect(
-      Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
-      global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w - 1, 0, 0,
-      global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h - 1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w - 1,
-      global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h - 1);
+    SDL_Surface* surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
+    sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
+                     surfSplash, 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1, surfSplash->w - 1, surfSplash->h - 1);
     SDL_Flip(Surf_Display);
 
     // continue loading pictures

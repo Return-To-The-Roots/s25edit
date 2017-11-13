@@ -150,6 +150,8 @@ struct bobMAP
     point& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
     // Initializes or updates the vertex indices and coordinates
     void initVertexCoords();
+    /// Updates x,y,z positions (e.g. after height change)
+    void updateVertexCoords();
 };
 // map types
 #define MAP_GREENLAND 0x00

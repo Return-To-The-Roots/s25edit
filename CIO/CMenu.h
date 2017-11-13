@@ -38,9 +38,9 @@ public:
     ~CMenu();
     // Access
     void setBackgroundPicture(int pic_background);
-    void setMouseData(SDL_MouseMotionEvent motion);
-    void setMouseData(SDL_MouseButtonEvent button);
-    void setKeyboardData(SDL_KeyboardEvent key);
+    void setMouseData(const SDL_MouseMotionEvent& motion);
+    void setMouseData(const SDL_MouseButtonEvent& button);
+    void setKeyboardData(const SDL_KeyboardEvent& key);
     SDL_Surface* getSurface()
     {
         render();

@@ -16,7 +16,7 @@ private:
     DisplayRectangle displayRect;
     bool active;
     bool needSurface;
-    int VertexX, VertexY;
+    int VertexX_, VertexY_;
     bool RenderBuildHelp;
     bool RenderBorders;
     int BitsPerPixel;
@@ -50,7 +50,7 @@ private:
     int MouseBlitY;
     // counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor vertex, 1 - six
     // vertices around the cursor vertex ....) (editor mode)
-    int ChangeSection;
+    int ChangeSection_;
     // in some cases we change the ChangeSection manually but want to reset it (this is user friendly)
     int lastChangeSection;
     // decides what to do if user presses '+' or '-', if true, then cursor will increase like an hexagon, otherwise like a square
@@ -87,14 +87,14 @@ public:
     void loadMapPics();
     void unloadMapPics();
 
-    void setMouseData(SDL_MouseMotionEvent motion);
-    void setMouseData(SDL_MouseButtonEvent button);
-    void setKeyboardData(SDL_KeyboardEvent key);
+    void setMouseData(const SDL_MouseMotionEvent& motion);
+    void setMouseData(const SDL_MouseButtonEvent& button);
+    void setKeyboardData(const SDL_KeyboardEvent& key);
     void setActive() { active = true; }
     void setInactive() { active = false; }
     bool isActive() { return active; }
-    int getVertexX() { return VertexX; }
-    int getVertexY() { return VertexY; }
+    int getVertexX() { return VertexX_; }
+    int getVertexY() { return VertexY_; }
     bool getRenderBuildHelp() { return RenderBuildHelp; }
     bool getRenderBorders() { return RenderBorders; }
     int getBitsPerPixel() { return BitsPerPixel; }
@@ -116,7 +116,7 @@ public:
         return Surf_Map;
     }
     DisplayRectangle getDisplayRect() { return displayRect; }
-    void setDisplayRect(DisplayRectangle displayRect) { this->displayRect = displayRect; }
+    void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
     Uint16* getPlayerHQx() { return PlayerHQx; }
     Uint16* getPlayerHQy() { return PlayerHQy; }
     const char* getMapname() { return map->name; }

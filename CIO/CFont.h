@@ -9,13 +9,13 @@ class CFont
 
 private:
     SDL_Surface* Surf_Font;
-    Uint16 x;
-    Sint16 y;
+    Uint16 x_;
+    Sint16 y_;
     Uint16 w;
     Uint16 h;
-    const char* string;
-    int fontsize; //== Uint16 h;
-    int color;
+    const char* string_;
+    int fontsize_; //== Uint16 h;
+    int color_;
     void (*callback)(int);
     int clickedParam;
 
@@ -24,15 +24,15 @@ public:
     CFont(const char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
     ~CFont();
     // Access
-    int getX() { return x; };
-    int getY() { return y; };
-    void setX(int x) { this->x = x; };
-    void setY(int y) { this->y = y; };
+    int getX() { return x_; };
+    int getY() { return y_; };
+    void setX(int x) { this->x_ = x; };
+    void setY(int y) { this->y_ = y; };
     int getW() { return w; };
-    int getH() { return fontsize; };
+    int getH() { return fontsize_; };
     void setFontsize(int fontsize);
     void setColor(int color);
-    int getColor() { return color; }
+    int getColor() { return color_; }
     void setText(const char* string);
     void setCallback(void (*callback)(int), int param)
     {

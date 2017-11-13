@@ -17,6 +17,7 @@ CGame::CGame()
     MenuResolutionX = 640;
     MenuResolutionY = 480;
     fullscreen = false;
+    showLoadScreen = true;
 
 #ifdef _ADMINMODE
     FrameCounter = 0;
@@ -103,7 +104,7 @@ bool CGame::UnregisterMenu(CMenu* Menu)
             {
                 if(Menus[j] != NULL)
                 {
-                    Menus[i - 1]->setActive();
+                    Menus[j]->setActive();
                     break;
                 }
             }

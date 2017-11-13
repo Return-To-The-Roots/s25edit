@@ -13,19 +13,19 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
 {
     marked = true;
     clicked = false;
-    this->x = x;
-    this->y = y;
+    this->x_ = x;
+    this->y_ = y;
     // ensure window is big enough to take all basic pictures needed
     // if ( w < (global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + global::bmpArray[WINDOW_UPPER_FRAME].w +
     // global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w) )
     //    this->w = global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + global::bmpArray[WINDOW_UPPER_FRAME].w +
     //    global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w;
     // else
-    this->w = w;
+    this->w_ = w;
     // if ( h < (global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h) )
     //    this->h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
     // else
-    this->h = h;
+    this->h_ = h;
     canMove = (flags & WINDOW_MOVE) ? true : false;
     canClose = (flags & WINDOW_CLOSE) ? true : false;
     canClose_marked = false;
@@ -47,8 +47,8 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
         pictures[i] = NULL;
     for(int i = 0; i < MAXPICTURES; i++)
     {
-        static_pictures[i].x = 0;
-        static_pictures[i].y = 0;
+        static_pictures[i].x_ = 0;
+        static_pictures[i].y_ = 0;
         static_pictures[i].pic = -1;
     }
     for(int i = 0; i < MAXTEXTFIELDS; i++)
@@ -57,7 +57,7 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
         selectboxes[i] = NULL;
 
     this->title = title;
-    this->callback = callback;
+    this->callback_ = callback;
     this->callbackQuitMessage = callbackQuitMessage;
     Surf_Window = NULL;
     needSurface = true;
@@ -121,9 +121,9 @@ bool CWindow::hasActiveInputElement()
 void CWindow::setMouseData(SDL_MouseMotionEvent motion)
 {
     // cursor is on the title frame (+/-2 and +/-4 are only for a good optic)
-    if((motion.x >= x + global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2)
-       && (motion.x < x + w - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2) && (motion.y >= y + 4)
-       && (motion.y < y + +global::bmpArray[WINDOW_UPPER_FRAME].h - 4))
+    if((motion.x >= x_ + global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2)
+       && (motion.x < x_ + w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2) && (motion.y >= y_ + 4)
+       && (motion.y < y_ + +global::bmpArray[WINDOW_UPPER_FRAME].h - 4))
     {
         // left button was pressed while moving
         if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))
@@ -136,25 +136,25 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
         moving = false;
     if(moving && canMove)
     {
-        x += motion.xrel;
-        y += motion.yrel;
+        x_ += motion.xrel;
+        y_ += motion.yrel;
         // make sure to not move the window outside the display surface
-        if(x < 0)
-            x = 0;
-        if(x + w >= global::s2->getDisplaySurface()->w)
-            x = global::s2->getDisplaySurface()->w - w - 1;
-        if(y < 0)
-            y = 0;
-        if(y + h >= global::s2->getDisplaySurface()->h)
-            y = global::s2->getDisplaySurface()->h - h - 1;
+        if(x_ < 0)
+            x_ = 0;
+        if(x_ + w_ >= global::s2->getDisplaySurface()->w)
+            x_ = global::s2->getDisplaySurface()->w - w_ - 1;
+        if(y_ < 0)
+            y_ = 0;
+        if(y_ + h_ >= global::s2->getDisplaySurface()->h)
+            y_ = global::s2->getDisplaySurface()->h - h_ - 1;
     }
 
     // check whats happen to the close button
     if(canClose)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        if((motion.x >= x + 2) && (motion.x < x + global::bmpArray[WINDOW_BUTTON_CLOSE].w - 2) && (motion.y >= y + 2)
-           && (motion.y < y + global::bmpArray[WINDOW_BUTTON_CLOSE].h - 2))
+        if((motion.x >= x_ + 2) && (motion.x < x_ + global::bmpArray[WINDOW_BUTTON_CLOSE].w - 2) && (motion.y >= y_ + 2)
+           && (motion.y < y_ + global::bmpArray[WINDOW_BUTTON_CLOSE].h - 2))
             canClose_marked = true;
         else
             canClose_marked = false;
@@ -163,8 +163,8 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     if(canMinimize)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        if((motion.x >= x + w - global::bmpArray[WINDOW_BUTTON_MINIMIZE].w + 2) && (motion.x < x + w - 2) && (motion.y >= y + 2)
-           && (motion.y < y + global::bmpArray[WINDOW_BUTTON_MINIMIZE].h - 2))
+        if((motion.x >= x_ + w_ - global::bmpArray[WINDOW_BUTTON_MINIMIZE].w + 2) && (motion.x < x_ + w_ - 2) && (motion.y >= y_ + 2)
+           && (motion.y < y_ + global::bmpArray[WINDOW_BUTTON_MINIMIZE].h - 2))
             canMinimize_marked = true;
         else
             canMinimize_marked = false;
@@ -173,8 +173,8 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     if(canResize)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        if((motion.x >= x + w - global::bmpArray[WINDOW_BUTTON_RESIZE].w + 2) && (motion.x < x + w - 2)
-           && (motion.y >= y + h - global::bmpArray[WINDOW_BUTTON_RESIZE].h + 2) && (motion.y < y + h - 2))
+        if((motion.x >= x_ + w_ - global::bmpArray[WINDOW_BUTTON_RESIZE].w + 2) && (motion.x < x_ + w_ - 2)
+           && (motion.y >= y_ + h_ - global::bmpArray[WINDOW_BUTTON_RESIZE].h + 2) && (motion.y < y_ + h_ - 2))
         {
             // left button was pressed while moving
             if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))
@@ -190,8 +190,8 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
             // only resize if not minimized
             if(!minimized)
             {
-                w += motion.xrel;
-                h += motion.yrel;
+                w_ += motion.xrel;
+                h_ += motion.yrel;
 
                 // MISSING: we have to test if window size is under minimum
 
@@ -202,12 +202,12 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     }
 
     // deliver mouse data to the content objects of the window (if mouse cursor is inside the window)
-    if((motion.x >= x) && (motion.x < x + w) && (motion.y >= y) && (motion.y < y + h))
+    if((motion.x >= x_) && (motion.x < x_ + w_) && (motion.y >= y_) && (motion.y < y_ + h_))
     {
         // IMPORTANT: we use the left upper corner of the window as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute - y_window
-        motion.x -= x;
-        motion.y -= y;
+        motion.x -= x_;
+        motion.y -= y_;
         for(int i = 0; i < MAXPICTURES; i++)
         {
             if(pictures[i] != NULL)
@@ -227,7 +227,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
 
     // at least call the callback if a mouse button is pressed
     if(motion.state == SDL_PRESSED)
-        callback(WINDOW_CLICKED_CALL);
+        callback_(WINDOW_CLICKED_CALL);
 
     needRender = true;
 }
@@ -237,7 +237,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     // at first check if the right mouse button was pressed, cause in this case we will close the window
     if(button.button == SDL_BUTTON_RIGHT && button.state == SDL_PRESSED)
     {
-        callback(callbackQuitMessage);
+        callback_(callbackQuitMessage);
         return;
     }
 
@@ -245,30 +245,27 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     // in fact: uninitialized values are only a problem if the window is created minimized, but this will not happen)
     static int maximized_h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
     if(!minimized)
-        maximized_h = h;
+        maximized_h = h_;
 
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
     {
         // cursor is on the title frame (+/-2 and +/-4 are only for a good optic)
-        if((button.x >= x + global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2)
-           && (button.x < x + w - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2) && (button.y >= y + 4)
-           && (button.y < y + +global::bmpArray[WINDOW_UPPER_FRAME].h - 4))
+        if((button.x >= x_ + global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2)
+           && (button.x < x_ + w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2) && (button.y >= y_ + 4)
+           && (button.y < y_ + +global::bmpArray[WINDOW_UPPER_FRAME].h - 4))
         {
             marked = true;
             clicked = true;
         }
         // pressed inside the window
-        if((button.state == SDL_PRESSED) && (button.x >= x) && (button.x <= x + w) && (button.y >= y) && (button.y <= y + h))
+        if((button.state == SDL_PRESSED) && (button.x >= x_) && (button.x <= x_ + w_) && (button.y >= y_) && (button.y <= y_ + h_))
             marked = true;
         // else pressed outside of the window
         else if(button.state == SDL_PRESSED)
             marked = false;
-    }
 
-    // check whats happen to the close button
-    if(button.button == SDL_BUTTON_LEFT)
-    {
+        // check whats happen to the close button
         // only set 'clicked' if pressed AND cursor is ON the button (marked == true)
         if(button.state == SDL_PRESSED && canClose_marked)
             canClose_clicked = true;
@@ -276,16 +273,13 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
         {
             canClose_clicked = false;
             // if mouse button is released ON the close button (marked = true), then send the quit message to the callback
-            if(canClose_marked && callback != NULL)
+            if(canClose_marked && callback_ != NULL)
             {
-                callback(callbackQuitMessage);
+                callback_(callbackQuitMessage);
                 return;
             }
         }
-    }
-    // check whats happen to the minimize button
-    if(button.button == SDL_BUTTON_LEFT)
-    {
+        // check whats happen to the minimize button
         // only set 'clicked' if pressed AND cursor is ON the button (marked == true)
         if(button.state == SDL_PRESSED && canMinimize_marked)
             canMinimize_clicked = true;
@@ -297,23 +291,20 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
             {
                 if(minimized) // maximize now
                 {
-                    h = maximized_h;
+                    h_ = maximized_h;
                     // the window has resized, so we need a new surface
                     needSurface = true;
                     minimized = false;
                 } else // minimize now
                 {
-                    h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
+                    h_ = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
                     // the window has resized, so we need a new surface
                     needSurface = true;
                     minimized = true;
                 }
             }
         }
-    }
-    // check whats happen to the resize button
-    if(button.button == SDL_BUTTON_LEFT)
-    {
+        // check whats happen to the resize button
         // only set 'clicked' if pressed AND cursor is ON the button (marked == true)
         if(button.state == SDL_PRESSED && canResize_marked)
             canResize_clicked = true;
@@ -322,12 +313,12 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     }
 
     // deliver mouse data to the content objects of the window (if mouse cursor is inside the window)
-    if((button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+    if((button.x >= x_) && (button.x < x_ + w_) && (button.y >= y_) && (button.y < y_ + h_))
     {
         // IMPORTANT: we use the left upper corner of the window as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute - y_window
-        button.x -= x;
-        button.y -= y;
+        button.x -= x_;
+        button.y -= y_;
         for(int i = 0; i < MAXPICTURES; i++)
         {
             if(pictures[i] != NULL)
@@ -351,12 +342,12 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     }
 
     // at least call the callback
-    callback(WINDOW_CLICKED_CALL);
+    callback_(WINDOW_CLICKED_CALL);
 
     needRender = true;
 }
 
-void CWindow::setKeyboardData(SDL_KeyboardEvent key)
+void CWindow::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
@@ -489,8 +480,8 @@ int CWindow::addStaticPicture(int x, int y, int picture)
         if(static_pictures[i].pic == -1)
         {
             static_pictures[i].pic = picture;
-            static_pictures[i].x = x_abs;
-            static_pictures[i].y = y_abs;
+            static_pictures[i].x_ = x_abs;
+            static_pictures[i].y_ = y_abs;
             needRender = true;
             return i;
         }
@@ -504,8 +495,8 @@ bool CWindow::delStaticPicture(int ArrayIndex)
         return false;
 
     static_pictures[ArrayIndex].pic = -1;
-    static_pictures[ArrayIndex].x = 0;
-    static_pictures[ArrayIndex].y = 0;
+    static_pictures[ArrayIndex].x_ = 0;
+    static_pictures[ArrayIndex].y_ = 0;
     needRender = true;
 
     return true;
@@ -617,7 +608,7 @@ bool CWindow::render()
     {
         SDL_FreeSurface(Surf_Window);
         Surf_Window = NULL;
-        if((Surf_Window = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
+        if((Surf_Window = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == NULL)
             return false;
         needSurface = false;
     }
@@ -625,13 +616,13 @@ bool CWindow::render()
     // at first completly fill the background (not the fastest way, but simplier)
     if(pic_background != WINDOW_NOTHING)
     {
-        if(w <= global::bmpArray[pic_background].w)
-            pic_w = w;
+        if(w_ <= global::bmpArray[pic_background].w)
+            pic_w = w_;
         else
             pic_w = global::bmpArray[pic_background].w;
 
-        if(h <= global::bmpArray[pic_background].h)
-            pic_h = h;
+        if(h_ <= global::bmpArray[pic_background].h)
+            pic_h = h_;
         else
             pic_h = global::bmpArray[pic_background].h;
 
@@ -674,8 +665,8 @@ bool CWindow::render()
         }
         for(int i = 0; i < MAXPICTURES; i++)
         {
-            if(static_pictures[i].pic >= 0 && static_pictures[i].x < Surf_Window->w && static_pictures[i].y < Surf_Window->h)
-                CSurface::Draw(Surf_Window, global::bmpArray[static_pictures[i].pic].surface, static_pictures[i].x, static_pictures[i].y);
+            if(static_pictures[i].pic >= 0 && static_pictures[i].x_ < Surf_Window->w && static_pictures[i].y_ < Surf_Window->h)
+                CSurface::Draw(Surf_Window, global::bmpArray[static_pictures[i].pic].surface, static_pictures[i].x_, static_pictures[i].y_);
         }
         for(int i = 0; i < MAXPICTURES; i++)
         {
@@ -707,8 +698,8 @@ bool CWindow::render()
     else
         upperframe = WINDOW_UPPER_FRAME;
 
-    if(w <= global::bmpArray[upperframe].w)
-        pic_w = w;
+    if(w_ <= global::bmpArray[upperframe].w)
+        pic_w = w_;
     else
         pic_w = global::bmpArray[upperframe].w;
 
@@ -724,19 +715,19 @@ bool CWindow::render()
         CSurface::Draw(Surf_Window, global::bmpArray[upperframe].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     // write text in the upper frame
     if(title != NULL)
-        CFont::writeText(Surf_Window, title, (int)w / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
+        CFont::writeText(Surf_Window, title, (int)w_ / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
                          ALIGN_MIDDLE);
 
     // now draw the other frames (left, right, down)
     // down
-    if(w <= global::bmpArray[WINDOW_LOWER_FRAME].w)
-        pic_w = w;
+    if(w_ <= global::bmpArray[WINDOW_LOWER_FRAME].w)
+        pic_w = w_;
     else
         pic_w = global::bmpArray[WINDOW_LOWER_FRAME].w;
 
     pic_h = global::bmpArray[WINDOW_LOWER_FRAME].h;
     pos_x = 0;
-    pos_y = h - global::bmpArray[WINDOW_LOWER_FRAME].h;
+    pos_y = h_ - global::bmpArray[WINDOW_LOWER_FRAME].h;
     while(pos_x + pic_w <= Surf_Window->w)
     {
         CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y);
@@ -745,8 +736,8 @@ bool CWindow::render()
     if(Surf_Window->w - pos_x > 0)
         CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     // left
-    if(h <= global::bmpArray[WINDOW_LEFT_FRAME].h)
-        pic_h = h;
+    if(h_ <= global::bmpArray[WINDOW_LEFT_FRAME].h)
+        pic_h = h_;
     else
         pic_h = global::bmpArray[WINDOW_LEFT_FRAME].h;
 
@@ -761,13 +752,13 @@ bool CWindow::render()
     if(Surf_Window->w - pos_x > 0)
         CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     // right
-    if(h <= global::bmpArray[WINDOW_RIGHT_FRAME].h)
-        pic_h = h;
+    if(h_ <= global::bmpArray[WINDOW_RIGHT_FRAME].h)
+        pic_h = h_;
     else
         pic_h = global::bmpArray[WINDOW_RIGHT_FRAME].h;
 
     pic_h = global::bmpArray[WINDOW_RIGHT_FRAME].h;
-    pos_x = w - global::bmpArray[WINDOW_RIGHT_FRAME].w;
+    pos_x = w_ - global::bmpArray[WINDOW_RIGHT_FRAME].w;
     pos_y = 0;
     while(pos_y + pic_h <= Surf_Window->h)
     {
@@ -779,10 +770,10 @@ bool CWindow::render()
 
     // now draw the corners
     CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LEFT_UPPER_CORNER].surface, 0, 0);
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].surface, w - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w, 0);
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, 0, h - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, w - global::bmpArray[WINDOW_CORNER_RECTANGLE].w,
-                   h - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
+    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].surface, w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w, 0);
+    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, 0, h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
+    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, w_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].w,
+                   h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
     // now the corner buttons
     // close
     if(canClose)
@@ -804,7 +795,7 @@ bool CWindow::render()
             minimizebutton = WINDOW_BUTTON_MINIMIZE_MARKED;
         else
             minimizebutton = WINDOW_BUTTON_MINIMIZE;
-        CSurface::Draw(Surf_Window, global::bmpArray[minimizebutton].surface, w - global::bmpArray[minimizebutton].w, 0);
+        CSurface::Draw(Surf_Window, global::bmpArray[minimizebutton].surface, w_ - global::bmpArray[minimizebutton].w, 0);
     }
     // resize
     if(canResize)
@@ -815,8 +806,8 @@ bool CWindow::render()
             resizebutton = WINDOW_BUTTON_RESIZE_MARKED;
         else
             resizebutton = WINDOW_BUTTON_RESIZE;
-        CSurface::Draw(Surf_Window, global::bmpArray[resizebutton].surface, w - global::bmpArray[resizebutton].w,
-                       h - global::bmpArray[resizebutton].h);
+        CSurface::Draw(Surf_Window, global::bmpArray[resizebutton].surface, w_ - global::bmpArray[resizebutton].w,
+                       h_ - global::bmpArray[resizebutton].h);
     }
 
     return true;

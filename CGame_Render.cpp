@@ -53,7 +53,7 @@ void CGame::Render()
     */
     // we are in game
     if((Surf_Display->w != GameResolutionX || Surf_Display->h != GameResolutionY)
-       || ((fullscreen && !(Surf_Display->flags & SDL_FULLSCREEN)) || (!fullscreen && (Surf_Display->flags & SDL_FULLSCREEN))))
+       || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0))
     {
         SDL_FreeSurface(Surf_Display);
         Surf_Display = NULL;
@@ -77,11 +77,10 @@ void CGame::Render()
     if(showLoadScreen)
     {
         // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-        sge_TexturedRect(
-          Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
-          global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w - 1, 0,
-          0, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h - 1, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->w - 1,
-          global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface->h - 1);
+        SDL_Surface* surfLoadScreen = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
+        sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
+                         surfLoadScreen, 0, 0, surfLoadScreen->w - 1, 0, 0, surfLoadScreen->h - 1, surfLoadScreen->w - 1,
+                         surfLoadScreen->h - 1);
 
         if(CSurface::useOpenGL)
         {

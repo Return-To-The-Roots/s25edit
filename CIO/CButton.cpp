@@ -8,15 +8,15 @@ CButton::CButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint1
 {
     marked = false;
     clicked = false;
-    this->x = x;
-    this->y = y;
+    this->x_ = x;
+    this->y_ = y;
     this->w = w;
     this->h = h;
     setColor(color);
     this->button_picture = button_picture;
     button_text = text;
     button_text_color = FONT_YELLOW;
-    this->callback = callback;
+    this->callback_ = callback;
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
     motionLeaveParam = -1;
@@ -92,34 +92,34 @@ void CButton::setColor(int color)
     needRender = true;
 }
 
-void CButton::setMouseData(SDL_MouseMotionEvent motion)
+void CButton::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the button (and mouse button not pressed while moving on the button)
-    if((motion.x >= x) && (motion.x < x + w) && (motion.y >= y) && (motion.y < y + h))
+    if((motion.x >= x_) && (motion.x < x_ + w) && (motion.y >= y_) && (motion.y < y_ + h))
     {
-        if(motion.state != SDL_PRESSED || motion.state == SDL_RELEASED)
+        if(motion.state == SDL_RELEASED)
         {
             marked = true;
-            if(motionEntryParam >= 0 && callback != NULL)
-                callback(motionEntryParam);
+            if(motionEntryParam >= 0 && callback_ != NULL)
+                callback_(motionEntryParam);
         }
     } else
     {
         // button was marked before and mouse cursor is on the button now, so do the callback
-        if(motionLeaveParam >= 0 && callback != NULL && marked == true)
-            callback(motionLeaveParam);
+        if(motionLeaveParam >= 0 && callback_ != NULL && marked == true)
+            callback_(motionLeaveParam);
         marked = false;
     }
     needRender = true;
 }
 
-void CButton::setMouseData(SDL_MouseButtonEvent button)
+void CButton::setMouseData(const SDL_MouseButtonEvent& button)
 {
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+        if((button.state == SDL_PRESSED) && (button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
         {
             marked = true;
             clicked = true;
@@ -127,8 +127,8 @@ void CButton::setMouseData(SDL_MouseButtonEvent button)
         {
             clicked = false;
             // if mouse button is released ON the BUTTON (marked = true), then do the callback
-            if(marked && callback != NULL)
-                callback(clickedParam);
+            if(marked && callback_ != NULL)
+                callback_(clickedParam);
         }
     }
     needRender = true;

@@ -6,10 +6,10 @@
 
 CSelectBox::CSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
-    this->x = x;
-    this->y = y;
-    this->w = w;
-    this->h = h;
+    this->x_ = x;
+    this->y_ = y;
+    this->w_ = w;
+    this->h_ = h;
     last_text_pos_y = 10;
     this->fontsize = fontsize;
     this->text_color = text_color;
@@ -116,8 +116,8 @@ void CSelectBox::setMouseData(SDL_MouseMotionEvent motion)
 {
     // IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
     //           the motion-structure before give it to the buttons: x_absolute - x_selectbox, y_absolute - y_selectbox
-    motion.x -= x;
-    motion.y -= y;
+    motion.x -= x_;
+    motion.y -= y_;
     ScrollUpButton->setMouseData(motion);
     ScrollDownButton->setMouseData(motion);
     needRender = true;
@@ -135,23 +135,23 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the selectbox
         if(button.state == SDL_PRESSED)
         {
-            if((button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+            if((button.x >= x_) && (button.x < x_ + w_) && (button.y >= y_) && (button.y < y_ + h_))
             {
                 // scroll up button
-                if((button.x > x + w - 20) && (button.y < y + 20))
+                if((button.x > x_ + w_ - 20) && (button.y < y_ + 20))
                 {
                     scroll_up_button_marked = true;
                 }
                 // scroll down button
-                else if((button.x > x + w - 20) && (button.y > y + h - 20))
+                else if((button.x > x_ + w_ - 20) && (button.y > y_ + h_ - 20))
                 {
                     scroll_down_button_marked = true;
                 }
 
                 // IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
                 //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
-                button.x -= x;
-                button.y -= y;
+                button.x -= x_;
+                button.y -= y_;
                 manipulated = true;
 
                 for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
@@ -162,12 +162,12 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
             }
         } else if(button.state == SDL_RELEASED)
         {
-            if((button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+            if((button.x >= x_) && (button.x < x_ + w_) && (button.y >= y_) && (button.y < y_ + h_))
             {
                 // scroll up button
                 if(scroll_up_button_marked)
                 {
-                    if((button.x > x + w - 20) && (button.y < y + 20))
+                    if((button.x > x_ + w_ - 20) && (button.y < y_ + 20))
                     {
                         // test if first entry is on the most upper position
                         if(Entries[0] != NULL && Entries[0]->getY() < 10)
@@ -183,7 +183,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                 // scroll down button
                 else if(scroll_down_button_marked)
                 {
-                    if((button.x > x + w - 20) && (button.y > y + h - 20))
+                    if((button.x > x_ + w_ - 20) && (button.y > y_ + h_ - 20))
                     {
                         // test if last entry is on the most lower position
                         int j;
@@ -193,7 +193,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                                 break;
                         }
                         j--;
-                        if(Entries[j] != NULL && Entries[j]->getY() > h - 10)
+                        if(Entries[j] != NULL && Entries[j]->getY() > h_ - 10)
                         {
                             for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
                             {
@@ -206,8 +206,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 
                 // IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
                 //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
-                button.x -= x;
-                button.y -= y;
+                button.x -= x_;
+                button.y -= y_;
                 manipulated = true;
 
                 for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
@@ -223,8 +223,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
         //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
         if(!manipulated)
         {
-            button.x -= x;
-            button.y -= y;
+            button.x -= x_;
+            button.y -= y_;
         }
         ScrollUpButton->setMouseData(button);
         ScrollDownButton->setMouseData(button);
@@ -251,7 +251,7 @@ bool CSelectBox::render()
     {
         SDL_FreeSurface(Surf_SelectBox);
         Surf_SelectBox = NULL;
-        if((Surf_SelectBox = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
+        if((Surf_SelectBox = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == NULL)
             return false;
         needSurface = false;
     }
@@ -263,13 +263,13 @@ bool CSelectBox::render()
         pic = pic_foreground;
 
         // at first completly fill the background (not the fastest way, but simplier)
-        if(w <= global::bmpArray[pic].w)
-            pic_w = w;
+        if(w_ <= global::bmpArray[pic].w)
+            pic_w = w_;
         else
             pic_w = global::bmpArray[pic].w;
 
-        if(h <= global::bmpArray[pic].h)
-            pic_h = h;
+        if(h_ <= global::bmpArray[pic].h)
+            pic_h = h_;
         else
             pic_h = global::bmpArray[pic].h;
 
@@ -309,8 +309,8 @@ bool CSelectBox::render()
             CSurface::Draw(Surf_SelectBox, Entries[i]->getSurface(), Entries[i]->getX(), Entries[i]->getY());
     }
 
-    CSurface::Draw(Surf_SelectBox, ScrollUpButton->getSurface(), w - 1 - 20, 0);
-    CSurface::Draw(Surf_SelectBox, ScrollDownButton->getSurface(), w - 1 - 20, h - 1 - 20);
+    CSurface::Draw(Surf_SelectBox, ScrollUpButton->getSurface(), w_ - 1 - 20, 0);
+    CSurface::Draw(Surf_SelectBox, ScrollDownButton->getSurface(), w_ - 1 - 20, h_ - 1 - 20);
 
     rendered = true;
 

@@ -55,6 +55,7 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     if(!cdata->map)
     {
         SDL_SetError("SGE - Out of memory");
+        delete cdata;
         return NULL;
     }
     memset(cdata->map, 0x00, offs + 2);

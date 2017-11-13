@@ -72,7 +72,7 @@ void CMenu::setBackgroundPicture(int pic_background)
     needRender = true;
 }
 
-void CMenu::setMouseData(SDL_MouseMotionEvent motion)
+void CMenu::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     for(int i = 0; i < MAXPICTURES; i++)
     {
@@ -92,7 +92,7 @@ void CMenu::setMouseData(SDL_MouseMotionEvent motion)
     needRender = true;
 }
 
-void CMenu::setMouseData(SDL_MouseButtonEvent button)
+void CMenu::setMouseData(const SDL_MouseButtonEvent& button)
 {
     for(int i = 0; i < MAXPICTURES; i++)
     {
@@ -117,7 +117,7 @@ void CMenu::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
-void CMenu::setKeyboardData(SDL_KeyboardEvent key)
+void CMenu::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {

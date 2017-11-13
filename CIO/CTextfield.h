@@ -15,17 +15,17 @@ private:
     CFont* textObj;
     bool needSurface;
     bool needRender;
-    Uint16 x;
-    Uint16 y;
+    Uint16 x_;
+    Uint16 y_;
     Uint16 w;
     Uint16 h;
     Uint16 cols;
     Uint16 rows;
-    int fontsize;
+    int fontsize_;
     int pic_background;
     int pic_foreground;
-    std::vector<char> text;
-    int text_color;
+    std::vector<char> text_;
+    int textColor_;
     // if active, keyboard data will be delivered and the cursor is blinking
     bool active;
     // we need this to say the window if it needs to render, otherwise no blinking cursor and no chiffres are shown
@@ -39,21 +39,21 @@ public:
                int bg_color = -1, bool button_style = false);
     ~CTextfield();
     // Access
-    int getX() { return x; };
-    int getY() { return y; };
+    int getX() { return x_; };
+    int getY() { return y_; };
     int getW() { return w; };
     int getH() { return h; };
     int getCols() { return cols; };
     int getRows() { return rows; };
-    void setX(int x) { this->x = x; }
-    void setY(int y) { this->y = y; }
+    void setX(int x) { this->x_ = x; }
+    void setY(int y) { this->y_ = y; }
     void setText(const char* text);
     void setActive() { active = true; }
     void setInactive() { active = false; }
     bool isActive() { return active; }
     bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
-    void setKeyboardData(SDL_KeyboardEvent key);
+    void setKeyboardData(const SDL_KeyboardEvent& key);
     bool render();
     SDL_Surface* getSurface()
     {
@@ -63,10 +63,10 @@ public:
     void setColor(int color);
     void setTextColor(int color)
     {
-        text_color = color;
+        textColor_ = color;
         needRender = true;
     }
-    const char* getText() { return &text[0]; }
+    const char* getText() { return &text_[0]; }
 };
 
 #endif

@@ -86,9 +86,9 @@
  */
 #if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) >= SDL_VERSIONNUM(1, 1, 5)
 #define sge_clip_xmin(pnt) pnt->clip_rect.x
-#define sge_clip_xmax(pnt) pnt->clip_rect.x + pnt->clip_rect.w - 1
+#define sge_clip_xmax(pnt) (pnt->clip_rect.x + pnt->clip_rect.w - 1)
 #define sge_clip_ymin(pnt) pnt->clip_rect.y
-#define sge_clip_ymax(pnt) pnt->clip_rect.y + pnt->clip_rect.h - 1
+#define sge_clip_ymax(pnt) (pnt->clip_rect.y + pnt->clip_rect.h - 1)
 #else
 #define sge_clip_xmin(pnt) pnt->clip_minx
 #define sge_clip_xmax(pnt) pnt->clip_maxx

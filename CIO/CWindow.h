@@ -21,17 +21,17 @@ private:
     SDL_Surface* Surf_Window;
     bool needSurface;
     bool needRender;
-    Sint16 x;
-    Sint16 y;
-    Uint16 w;
-    Uint16 h;
+    Sint16 x_;
+    Sint16 y_;
+    Uint16 w_;
+    Uint16 h_;
     int pic_background;
     CButton* buttons[MAXBUTTONS];
     CFont* texts[MAXTEXTS];
     CPicture* pictures[MAXPICTURES];
     struct
     {
-        int x, y, pic;
+        int x_, y_, pic;
     } static_pictures[MAXPICTURES];
     CTextfield* textfields[MAXTEXTFIELDS];
     CSelectBox* selectboxes[MAXSELECTBOXES];
@@ -52,25 +52,25 @@ private:
     bool moving;
     bool resizing;
     int priority; // for register, blit, event
-    void (*callback)(int);
+    void (*callback_)(int);
     int callbackQuitMessage;
 
 public:
     // Constructor - Destructor
-    CWindow(void callback(int), int callbackQuitMessage, Uint16 x = 0, Uint16 y = 0, Uint16 w = 200, Uint16 h = 200,
+    CWindow(void callback_(int), int callbackQuitMessage, Uint16 x = 0, Uint16 y = 0, Uint16 w = 200, Uint16 h = 200,
             const char* title = NULL, int color = WINDOW_GREEN1, Uint8 flags = 0);
     ~CWindow();
     // Access
-    int getX() { return x; };
-    int getY() { return y; };
-    int getW() { return w; };
-    int getH() { return h; };
+    int getX() { return x_; };
+    int getY() { return y_; };
+    int getW() { return w_; };
+    int getH() { return h_; };
     int getPriority() { return priority; }
     void setPriority(int priority) { this->priority = priority; }
     void setTitle(const char* title);
     void setMouseData(SDL_MouseMotionEvent motion);
     void setMouseData(SDL_MouseButtonEvent button);
-    void setKeyboardData(SDL_KeyboardEvent key);
+    void setKeyboardData(const SDL_KeyboardEvent& key);
     SDL_Surface* getSurface()
     {
         render();
@@ -96,12 +96,12 @@ public:
     bool hasActiveInputElement();
     void setColor(int color);
     // Methods
-    CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20,
+    CButton* addButton(void callback_(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20,
                        int color = BUTTON_GREY, const char* text = NULL, int picture = -1);
     bool delButton(CButton* ButtonToDelete);
     CFont* addText(const char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
     bool delText(CFont* TextToDelete);
-    CPicture* addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture);
+    CPicture* addPicture(void callback_(int), int clickedParam, Uint16 x, Uint16 y, int picture);
     bool delPicture(CPicture* PictureToDelete);
     int addStaticPicture(int x, int y, int picture);
     bool delStaticPicture(int ArrayIndex);

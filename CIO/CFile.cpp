@@ -454,7 +454,7 @@ bool CFile::open_lbm(const std::string& filename)
                         // draw
                         CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
                     }
-                } else if(ctype < 0 && ctype >= -127)
+                } else if(ctype >= -127)
                 {
                     // draw the following byte '-ctype + 1' times to the surface
                     freadChecked(&color_value, 1, 1, fp);
@@ -1222,7 +1222,7 @@ bool CFile::read_bob04(int player_color)
                 {
                     CSurface::DrawPixel_RGBA(bmpArray->surface, x, y, 0, 0, 0, 0);
                 }
-            } else if(shift >= 0x41 && shift < 0x81)
+            } else if(shift < 0x81)
             {
                 freadChecked(&color_value, 1, 1, fp);
 
@@ -1230,7 +1230,7 @@ bool CFile::read_bob04(int player_color)
                 {
                     CSurface::DrawPixel_Color(bmpArray->surface, x, y, /*0x80 - 0x40*/ +(Uint32)color_value);
                 }
-            } else if(shift >= 0x81 && shift < 0xC1)
+            } else if(shift < 0xC1)
             {
                 freadChecked(&color_value, 1, 1, fp);
 

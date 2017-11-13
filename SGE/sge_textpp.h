@@ -156,11 +156,10 @@ public:
     {
         tt_font = NULL;
         bm_font = NULL;
+        alpha_level = SDL_ALPHA_OPAQUE;
         text_surface = NULL;
         use_tt = true;
-        text_surface = NULL;
         sCursor = false;
-        alpha_level = SDL_ALPHA_OPAQUE;
     }
     virtual ~sge_text()
     {
@@ -257,7 +256,7 @@ public:
         current_pos.h = 0;
     }
 
-    sge_TextSurface(SDL_Surface* screen, const std::string text, Sint16 x = 0, Sint16 y = 0) : sge_surface(screen, screen, x, y)
+    sge_TextSurface(SDL_Surface* screen, const std::string& text, Sint16 x = 0, Sint16 y = 0) : sge_surface(screen, screen, x, y)
     {
         change_text(text);
         current_pos.w = 0;
@@ -280,7 +279,7 @@ public:
         current_pos.h = 0;
     }
 
-    sge_TextSsprite(SDL_Surface* screen, const std::string text, Sint16 x = 0, Sint16 y = 0) : sge_ssprite(screen, screen, x, y)
+    sge_TextSsprite(SDL_Surface* screen, const std::string& text, Sint16 x = 0, Sint16 y = 0) : sge_ssprite(screen, screen, x, y)
     {
         change_text(text);
         current_pos.w = 0;
@@ -303,7 +302,7 @@ public:
         current_pos.h = 0;
     }
 
-    sge_TextSprite(SDL_Surface* screen, const std::string text, Sint16 x = 0, Sint16 y = 0) : sge_sprite(screen, screen, x, y)
+    sge_TextSprite(SDL_Surface* screen, const std::string& text, Sint16 x = 0, Sint16 y = 0) : sge_sprite(screen, screen, x, y)
     {
         change_text(text);
         current_pos.w = 0;

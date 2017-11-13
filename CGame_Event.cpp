@@ -60,11 +60,8 @@ void CGame::EventHandling(SDL_Event* Event)
                     // data has been delivered to map, so no menu is in the foreground --> stop delivering
                     // break;
                 }
-            }
 
-            // deliver keyboard data to active menus
-            if(!delivered)
-            {
+                // deliver keyboard data to active menus
                 for(int i = 0; i < MAXMENUS; i++)
                 {
                     if(Menus[i] != NULL && Menus[i]->isActive() && !Menus[i]->isWaste())
@@ -100,26 +97,7 @@ void CGame::EventHandling(SDL_Event* Event)
                         TRIANGLE_WIDTH += 11;
                         TRIANGLE_INCREASE += 1;
                         bobMAP* myMap = MapObj->getMap();
-                        int a;
-                        int b = 0;
-                        int heightFactor;
-                        for(int j = 0; j < myMap->height; j++)
-                        {
-                            if(j % 2 == 0)
-                                a = TRIANGLE_WIDTH / 2;
-                            else
-                                a = TRIANGLE_WIDTH;
-
-                            for(int i = 0; i < myMap->width; i++)
-                            {
-                                heightFactor = myMap->getVertex(i, j).h;
-                                myMap->getVertex(i, j).x = a;
-                                myMap->getVertex(i, j).y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-                                myMap->getVertex(i, j).z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
-                                a += TRIANGLE_WIDTH;
-                            }
-                            b += TRIANGLE_HEIGHT;
-                        }
+                        myMap->updateVertexCoords();
                         CSurface::get_nodeVectors(myMap);
                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     }
@@ -131,26 +109,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     TRIANGLE_WIDTH = 56;
                     TRIANGLE_INCREASE = 5;
                     bobMAP* myMap = MapObj->getMap();
-                    int a;
-                    int b = 0;
-                    int heightFactor;
-                    for(int j = 0; j < myMap->height; j++)
-                    {
-                        if(j % 2 == 0)
-                            a = TRIANGLE_WIDTH / 2;
-                        else
-                            a = TRIANGLE_WIDTH;
-
-                        for(int i = 0; i < myMap->width; i++)
-                        {
-                            heightFactor = myMap->getVertex(i, j).h;
-                            myMap->getVertex(i, j).x = a;
-                            myMap->getVertex(i, j).y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-                            myMap->getVertex(i, j).z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
-                            a += TRIANGLE_WIDTH;
-                        }
-                        b += TRIANGLE_HEIGHT;
-                    }
+                    myMap->updateVertexCoords();
                     CSurface::get_nodeVectors(myMap);
                     callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                 }
@@ -163,26 +122,7 @@ void CGame::EventHandling(SDL_Event* Event)
                         TRIANGLE_WIDTH -= 11;
                         TRIANGLE_INCREASE -= 1;
                         bobMAP* myMap = MapObj->getMap();
-                        int a;
-                        int b = 0;
-                        int heightFactor;
-                        for(int j = 0; j < myMap->height; j++)
-                        {
-                            if(j % 2 == 0)
-                                a = TRIANGLE_WIDTH / 2;
-                            else
-                                a = TRIANGLE_WIDTH;
-
-                            for(int i = 0; i < myMap->width; i++)
-                            {
-                                heightFactor = myMap->getVertex(i, j).h;
-                                myMap->getVertex(i, j).x = a;
-                                myMap->getVertex(i, j).y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-                                myMap->getVertex(i, j).z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
-                                a += TRIANGLE_WIDTH;
-                            }
-                            b += TRIANGLE_HEIGHT;
-                        }
+                        myMap->updateVertexCoords();
                         CSurface::get_nodeVectors(myMap);
                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     }

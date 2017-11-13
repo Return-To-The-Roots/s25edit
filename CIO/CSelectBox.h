@@ -18,10 +18,10 @@ private:
     CFont* Entries[MAXSELECTBOXENTRIES];
     bool needSurface;
     bool needRender;
-    Uint16 x;
-    Uint16 y;
-    Uint16 w;
-    Uint16 h;
+    Uint16 x_;
+    Uint16 y_;
+    Uint16 w_;
+    Uint16 h_;
     Uint16 last_text_pos_y;
     int fontsize;
     int pic_background;
@@ -38,12 +38,12 @@ public:
                int bg_color = -1);
     ~CSelectBox();
     // Access;
-    int getX() { return x; }
-    int getY() { return y; }
-    int getW() { return w; }
-    int getH() { return h; }
-    void setX(int x) { this->x = x; }
-    void setY(int y) { this->y = y; }
+    int getX() { return x_; }
+    int getY() { return y_; }
+    int getW() { return w_; }
+    int getH() { return h_; }
+    void setX(int x) { this->x_ = x; }
+    void setY(int y) { this->y_ = y; }
     bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
     void setMouseData(SDL_MouseMotionEvent motion);

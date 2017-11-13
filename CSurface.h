@@ -19,7 +19,7 @@ public:
     static void DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
     static void DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     static Uint32 GetPixel(SDL_Surface* surface, int x, int y);
-    static void DrawTriangleField(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap);
+    static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap);
     static void DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, point P1, point P2, point P3);
     static void get_nodeVectors(bobMAP* myMap);
     static void update_shading(bobMAP* myMap, int VertexX, int VertexY);
@@ -30,10 +30,10 @@ private:
     // to decide what to draw, triangle-textures or objects and texture-borders
     static bool drawTextures;
 
-    static vector get_nodeVector(vector v1, vector v2, vector v3);
-    static vector get_normVector(vector v);
+    static vector get_nodeVector(const vector& v1, const vector& v2, const vector& v3);
+    static vector get_normVector(const vector& v);
     static vector get_flatVector(point* P1, point* P2, point* P3);
-    static Sint32 get_LightIntensity(vector node);
+    static Sint32 get_LightIntensity(const vector& node);
     static float absf(float a);
     // update flatVectors around a vertex
     static void update_flatVectors(bobMAP* myMap, int VertexX, int VertexY);

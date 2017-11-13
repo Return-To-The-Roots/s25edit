@@ -3252,8 +3252,8 @@ void callback::viewer(int Param)
 
             if(PicInfosText != NULL)
             {
-                WNDViewer->delText(PicInfosText);
-                PicInfosText = NULL;
+                if(WNDViewer->delText(PicInfosText))
+                    PicInfosText = NULL;
             }
             if(PicInfosText == NULL)
             {
@@ -3546,8 +3546,8 @@ void callback::submenu1(int Param)
             {
                 if(counterText != NULL)
                 {
-                    SubMenu->delText(counterText);
-                    counterText = NULL;
+                    if(SubMenu->delText(counterText))
+                        counterText = NULL;
                 }
                 if(counterText == NULL)
                 {

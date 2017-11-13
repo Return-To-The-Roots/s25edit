@@ -15,7 +15,7 @@ private:
     Uint16 y;
     Uint16 w;
     Uint16 h;
-    int picture;
+    int picture_;
     bool marked;
     bool clicked;
     void (*callback)(int);
@@ -34,8 +34,8 @@ public:
     int getH() { return h; };
     void setX(int x) { this->x = x; };
     void setY(int y) { this->y = y; };
-    void setMouseData(SDL_MouseMotionEvent motion);
-    void setMouseData(SDL_MouseButtonEvent button);
+    void setMouseData(const SDL_MouseMotionEvent& motion);
+    void setMouseData(const SDL_MouseButtonEvent& button);
     bool render();
     SDL_Surface* getSurface()
     {

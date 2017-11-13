@@ -9,9 +9,9 @@ CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int
     this->x = x;
     this->y = y;
     if(picture >= 0)
-        this->picture = picture;
+        this->picture_ = picture;
     else
-        this->picture = 0;
+        this->picture_ = 0;
     this->w = global::bmpArray[picture].w;
     this->h = global::bmpArray[picture].h;
     this->callback = callback;
@@ -28,12 +28,12 @@ CPicture::~CPicture()
     SDL_FreeSurface(Surf_Picture);
 }
 
-void CPicture::setMouseData(SDL_MouseMotionEvent motion)
+void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the picture
     if((motion.x >= x) && (motion.x < x + w) && (motion.y >= y) && (motion.y < y + h))
     {
-        if(motion.state != SDL_PRESSED || motion.state == SDL_RELEASED)
+        if(motion.state == SDL_RELEASED)
         {
             marked = true;
             if(motionEntryParam >= 0 && callback != NULL)
@@ -49,7 +49,7 @@ void CPicture::setMouseData(SDL_MouseMotionEvent motion)
     needRender = true;
 }
 
-void CPicture::setMouseData(SDL_MouseButtonEvent button)
+void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
 {
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
@@ -87,7 +87,7 @@ bool CPicture::render()
         needSurface = false;
     }
 
-    CSurface::Draw(Surf_Picture, global::bmpArray[picture].surface, 0, 0);
+    CSurface::Draw(Surf_Picture, global::bmpArray[picture_].surface, 0, 0);
 
     return true;
 }

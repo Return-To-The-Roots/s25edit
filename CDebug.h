@@ -11,7 +11,7 @@ class CDebug
 {
 private:
     // callback fuction that is constructing the Debugger-Object
-    void (*dbgCallback)(int);
+    void (*dbgCallback_)(int);
     // debugger window
     CWindow* dbgWnd;
     // text for FrameCounter
@@ -83,7 +83,7 @@ private:
 
 public:
     // Constructor, Destructor
-    CDebug(void dbgCallback(int), int quitParam);
+    CDebug(void dbgCallback_(int), int quitParam);
     ~CDebug();
     // Methods
     void sendParam(int Param);

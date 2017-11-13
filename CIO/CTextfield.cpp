@@ -6,20 +6,20 @@
 CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
 {
     active = false;
-    this->x = x;
-    this->y = y;
+    this->x_ = x;
+    this->y_ = y;
     this->cols = (cols < 1 ? 1 : cols);
     this->rows = (rows < 1 ? 1 : rows);
-    this->fontsize = fontsize;
+    this->fontsize_ = fontsize;
     // calc width by maximum number of chiffres (cols) + one blinking chiffre * average pixel_width of a chiffre (fontsize-3) + tolerance
     // for borders
     this->w = (this->cols + 1) * (fontsize - 3) + 4;
     // calc height ----------------| this is the row_separator from CFont.cpp    |----        + tolerance for borders
     this->h = this->rows * (fontsize + (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4))) + 4;
-    this->text_color = text_color;
+    this->textColor_ = text_color;
     setColor(bg_color);
     // allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
-    text.resize((this->cols + 1) * this->rows + 2);
+    text_.resize((this->cols + 1) * this->rows + 2);
 
     Surf_Text = NULL;
     needSurface = true;
@@ -90,12 +90,12 @@ void CTextfield::setColor(int color)
 
 void CTextfield::setText(const char* text)
 {
-    char* txtPtr = &this->text[0];
+    char* txtPtr = &this->text_[0];
     int col_ctr = 1, row_ctr = 1;
 
     while(*text != '\0')
     {
-        if(txtPtr >= &this->text.back() - 2)
+        if(txtPtr >= &this->text_.back() - 2)
             break;
 
         if(col_ctr > cols)
@@ -124,7 +124,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            if((button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+            if((button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
                 active = true;
             else
                 active = false;
@@ -133,10 +133,10 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
-void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
+void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     unsigned char chiffre = '\0';
-    char* txtPtr = &text[0];
+    char* txtPtr = &text_[0];
     int col_ctr = 1, row_ctr = 1;
 
     if(!active)
@@ -159,7 +159,7 @@ void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
         col_ctr--;
         // end of text memory reached? ( 'cols'-chiffres from the user + '\n' in each row * rows + blinking chiffre + '\0' -1 for pointer
         // adress range
-        if(txtPtr >= &text.back() - 2)
+        if(txtPtr >= &text_.back() - 2)
         {
             // end reached, user may only delete chiffres
             if(key.keysym.sym != SDLK_BACKSPACE)
@@ -169,7 +169,7 @@ void CTextfield::setKeyboardData(SDL_KeyboardEvent key)
         switch(key.keysym.sym)
         {
             case SDLK_BACKSPACE:
-                if(txtPtr > &text[0])
+                if(txtPtr > &text_[0])
                 {
                     txtPtr--;
                     *txtPtr = '\0';
@@ -419,7 +419,7 @@ bool CTextfield::render()
     } else
         SDL_FillRect(Surf_Text, NULL, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
 
-    char* txtPtr = &text[0];
+    char* txtPtr = &text_[0];
 
     // go to '\0'
     while(*txtPtr != '\0')
@@ -436,7 +436,7 @@ bool CTextfield::render()
     // textObj->setText(text);
     delete textObj;
     textObj = NULL;
-    textObj = new CFont(&text[0], x, y, fontsize, text_color);
+    textObj = new CFont(&text_[0], x_, y_, fontsize_, textColor_);
 
     // delete blinking chiffre (otherwise it could be written between user input chiffres)
     if(blinking_chiffre && active)
