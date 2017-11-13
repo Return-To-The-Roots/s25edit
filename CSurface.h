@@ -19,7 +19,7 @@ public:
     static void DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
     static void DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     static Uint32 GetPixel(SDL_Surface* surface, int x, int y);
-    static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap);
+    static void DrawTriangleField(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap);
     static void DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, point P1, point P2, point P3);
     static void get_nodeVectors(bobMAP* myMap);
     static void update_shading(bobMAP* myMap, int VertexX, int VertexY);

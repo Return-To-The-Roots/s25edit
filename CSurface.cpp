@@ -280,7 +280,7 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
     }
 }
 
-void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap)
+void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap)
 {
     Uint16 width = myMap->width;
     Uint16 height = myMap->height;
@@ -290,6 +290,13 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     // min size to avoid underflows
     if(width < 8 || height < 8)
         return;
+
+    assert(displayRect.x < myMap->width_pixel);
+    assert(-displayRect.x <= displayRect.w);
+    assert(displayRect.x + displayRect.w > 0);
+    assert(displayRect.y < myMap->height_pixel);
+    assert(-displayRect.y <= displayRect.h);
+    assert(displayRect.y + displayRect.h > 0);
 
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
@@ -323,12 +330,10 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // at first call DrawTriangle for all triangles up or down outside
                     if(displayRect.y < 0)
                     {
-                        row_start = height - 1 - (-displayRect.y / TRIANGLE_HEIGHT) - 1;
+                        row_start = std::max(0, height - 1 - (-displayRect.y / TRIANGLE_HEIGHT) - 1);
                         row_end = height - 1;
                         view_outside_edges = true;
-                    }
-
-                    else if((displayRect.y + displayRect.h) > myMap->height_pixel)
+                    } else if((displayRect.y + displayRect.h) > myMap->height_pixel)
                     {
                         row_start = 0;
                         row_end = ((displayRect.y + displayRect.h) - myMap->height_pixel) / TRIANGLE_HEIGHT + 8;
@@ -354,7 +359,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // now call DrawTriangle for all triangles left or right outside
                     if(displayRect.x <= 0)
                     {
-                        col_start = width - 1 - (-displayRect.x / TRIANGLE_WIDTH) - 1;
+                        col_start = std::max(0, width - 1 - (-displayRect.x / TRIANGLE_WIDTH) - 1);
                         col_end = width - 1;
                         view_outside_edges = true;
                     } else if(displayRect.x < TRIANGLE_WIDTH)
@@ -390,7 +395,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     tempP2.z = myMap->getVertex(width - 1, j + 1).z;
                     tempP2.i = myMap->getVertex(width - 1, j + 1).i;
                     DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(0, j), tempP2, myMap->getVertex(0, j + 1));
-                    for(int i = /*1*/ (col_start > 0 ? col_start : 1); i < width && i <= col_end; i++)
+                    for(int i = std::max(col_start, 1); i < width && i <= col_end; i++)
                     {
                         // RightSideUp
                         DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, j), myMap->getVertex(i - 1, j + 1),

@@ -543,9 +543,7 @@ bobMAP* CFile::open_wld()
     // go to real map height and width
     fseek(fp, 2348, SEEK_SET);
     freadChecked(&myMap->width, 2, 1, fp);
-    myMap->width_pixel = myMap->width * TRIANGLE_WIDTH;
     freadChecked(&myMap->height, 2, 1, fp);
-    myMap->height_pixel = myMap->height * TRIANGLE_HEIGHT;
 
     if((myMap->vertex = (point*)malloc(sizeof(point) * myMap->width * myMap->height)) == NULL)
     {

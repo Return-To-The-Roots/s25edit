@@ -24,6 +24,9 @@ void bobMAP::initVertexCoords()
 
 void bobMAP::updateVertexCoords()
 {
+    width_pixel = width * TRIANGLE_WIDTH;
+    height_pixel = height * TRIANGLE_HEIGHT;
+
     Sint32 b = 0;
     for(unsigned j = 0; j < height; j++)
     {
@@ -214,10 +217,8 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
     strcpy(myMap->name, "Ohne Namen");
     myMap->width = width;
     myMap->width_old = width;
-    myMap->width_pixel = myMap->width * TRIANGLE_WIDTH;
     myMap->height = height;
     myMap->height_old = height;
-    myMap->height_pixel = myMap->height * TRIANGLE_HEIGHT;
     myMap->type = type;
     myMap->player = 0;
     strcpy(myMap->author, "Niemand");
@@ -891,15 +892,15 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             displayRect.y += (key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0));
 
             // reset coords of displayRects when end of map is reached
-            if(displayRect.x >= map->width * TRIANGLE_WIDTH)
+            if(displayRect.x >= map->width_pixel)
                 displayRect.x = 0;
             else if(displayRect.x <= -displayRect.w)
-                displayRect.x = map->width * TRIANGLE_WIDTH - displayRect.w;
+                displayRect.x = map->width_pixel - displayRect.w;
 
-            if(displayRect.y >= map->height * TRIANGLE_HEIGHT)
+            if(displayRect.y >= map->height_pixel)
                 displayRect.y = 0;
             else if(displayRect.y <= -displayRect.h)
-                displayRect.y = map->height * TRIANGLE_HEIGHT - displayRect.h;
+                displayRect.y = map->height_pixel - displayRect.h;
         }
 #ifdef _EDITORMODE
         // help menu
