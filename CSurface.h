@@ -32,7 +32,7 @@ private:
 
     static vector get_nodeVector(vector v1, vector v2, vector v3);
     static vector get_normVector(vector v);
-    static vector get_flatVector(struct point* P1, struct point* P2, struct point* P3);
+    static vector get_flatVector(point* P1, point* P2, point* P3);
     static Sint32 get_LightIntensity(vector node);
     static float absf(float a);
     // update flatVectors around a vertex

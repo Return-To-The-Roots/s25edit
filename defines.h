@@ -146,7 +146,10 @@ struct bobMAP
     char author[20];
     // 250 items from the big map header
     MapHeaderItem header[250];
-    struct point* vertex;
+    point* vertex;
+    point& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
+    // Initializes or updates the vertex indices and coordinates
+    void initVertexCoords();
 };
 // map types
 #define MAP_GREENLAND 0x00

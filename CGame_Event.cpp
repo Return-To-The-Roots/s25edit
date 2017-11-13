@@ -112,10 +112,10 @@ void CGame::EventHandling(SDL_Event* Event)
 
                             for(int i = 0; i < myMap->width; i++)
                             {
-                                heightFactor = myMap->vertex[j * myMap->width + i].h;
-                                myMap->vertex[j * myMap->width + i].x = a;
-                                myMap->vertex[j * myMap->width + i].y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-                                myMap->vertex[j * myMap->width + i].z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
+                                heightFactor = myMap->getVertex(i, j).h;
+                                myMap->getVertex(i, j).x = a;
+                                myMap->getVertex(i, j).y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
+                                myMap->getVertex(i, j).z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
                                 a += TRIANGLE_WIDTH;
                             }
                             b += TRIANGLE_HEIGHT;
@@ -143,10 +143,10 @@ void CGame::EventHandling(SDL_Event* Event)
 
                         for(int i = 0; i < myMap->width; i++)
                         {
-                            heightFactor = myMap->vertex[j * myMap->width + i].h;
-                            myMap->vertex[j * myMap->width + i].x = a;
-                            myMap->vertex[j * myMap->width + i].y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-                            myMap->vertex[j * myMap->width + i].z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
+                            heightFactor = myMap->getVertex(i, j).h;
+                            myMap->getVertex(i, j).x = a;
+                            myMap->getVertex(i, j).y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
+                            myMap->getVertex(i, j).z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
                             a += TRIANGLE_WIDTH;
                         }
                         b += TRIANGLE_HEIGHT;
@@ -175,10 +175,10 @@ void CGame::EventHandling(SDL_Event* Event)
 
                             for(int i = 0; i < myMap->width; i++)
                             {
-                                heightFactor = myMap->vertex[j * myMap->width + i].h;
-                                myMap->vertex[j * myMap->width + i].x = a;
-                                myMap->vertex[j * myMap->width + i].y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-                                myMap->vertex[j * myMap->width + i].z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
+                                heightFactor = myMap->getVertex(i, j).h;
+                                myMap->getVertex(i, j).x = a;
+                                myMap->getVertex(i, j).y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
+                                myMap->getVertex(i, j).z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
                                 a += TRIANGLE_WIDTH;
                             }
                             b += TRIANGLE_HEIGHT;

@@ -509,7 +509,6 @@ bool CFile::open_gou()
 bobMAP* CFile::open_wld()
 {
     bobMAP* myMap = (bobMAP*)malloc(sizeof(bobMAP));
-    Uint8 heightFactor;
 
     if(myMap == NULL)
         return myMap;
@@ -548,7 +547,7 @@ bobMAP* CFile::open_wld()
     freadChecked(&myMap->height, 2, 1, fp);
     myMap->height_pixel = myMap->height * TRIANGLE_HEIGHT;
 
-    if((myMap->vertex = (struct point*)malloc(sizeof(struct point) * myMap->width * myMap->height)) == NULL)
+    if((myMap->vertex = (point*)malloc(sizeof(point) * myMap->width * myMap->height)) == NULL)
     {
         free(myMap);
         return NULL;
@@ -557,31 +556,16 @@ bobMAP* CFile::open_wld()
     // go to altitude information (we skip the 16 bytes long map data header that each block has)
     fseek(fp, 16, SEEK_CUR);
 
-    long int a;
-    long int b = 0;
     for(int j = 0; j < myMap->height; j++)
     {
-        if(j % 2 == 0)
-            a = TRIANGLE_WIDTH / 2;
-        else
-            a = TRIANGLE_WIDTH;
-
         for(int i = 0; i < myMap->width; i++)
         {
-            myMap->vertex[j * myMap->width + i].VertexX = i;
-            myMap->vertex[j * myMap->width + i].VertexY = j;
+            Uint8 heightFactor;
             freadChecked(&heightFactor, 1, 1, fp);
-            myMap->vertex[j * myMap->width + i].h = heightFactor;
-            myMap->vertex[j * myMap->width + i].x = a;
-            myMap->vertex[j * myMap->width + i].y = b + (-TRIANGLE_INCREASE) * (heightFactor - 0x0A);
-            myMap->vertex[j * myMap->width + i].z = TRIANGLE_INCREASE * (heightFactor - 0x0A);
-            // TEMPORARY: to prevent drawing point outside the surface (negative points)
-            // if (myMap->vertex[j*myMap->width+i].y < 0)
-            // myMap->vertex[j*myMap->width+i].y = 0;
-            a += TRIANGLE_WIDTH;
+            myMap->getVertex(i, j).h = heightFactor;
         }
-        b += TRIANGLE_HEIGHT;
     }
+    myMap->initVertexCoords();
 
     // go to texture information for RightSideUp-Triangles
     fseek(fp, 16, SEEK_CUR);
@@ -589,7 +573,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].rsuTexture, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).rsuTexture, 1, 1, fp);
     }
 
     // go to texture information for UpSideDown-Triangles
@@ -598,7 +582,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].usdTexture, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).usdTexture, 1, 1, fp);
     }
 
     // go to road data
@@ -607,7 +591,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].road, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).road, 1, 1, fp);
     }
 
     // go to object type data
@@ -616,7 +600,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].objectType, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).objectType, 1, 1, fp);
     }
 
     // go to object info data
@@ -625,7 +609,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].objectInfo, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).objectInfo, 1, 1, fp);
     }
 
     // go to animal data
@@ -634,7 +618,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].animal, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).animal, 1, 1, fp);
     }
 
     // go to unknown1 data
@@ -643,7 +627,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].unknown1, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).unknown1, 1, 1, fp);
     }
 
     // go to build data
@@ -652,7 +636,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].build, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).build, 1, 1, fp);
     }
 
     // go to unknown2 data
@@ -661,7 +645,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].unknown2, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).unknown2, 1, 1, fp);
     }
 
     // go to unknown3 data
@@ -670,7 +654,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].unknown3, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).unknown3, 1, 1, fp);
     }
 
     // go to resource data
@@ -679,7 +663,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].resource, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).resource, 1, 1, fp);
     }
 
     // go to shading data
@@ -688,7 +672,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].shading, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).shading, 1, 1, fp);
     }
 
     // go to unknown5 data
@@ -697,7 +681,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->vertex[j * myMap->width + i].unknown5, 1, 1, fp);
+            freadChecked(&myMap->getVertex(i, j).unknown5, 1, 1, fp);
     }
 
     return myMap;
@@ -847,7 +831,7 @@ bool CFile::save_wld(void* data)
     {
         for(int i = 0; i < myMap->width; i++)
         {
-            temp = myMap->vertex[j * myMap->width + i].z / 5 + 0x0A;
+            temp = myMap->getVertex(i, j).z / 5 + 0x0A;
             fwrite(&temp, 1, 1, fp);
         }
     }
@@ -858,7 +842,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].rsuTexture, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).rsuTexture, 1, 1, fp);
     }
 
     // go to texture information for UpSideDown-Triangles
@@ -867,7 +851,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].usdTexture, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).usdTexture, 1, 1, fp);
     }
 
     // go to road data
@@ -876,7 +860,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].road, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).road, 1, 1, fp);
     }
 
     // go to object type data
@@ -885,7 +869,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].objectType, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).objectType, 1, 1, fp);
     }
 
     // go to object info data
@@ -894,7 +878,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].objectInfo, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).objectInfo, 1, 1, fp);
     }
 
     // go to animal data
@@ -903,7 +887,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].animal, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).animal, 1, 1, fp);
     }
 
     // go to unknown1 data
@@ -912,7 +896,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].unknown1, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).unknown1, 1, 1, fp);
     }
 
     // go to build data
@@ -921,7 +905,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].build, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).build, 1, 1, fp);
     }
 
     // go to unknown2 data
@@ -930,7 +914,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].unknown2, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).unknown2, 1, 1, fp);
     }
 
     // go to unknown3 data
@@ -939,7 +923,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].unknown3, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).unknown3, 1, 1, fp);
     }
 
     // go to resource data
@@ -948,7 +932,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].resource, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).resource, 1, 1, fp);
     }
 
     // go to shading data
@@ -957,7 +941,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].shading, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).shading, 1, 1, fp);
     }
 
     // go to unknown5 data
@@ -966,7 +950,7 @@ bool CFile::save_wld(void* data)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->vertex[j * myMap->width + i].unknown5, 1, 1, fp);
+            fwrite(&myMap->getVertex(i, j).unknown5, 1, 1, fp);
     }
 
     // at least write the map footer (ends in 0xFF)

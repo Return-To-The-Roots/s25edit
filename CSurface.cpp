@@ -2,6 +2,7 @@
 #include "CGame.h"
 #include "CMap.h"
 #include "globals.h"
+#include <algorithm>
 
 bool CSurface::drawTextures = false;
 bool CSurface::useOpenGL = false;
@@ -283,14 +284,11 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
     Uint16 width = myMap->width;
     Uint16 height = myMap->height;
     Uint8 type = myMap->type;
-    struct point* vertex = myMap->vertex;
     point tempP1, tempP2, tempP3;
 
-    int row_start;
-    int row_end;
-    int col_start;
-    int col_end;
-    bool view_outside_edges;
+    // min size to avoid underflows
+    if(width < 8 || height < 8)
+        return;
 
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
@@ -308,10 +306,11 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
             // IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
 
             // at first call DrawTriangle for all triangles inside the map edges
-            row_start = (displayRect.y > 2 * TRIANGLE_HEIGHT ? displayRect.y : 2 * TRIANGLE_HEIGHT) / TRIANGLE_HEIGHT - 2;
-            row_end = (displayRect.y + displayRect.h) / TRIANGLE_HEIGHT + 8;
-            col_start = (displayRect.x > TRIANGLE_WIDTH ? displayRect.x : TRIANGLE_WIDTH) / TRIANGLE_WIDTH - 1;
-            col_end = (displayRect.x + displayRect.w) / TRIANGLE_WIDTH + 1;
+            int row_start = std::max(displayRect.y, 2 * TRIANGLE_HEIGHT) / TRIANGLE_HEIGHT - 2;
+            int row_end = (displayRect.y + displayRect.h) / TRIANGLE_HEIGHT + 8;
+            int col_start = std::max<int>(displayRect.x, TRIANGLE_WIDTH) / TRIANGLE_WIDTH - 1;
+            int col_end = (displayRect.x + displayRect.w) / TRIANGLE_WIDTH + 1;
+            bool view_outside_edges;
 
             if(k > 0)
             {
@@ -340,7 +339,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
                         row_start = height - 3;
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.y + displayRect.h) >= (myMap->height_pixel - 8 * TRIANGLE_HEIGHT))
+                    } else if((displayRect.y + displayRect.h) >= (myMap->height_pixel - 8u * TRIANGLE_HEIGHT))
                     {
                         // this is for draw triangles that are raised over the upper map edge (have negative y-coords)
                         row_start = 0;
@@ -381,55 +380,55 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
                 {
                     // first RightSideUp
                     tempP2.x = 0;
-                    tempP2.y = vertex[(j + 1) * width + width - 1].y;
-                    tempP2.z = vertex[(j + 1) * width + width - 1].z;
-                    tempP2.i = vertex[(j + 1) * width + width - 1].i;
-                    DrawTriangle(display, displayRect, myMap, type, vertex[j * width + 0], tempP2, vertex[(j + 1) * width + 0]);
+                    tempP2.y = myMap->getVertex(width - 1, j + 1).y;
+                    tempP2.z = myMap->getVertex(width - 1, j + 1).z;
+                    tempP2.i = myMap->getVertex(width - 1, j + 1).i;
+                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(0, j), tempP2, myMap->getVertex(0, j + 1));
                     for(int i = /*1*/ (col_start > 0 ? col_start : 1); i < width && i <= col_end; i++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, vertex[j * width + i], vertex[(j + 1) * width + i - 1],
-                                     vertex[(j + 1) * width + i]);
+                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, j), myMap->getVertex(i - 1, j + 1),
+                                     myMap->getVertex(i, j + 1));
                         // UpSideDown
                         if(i < width)
-                            DrawTriangle(display, displayRect, myMap, type, vertex[(j + 1) * width + i - 1], vertex[j * width + i - 1],
-                                         vertex[j * width + i]);
+                            DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i - 1, j + 1), myMap->getVertex(i - 1, j),
+                                         myMap->getVertex(i, j));
                     }
                     // last UpSideDown
-                    tempP3.x = vertex[j * width + width - 1].x + TRIANGLE_WIDTH;
-                    tempP3.y = vertex[j * width + 0].y;
-                    tempP3.z = vertex[j * width + 0].z;
-                    tempP3.i = vertex[j * width + 0].i;
-                    DrawTriangle(display, displayRect, myMap, type, vertex[(j + 1) * width + width - 1], vertex[j * width + width - 1],
+                    tempP3.x = myMap->getVertex(width - 1, j).x + TRIANGLE_WIDTH;
+                    tempP3.y = myMap->getVertex(0, j).y;
+                    tempP3.z = myMap->getVertex(0, j).z;
+                    tempP3.i = myMap->getVertex(0, j).i;
+                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, j + 1), myMap->getVertex(width - 1, j),
                                  tempP3);
                 } else
                 {
                     for(int i = /*0*/ col_start; i < width - 1 && i <= col_end; i++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, vertex[j * width + i], vertex[(j + 1) * width + i],
-                                     vertex[(j + 1) * width + i + 1]);
+                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, j), myMap->getVertex(i, j + 1),
+                                     myMap->getVertex(i + 1, j + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, vertex[(j + 1) * width + i + 1], vertex[j * width + i],
-                                     vertex[j * width + i + 1]);
+                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i + 1, j + 1), myMap->getVertex(i, j),
+                                     myMap->getVertex(i + 1, j));
                     }
                     // last RightSideUp
-                    tempP3.x = vertex[(j + 1) * width + width - 1].x + TRIANGLE_WIDTH;
-                    tempP3.y = vertex[(j + 1) * width + 0].y;
-                    tempP3.z = vertex[(j + 1) * width + 0].z;
-                    tempP3.i = vertex[(j + 1) * width + 0].i;
-                    DrawTriangle(display, displayRect, myMap, type, vertex[j * width + width - 1], vertex[(j + 1) * width + width - 1],
+                    tempP3.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
+                    tempP3.y = myMap->getVertex(0, j + 1).y;
+                    tempP3.z = myMap->getVertex(0, j + 1).z;
+                    tempP3.i = myMap->getVertex(0, j + 1).i;
+                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, j), myMap->getVertex(width - 1, j + 1),
                                  tempP3);
                     // last UpSideDown
-                    tempP1.x = vertex[(j + 1) * width + width - 1].x + TRIANGLE_WIDTH;
-                    tempP1.y = vertex[(j + 1) * width + 0].y;
-                    tempP1.z = vertex[(j + 1) * width + 0].z;
-                    tempP1.i = vertex[(j + 1) * width + 0].i;
-                    tempP3.x = vertex[j * width + width - 1].x + TRIANGLE_WIDTH;
-                    tempP3.y = vertex[j * width + 0].y;
-                    tempP3.z = vertex[j * width + 0].z;
-                    tempP3.i = vertex[j * width + 0].i;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[j * width + width - 1], tempP3);
+                    tempP1.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
+                    tempP1.y = myMap->getVertex(0, j + 1).y;
+                    tempP1.z = myMap->getVertex(0, j + 1).z;
+                    tempP1.i = myMap->getVertex(0, j + 1).i;
+                    tempP3.x = myMap->getVertex(width - 1, j).x + TRIANGLE_WIDTH;
+                    tempP3.y = myMap->getVertex(0, j).y;
+                    tempP3.z = myMap->getVertex(0, j).z;
+                    tempP3.i = myMap->getVertex(0, j).i;
+                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, j), tempP3);
                 }
             }
 
@@ -437,45 +436,45 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
             for(int i = /*0*/ col_start; i < width - 1 && i <= col_end; i++)
             {
                 // RightSideUp
-                tempP2.x = vertex[0 * width + i].x;
-                tempP2.y = height * TRIANGLE_HEIGHT + vertex[0 * width + i].y;
-                tempP2.z = vertex[0 * width + i].z;
-                tempP2.i = vertex[0 * width + i].i;
-                tempP3.x = vertex[0 * width + i + 1].x;
-                tempP3.y = height * TRIANGLE_HEIGHT + vertex[0 * width + i + 1].y;
-                tempP3.z = vertex[0 * width + i + 1].z;
-                tempP3.i = vertex[0 * width + i + 1].i;
-                DrawTriangle(display, displayRect, myMap, type, vertex[(height - 1) * width + i], tempP2, tempP3);
+                tempP2.x = myMap->getVertex(i, 0).x;
+                tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i, 0).y;
+                tempP2.z = myMap->getVertex(i, 0).z;
+                tempP2.i = myMap->getVertex(i, 0).i;
+                tempP3.x = myMap->getVertex(i + 1, 0).x;
+                tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i + 1, 0).y;
+                tempP3.z = myMap->getVertex(i + 1, 0).z;
+                tempP3.i = myMap->getVertex(i + 1, 0).i;
+                DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(i, height - 1), tempP2, tempP3);
                 // UpSideDown
-                tempP1.x = vertex[0 * width + i + 1].x;
-                tempP1.y = height * TRIANGLE_HEIGHT + vertex[0 * width + i + 1].y;
-                tempP1.z = vertex[0 * width + i + 1].z;
-                tempP1.i = vertex[0 * width + i + 1].i;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height - 1) * width + i],
-                             vertex[(height - 1) * width + i + 1]);
+                tempP1.x = myMap->getVertex(i + 1, 0).x;
+                tempP1.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i + 1, 0).y;
+                tempP1.z = myMap->getVertex(i + 1, 0).z;
+                tempP1.i = myMap->getVertex(i + 1, 0).i;
+                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(i, height - 1),
+                             myMap->getVertex(i + 1, height - 1));
             }
         }
 
         // last RightSideUp
-        tempP2.x = vertex[0 * width + width - 1].x;
-        tempP2.y = height * TRIANGLE_HEIGHT + vertex[0 * width + width - 1].y;
-        tempP2.z = vertex[0 * width + width - 1].z;
-        tempP2.i = vertex[0 * width + width - 1].i;
-        tempP3.x = vertex[0 * width + width - 1].x + TRIANGLE_WIDTH;
-        tempP3.y = height * TRIANGLE_HEIGHT + vertex[0 * width + 0].y;
-        tempP3.z = vertex[0 * width + 0].z;
-        tempP3.i = vertex[0 * width + 0].i;
-        DrawTriangle(display, displayRect, myMap, type, vertex[(height - 1) * width + width - 1], tempP2, tempP3);
+        tempP2.x = myMap->getVertex(width - 1, 0).x;
+        tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(width - 1, 0).y;
+        tempP2.z = myMap->getVertex(width - 1, 0).z;
+        tempP2.i = myMap->getVertex(width - 1, 0).i;
+        tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
+        tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
+        tempP3.z = myMap->getVertex(0, 0).z;
+        tempP3.i = myMap->getVertex(0, 0).i;
+        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, height - 1), tempP2, tempP3);
         // last UpSideDown
-        tempP1.x = vertex[0 * width + width - 1].x + TRIANGLE_WIDTH;
-        tempP1.y = height * TRIANGLE_HEIGHT + vertex[0 * width + 0].y;
-        tempP1.z = vertex[0 * width + 0].z;
-        tempP1.i = vertex[0 * width + 0].i;
-        tempP3.x = vertex[(height - 1) * width + width - 1].x + TRIANGLE_WIDTH;
-        tempP3.y = vertex[(height - 1) * width + 0].y;
-        tempP3.z = vertex[(height - 1) * width + 0].z;
-        tempP3.i = vertex[(height - 1) * width + 0].i;
-        DrawTriangle(display, displayRect, myMap, type, tempP1, vertex[(height - 1) * width + width - 1], tempP3);
+        tempP1.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
+        tempP1.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
+        tempP1.z = myMap->getVertex(0, 0).z;
+        tempP1.i = myMap->getVertex(0, 0).i;
+        tempP3.x = myMap->getVertex(width - 1, height - 1).x + TRIANGLE_WIDTH;
+        tempP3.y = myMap->getVertex(0, height - 1).y;
+        tempP3.z = myMap->getVertex(0, height - 1).z;
+        tempP3.i = myMap->getVertex(0, height - 1).i;
+        DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, height - 1), tempP3);
     }
 }
 
@@ -989,7 +988,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
         {
             // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
             Uint16 col = (P1.VertexX - 1 < 0 ? myMap->width - 1 : P1.VertexX - 1);
-            tempP = myMap->vertex[P1.VertexY * myMap->width + col];
+            tempP = myMap->getVertex(col, P1.VertexY);
 
             // only if textures are not the same or textures are both mining or meadow
             if(!((tempP.usdTexture == P1.rsuTexture)
@@ -1272,7 +1271,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
             // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
             Uint16 row = (P2.VertexY - 1 < 0 ? myMap->height - 1 : P2.VertexY - 1);
             Uint16 col = (P2.VertexY % 2 == 0 ? P2.VertexX : (P2.VertexX + 1 > myMap->width - 1 ? 0 : P2.VertexX + 1));
-            tempP = myMap->vertex[row * myMap->width + col];
+            tempP = myMap->getVertex(col, row);
 
             // only if textures are not the same or textures are both mining or meadow
             if(!((tempP.rsuTexture == P2.usdTexture)
@@ -1675,8 +1674,7 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
     // prepare triangle field
     int height = myMap->height;
     int width = myMap->width;
-    struct point* vertex = myMap->vertex;
-    struct point /*tempP1,*/ tempP2, tempP3;
+    point /*tempP1,*/ tempP2, tempP3;
 
     // get flat vectors
     for(int j = 0; j < height - 1; j++)
@@ -1685,48 +1683,48 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
         {
             // vector of first triangle
             tempP2.x = 0;
-            tempP2.y = vertex[(j + 1) * width + width - 1].y;
-            tempP2.z = vertex[(j + 1) * width + width - 1].z;
-            vertex[j * width + 0].flatVector = get_flatVector(&vertex[j * width + 0], &tempP2, &vertex[(j + 1) * width + 0]);
+            tempP2.y = myMap->getVertex(width - 1, j + 1).y;
+            tempP2.z = myMap->getVertex(width - 1, j + 1).z;
+            myMap->getVertex(0, j).flatVector = get_flatVector(&myMap->getVertex(0, j), &tempP2, &myMap->getVertex(0, j + 1));
 
             for(int i = 1; i < width; i++)
-                vertex[j * width + i].flatVector =
-                  get_flatVector(&vertex[j * width + i], &vertex[(j + 1) * width + i - 1], &vertex[(j + 1) * width + i]);
+                myMap->getVertex(i, j).flatVector =
+                  get_flatVector(&myMap->getVertex(i, j), &myMap->getVertex(i - 1, j + 1), &myMap->getVertex(i, j + 1));
         } else
         {
             for(int i = 0; i < width - 1; i++)
-                vertex[j * width + i].flatVector =
-                  get_flatVector(&vertex[j * width + i], &vertex[(j + 1) * width + i], &vertex[(j + 1) * width + i + 1]);
+                myMap->getVertex(i, j).flatVector =
+                  get_flatVector(&myMap->getVertex(i, j), &myMap->getVertex(i, j + 1), &myMap->getVertex(i + 1, j + 1));
 
             // vector of last triangle
-            tempP3.x = vertex[(j + 1) * width + width - 1].x + TRIANGLE_WIDTH;
-            tempP3.y = vertex[(j + 1) * width + 0].y;
-            tempP3.z = vertex[(j + 1) * width + 0].z;
-            vertex[j * width + width - 1].flatVector =
-              get_flatVector(&vertex[j * width + width - 1], &vertex[(j + 1) * width + width - 1], &tempP3);
+            tempP3.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
+            tempP3.y = myMap->getVertex(0, j + 1).y;
+            tempP3.z = myMap->getVertex(0, j + 1).z;
+            myMap->getVertex(width - 1, j).flatVector =
+              get_flatVector(&myMap->getVertex(width - 1, j), &myMap->getVertex(width - 1, j + 1), &tempP3);
         }
     }
     // flat vectors of last line
     for(int i = 0; i < width - 1; i++)
     {
-        tempP2.x = vertex[0 * width + i].x;
-        tempP2.y = height * TRIANGLE_HEIGHT + vertex[0 * width + i].y;
-        tempP2.z = vertex[0 * width + i].z;
-        tempP3.x = vertex[0 * width + i + 1].x;
-        tempP3.y = height * TRIANGLE_HEIGHT + vertex[0 * width + i + 1].y;
-        tempP3.z = vertex[0 * width + i + 1].z;
-        vertex[(height - 1) * width + i].flatVector = get_flatVector(&vertex[(height - 1) * width + i], &tempP2, &tempP3);
+        tempP2.x = myMap->getVertex(i, 0).x;
+        tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i, 0).y;
+        tempP2.z = myMap->getVertex(i, 0).z;
+        tempP3.x = myMap->getVertex(i + 1, 0).x;
+        tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i + 1, 0).y;
+        tempP3.z = myMap->getVertex(i + 1, 0).z;
+        myMap->getVertex(i, height - 1).flatVector = get_flatVector(&myMap->getVertex(i, height - 1), &tempP2, &tempP3);
     }
     // vector of last Triangle
-    tempP2.x = vertex[0 * width + width - 1].x;
-    tempP2.y = height * TRIANGLE_HEIGHT + vertex[0 * width + width - 1].y;
-    tempP2.z = vertex[0 * width + width - 1].z;
-    tempP3.x = vertex[0 * width + width - 1].x + TRIANGLE_WIDTH;
-    tempP3.y = height * TRIANGLE_HEIGHT + vertex[0 * width + 0].y;
-    tempP3.z = vertex[0 * width + 0].z;
-    vertex[(height - 1) * width + width - 1].flatVector = get_flatVector(&vertex[(height - 1) * width + width - 1], &tempP2, &tempP3);
+    tempP2.x = myMap->getVertex(width - 1, 0).x;
+    tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(width - 1, 0).y;
+    tempP2.z = myMap->getVertex(width - 1, 0).z;
+    tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
+    tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
+    tempP3.z = myMap->getVertex(0, 0).z;
+    myMap->getVertex(width - 1, height - 1).flatVector = get_flatVector(&myMap->getVertex(width - 1, height - 1), &tempP2, &tempP3);
 
-    // now get the vector at each node and save it to vertex[j*width+i].normVector
+    // now get the vector at each node and save it to myMap->getVertex(j*width+i, 0).normVector
     // temporary index
     int index, index2;
     for(int j = 0; j < height; j++)
@@ -1737,13 +1735,13 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
             {
                 index = (i - 1 < 0 ? width - 1 : i - 1);
                 if(j == 0) // first line
-                    vertex[j * width + i].normVector =
-                      get_nodeVector(vertex[(height - 1) * width + index].flatVector, vertex[(height - 1) * width + i].flatVector,
-                                     vertex[j * width + i].flatVector);
+                    myMap->getVertex(i, j).normVector =
+                      get_nodeVector(myMap->getVertex(index, height - 1).flatVector, myMap->getVertex(i, height - 1).flatVector,
+                                     myMap->getVertex(i, j).flatVector);
                 else
-                    vertex[j * width + i].normVector = get_nodeVector(
-                      vertex[(j - 1) * width + index].flatVector, vertex[(j - 1) * width + i].flatVector, vertex[j * width + i].flatVector);
-                vertex[j * width + i].i = get_LightIntensity(vertex[j * width + i].normVector);
+                    myMap->getVertex(i, j).normVector = get_nodeVector(
+                      myMap->getVertex(index, j - 1).flatVector, myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
+                myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
             }
         } else
         {
@@ -1759,9 +1757,9 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
                 else
                     index2 = i + 1;
 
-                vertex[j * width + i].normVector = get_nodeVector(
-                  vertex[(j - 1) * width + i].flatVector, vertex[(j - 1) * width + index2].flatVector, vertex[j * width + i].flatVector);
-                vertex[j * width + i].i = get_LightIntensity(vertex[j * width + i].normVector);
+                myMap->getVertex(i, j).normVector = get_nodeVector(
+                  myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(index2, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
+                myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
             }
         }
     }
@@ -1809,7 +1807,7 @@ vector CSurface::get_normVector(vector v)
     return normal;
 }
 
-vector CSurface::get_flatVector(struct point* P1, struct point* P2, struct point* P3)
+vector CSurface::get_flatVector(point* P1, point* P2, point* P3)
 {
     // vector components
     float vax, vay, vaz, vbx, vby, vbz;
@@ -1894,7 +1892,7 @@ void CSurface::update_shading(bobMAP* myMap, int VertexX, int VertexY)
 void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
 {
     // point structures for the triangles, Pmiddle is the point in the middle of the hexagon we will update
-    struct point *P1, *P2, *P3, *Pmiddle;
+    point *P1, *P2, *P3, *Pmiddle;
     // vertex count for the points
     int P1x, P1y, P2x, P2y, P3x, P3y;
 
@@ -1902,7 +1900,7 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     if(VertexY % 2 == 0)
         even = true;
 
-    Pmiddle = &myMap->vertex[VertexY * myMap->width + VertexX];
+    Pmiddle = &myMap->getVertex(VertexX, VertexY);
 
     // update first triangle left upside
     P1x = VertexX - (even ? 1 : 0);
@@ -1911,12 +1909,12 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     P1y = VertexY - 1;
     if(P1y < 0)
         P1y += myMap->height;
-    P1 = &myMap->vertex[P1y * myMap->width + P1x];
+    P1 = &myMap->getVertex(P1x, P1y);
     P2x = VertexX - 1;
     if(P2x < 0)
         P2x += myMap->width;
     P2y = VertexY;
-    P2 = &myMap->vertex[P2y * myMap->width + P2x];
+    P2 = &myMap->getVertex(P2x, P2y);
     P3 = Pmiddle;
     P1->flatVector = get_flatVector(P1, P2, P3);
 
@@ -1927,13 +1925,13 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     P1y = VertexY - 1;
     if(P1y < 0)
         P1y += myMap->height;
-    P1 = &myMap->vertex[P1y * myMap->width + P1x];
+    P1 = &myMap->getVertex(P1x, P1y);
     P2 = Pmiddle;
     P3x = VertexX + 1;
     if(P3x >= myMap->width)
         P3x -= myMap->width;
     P3y = VertexY;
-    P3 = &myMap->vertex[P3y * myMap->width + P3x];
+    P3 = &myMap->getVertex(P3x, P3y);
     P1->flatVector = get_flatVector(P1, P2, P3);
 
     // update third triangle down middle
@@ -1944,14 +1942,14 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     P2y = VertexY + 1;
     if(P2y >= myMap->height)
         P2y -= myMap->height;
-    P2 = &myMap->vertex[P2y * myMap->width + P2x];
+    P2 = &myMap->getVertex(P2x, P2y);
     P3x = VertexX + (even ? 0 : 1);
     if(P3x >= myMap->width)
         P3x -= myMap->width;
     P3y = VertexY + 1;
     if(P3y >= myMap->height)
         P3y -= myMap->height;
-    P3 = &myMap->vertex[P3y * myMap->width + P3x];
+    P3 = &myMap->getVertex(P3x, P3y);
     P1->flatVector = get_flatVector(P1, P2, P3);
 }
 
@@ -1961,7 +1959,6 @@ void CSurface::update_nodeVector(bobMAP* myMap, int VertexX, int VertexY)
     int i = VertexX;
     int width = myMap->width;
     int height = myMap->height;
-    struct point* vertex = myMap->vertex;
 
     // temporary index
     int index, index2;
@@ -1970,13 +1967,13 @@ void CSurface::update_nodeVector(bobMAP* myMap, int VertexX, int VertexY)
     {
         index = (i - 1 < 0 ? width - 1 : i - 1);
         if(j == 0) // first line
-            vertex[j * width + i].normVector =
-              get_nodeVector(vertex[(height - 1) * width + index].flatVector, vertex[(height - 1) * width + i].flatVector,
-                             vertex[j * width + i].flatVector);
+            myMap->getVertex(i, j).normVector =
+              get_nodeVector(myMap->getVertex(index, height - 1).flatVector, myMap->getVertex(i, height - 1).flatVector,
+                             myMap->getVertex(i, j).flatVector);
         else
-            vertex[j * width + i].normVector = get_nodeVector(vertex[(j - 1) * width + index].flatVector,
-                                                              vertex[(j - 1) * width + i].flatVector, vertex[j * width + i].flatVector);
-        vertex[j * width + i].i = get_LightIntensity(vertex[j * width + i].normVector);
+            myMap->getVertex(i, j).normVector = get_nodeVector(myMap->getVertex(index, j - 1).flatVector,
+                                                               myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
+        myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
     } else
     {
         if(i - 1 < 0)
@@ -1989,9 +1986,9 @@ void CSurface::update_nodeVector(bobMAP* myMap, int VertexX, int VertexY)
         else
             index2 = i + 1;
 
-        vertex[j * width + i].normVector = get_nodeVector(vertex[(j - 1) * width + i].flatVector,
-                                                          vertex[(j - 1) * width + index2].flatVector, vertex[j * width + i].flatVector);
-        vertex[j * width + i].i = get_LightIntensity(vertex[j * width + i].normVector);
+        myMap->getVertex(i, j).normVector = get_nodeVector(myMap->getVertex(i, j - 1).flatVector,
+                                                           myMap->getVertex(index2, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
+        myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
     }
 }
 
