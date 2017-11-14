@@ -354,9 +354,7 @@ Sint16 sge_get_cy()
 //==================================================================================
 void sge_destroy_cmap(sge_cdata* cd)
 {
-    if(cd->map != NULL)
-        delete[] cd->map;
-
+    delete[] cd->map;
     delete cd;
 }
 

@@ -46,7 +46,7 @@ extern void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Si
 
 /* Macro to inline RGB mapping */
 #define MapRGB(format, r, g, b) \
-    (r >> format->Rloss) << format->Rshift | (g >> format->Gloss) << format->Gshift | (b >> format->Bloss) << format->Bshift
+    ((r) >> format->Rloss) << format->Rshift | ((g) >> format->Gloss) << format->Gshift | ((b) >> format->Bloss) << format->Bshift
 
 //==================================================================================
 // Draws a horisontal line, fading the colors

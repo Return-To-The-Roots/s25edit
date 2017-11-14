@@ -62,9 +62,7 @@ private:
     CFont* unknown5Text;
     CFont* editorModeText;
     // some puffers to write texts with sprintf()
-    char puffer1[100];
-    // char puffer2[100];
-    // char puffer3[100];
+    char puffer1[100]; //-V730_NOINIT
     // fontsize for debugging window (remember: only 9, 11 or 14)
     int fontsize;
     // temporary pointer to Map-Object

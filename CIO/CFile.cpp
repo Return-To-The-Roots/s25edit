@@ -545,7 +545,7 @@ bobMAP* CFile::open_wld()
     freadChecked(&myMap->width, 2, 1, fp);
     freadChecked(&myMap->height, 2, 1, fp);
 
-    if((myMap->vertex = (point*)malloc(sizeof(point) * myMap->width * myMap->height)) == NULL)
+    if((myMap->vertex = (MapNode*)malloc(sizeof(MapNode) * myMap->width * myMap->height)) == NULL)
     {
         free(myMap);
         return NULL;
@@ -560,7 +560,7 @@ bobMAP* CFile::open_wld()
         {
             Uint8 heightFactor;
             freadChecked(&heightFactor, 1, 1, fp);
-            myMap->getVertex(i, j).h = heightFactor;
+            myMap->getVertex(i, j).h = heightFactor; //-V807
         }
     }
     myMap->initVertexCoords();
@@ -829,7 +829,7 @@ bool CFile::save_wld(void* data)
     {
         for(int i = 0; i < myMap->width; i++)
         {
-            temp = myMap->getVertex(i, j).z / 5 + 0x0A;
+            temp = myMap->getVertex(i, j).z / 5 + 0x0A; //-V807
             fwrite(&temp, 1, 1, fp);
         }
     }

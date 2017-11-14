@@ -14,13 +14,13 @@
  *  License as published by the Free Software Foundation; either     *
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
-
+#define _USE_MATH_DEFINES
 #include "sge_rotation.h"
 #include "sge_blib.h"
 #include "sge_surface.h"
 #include <SDL.h>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #define SWAP(x, y, temp) \
     temp = x;            \
@@ -326,7 +326,7 @@ SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angle, floa
     SDL_Rect r;
     r.x = r.y = r.w = r.h = 0;
 
-    float theta = float(angle * PI / 180.0); /* Convert to radians.  */
+    float theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
 
     // Here we use 18.13 fixed point integer math
     // Sint32 should have 31 usable bits and one for sign
@@ -433,7 +433,7 @@ SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle, float 
     SDL_Rect r;
     r.x = r.y = r.w = r.h = 0;
 
-    float theta = float(angle * PI / 180.0); /* Convert to radians.  */
+    float theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
 
     // Here we use 18.13 fixed point integer math
     // Sint32 should have 31 usable bits and one for sign
@@ -552,7 +552,7 @@ SDL_Rect sge_transform(SDL_Surface* src, SDL_Surface* dst, float angle, float xs
 //==================================================================================
 SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, float xscale, float yscale, Uint8 flags)
 {
-    float theta = float(angle * PI / 180.0); /* Convert to radians.  */
+    float theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
 
     // Compute a bounding rectangle
     Sint16 xmin = 0, xmax = 0, ymin = 0, ymax = 0;
@@ -606,8 +606,8 @@ SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, flo
         cosv = 0;
         sinv = -1;
     } else
-    {                               // Oh well
-        rad = angle * (PI / 180.0); // Deg => rad
+    {                                 // Oh well
+        rad = angle * (M_PI / 180.0); // Deg => rad
         cosv = cos(rad);
         sinv = sin(rad);
     }

@@ -434,9 +434,9 @@ void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint
                     Uint8 sG = surface->format->palette->colors[color].g;
                     Uint8 sB = surface->format->palette->colors[color].b;
 
-                    dR = dR + ((sR - dR) * alpha >> 8);
-                    dG = dG + ((sG - dG) * alpha >> 8);
-                    dB = dB + ((sB - dB) * alpha >> 8);
+                    dR = dR + (((sR - dR) * alpha) >> 8);
+                    dG = dG + (((sG - dG) * alpha) >> 8);
+                    dB = dB + (((sB - dB) * alpha) >> 8);
 
                     *pixel = SDL_MapRGB(surface->format, dR, dG, dB);
                 }
@@ -453,11 +453,11 @@ void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint
                     Uint16* pixel = (Uint16*)surface->pixels + y * surface->pitch / 2 + x;
                     Uint32 dc = *pixel;
 
-                    R = ((dc & Rmask) + (((color & Rmask) - (dc & Rmask)) * alpha >> 8)) & Rmask;
-                    G = ((dc & Gmask) + (((color & Gmask) - (dc & Gmask)) * alpha >> 8)) & Gmask;
-                    B = ((dc & Bmask) + (((color & Bmask) - (dc & Bmask)) * alpha >> 8)) & Bmask;
+                    R = ((dc & Rmask) + ((((color & Rmask) - (dc & Rmask)) * alpha) >> 8)) & Rmask;
+                    G = ((dc & Gmask) + ((((color & Gmask) - (dc & Gmask)) * alpha) >> 8)) & Gmask;
+                    B = ((dc & Bmask) + ((((color & Bmask) - (dc & Bmask)) * alpha) >> 8)) & Bmask;
                     if(Amask)
-                        A = ((dc & Amask) + (((color & Amask) - (dc & Amask)) * alpha >> 8)) & Amask;
+                        A = ((dc & Amask) + ((((color & Amask) - (dc & Amask)) * alpha) >> 8)) & Amask;
 
                     *pixel = R | G | B | A;
                 }
@@ -495,10 +495,10 @@ void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint
                     sB = (color >> surface->format->Bshift) & 0xff;
                     sA = (color >> surface->format->Ashift) & 0xff;
 
-                    dR = dR + ((sR - dR) * alpha >> 8);
-                    dG = dG + ((sG - dG) * alpha >> 8);
-                    dB = dB + ((sB - dB) * alpha >> 8);
-                    dA = dA + ((sA - dA) * alpha >> 8);
+                    dR = dR + (((sR - dR) * alpha) >> 8);
+                    dG = dG + (((sG - dG) * alpha) >> 8);
+                    dB = dB + (((sB - dB) * alpha) >> 8);
+                    dA = dA + (((sA - dA) * alpha) >> 8);
 
                     *((pix) + rshift8) = dR;
                     *((pix) + gshift8) = dG;
@@ -518,11 +518,11 @@ void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint
                     Uint32* pixel = (Uint32*)surface->pixels + y * surface->pitch / 4 + x;
                     Uint32 dc = *pixel;
 
-                    R = ((dc & Rmask) + (((color & Rmask) - (dc & Rmask)) * alpha >> 8)) & Rmask;
-                    G = ((dc & Gmask) + (((color & Gmask) - (dc & Gmask)) * alpha >> 8)) & Gmask;
-                    B = ((dc & Bmask) + (((color & Bmask) - (dc & Bmask)) * alpha >> 8)) & Bmask;
+                    R = ((dc & Rmask) + ((((color & Rmask) - (dc & Rmask)) * alpha) >> 8)) & Rmask;
+                    G = ((dc & Gmask) + ((((color & Gmask) - (dc & Gmask)) * alpha) >> 8)) & Gmask;
+                    B = ((dc & Bmask) + ((((color & Bmask) - (dc & Bmask)) * alpha) >> 8)) & Bmask;
                     if(Amask)
-                        A = ((dc & Amask) + (((color & Amask) - (dc & Amask)) * alpha >> 8)) & Amask;
+                        A = ((dc & Amask) + ((((color & Amask) - (dc & Amask)) * alpha) >> 8)) & Amask;
 
                     *pixel = R | G | B | A;
                 }
@@ -944,6 +944,7 @@ struct seg
 
 #define MAX 1000 /* max depth of stack */
 
+//-V:PUSH:782
 #define PUSH(Y, XL, XR, DY)                                                                      \
     {                                                                                            \
         if(sp < stack + MAX && Y + (DY) >= sge_clip_ymin(dst) && Y + (DY) <= sge_clip_ymax(dst)) \
@@ -1040,6 +1041,7 @@ void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
     }
 }
 
+//-V:DO_FILL:782
 /* Macro for 8/16/32 bpp */
 #define DO_FILL(UintXX, label)                                                                                   \
     \

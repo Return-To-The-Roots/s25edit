@@ -1,6 +1,8 @@
 ﻿#ifndef _DEFINES_H
 #define _DEFINES_H
 
+#include "commonDefines.h"
+
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
 // in admin mode, there are some key combos to open debugger, resource viewer and so on
 //#define _ADMINMODE
@@ -23,7 +25,7 @@ enum
     DEBUGGER_QUIT = -4,
     // this will happen every time the user clicks anywhere on the window
     WINDOW_CLICKED_CALL = -5,
-    // this window quit message is ONLY useable to call a callback function explicit with this value
+    // this window quit message is ONLY usable to call a callback function explicit with this value
     WINDOW_QUIT_MESSAGE = -6
 };
 
@@ -84,6 +86,10 @@ struct vector
 {
     float x, y, z;
 };
+struct IntVector
+{
+    Sint32 x, y, z;
+};
 // structure for the 250 9Byte-Items from die 2250Bytes long map header
 struct MapHeaderItem
 {
@@ -93,7 +99,7 @@ struct MapHeaderItem
     Uint32 area; // number of vertices this area has
 };
 // point structure
-struct point
+struct MapNode
 {
     Uint16 VertexX; /* number of the vertex on x-axis */
     Uint16 VertexY; /* number of the vertex on y-axis */
@@ -117,6 +123,15 @@ struct point
     Uint8 resource;   /* section 12 */
     Uint8 shading;    /* section 13 */
     Uint8 unknown5;   /* section 14 */
+
+    operator IntVector() const
+    {
+        IntVector result;
+        result.x = x;
+        result.y = y;
+        result.z = z;
+        return result;
+    }
 };
 // structure for display, cause SDL_Rect's datatypes are too small
 struct DisplayRectangle
@@ -124,10 +139,13 @@ struct DisplayRectangle
     Sint32 x, y;
     Sint32 w, h;
 };
-struct Point16
+template<typename T>
+struct Point
 {
-    Sint16 x, y;
+    T x, y;
 };
+typedef Point<Sint16> Point16;
+typedef Point<Sint32> Point32;
 // map strutcture
 struct bobMAP
 {
@@ -146,8 +164,8 @@ struct bobMAP
     char author[20];
     // 250 items from the big map header
     MapHeaderItem header[250];
-    point* vertex;
-    point& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
+    MapNode* vertex;
+    MapNode& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
     // Initializes or updates the vertex indices and coordinates
     void initVertexCoords();
     /// Updates x,y,z positions (e.g. after height change)
@@ -158,10 +176,8 @@ struct bobMAP
 #define MAP_WASTELAND 0x01
 #define MAP_WINTERLAND 0x02
 // structure to save vertex coordinates
-struct cursorPoint
+struct cursorPoint : public Point32
 {
-    int x;
-    int y;
     int blit_x;
     int blit_y;
     bool active;

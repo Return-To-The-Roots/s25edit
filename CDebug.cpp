@@ -113,7 +113,7 @@ void CDebug::actualizeData()
     FrameCounterText = dbgWnd->addText(puffer1, 0, 10, fontsize);
 
     // Frames per Second
-    static float tmpFrameCtr = 0, tmpTickCtr = (float)SDL_GetTicks();
+    static Uint32 tmpFrameCtr = 0, tmpTickCtr = SDL_GetTicks();
     if(tmpFrameCtr == 10)
     {
         // del FramesPerSecText before drawing new
@@ -124,7 +124,7 @@ void CDebug::actualizeData()
         FramesPerSecText = dbgWnd->addText(puffer1, 0, 20, fontsize);
         // set new values
         tmpFrameCtr = 0;
-        tmpTickCtr = (float)SDL_GetTicks();
+        tmpTickCtr = SDL_GetTicks();
     } else
         tmpFrameCtr++;
 
@@ -171,6 +171,7 @@ void CDebug::actualizeData()
     if(MapObj != NULL)
     {
         map = MapObj->map;
+        const MapNode& vertex = map->getVertex(MapObj->VertexX_, MapObj->VertexY_);
 
         if(MapNameText != NULL)
         {
@@ -242,10 +243,8 @@ void CDebug::actualizeData()
         }
         if(VertexDataText == NULL)
         {
-            sprintf(puffer1, "Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).x,
-                    map->getVertex(MapObj->VertexX_, MapObj->VertexY_).y, map->getVertex(MapObj->VertexX_, MapObj->VertexY_).z,
-                    ((float)map->getVertex(MapObj->VertexX_, MapObj->VertexY_).i) / pow(2, 16),
-                    map->getVertex(MapObj->VertexX_, MapObj->VertexY_).h);
+            sprintf(puffer1, "Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y, vertex.z, ((float)vertex.i) / pow(2, 16),
+                    vertex.h);
             VertexDataText = dbgWnd->addText(puffer1, 260, 70, fontsize);
         }
         if(VertexVectorText != NULL)
@@ -255,9 +254,7 @@ void CDebug::actualizeData()
         }
         if(VertexVectorText == NULL)
         {
-            sprintf(puffer1, "Vertex Vector: (%.2f, %.2f, %.2f)", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).normVector.x,
-                    map->getVertex(MapObj->VertexX_, MapObj->VertexY_).normVector.y,
-                    map->getVertex(MapObj->VertexX_, MapObj->VertexY_).normVector.z);
+            sprintf(puffer1, "Vertex Vector: (%.2f, %.2f, %.2f)", vertex.normVector.x, vertex.normVector.y, vertex.normVector.z);
             VertexVectorText = dbgWnd->addText(puffer1, 260, 80, fontsize);
         }
         if(FlatVectorText != NULL)
@@ -267,9 +264,7 @@ void CDebug::actualizeData()
         }
         if(FlatVectorText == NULL)
         {
-            sprintf(puffer1, "Flat Vector: (%.2f, %.2f, %.2f)", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).flatVector.x,
-                    map->getVertex(MapObj->VertexX_, MapObj->VertexY_).flatVector.y,
-                    map->getVertex(MapObj->VertexX_, MapObj->VertexY_).flatVector.z);
+            sprintf(puffer1, "Flat Vector: (%.2f, %.2f, %.2f)", vertex.flatVector.x, vertex.flatVector.y, vertex.flatVector.z);
             FlatVectorText = dbgWnd->addText(puffer1, 260, 90, fontsize);
         }
         if(rsuTextureText != NULL)
@@ -279,7 +274,7 @@ void CDebug::actualizeData()
         }
         if(rsuTextureText == NULL)
         {
-            sprintf(puffer1, "RSU-Texture: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).rsuTexture);
+            sprintf(puffer1, "RSU-Texture: %#04x", vertex.rsuTexture);
             rsuTextureText = dbgWnd->addText(puffer1, 260, 100, fontsize);
         }
         if(usdTextureText != NULL)
@@ -289,7 +284,7 @@ void CDebug::actualizeData()
         }
         if(usdTextureText == NULL)
         {
-            sprintf(puffer1, "USD-Texture: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).usdTexture);
+            sprintf(puffer1, "USD-Texture: %#04x", vertex.usdTexture);
             usdTextureText = dbgWnd->addText(puffer1, 260, 110, fontsize);
         }
         if(roadText != NULL)
@@ -299,7 +294,7 @@ void CDebug::actualizeData()
         }
         if(roadText == NULL)
         {
-            sprintf(puffer1, "road: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).road);
+            sprintf(puffer1, "road: %#04x", vertex.road);
             roadText = dbgWnd->addText(puffer1, 260, 120, fontsize);
         }
         if(objectTypeText != NULL)
@@ -309,7 +304,7 @@ void CDebug::actualizeData()
         }
         if(objectTypeText == NULL)
         {
-            sprintf(puffer1, "objectType: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).objectType);
+            sprintf(puffer1, "objectType: %#04x", vertex.objectType);
             objectTypeText = dbgWnd->addText(puffer1, 260, 130, fontsize);
         }
         if(objectInfoText != NULL)
@@ -319,7 +314,7 @@ void CDebug::actualizeData()
         }
         if(objectInfoText == NULL)
         {
-            sprintf(puffer1, "objectInfo: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).objectInfo);
+            sprintf(puffer1, "objectInfo: %#04x", vertex.objectInfo);
             objectInfoText = dbgWnd->addText(puffer1, 260, 140, fontsize);
         }
         if(animalText != NULL)
@@ -329,7 +324,7 @@ void CDebug::actualizeData()
         }
         if(animalText == NULL)
         {
-            sprintf(puffer1, "animal: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).animal);
+            sprintf(puffer1, "animal: %#04x", vertex.animal);
             animalText = dbgWnd->addText(puffer1, 260, 150, fontsize);
         }
         if(unknown1Text != NULL)
@@ -339,7 +334,7 @@ void CDebug::actualizeData()
         }
         if(unknown1Text == NULL)
         {
-            sprintf(puffer1, "unknown1: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).unknown1);
+            sprintf(puffer1, "unknown1: %#04x", vertex.unknown1);
             unknown1Text = dbgWnd->addText(puffer1, 260, 160, fontsize);
         }
         if(buildText != NULL)
@@ -349,7 +344,7 @@ void CDebug::actualizeData()
         }
         if(buildText == NULL)
         {
-            sprintf(puffer1, "build: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).build);
+            sprintf(puffer1, "build: %#04x", vertex.build);
             buildText = dbgWnd->addText(puffer1, 260, 170, fontsize);
         }
         if(unknown2Text != NULL)
@@ -359,7 +354,7 @@ void CDebug::actualizeData()
         }
         if(unknown2Text == NULL)
         {
-            sprintf(puffer1, "unknown2: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).unknown2);
+            sprintf(puffer1, "unknown2: %#04x", vertex.unknown2);
             unknown2Text = dbgWnd->addText(puffer1, 260, 180, fontsize);
         }
         if(unknown3Text != NULL)
@@ -369,7 +364,7 @@ void CDebug::actualizeData()
         }
         if(unknown3Text == NULL)
         {
-            sprintf(puffer1, "unknown3: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).unknown3);
+            sprintf(puffer1, "unknown3: %#04x", vertex.unknown3);
             unknown3Text = dbgWnd->addText(puffer1, 260, 190, fontsize);
         }
         if(resourceText != NULL)
@@ -379,7 +374,7 @@ void CDebug::actualizeData()
         }
         if(resourceText == NULL)
         {
-            sprintf(puffer1, "resource: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).resource);
+            sprintf(puffer1, "resource: %#04x", vertex.resource);
             resourceText = dbgWnd->addText(puffer1, 260, 200, fontsize);
         }
         if(shadingText != NULL)
@@ -389,7 +384,7 @@ void CDebug::actualizeData()
         }
         if(shadingText == NULL)
         {
-            sprintf(puffer1, "shading: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).shading);
+            sprintf(puffer1, "shading: %#04x", vertex.shading);
             shadingText = dbgWnd->addText(puffer1, 260, 210, fontsize);
         }
         if(unknown5Text != NULL)
@@ -399,7 +394,7 @@ void CDebug::actualizeData()
         }
         if(unknown5Text == NULL)
         {
-            sprintf(puffer1, "unknown5: %#04x", map->getVertex(MapObj->VertexX_, MapObj->VertexY_).unknown5);
+            sprintf(puffer1, "unknown5: %#04x", vertex.unknown5);
             unknown5Text = dbgWnd->addText(puffer1, 260, 220, fontsize);
         }
         if(editorModeText != NULL)

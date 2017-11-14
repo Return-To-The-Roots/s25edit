@@ -280,12 +280,12 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
     }
 }
 
-void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap)
+void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap)
 {
     Uint16 width = myMap->width;
     Uint16 height = myMap->height;
     Uint8 type = myMap->type;
-    point tempP1, tempP2, tempP3;
+    MapNode tempP1, tempP2, tempP3;
 
     // min size to avoid underflows
     if(width < 8 || height < 8)
@@ -449,7 +449,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
 
         // last RightSideUp
         tempP2 = myMap->getVertex(width - 1, 0);
-        tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(width - 1, 0).y;
+        tempP2.y += height * TRIANGLE_HEIGHT;
         tempP3 = myMap->getVertex(0, 0);
         tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
         tempP3.y += height * TRIANGLE_HEIGHT;
@@ -464,7 +464,8 @@ void CSurface::DrawTriangleField(SDL_Surface* display, DisplayRectangle displayR
     }
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, point P1, point P2, point P3)
+void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, MapNode P1, MapNode P2,
+                            MapNode P3)
 {
     // prevent drawing triangles that are not shown
     if(((P1.x < displayRect.x && P2.x < displayRect.x && P3.x < displayRect.x)
@@ -969,7 +970,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
         // we have to decide which border to blit, "left or right" or "top or bottom", therefore we are using two bool variables, the first
         // is left/top, the second is right/bottom
         bool Border1, Border2;
-        point tempP;
+        MapNode tempP;
         // RSU-Triangle
         if(P1.y < P2.y)
         {
@@ -1658,7 +1659,7 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
     // prepare triangle field
     int height = myMap->height;
     int width = myMap->width;
-    point /*tempP1,*/ tempP2, tempP3;
+    IntVector tempP2, tempP3;
 
     // get flat vectors
     for(int j = 0; j < height - 1; j++)
@@ -1669,81 +1670,69 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
             tempP2.x = 0;
             tempP2.y = myMap->getVertex(width - 1, j + 1).y;
             tempP2.z = myMap->getVertex(width - 1, j + 1).z;
-            myMap->getVertex(0, j).flatVector = get_flatVector(&myMap->getVertex(0, j), &tempP2, &myMap->getVertex(0, j + 1));
+            myMap->getVertex(0, j).flatVector = get_flatVector(myMap->getVertex(0, j), tempP2, myMap->getVertex(0, j + 1));
 
             for(int i = 1; i < width; i++)
                 myMap->getVertex(i, j).flatVector =
-                  get_flatVector(&myMap->getVertex(i, j), &myMap->getVertex(i - 1, j + 1), &myMap->getVertex(i, j + 1));
+                  get_flatVector(myMap->getVertex(i, j), myMap->getVertex(i - 1, j + 1), myMap->getVertex(i, j + 1));
         } else
         {
             for(int i = 0; i < width - 1; i++)
                 myMap->getVertex(i, j).flatVector =
-                  get_flatVector(&myMap->getVertex(i, j), &myMap->getVertex(i, j + 1), &myMap->getVertex(i + 1, j + 1));
+                  get_flatVector(myMap->getVertex(i, j), myMap->getVertex(i, j + 1), myMap->getVertex(i + 1, j + 1));
 
             // vector of last triangle
             tempP3.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
             tempP3.y = myMap->getVertex(0, j + 1).y;
             tempP3.z = myMap->getVertex(0, j + 1).z;
             myMap->getVertex(width - 1, j).flatVector =
-              get_flatVector(&myMap->getVertex(width - 1, j), &myMap->getVertex(width - 1, j + 1), &tempP3);
+              get_flatVector(myMap->getVertex(width - 1, j), myMap->getVertex(width - 1, j + 1), tempP3);
         }
     }
     // flat vectors of last line
     for(int i = 0; i < width - 1; i++)
     {
-        tempP2.x = myMap->getVertex(i, 0).x;
-        tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i, 0).y;
-        tempP2.z = myMap->getVertex(i, 0).z;
-        tempP3.x = myMap->getVertex(i + 1, 0).x;
-        tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(i + 1, 0).y;
-        tempP3.z = myMap->getVertex(i + 1, 0).z;
-        myMap->getVertex(i, height - 1).flatVector = get_flatVector(&myMap->getVertex(i, height - 1), &tempP2, &tempP3);
+        tempP2 = myMap->getVertex(i, 0);
+        tempP2.y += height * TRIANGLE_HEIGHT;
+        tempP3 = myMap->getVertex(i + 1, 0);
+        tempP3.y += height * TRIANGLE_HEIGHT;
+        myMap->getVertex(i, height - 1).flatVector = get_flatVector(myMap->getVertex(i, height - 1), tempP2, tempP3);
     }
     // vector of last Triangle
-    tempP2.x = myMap->getVertex(width - 1, 0).x;
-    tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(width - 1, 0).y;
-    tempP2.z = myMap->getVertex(width - 1, 0).z;
+    tempP2 = myMap->getVertex(width - 1, 0);
+    tempP2.y += height * TRIANGLE_HEIGHT;
     tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
     tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
     tempP3.z = myMap->getVertex(0, 0).z;
-    myMap->getVertex(width - 1, height - 1).flatVector = get_flatVector(&myMap->getVertex(width - 1, height - 1), &tempP2, &tempP3);
+    myMap->getVertex(width - 1, height - 1).flatVector = get_flatVector(myMap->getVertex(width - 1, height - 1), tempP2, tempP3);
 
     // now get the vector at each node and save it to myMap->getVertex(j*width+i, 0).normVector
-    // temporary index
-    int index, index2;
     for(int j = 0; j < height; j++)
     {
         if(j % 2 == 0)
         {
             for(int i = 0; i < width; i++)
             {
-                index = (i - 1 < 0 ? width - 1 : i - 1);
+                MapNode& curVertex = myMap->getVertex(i, j);
+                int iM1 = (i == 0 ? width - 1 : i - 1);
                 if(j == 0) // first line
-                    myMap->getVertex(i, j).normVector =
-                      get_nodeVector(myMap->getVertex(index, height - 1).flatVector, myMap->getVertex(i, height - 1).flatVector,
-                                     myMap->getVertex(i, j).flatVector);
+                    curVertex.normVector = get_nodeVector(myMap->getVertex(iM1, height - 1).flatVector,
+                                                          myMap->getVertex(i, height - 1).flatVector, curVertex.flatVector);
                 else
-                    myMap->getVertex(i, j).normVector = get_nodeVector(
-                      myMap->getVertex(index, j - 1).flatVector, myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
-                myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
+                    curVertex.normVector =
+                      get_nodeVector(myMap->getVertex(iM1, j - 1).flatVector, myMap->getVertex(i, j - 1).flatVector, curVertex.flatVector);
+                curVertex.i = get_LightIntensity(curVertex.normVector);
             }
         } else
         {
             for(int i = 0; i < width; i++)
             {
-                if(i - 1 < 0)
-                    index = width - 1;
-                else
-                    index = i - 1;
+                MapNode& curVertex = myMap->getVertex(i, j);
+                int iP1 = (i + 1 == width ? 0 : i + 1);
 
-                if(i + 1 >= width)
-                    index2 = 0;
-                else
-                    index2 = i + 1;
-
-                myMap->getVertex(i, j).normVector = get_nodeVector(
-                  myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(index2, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
-                myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
+                curVertex.normVector =
+                  get_nodeVector(myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
+                curVertex.i = get_LightIntensity(curVertex.normVector);
             }
         }
     }
@@ -1775,7 +1764,7 @@ vector CSurface::get_normVector(const vector& v)
     vector normal;
     float length = static_cast<float>(sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2)));
     // in case vector length equals 0 (should not happen)
-    if(length == 0)
+    if(std::abs(length) < 1e-20f)
     {
         normal.x = 0;
         normal.y = 0;
@@ -1791,19 +1780,19 @@ vector CSurface::get_normVector(const vector& v)
     return normal;
 }
 
-vector CSurface::get_flatVector(point* P1, point* P2, point* P3)
+vector CSurface::get_flatVector(const IntVector& P1, const IntVector& P2, const IntVector& P3)
 {
     // vector components
     float vax, vay, vaz, vbx, vby, vbz;
     // cross product
     vector cross;
 
-    vax = static_cast<float>(P1->x - P2->x);
-    vay = static_cast<float>(P1->y - P2->y);
-    vaz = static_cast<float>(P1->z - P2->z);
-    vbx = static_cast<float>(P3->x - P2->x);
-    vby = static_cast<float>(P3->y - P2->y);
-    vbz = static_cast<float>(P3->z - P2->z);
+    vax = static_cast<float>(P1.x - P2.x);
+    vay = static_cast<float>(P1.y - P2.y);
+    vaz = static_cast<float>(P1.z - P2.z);
+    vbx = static_cast<float>(P3.x - P2.x);
+    vby = static_cast<float>(P3.y - P2.y);
+    vbz = static_cast<float>(P3.z - P2.z);
 
     cross.x = (vay * vbz - vaz * vby);
     cross.y = (vaz * vbx - vax * vbz);
@@ -1876,7 +1865,7 @@ void CSurface::update_shading(bobMAP* myMap, int VertexX, int VertexY)
 void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
 {
     // point structures for the triangles, Pmiddle is the point in the middle of the hexagon we will update
-    point *P1, *P2, *P3, *Pmiddle;
+    MapNode *P1, *P2, *P3, *Pmiddle;
     // vertex count for the points
     int P1x, P1y, P2x, P2y, P3x, P3y;
 
@@ -1900,7 +1889,7 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     P2y = VertexY;
     P2 = &myMap->getVertex(P2x, P2y);
     P3 = Pmiddle;
-    P1->flatVector = get_flatVector(P1, P2, P3);
+    P1->flatVector = get_flatVector(*P1, *P2, *P3);
 
     // update second triangle right upside
     P1x = VertexX + (even ? 0 : 1);
@@ -1916,7 +1905,7 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
         P3x -= myMap->width;
     P3y = VertexY;
     P3 = &myMap->getVertex(P3x, P3y);
-    P1->flatVector = get_flatVector(P1, P2, P3);
+    P1->flatVector = get_flatVector(*P1, *P2, *P3);
 
     // update third triangle down middle
     P1 = Pmiddle;
@@ -1934,7 +1923,7 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     if(P3y >= myMap->height)
         P3y -= myMap->height;
     P3 = &myMap->getVertex(P3x, P3y);
-    P1->flatVector = get_flatVector(P1, P2, P3);
+    P1->flatVector = get_flatVector(*P1, *P2, *P3);
 }
 
 void CSurface::update_nodeVector(bobMAP* myMap, int VertexX, int VertexY)
@@ -1944,35 +1933,25 @@ void CSurface::update_nodeVector(bobMAP* myMap, int VertexX, int VertexY)
     int width = myMap->width;
     int height = myMap->height;
 
-    // temporary index
-    int index, index2;
-
     if(j % 2 == 0)
     {
-        index = (i - 1 < 0 ? width - 1 : i - 1);
+        MapNode& curVertex = myMap->getVertex(i, j);
+        int iM1 = (i == 0 ? width - 1 : i - 1);
         if(j == 0) // first line
-            myMap->getVertex(i, j).normVector =
-              get_nodeVector(myMap->getVertex(index, height - 1).flatVector, myMap->getVertex(i, height - 1).flatVector,
-                             myMap->getVertex(i, j).flatVector);
+            curVertex.normVector = get_nodeVector(myMap->getVertex(iM1, height - 1).flatVector, myMap->getVertex(i, height - 1).flatVector,
+                                                  curVertex.flatVector);
         else
-            myMap->getVertex(i, j).normVector = get_nodeVector(myMap->getVertex(index, j - 1).flatVector,
-                                                               myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
-        myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
+            curVertex.normVector =
+              get_nodeVector(myMap->getVertex(iM1, j - 1).flatVector, myMap->getVertex(i, j - 1).flatVector, curVertex.flatVector);
+        curVertex.i = get_LightIntensity(curVertex.normVector);
     } else
     {
-        if(i - 1 < 0)
-            index = width - 1;
-        else
-            index = i - 1;
+        MapNode& curVertex = myMap->getVertex(i, j);
+        int iP1 = (i + 1 == width ? 0 : i + 1);
 
-        if(i + 1 >= width)
-            index2 = 0;
-        else
-            index2 = i + 1;
-
-        myMap->getVertex(i, j).normVector = get_nodeVector(myMap->getVertex(i, j - 1).flatVector,
-                                                           myMap->getVertex(index2, j - 1).flatVector, myMap->getVertex(i, j).flatVector);
-        myMap->getVertex(i, j).i = get_LightIntensity(myMap->getVertex(i, j).normVector);
+        curVertex.normVector =
+          get_nodeVector(myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
+        curVertex.i = get_LightIntensity(curVertex.normVector);
     }
 }
 

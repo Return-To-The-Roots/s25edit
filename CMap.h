@@ -2,6 +2,7 @@
 #define _CMAP_H
 
 #include "includes.h"
+#include <boost/array.hpp>
 #include <string>
 
 class CMap
@@ -39,7 +40,7 @@ private:
         //+ 10 because if we raise a vertex then the other vertices will be raised too after 5 times
         // this ranges up to 10 vertices
         //+ 2 because modifications on a vertex will touch building and shading around
-        point PointsArroundVertex[((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1)];
+        MapNode PointsArroundVertex[((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1)];
         struct savedVertices* prev;
         struct savedVertices* next;
     } * CurrPtr_savedVertices;
@@ -170,7 +171,8 @@ private:
     //      X=12    X=3     X=0     X=4     X=13
     //          X=14    X=5     X=6     X=15
     //              X=16    X=17    X=18
-    void calculateVerticesAround(cursorPoint Vertices[], int VertexX, int VertexY, int ChangeSection);
+    template<size_t T_size>
+    void calculateVerticesAround(boost::array<Point32, T_size>& Vertices, int VertexX, int VertexY);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
     int correctMouseBlitX(int VertexX, int VertexY);

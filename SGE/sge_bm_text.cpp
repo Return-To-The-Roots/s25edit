@@ -73,6 +73,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
             {
                 SDL_SetError("SGE - Out of memory");
                 SDL_FreeSurface(font->FontSurface);
+                delete font;
                 return NULL;
             }
 
@@ -91,6 +92,8 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
                 {
                     SDL_SetError("SGE - Locking error");
                     SDL_FreeSurface(font->FontSurface);
+                    SDL_FreeSurface(tmp);
+                    delete font;
                     return NULL;
                 }
 
@@ -128,6 +131,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     if(font->FontSurface == NULL)
     {
         SDL_SetError("SGE - Out of memory");
+        delete font;
         return NULL;
     }
 
@@ -352,9 +356,7 @@ void sge_BF_CloseFont(sge_bmpFont* font)
     {
         SDL_FreeSurface(font->FontSurface);
 
-        if(font->CharPos)
-            delete[] font->CharPos;
-
+        delete[] font->CharPos;
         delete font;
         font = NULL;
     }

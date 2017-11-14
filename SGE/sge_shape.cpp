@@ -136,7 +136,7 @@ void sge_screen::update()
     SI i;
 
     // Draw shapes in list
-    for(i = shapes.begin(); i != shapes.end(); i++)
+    for(i = shapes.begin(); i != shapes.end(); ++i)
     {
         (*i)->draw();
         (*i)->UpdateRects(); // Adds rectangles with add_rect() automaticly
@@ -144,7 +144,7 @@ void sge_screen::update()
     shapes.clear();
 
     // Draw permanent shapes in list
-    for(i = shapes_p.begin(); i != shapes_p.end(); i++)
+    for(i = shapes_p.begin(); i != shapes_p.end(); ++i)
     {
         (*i)->draw();
         (*i)->UpdateRects(); // Adds rectangles with add_rect() automaticly
@@ -517,7 +517,7 @@ sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata
 sge_ssprite::~sge_ssprite()
 {
     // Empty the list
-    for(FI i = frames.begin(); i != frames.end(); i++)
+    for(FI i = frames.begin(); i != frames.end(); ++i)
         delete *i;
 
     frames.clear();
@@ -582,7 +582,7 @@ void sge_ssprite::skip_frame(int skips)
     {
         for(int i = 0; i < skips; i++)
         {
-            current_fi++;
+            ++current_fi;
             if(current_fi == fi_stop)
             {
                 if(seq_mode != play_once)
@@ -590,7 +590,7 @@ void sge_ssprite::skip_frame(int skips)
                 else
                 { // stop
                     seq_mode = stop;
-                    current_fi--; // current_fi = fi_stop -1
+                    --current_fi; // current_fi = fi_stop -1
                     fi_start = current_fi;
                 }
             }
@@ -606,11 +606,11 @@ void sge_ssprite::skip_frame(int skips)
                 else
                 { // stop
                     seq_mode = stop;
-                    current_fi++; //+1
+                    ++current_fi; //+1
                     fi_stop = current_fi;
                 }
             }
-            current_fi--;
+            --current_fi;
         }
     } else
         return;
@@ -646,14 +646,14 @@ void sge_ssprite::set_seq(int start, int stop, playing_mode mode)
     for(int i = 0; i <= stop; i++)
     {
         if(i < start)
-            fi_start++;
+            ++fi_start;
 
-        fi_stop++;
+        ++fi_stop;
 
         if(fi_stop == frames.end())
         {
             if(fi_start == frames.end())
-                fi_start--;
+                --fi_start;
             break;
         }
     }
@@ -697,7 +697,7 @@ void sge_ssprite::first_frame()
 void sge_ssprite::last_frame()
 {
     current_fi = fi_stop;
-    current_fi--;
+    --current_fi;
 
     current_frame = *current_fi;
     surface = current_frame->img;

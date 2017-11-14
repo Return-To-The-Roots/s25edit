@@ -37,13 +37,6 @@
 #endif
 
 /*
- *  This is traditional
- */
-#ifndef PI
-#define PI 3.1414926535
-#endif
-
-/*
  *  Bit flags
  */
 #define SGE_FLAG0 0x00

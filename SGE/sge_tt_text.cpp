@@ -98,8 +98,8 @@ struct _sge_TTFont
 #define NUM_GRAYS 256
 
 /* Handy routines for converting from fixed point */
-#define FT_FLOOR(X) ((X & -64) / 64)
-#define FT_CEIL(X) (((X + 63) & -64) / 64)
+#define FT_FLOOR(X) (((X) & -64) / 64)
+#define FT_CEIL(X) ((((X) + 63) & -64) / 64)
 
 #define CACHED_METRICS 0x10
 #define CACHED_BITMAP 0x01

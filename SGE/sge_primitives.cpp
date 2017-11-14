@@ -315,9 +315,9 @@ void sge_DoLine(SDL_Surface* Surface, Sint16 X1, Sint16 Y1, Sint16 X2, Sint16 Y2
 #define CLIP_RIGHT_EDGE 0x2
 #define CLIP_BOTTOM_EDGE 0x4
 #define CLIP_TOP_EDGE 0x8
-#define CLIP_INSIDE(a) (!a)
-#define CLIP_REJECT(a, b) (a & b)
-#define CLIP_ACCEPT(a, b) (!(a | b))
+#define CLIP_INSIDE(a) (!(a))
+#define CLIP_REJECT(a, b) ((a) & (b))
+#define CLIP_ACCEPT(a, b) (!((a) | (b)))
 
 int clipEncode(Sint16 x, Sint16 y, Sint16 left, Sint16 top, Sint16 right, Sint16 bottom)
 {
@@ -1275,9 +1275,9 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
                     dG = surface->format->palette->colors[*pixel].g;
                     dB = surface->format->palette->colors[*pixel].b;
 
-                    dR = dR + ((sR - dR) * alpha >> 8);
-                    dG = dG + ((sG - dG) * alpha >> 8);
-                    dB = dB + ((sB - dB) * alpha >> 8);
+                    dR = dR + (((sR - dR) * alpha) >> 8);
+                    dG = dG + (((sG - dG) * alpha) >> 8);
+                    dB = dB + (((sB - dB) * alpha) >> 8);
 
                     *pixel = SDL_MapRGB(surface->format, dR, dG, dB);
                 }
@@ -1297,11 +1297,11 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
                 {
                     pixel = row + x;
 
-                    R = ((*pixel & Rmask) + ((dR - (*pixel & Rmask)) * alpha >> 8)) & Rmask;
-                    G = ((*pixel & Gmask) + ((dG - (*pixel & Gmask)) * alpha >> 8)) & Gmask;
-                    B = ((*pixel & Bmask) + ((dB - (*pixel & Bmask)) * alpha >> 8)) & Bmask;
+                    R = ((*pixel & Rmask) + (((dR - (*pixel & Rmask)) * alpha) >> 8)) & Rmask;
+                    G = ((*pixel & Gmask) + (((dG - (*pixel & Gmask)) * alpha) >> 8)) & Gmask;
+                    B = ((*pixel & Bmask) + (((dB - (*pixel & Bmask)) * alpha) >> 8)) & Bmask;
                     if(Amask)
-                        A = ((*pixel & Amask) + ((dA - (*pixel & Amask)) * alpha >> 8)) & Amask;
+                        A = ((*pixel & Amask) + (((dA - (*pixel & Amask)) * alpha) >> 8)) & Amask;
 
                     *pixel = R | G | B | A;
                 }
@@ -1335,10 +1335,10 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
                     dB = *((pix) + bshift8);
                     dA = *((pix) + ashift8);
 
-                    dR = dR + ((sR - dR) * alpha >> 8);
-                    dG = dG + ((sG - dG) * alpha >> 8);
-                    dB = dB + ((sB - dB) * alpha >> 8);
-                    dA = dA + ((sA - dA) * alpha >> 8);
+                    dR = dR + (((sR - dR) * alpha) >> 8);
+                    dG = dG + (((sG - dG) * alpha) >> 8);
+                    dB = dB + (((sB - dB) * alpha) >> 8);
+                    dA = dA + (((sA - dA) * alpha) >> 8);
 
                     *((pix) + rshift8) = dR;
                     *((pix) + gshift8) = dG;
@@ -1361,11 +1361,11 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
                 {
                     pixel = row + x;
 
-                    R = ((*pixel & Rmask) + ((dR - (*pixel & Rmask)) * alpha >> 8)) & Rmask;
-                    G = ((*pixel & Gmask) + ((dG - (*pixel & Gmask)) * alpha >> 8)) & Gmask;
-                    B = ((*pixel & Bmask) + ((dB - (*pixel & Bmask)) * alpha >> 8)) & Bmask;
+                    R = ((*pixel & Rmask) + (((dR - (*pixel & Rmask)) * alpha) >> 8)) & Rmask;
+                    G = ((*pixel & Gmask) + (((dG - (*pixel & Gmask)) * alpha) >> 8)) & Gmask;
+                    B = ((*pixel & Bmask) + (((dB - (*pixel & Bmask)) * alpha) >> 8)) & Bmask;
                     if(Amask)
-                        A = ((*pixel & Amask) + ((dA - (*pixel & Amask)) * alpha >> 8)) & Amask;
+                        A = ((*pixel & Amask) + (((dA - (*pixel & Amask)) * alpha) >> 8)) & Amask;
 
                     *pixel = R | G | B | A;
                 }

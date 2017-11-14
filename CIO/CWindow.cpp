@@ -71,30 +71,15 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
 CWindow::~CWindow()
 {
     for(int i = 0; i < MAXBUTTONS; i++)
-    {
-        if(buttons[i] != NULL)
-            delete buttons[i];
-    }
+        delete buttons[i];
     for(int i = 0; i < MAXTEXTS; i++)
-    {
-        if(texts[i] != NULL)
-            delete texts[i];
-    }
+        delete texts[i];
     for(int i = 0; i < MAXPICTURES; i++)
-    {
-        if(pictures[i] != NULL)
-            delete pictures[i];
-    }
+        delete pictures[i];
     for(int i = 0; i < MAXTEXTFIELDS; i++)
-    {
-        if(textfields[i] != NULL)
-            delete textfields[i];
-    }
+        delete textfields[i];
     for(int i = 0; i < MAXSELECTBOXES; i++)
-    {
-        if(selectboxes[i] != NULL)
-            delete selectboxes[i];
-    }
+        delete selectboxes[i];
     SDL_FreeSurface(Surf_Window);
 }
 
@@ -141,7 +126,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
         // make sure to not move the window outside the display surface
         if(x_ < 0)
             x_ = 0;
-        if(x_ + w_ >= global::s2->getDisplaySurface()->w)
+        if(x_ + w_ >= global::s2->getDisplaySurface()->w) //-V807
             x_ = global::s2->getDisplaySurface()->w - w_ - 1;
         if(y_ < 0)
             y_ = 0;

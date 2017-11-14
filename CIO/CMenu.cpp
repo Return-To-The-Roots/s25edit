@@ -39,30 +39,15 @@ CMenu::CMenu(int pic_background)
 CMenu::~CMenu()
 {
     for(int i = 0; i < MAXBUTTONS; i++)
-    {
-        if(buttons[i] != NULL)
-            delete buttons[i];
-    }
+        delete buttons[i];
     for(int i = 0; i < MAXTEXTS; i++)
-    {
-        if(texts[i] != NULL)
-            delete texts[i];
-    }
+        delete texts[i];
     for(int i = 0; i < MAXPICTURES; i++)
-    {
-        if(pictures[i] != NULL)
-            delete pictures[i];
-    }
+        delete pictures[i];
     for(int i = 0; i < MAXTEXTFIELDS; i++)
-    {
-        if(textfields[i] != NULL)
-            delete textfields[i];
-    }
+        delete textfields[i];
     for(int i = 0; i < MAXSELECTBOXES; i++)
-    {
-        if(selectboxes[i] != NULL)
-            delete selectboxes[i];
-    }
+        delete selectboxes[i];
     SDL_FreeSurface(Surf_Menu);
 }
 
@@ -357,10 +342,9 @@ bool CMenu::render()
     }
 
     // CSurface::Draw(Surf_Menu, global::bmpArray[pic_background].surface, 0, 0);
-    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w - 1, 0, 0, Surf_Menu->h - 1, Surf_Menu->w - 1, Surf_Menu->h - 1,
-                     global::bmpArray[pic_background].surface, 0, 0, global::bmpArray[pic_background].surface->w - 1, 0, 0,
-                     global::bmpArray[pic_background].surface->h - 1, global::bmpArray[pic_background].surface->w - 1,
-                     global::bmpArray[pic_background].surface->h - 1);
+    SDL_Surface* surfBG = global::bmpArray[pic_background].surface;
+    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w - 1, 0, 0, Surf_Menu->h - 1, Surf_Menu->w - 1, Surf_Menu->h - 1, surfBG, 0, 0,
+                     surfBG->w - 1, 0, 0, surfBG->h - 1, surfBG->w - 1, surfBG->h - 1);
 
     for(int i = 0; i < MAXPICTURES; i++)
     {

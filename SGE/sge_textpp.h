@@ -109,7 +109,7 @@ public:
 
     // Change the text
     void clear_text();
-    void change_text(const std::string s);
+    void change_text(const std::string& s);
     // void change_utext(const std::basic_string<Uint16> s);
     void change_uctext(Uint16* text);
     void change_textf(const char* text, ...); // printf c-style... urk

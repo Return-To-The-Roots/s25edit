@@ -12,6 +12,7 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
+#include <algorithm>
 
 void callback::PleaseWait(int Param)
 {
@@ -31,7 +32,7 @@ void callback::PleaseWait(int Param)
         case INITIALIZING_CALL:
             if(WNDWait != NULL)
                 break;
-            WNDWait = new CWindow(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106,
+            WNDWait = new CWindow(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, //-V807
                                   global::s2->getDisplaySurface()->h / 2 - 35, 212, 70, "Please wait");
             if(global::s2->RegisterWindow(WNDWait))
             {
@@ -3077,7 +3078,7 @@ void callback::MinimapMenu(int Param)
     static CWindow* WNDMinimap = NULL;
     static CMap* MapObj = NULL;
     static SDL_Surface* WndSurface = NULL;
-    static int num_x = 1, num_y = 1;
+    static int scaleNum = 1;
     // only in case INITIALIZING_CALL needed to create the window
     int width;
     int height;
@@ -3092,32 +3093,29 @@ void callback::MinimapMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDMinimap != NULL)
                 break;
-
-            // this variables are needed to reduce the size of minimap-windows of big maps
-            num_x = (global::s2->getMapObj()->getMap()->width > 256 ? global::s2->getMapObj()->getMap()->width / 256 : 1);
-            num_y = (global::s2->getMapObj()->getMap()->height > 256 ? global::s2->getMapObj()->getMap()->height / 256 : 1);
-
-            // make sure the minimap has the same proportions as the "real" map, so scale the same rate
-            num_x = (num_x > num_y ? num_x : num_y);
-            num_y = (num_x > num_y ? num_x : num_y);
-
-            width = global::s2->getMapObj()->getMap()->width / num_x;
-            height = global::s2->getMapObj()->getMap()->height / num_y;
-            //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
-            if((global::s2->getDisplaySurface()->w - 12 < width) || (global::s2->getDisplaySurface()->h - 30 < height))
-                break;
-            WNDMinimap = new CWindow(MinimapMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - width / 2 - 6,
-                                     global::s2->GameResolutionY / 2 - height / 2 - 15, width + 12, height + 30, "Overview", WINDOW_NOTHING,
-                                     WINDOW_CLOSE | WINDOW_MOVE);
-            if(global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(MinimapMenu))
             {
-                WndSurface = WNDMinimap->getSurface();
+                // this variables are needed to reduce the size of minimap-windows of big maps
                 MapObj = global::s2->getMapObj();
-            } else
-            {
-                delete WNDMinimap;
-                WNDMinimap = NULL;
-                return;
+                bobMAP* map = MapObj->getMap();
+                scaleNum = std::max(std::max(map->width / 256, map->height / 256), 1);
+
+                width = map->width / scaleNum;
+                height = map->height / scaleNum;
+                //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
+                if((global::s2->getDisplaySurface()->w - 12 < width) || (global::s2->getDisplaySurface()->h - 30 < height))
+                    break;
+                WNDMinimap = new CWindow(MinimapMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - width / 2 - 6,
+                                         global::s2->GameResolutionY / 2 - height / 2 - 15, width + 12, height + 30, "Overview",
+                                         WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE);
+                if(global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(MinimapMenu))
+                    WndSurface = WNDMinimap->getSurface();
+                else
+                {
+                    delete WNDMinimap;
+                    WNDMinimap = NULL;
+                    MapObj = NULL;
+                    return;
+                }
             }
             break;
 
@@ -3137,9 +3135,9 @@ void callback::MinimapMenu(int Param)
                     {
                         DisplayRectangle displayRect = MapObj->getDisplayRect();
                         displayRect.x =
-                          (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx) * TRIANGLE_WIDTH * num_x;
+                          (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx) * TRIANGLE_WIDTH * scaleNum;
                         displayRect.y =
-                          (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny) * TRIANGLE_HEIGHT * num_y;
+                          (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny) * TRIANGLE_HEIGHT * scaleNum;
                         MapObj->setDisplayRect(displayRect);
                     }
                 }
