@@ -112,103 +112,103 @@ bool CFont::writeText(const char* string)
 
         // between 'spacebar' and the 'Z'
         if(*chiffre >= 32 && *chiffre <= 90)
-            chiffre_index += (*chiffre - 32) * FONT_COLOR_COUNT + color_;
+            chiffre_index += (*chiffre - 32) * NUM_FONT_COLORS + color_;
         /* \ */
         else if(*chiffre == 92)
-            chiffre_index += 59 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 59 * NUM_FONT_COLORS + color_;
         // _
         else if(*chiffre == 95)
-            chiffre_index += 60 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 60 * NUM_FONT_COLORS + color_;
         // between 'a' and 'z'
         else if(*chiffre >= 97 && *chiffre <= 122)
-            chiffre_index += (*chiffre - 32 - 4) * FONT_COLOR_COUNT + color_;
+            chiffre_index += (*chiffre - 32 - 4) * NUM_FONT_COLORS + color_;
         // ©
         else if(*chiffre == 169)
-            chiffre_index += 114 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 114 * NUM_FONT_COLORS + color_;
         // Ä
         else if(*chiffre == 196)
-            chiffre_index += 100 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 100 * NUM_FONT_COLORS + color_;
         // Ç
         else if(*chiffre == 199)
-            chiffre_index += 87 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 87 * NUM_FONT_COLORS + color_;
         // Ö
         else if(*chiffre == 214)
-            chiffre_index += 106 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 106 * NUM_FONT_COLORS + color_;
         // Ü
         else if(*chiffre == 220)
-            chiffre_index += 107 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 107 * NUM_FONT_COLORS + color_;
         // ß
         else if(*chiffre == 223)
-            chiffre_index += 113 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 113 * NUM_FONT_COLORS + color_;
         // à
         else if(*chiffre == 224)
-            chiffre_index += 92 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 92 * NUM_FONT_COLORS + color_;
         // á
         else if(*chiffre == 225)
-            chiffre_index += 108 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 108 * NUM_FONT_COLORS + color_;
         // â
         else if(*chiffre == 226)
-            chiffre_index += 90 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 90 * NUM_FONT_COLORS + color_;
         // ä
         else if(*chiffre == 228)
-            chiffre_index += 91 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 91 * NUM_FONT_COLORS + color_;
         // ç
         else if(*chiffre == 231)
-            chiffre_index += 93 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 93 * NUM_FONT_COLORS + color_;
         // è
         else if(*chiffre == 232)
-            chiffre_index += 96 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 96 * NUM_FONT_COLORS + color_;
         // é
         else if(*chiffre == 233)
-            chiffre_index += 89 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 89 * NUM_FONT_COLORS + color_;
         // ê
         else if(*chiffre == 234)
-            chiffre_index += 94 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 94 * NUM_FONT_COLORS + color_;
         // ë
         else if(*chiffre == 235)
-            chiffre_index += 95 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 95 * NUM_FONT_COLORS + color_;
         // ì
         else if(*chiffre == 236)
-            chiffre_index += 99 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 99 * NUM_FONT_COLORS + color_;
         // í
         else if(*chiffre == 237)
-            chiffre_index += 109 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 109 * NUM_FONT_COLORS + color_;
         // î
         else if(*chiffre == 238)
-            chiffre_index += 98 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 98 * NUM_FONT_COLORS + color_;
         // ï
         else if(*chiffre == 239)
-            chiffre_index += 97 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 97 * NUM_FONT_COLORS + color_;
         // ñ
         else if(*chiffre == 241)
-            chiffre_index += 112 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 112 * NUM_FONT_COLORS + color_;
         // ò
         else if(*chiffre == 242)
-            chiffre_index += 103 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 103 * NUM_FONT_COLORS + color_;
         // ó
         else if(*chiffre == 243)
-            chiffre_index += 110 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 110 * NUM_FONT_COLORS + color_;
         // ô
         else if(*chiffre == 244)
-            chiffre_index += 101 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 101 * NUM_FONT_COLORS + color_;
         // ö
         else if(*chiffre == 246)
-            chiffre_index += 102 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 102 * NUM_FONT_COLORS + color_;
         // ù
         else if(*chiffre == 249)
-            chiffre_index += 105 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 105 * NUM_FONT_COLORS + color_;
         // ú
         else if(*chiffre == 250)
-            chiffre_index += 111 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 111 * NUM_FONT_COLORS + color_;
         // û
         else if(*chiffre == 251)
-            chiffre_index += 104 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 104 * NUM_FONT_COLORS + color_;
         // ü
         else if(*chiffre == 252)
-            chiffre_index += 88 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 88 * NUM_FONT_COLORS + color_;
         // chiffre not available, use '_' instead
         else
-            chiffre_index += 60 * FONT_COLOR_COUNT + color_;
+            chiffre_index += 60 * NUM_FONT_COLORS + color_;
 
         // if we only count pixels in this round
         if(pixel_count_loop)
@@ -270,7 +270,7 @@ bool CFont::writeText(const char* string)
         // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
         // 'í' instead
         if(fontsize_ == 9 && *chiffre == 236)
-            pos_x += global::bmpArray[FONT9_SPACE + 109 * FONT_COLOR_COUNT + color_].w;
+            pos_x += global::bmpArray[FONT9_SPACE + 109 * NUM_FONT_COLORS + color_].w;
         else
             pos_x += global::bmpArray[chiffre_index].w;
 
@@ -340,103 +340,103 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
 
         // between 'spacebar' and the 'Z'
         if(*chiffre >= 32 && *chiffre <= 90)
-            chiffre_index += (*chiffre - 32) * FONT_COLOR_COUNT + color;
+            chiffre_index += (*chiffre - 32) * NUM_FONT_COLORS + color;
         /* \ */
         else if(*chiffre == 92)
-            chiffre_index += 59 * FONT_COLOR_COUNT + color;
+            chiffre_index += 59 * NUM_FONT_COLORS + color;
         // _
         else if(*chiffre == 95)
-            chiffre_index += 60 * FONT_COLOR_COUNT + color;
+            chiffre_index += 60 * NUM_FONT_COLORS + color;
         // between 'a' and 'z'
         else if(*chiffre >= 97 && *chiffre <= 122)
-            chiffre_index += (*chiffre - 32 - 4) * FONT_COLOR_COUNT + color;
+            chiffre_index += (*chiffre - 32 - 4) * NUM_FONT_COLORS + color;
         // ©
         else if(*chiffre == 169)
-            chiffre_index += 114 * FONT_COLOR_COUNT + color;
+            chiffre_index += 114 * NUM_FONT_COLORS + color;
         // Ä
         else if(*chiffre == 196)
-            chiffre_index += 100 * FONT_COLOR_COUNT + color;
+            chiffre_index += 100 * NUM_FONT_COLORS + color;
         // Ç
         else if(*chiffre == 199)
-            chiffre_index += 87 * FONT_COLOR_COUNT + color;
+            chiffre_index += 87 * NUM_FONT_COLORS + color;
         // Ö
         else if(*chiffre == 214)
-            chiffre_index += 106 * FONT_COLOR_COUNT + color;
+            chiffre_index += 106 * NUM_FONT_COLORS + color;
         // Ü
         else if(*chiffre == 220)
-            chiffre_index += 107 * FONT_COLOR_COUNT + color;
+            chiffre_index += 107 * NUM_FONT_COLORS + color;
         // ß
         else if(*chiffre == 223)
-            chiffre_index += 113 * FONT_COLOR_COUNT + color;
+            chiffre_index += 113 * NUM_FONT_COLORS + color;
         // à
         else if(*chiffre == 224)
-            chiffre_index += 92 * FONT_COLOR_COUNT + color;
+            chiffre_index += 92 * NUM_FONT_COLORS + color;
         // á
         else if(*chiffre == 225)
-            chiffre_index += 108 * FONT_COLOR_COUNT + color;
+            chiffre_index += 108 * NUM_FONT_COLORS + color;
         // â
         else if(*chiffre == 226)
-            chiffre_index += 90 * FONT_COLOR_COUNT + color;
+            chiffre_index += 90 * NUM_FONT_COLORS + color;
         // ä
         else if(*chiffre == 228)
-            chiffre_index += 91 * FONT_COLOR_COUNT + color;
+            chiffre_index += 91 * NUM_FONT_COLORS + color;
         // ç
         else if(*chiffre == 231)
-            chiffre_index += 93 * FONT_COLOR_COUNT + color;
+            chiffre_index += 93 * NUM_FONT_COLORS + color;
         // è
         else if(*chiffre == 232)
-            chiffre_index += 96 * FONT_COLOR_COUNT + color;
+            chiffre_index += 96 * NUM_FONT_COLORS + color;
         // é
         else if(*chiffre == 233)
-            chiffre_index += 89 * FONT_COLOR_COUNT + color;
+            chiffre_index += 89 * NUM_FONT_COLORS + color;
         // ê
         else if(*chiffre == 234)
-            chiffre_index += 94 * FONT_COLOR_COUNT + color;
+            chiffre_index += 94 * NUM_FONT_COLORS + color;
         // ë
         else if(*chiffre == 235)
-            chiffre_index += 95 * FONT_COLOR_COUNT + color;
+            chiffre_index += 95 * NUM_FONT_COLORS + color;
         // ì
         else if(*chiffre == 236)
-            chiffre_index += 99 * FONT_COLOR_COUNT + color;
+            chiffre_index += 99 * NUM_FONT_COLORS + color;
         // í
         else if(*chiffre == 237)
-            chiffre_index += 109 * FONT_COLOR_COUNT + color;
+            chiffre_index += 109 * NUM_FONT_COLORS + color;
         // î
         else if(*chiffre == 238)
-            chiffre_index += 98 * FONT_COLOR_COUNT + color;
+            chiffre_index += 98 * NUM_FONT_COLORS + color;
         // ï
         else if(*chiffre == 239)
-            chiffre_index += 97 * FONT_COLOR_COUNT + color;
+            chiffre_index += 97 * NUM_FONT_COLORS + color;
         // ñ
         else if(*chiffre == 241)
-            chiffre_index += 112 * FONT_COLOR_COUNT + color;
+            chiffre_index += 112 * NUM_FONT_COLORS + color;
         // ò
         else if(*chiffre == 242)
-            chiffre_index += 103 * FONT_COLOR_COUNT + color;
+            chiffre_index += 103 * NUM_FONT_COLORS + color;
         // ó
         else if(*chiffre == 243)
-            chiffre_index += 110 * FONT_COLOR_COUNT + color;
+            chiffre_index += 110 * NUM_FONT_COLORS + color;
         // ô
         else if(*chiffre == 244)
-            chiffre_index += 101 * FONT_COLOR_COUNT + color;
+            chiffre_index += 101 * NUM_FONT_COLORS + color;
         // ö
         else if(*chiffre == 246)
-            chiffre_index += 102 * FONT_COLOR_COUNT + color;
+            chiffre_index += 102 * NUM_FONT_COLORS + color;
         // ù
         else if(*chiffre == 249)
-            chiffre_index += 105 * FONT_COLOR_COUNT + color;
+            chiffre_index += 105 * NUM_FONT_COLORS + color;
         // ú
         else if(*chiffre == 250)
-            chiffre_index += 111 * FONT_COLOR_COUNT + color;
+            chiffre_index += 111 * NUM_FONT_COLORS + color;
         // û
         else if(*chiffre == 251)
-            chiffre_index += 104 * FONT_COLOR_COUNT + color;
+            chiffre_index += 104 * NUM_FONT_COLORS + color;
         // ü
         else if(*chiffre == 252)
-            chiffre_index += 88 * FONT_COLOR_COUNT + color;
+            chiffre_index += 88 * NUM_FONT_COLORS + color;
         // chiffre not available, use '_' instead
         else
-            chiffre_index += 60 * FONT_COLOR_COUNT + color;
+            chiffre_index += 60 * NUM_FONT_COLORS + color;
 
         // if we only count pixels in this round
         if(pixel_count_loop)
@@ -480,7 +480,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
         // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
         // 'í' instead
         if(fontsize == 9 && *chiffre == 236)
-            pos_x += global::bmpArray[FONT9_SPACE + 109 * FONT_COLOR_COUNT + color].w;
+            pos_x += global::bmpArray[FONT9_SPACE + 109 * NUM_FONT_COLORS + color].w;
         else
             pos_x += global::bmpArray[chiffre_index].w;
 
