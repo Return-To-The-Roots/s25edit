@@ -816,6 +816,7 @@ SDL_Color sge_FillPaletteEntry(Uint8 R, Uint8 G, Uint8 B)
     color.r = R;
     color.g = G;
     color.b = B;
+    color.unused = 0;
 
     return color;
 }
