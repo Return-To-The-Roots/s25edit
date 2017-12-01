@@ -77,7 +77,7 @@ ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
 
-target_link_libraries(s25edit SGE rttrConfig s25Common nowide-static ${SDL_LIBRARY})
+target_link_libraries(s25edit SGE rttrConfig s25Common endian nowide-static ${SDL_LIBRARY})
 
 if(RTTR_BINDIR)
 	INSTALL(TARGETS s25edit RUNTIME DESTINATION ${RTTR_BINDIR})

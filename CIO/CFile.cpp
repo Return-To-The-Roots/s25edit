@@ -1,14 +1,11 @@
 #include "CFile.h"
 #include "../CSurface.h"
 #include "../globals.h"
+#include "libendian/libendian.h"
+#include <boost/endian/conversion.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <iostream>
 #include <stdexcept>
-
-// Hard coded file format :(
-#if SDL_BYTEORDER != SDL_LIL_ENDIAN
-#error "Only little endian systems are supported"
-#endif
 
 FILE* CFile::fp = NULL;
 bobBMP* CFile::bmpArray = &global::bmpArray[0];
@@ -17,11 +14,12 @@ bobPAL* CFile::palArray = &global::palArray[0];
 bobPAL* CFile::palActual = &global::palArray[0];
 bool CFile::loadPAL = false;
 
-inline void freadChecked(void* buf, size_t elSize, size_t elCt, FILE* file)
-{
-    if(fread(buf, elSize, elCt, file) != elCt && !feof(file))
-        throw std::runtime_error("Read failed");
-}
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define LINE_STRING STRINGIZE(__LINE__)
+#define CHECK_READ(readCmd) \
+    if(!readCmd)            \
+    throw std::runtime_error("Read failed at line " LINE_STRING)
 
 CFile::CFile() {}
 
@@ -117,7 +115,12 @@ bool CFile::open_lst()
     while(!feof(fp))
     {
         // entry type (2 Bytes) - unused (=0x0000) or used (=0x0001) -
-        freadChecked(&entrytype, 2, 1, fp);
+        if(!libendian::le_read_us(&entrytype, fp))
+        {
+            if(feof(fp))
+                break;
+            CHECK_READ(false);
+        }
 
         // if entry is unused, go back to 'while' --- and by the way: after the last entry there are always zeros in the file,
         // so the following case will happen till we have reached the end of the file and the 'while' will break - PERFECT!
@@ -125,7 +128,7 @@ bool CFile::open_lst()
             continue;
 
         // bobtype (2 Bytes)
-        freadChecked(&bobtype, 2, 1, fp);
+        CHECK_READ(libendian::le_read_us(&bobtype, fp));
 
         switch(bobtype)
         {
@@ -223,15 +226,20 @@ bool CFile::open_idx(const std::string& filename)
         // skip: name (1x 16 Bytes)
         fseek(fp_idx, 16, SEEK_CUR);
         // offset (4 Bytes)
-        freadChecked(&offset, 4, 1, fp_idx);
+        if(!libendian::le_read_ui(&offset, fp_idx))
+        {
+            if(feof(fp_idx))
+                break;
+            CHECK_READ(false);
+        }
         // skip unknown data (6x 1 Byte)
         fseek(fp_idx, 6, SEEK_CUR);
         // bobtype (2 Bytes)
-        freadChecked(&bobtype, 2, 1, fp_idx);
+        CHECK_READ(libendian::le_read_us(&bobtype, fp_idx));
         // set fp_dat to the position in 'offset'
         fseek(fp_dat, offset, SEEK_SET);
         // read bobtype again, now from 'DAT'-File
-        freadChecked(&bobtype_check, 2, 1, fp_dat);
+        CHECK_READ(libendian::le_read_us(&bobtype_check, fp_dat));
         // check if data in 'DAT'-File is the data that it should be (bobtypes are equal)
         if(bobtype != bobtype_check)
             return false;
@@ -300,9 +308,9 @@ bool CFile::open_bbm()
 
     for(int i = 0; i < 256; i++)
     {
-        freadChecked(&((palArray->colors[i]).r), 1, 1, fp);
-        freadChecked(&((palArray->colors[i]).g), 1, 1, fp);
-        freadChecked(&((palArray->colors[i]).b), 1, 1, fp);
+        CHECK_READ(libendian::read(&((palArray->colors[i]).r), 1, fp));
+        CHECK_READ(libendian::read(&((palArray->colors[i]).g), 1, fp));
+        CHECK_READ(libendian::read(&((palArray->colors[i]).b), 1, fp));
     }
 
     palArray++;
@@ -323,7 +331,7 @@ bool CFile::open_lbm(const std::string& filename)
     // color depth of the picture
     Uint16 color_depth;
     // is the picture rle-compressed?
-    Uint16 compression_flag;
+    Uint8 compression_flag;
     // compression type
     Sint8 ctype;
     // array for palette colors
@@ -337,26 +345,24 @@ bool CFile::open_lbm(const std::string& filename)
     /* READ FIRST CHUNK "BMHD" */
 
     // chunk-identifier (4 Bytes)
-    freadChecked(chunk_identifier, 4, 1, fp);
+    CHECK_READ(libendian::read(chunk_identifier, 4, fp));
     chunk_identifier[4] = '\0';
     // should be "BMHD" at this time
     if(strcmp(chunk_identifier, "BMHD") != 0)
         return false;
     // length of data block
-    freadChecked(&length, 4, 1, fp);
-    endian_swap(length);
+    CHECK_READ(libendian::be_read_ui(&length, fp));
     // width of picture (2 Bytes)
-    freadChecked(&(bmpArray->w), 2, 1, fp);
-    endian_swap(bmpArray->w);
+    CHECK_READ(libendian::be_read_us(&(bmpArray->w), fp));
     // heigth of picture (2 Bytes)
-    freadChecked(&(bmpArray->h), 2, 1, fp);
-    endian_swap(bmpArray->h);
+    CHECK_READ(libendian::be_read_us(&(bmpArray->h), fp));
     // skip unknown data (4x 1 Bytes)
     fseek(fp, 4, SEEK_CUR);
     // color depth of the picture (1x 2 Bytes)
-    freadChecked(&color_depth, 2, 1, fp);
-    // compression_flag (1x 2 Bytes)
-    freadChecked(&compression_flag, 2, 1, fp);
+    CHECK_READ(libendian::be_read_us(&color_depth, fp));
+    // compression_flag (1x 1 Bytes)
+    CHECK_READ(libendian::read(&compression_flag, 1, fp));
+    fseek(fp, 9, SEEK_CUR);
     // skip unknown data (length - 20 x 1 Byte)
     // fseek(fp, length-20, SEEK_CUR);
 
@@ -366,27 +372,32 @@ bool CFile::open_lbm(const std::string& filename)
     // search for the "CMAP" and skip other chunk-types
     while(!feof(fp))
     {
-        freadChecked(chunk_identifier, 4, 1, fp);
+        CHECK_READ(libendian::read(chunk_identifier, 4, fp));
 
         if(strcmp(chunk_identifier, "CMAP") == 0)
             break;
         else
-            fseek(fp, -3, SEEK_CUR);
+        {
+            Uint32 chunkLen;
+            CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
+            if(chunkLen & 1)
+                chunkLen++;
+            fseek(fp, chunkLen, SEEK_CUR);
+        }
     }
     if(feof(fp))
         return false;
     // length of data block
-    freadChecked(&length, 4, 1, fp);
-    endian_swap(length);
+    CHECK_READ(libendian::be_read_ui(&length, fp));
     // must be 768 (RGB = 3 Byte x 256 Colors)
-    if(length != 768)
+    if(length != 3u * 256u)
         return false;
     // palette
     for(int i = 0; i < 256; i++)
     {
-        freadChecked(&colors[i].r, 1, 1, fp);
-        freadChecked(&colors[i].g, 1, 1, fp);
-        freadChecked(&colors[i].b, 1, 1, fp);
+        CHECK_READ(libendian::read(&colors[i].r, 1, fp));
+        CHECK_READ(libendian::read(&colors[i].g, 1, fp));
+        CHECK_READ(libendian::read(&colors[i].b, 1, fp));
     }
 
     /* READ THIRD CHUNK "BODY" */
@@ -395,18 +406,23 @@ bool CFile::open_lbm(const std::string& filename)
     // search for the "BODY" and skip other chunk-types
     while(!feof(fp))
     {
-        freadChecked(chunk_identifier, 4, 1, fp);
+        CHECK_READ(libendian::read(chunk_identifier, 4, fp));
 
         if(strcmp(chunk_identifier, "BODY") == 0)
             break;
         else
-            fseek(fp, -3, SEEK_CUR);
+        {
+            Uint32 chunkLen;
+            CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
+            if(chunkLen & 1)
+                chunkLen++;
+            fseek(fp, chunkLen, SEEK_CUR);
+        }
     }
     if(feof(fp))
         return false;
     // length of data block
-    freadChecked(&length, 4, 1, fp);
-    endian_swap(length);
+    CHECK_READ(libendian::be_read_ui(&length, fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -423,7 +439,7 @@ bool CFile::open_lbm(const std::string& filename)
             for(int x = 0; x < bmpArray->w; x++)
             {
                 // read color value (1 Byte)
-                freadChecked(&color_value, 1, 1, fp);
+                CHECK_READ(libendian::read(&color_value, 1, fp));
                 // draw
                 CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
             }
@@ -442,7 +458,7 @@ bool CFile::open_lbm(const std::string& filename)
             for(int x = 0; x < bmpArray->w;)
             {
                 // read compression type
-                freadChecked(&ctype, 1, 1, fp);
+                CHECK_READ(libendian::read(&ctype, 1, fp));
 
                 if(ctype >= 0)
                 {
@@ -450,14 +466,14 @@ bool CFile::open_lbm(const std::string& filename)
                     for(int k = 0; k < ctype + 1; k++, x++)
                     {
                         // read color value (1 Byte)
-                        freadChecked(&color_value, 1, 1, fp);
+                        CHECK_READ(libendian::read(&color_value, 1, fp));
                         // draw
                         CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
                     }
                 } else if(ctype >= -127)
                 {
                     // draw the following byte '-ctype + 1' times to the surface
-                    freadChecked(&color_value, 1, 1, fp);
+                    CHECK_READ(libendian::read(&color_value, 1, fp));
 
                     for(int k = 0; k < -ctype + 1; k++, x++)
                         CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
@@ -500,7 +516,7 @@ bool CFile::open_gou()
     if(internalArrayCtr > 2)
         return false;
 
-    freadChecked(gouData[internalArrayCtr], 256, 256, fp);
+    CHECK_READ(libendian::read(gouData[internalArrayCtr][0], sizeof(gouData[internalArrayCtr]), fp));
     internalArrayCtr++;
 
     return true;
@@ -521,29 +537,31 @@ bobMAP* CFile::open_wld()
     }
 
     fseek(fp, 10, SEEK_SET);
-    freadChecked(myMap->name, 20, 1, fp);
-    freadChecked(&myMap->width_old, 2, 1, fp);
-    freadChecked(&myMap->height_old, 2, 1, fp);
-    freadChecked(&myMap->type, 1, 1, fp);
-    freadChecked(&myMap->player, 1, 1, fp);
-    freadChecked(myMap->author, 20, 1, fp);
-    freadChecked(myMap->HQx, 2, 7, fp);
-    freadChecked(myMap->HQy, 2, 7, fp);
+    CHECK_READ(libendian::read(myMap->name, 20, fp));
+    CHECK_READ(libendian::le_read_us(&myMap->width_old, fp));
+    CHECK_READ(libendian::le_read_us(&myMap->height_old, fp));
+    CHECK_READ(libendian::read(&myMap->type, 1, fp));
+    CHECK_READ(libendian::read(&myMap->player, 1, fp));
+    CHECK_READ(libendian::read(myMap->author, 20, fp));
+    for(int i = 0; i < 7; i++)
+        CHECK_READ(libendian::le_read_us(&myMap->HQx[i], fp));
+    for(int i = 0; i < 7; i++)
+        CHECK_READ(libendian::le_read_us(&myMap->HQy[i], fp));
 
     // go to big map header and read it
     fseek(fp, 92, SEEK_SET);
     for(int i = 0; i < 250; i++)
     {
-        freadChecked(&myMap->header[i].type, 1, 1, fp);
-        freadChecked(&myMap->header[i].x, 1, 2, fp);
-        freadChecked(&myMap->header[i].y, 1, 2, fp);
-        freadChecked(&myMap->header[i].area, 1, 4, fp);
+        CHECK_READ(libendian::read(&myMap->header[i].type, 1, fp));
+        CHECK_READ(libendian::le_read_us(&myMap->header[i].x, fp));
+        CHECK_READ(libendian::le_read_us(&myMap->header[i].y, fp));
+        CHECK_READ(libendian::le_read_ui(&myMap->header[i].area, fp));
     }
 
     // go to real map height and width
     fseek(fp, 2348, SEEK_SET);
-    freadChecked(&myMap->width, 2, 1, fp);
-    freadChecked(&myMap->height, 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&myMap->width, fp));
+    CHECK_READ(libendian::le_read_us(&myMap->height, fp));
 
     if((myMap->vertex = (MapNode*)malloc(sizeof(MapNode) * myMap->width * myMap->height)) == NULL)
     {
@@ -559,7 +577,7 @@ bobMAP* CFile::open_wld()
         for(int i = 0; i < myMap->width; i++)
         {
             Uint8 heightFactor;
-            freadChecked(&heightFactor, 1, 1, fp);
+            CHECK_READ(libendian::read(&heightFactor, 1, fp));
             myMap->getVertex(i, j).h = heightFactor; //-V807
         }
     }
@@ -571,7 +589,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).rsuTexture, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).rsuTexture, 1, fp));
     }
 
     // go to texture information for UpSideDown-Triangles
@@ -580,7 +598,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).usdTexture, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).usdTexture, 1, fp));
     }
 
     // go to road data
@@ -589,7 +607,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).road, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).road, 1, fp));
     }
 
     // go to object type data
@@ -598,7 +616,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).objectType, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).objectType, 1, fp));
     }
 
     // go to object info data
@@ -607,7 +625,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).objectInfo, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).objectInfo, 1, fp));
     }
 
     // go to animal data
@@ -616,7 +634,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).animal, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).animal, 1, fp));
     }
 
     // go to unknown1 data
@@ -625,7 +643,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).unknown1, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).unknown1, 1, fp));
     }
 
     // go to build data
@@ -634,7 +652,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).build, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).build, 1, fp));
     }
 
     // go to unknown2 data
@@ -643,7 +661,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).unknown2, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).unknown2, 1, fp));
     }
 
     // go to unknown3 data
@@ -652,7 +670,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).unknown3, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).unknown3, 1, fp));
     }
 
     // go to resource data
@@ -661,7 +679,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).resource, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).resource, 1, fp));
     }
 
     // go to shading data
@@ -670,7 +688,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).shading, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).shading, 1, fp));
     }
 
     // go to unknown5 data
@@ -679,7 +697,7 @@ bobMAP* CFile::open_wld()
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            freadChecked(&myMap->getVertex(i, j).unknown5, 1, 1, fp);
+            CHECK_READ(libendian::read(&myMap->getVertex(i, j).unknown5, 1, fp));
     }
 
     return myMap;
@@ -770,190 +788,192 @@ bool CFile::save_wld(void* data)
     map_data_header[3] = 0x00;
     map_data_header[4] = 0x00;
     map_data_header[5] = 0x00;
-    *((Uint16*)(map_data_header + 6)) = myMap->width;
-    *((Uint16*)(map_data_header + 8)) = myMap->height;
+    *((Uint16*)(map_data_header + 6)) = boost::endian::native_to_little(myMap->width);
+    *((Uint16*)(map_data_header + 8)) = boost::endian::native_to_little(myMap->height);
     map_data_header[10] = 0x01;
     map_data_header[11] = 0x00;
-    *((Uint32*)(map_data_header + 12)) = myMap->width * myMap->height;
+    *((Uint32*)(map_data_header + 12)) = boost::endian::native_to_little(myMap->width * myMap->height);
 
     // begin writing data to file
     // first of all the map header
     // WORLD_V1.0
-    fwrite(map_version, 1, 10, fp);
+    libendian::write(map_version, 10, fp);
     // name
-    fwrite(myMap->name, 1, 20, fp);
+    libendian::write(myMap->name, 20, fp);
     // old width
-    fwrite(&myMap->width_old, 2, 1, fp);
+    libendian::le_write_us(myMap->width_old, fp);
     // old height
-    fwrite(&myMap->height_old, 2, 1, fp);
+    libendian::le_write_us(myMap->height_old, fp);
     // type
-    fwrite(&myMap->type, 1, 1, fp);
+    libendian::write(&myMap->type, 1, fp);
     // players
-    fwrite(&myMap->player, 1, 1, fp);
+    libendian::write(&myMap->player, 1, fp);
     // author
-    fwrite(myMap->author, 1, 20, fp);
+    libendian::write(myMap->author, 20, fp);
     // headquarters x
-    fwrite(myMap->HQx, 2, 7, fp);
+    for(int i = 0; i < 7; i++)
+        libendian::le_write_us(myMap->HQx[i], fp);
     // headquarters y
-    fwrite(myMap->HQy, 2, 7, fp);
+    for(int i = 0; i < 7; i++)
+        libendian::le_write_us(myMap->HQy[i], fp);
     // unknown data (8 Bytes)
     for(int i = 0; i < 8; i++)
-        fwrite(&zero, 1, 1, fp);
+        libendian::write(&zero, 1, fp);
     // big map header with area information
     for(int i = 0; i < 250; i++)
     {
-        fwrite(&myMap->header[i].type, 1, 1, fp);
-        fwrite(&myMap->header[i].x, 1, 2, fp);
-        fwrite(&myMap->header[i].y, 1, 2, fp);
-        fwrite(&myMap->header[i].area, 1, 4, fp);
+        libendian::write(&myMap->header[i].type, 1, fp);
+        libendian::le_write_us(myMap->header[i].x, fp);
+        libendian::le_write_us(myMap->header[i].y, fp);
+        libendian::le_write_ui(myMap->header[i].area, fp);
     }
     // 0x11 0x27
     temp = 0x11;
-    fwrite(&temp, 1, 1, fp);
+    libendian::write(&temp, 1, fp);
     temp = 0x27;
-    fwrite(&temp, 1, 1, fp);
+    libendian::write(&temp, 1, fp);
     // unknown data (always null, 4 Bytes)
     for(int i = 0; i < 4; i++)
-        fwrite(&zero, 1, 1, fp);
+        libendian::write(&zero, 1, fp);
     // width
-    fwrite(&myMap->width, 2, 1, fp);
+    libendian::le_write_us(myMap->width, fp);
     // height
-    fwrite(&myMap->height, 2, 1, fp);
+    libendian::le_write_us(myMap->height, fp);
 
     // now begin writing the real map data
 
     // altitude information
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
         {
             temp = myMap->getVertex(i, j).z / 5 + 0x0A; //-V807
-            fwrite(&temp, 1, 1, fp);
+            libendian::write(&temp, 1, fp);
         }
     }
 
     // texture information for RightSideUp-Triangles
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).rsuTexture, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).rsuTexture, 1, fp);
     }
 
     // go to texture information for UpSideDown-Triangles
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).usdTexture, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).usdTexture, 1, fp);
     }
 
     // go to road data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).road, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).road, 1, fp);
     }
 
     // go to object type data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).objectType, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).objectType, 1, fp);
     }
 
     // go to object info data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).objectInfo, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).objectInfo, 1, fp);
     }
 
     // go to animal data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).animal, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).animal, 1, fp);
     }
 
     // go to unknown1 data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).unknown1, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).unknown1, 1, fp);
     }
 
     // go to build data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).build, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).build, 1, fp);
     }
 
     // go to unknown2 data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).unknown2, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).unknown2, 1, fp);
     }
 
     // go to unknown3 data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).unknown3, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).unknown3, 1, fp);
     }
 
     // go to resource data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).resource, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).resource, 1, fp);
     }
 
     // go to shading data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).shading, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).shading, 1, fp);
     }
 
     // go to unknown5 data
-    fwrite(&map_data_header, 16, 1, fp);
+    libendian::write(map_data_header, sizeof(map_data_header), fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            fwrite(&myMap->getVertex(i, j).unknown5, 1, 1, fp);
+            libendian::write(&myMap->getVertex(i, j).unknown5, 1, fp);
     }
 
     // at least write the map footer (ends in 0xFF)
     temp = char(0xFF);
-    fwrite(&temp, 1, 1, fp);
+    libendian::write(&temp, 1, fp);
 
     return true;
 }
@@ -990,19 +1010,19 @@ bool CFile::read_bob02()
     Uint8 color_value;
 
     // coordinate for zeropoint x (2 Bytes)
-    freadChecked(&(bmpArray->nx), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->nx), fp));
     // coordinate for zeropoint y (2 Bytes)
-    freadChecked(&(bmpArray->ny), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->ny), fp));
     // skip unknown data (4x 1 Byte)
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
-    freadChecked(&(bmpArray->w), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->w), fp));
     // heigth of picture (2 Bytes)
-    freadChecked(&(bmpArray->h), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->h), fp));
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    freadChecked(&length, 4, 1, fp);
+    CHECK_READ(libendian::le_read_ui(&length, fp));
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
     next_entry = starting_point + length;
@@ -1020,7 +1040,7 @@ bool CFile::read_bob02()
 
     // read start adresses
     for(int y = 0; y < bmpArray->h; y++)
-        freadChecked(&starts[y], 2, 1, fp);
+        CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -1041,19 +1061,19 @@ bool CFile::read_bob02()
         for(int x = 0; x < bmpArray->w;)
         {
             // number of following colored pixels (1 Byte)
-            freadChecked(&count_color, 1, 1, fp);
+            CHECK_READ(libendian::read(&count_color, 1, fp));
 
             // loop for drawing the colored pixels to the surface
             for(int k = 0; k < count_color; k++, x++)
             {
                 // read color value (1 Byte)
-                freadChecked(&color_value, 1, 1, fp);
+                CHECK_READ(libendian::read(&color_value, 1, fp));
                 // draw
                 CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
             }
 
             // number of transparent pixels to draw now (1 Byte)
-            freadChecked(&count_trans, 1, 1, fp);
+            CHECK_READ(libendian::read(&count_trans, 1, fp));
 
             // loop for drawing the transparent pixels to the surface
             for(int k = 0; k < count_trans; k++, x++)
@@ -1063,13 +1083,13 @@ bool CFile::read_bob02()
         }
 
         // the end of line should be 0xFF, otherwise an error has ocurred (1 Byte)
-        freadChecked(&endmark, 1, 1, fp);
+        CHECK_READ(libendian::read(&endmark, 1, fp));
         if(endmark != 0xFF)
             return false;
     }
 
     // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has ocurred (1 Byte)
-    freadChecked(&endmark, 1, 1, fp);
+    CHECK_READ(libendian::read(&endmark, 1, fp));
     if(endmark != 0xFF)
         return false;
 
@@ -1105,14 +1125,14 @@ bool CFile::read_bob03()
     for(int i = 1; i <= 115; i++)
     {
         // following data blocks are bobtype04 for some ascii chars, bobtype is repeated at the beginning of each data block
-        freadChecked(&bobtype, 2, 1, fp);
+        CHECK_READ(libendian::le_read_us(&bobtype, fp));
 
         // bobtype should be 04. if not, it's possible that there are a lot of zeros till the next block begins
         if(bobtype != BOBTYPE04)
         {
             // read the zeros (2 Bytes for each zero)
             while(bobtype == 0)
-                freadChecked(&bobtype, 2, 1, fp);
+                CHECK_READ(libendian::le_read_us(&bobtype, fp));
 
             // at the end of all the zeros --> if bobtype is STILL NOT 04, an error has occured
             if(bobtype != BOBTYPE04)
@@ -1161,19 +1181,19 @@ bool CFile::read_bob04(int player_color)
     Uint8 color_value;
 
     // coordinate for zeropoint x (2 Bytes)
-    freadChecked(&(bmpArray->nx), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->nx), fp));
     // coordinate for zeropoint y (2 Bytes)
-    freadChecked(&(bmpArray->ny), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->ny), fp));
     // skip unknown data (4x 1 Byte)
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
-    freadChecked(&(bmpArray->w), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->w), fp));
     // heigth of picture (2 Bytes)
-    freadChecked(&(bmpArray->h), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->h), fp));
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    freadChecked(&length, 4, 1, fp);
+    CHECK_READ(libendian::le_read_ui(&length, fp));
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
     next_entry = starting_point + length;
@@ -1191,7 +1211,7 @@ bool CFile::read_bob04(int player_color)
 
     // read start adresses
     for(int y = 0; y < bmpArray->h; y++)
-        freadChecked(&starts[y], 2, 1, fp);
+        CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -1212,7 +1232,7 @@ bool CFile::read_bob04(int player_color)
         for(int x = 0; x < bmpArray->w;)
         {
             // read our 'shift' (1 Byte)
-            freadChecked(&shift, 1, 1, fp);
+            CHECK_READ(libendian::read(&shift, 1, fp));
 
             if(shift < 0x41)
             {
@@ -1222,7 +1242,7 @@ bool CFile::read_bob04(int player_color)
                 }
             } else if(shift < 0x81)
             {
-                freadChecked(&color_value, 1, 1, fp);
+                CHECK_READ(libendian::read(&color_value, 1, fp));
 
                 for(int i = 1; i <= shift - 0x40; i++, x++)
                 {
@@ -1230,7 +1250,7 @@ bool CFile::read_bob04(int player_color)
                 }
             } else if(shift < 0xC1)
             {
-                freadChecked(&color_value, 1, 1, fp);
+                CHECK_READ(libendian::read(&color_value, 1, fp));
 
                 for(int i = 1; i <= shift - 0x80; i++, x++)
                 {
@@ -1238,7 +1258,7 @@ bool CFile::read_bob04(int player_color)
                 }
             } else // if (shift > 0xC0)
             {
-                freadChecked(&color_value, 1, 1, fp);
+                CHECK_READ(libendian::read(&color_value, 1, fp));
 
                 for(int i = 1; i <= shift - 0xC0; i++, x++)
                 {
@@ -1271,9 +1291,9 @@ bool CFile::read_bob05()
 
     for(int i = 0; i < 256; i++)
     {
-        freadChecked(&((palArray->colors[i]).r), 1, 1, fp);
-        freadChecked(&((palArray->colors[i]).g), 1, 1, fp);
-        freadChecked(&((palArray->colors[i]).b), 1, 1, fp);
+        CHECK_READ(libendian::read(&((palArray->colors[i]).r), 1, fp));
+        CHECK_READ(libendian::read(&((palArray->colors[i]).g), 1, fp));
+        CHECK_READ(libendian::read(&((palArray->colors[i]).b), 1, fp));
     }
 
     palArray++;
@@ -1301,19 +1321,19 @@ bool CFile::read_bob07()
     Uint8 count_trans;
 
     // coordinate for zeropoint x (2 Bytes)
-    freadChecked(&(shadowArray->nx), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(shadowArray->nx), fp));
     // coordinate for zeropoint y (2 Bytes)
-    freadChecked(&(shadowArray->ny), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(shadowArray->ny), fp));
     // skip unknown data (4x 1 Byte)
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
-    freadChecked(&(shadowArray->w), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(shadowArray->w), fp));
     // heigth of picture (2 Bytes)
-    freadChecked(&(shadowArray->h), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(shadowArray->h), fp));
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    freadChecked(&length, 4, 1, fp);
+    CHECK_READ(libendian::le_read_ui(&length, fp));
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
     next_entry = starting_point + length;
@@ -1331,7 +1351,7 @@ bool CFile::read_bob07()
 
     // read start adresses
     for(int y = 0; y < shadowArray->h; y++)
-        freadChecked(&starts[y], 2, 1, fp);
+        CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((shadowArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == NULL)
@@ -1351,7 +1371,7 @@ bool CFile::read_bob07()
         for(int x = 0; x < shadowArray->w;)
         {
             // number of half-transparent black (alpha value = 0x40) pixels (1 Byte)
-            freadChecked(&count_black, 1, 1, fp);
+            CHECK_READ(libendian::read(&count_black, 1, fp));
 
             // loop for drawing the black pixels to the surface
             for(int k = 0; k < count_black; k++, x++)
@@ -1361,7 +1381,7 @@ bool CFile::read_bob07()
             }
 
             // number of transparent pixels to draw now (1 Byte)
-            freadChecked(&count_trans, 1, 1, fp);
+            CHECK_READ(libendian::read(&count_trans, 1, fp));
 
             // loop for drawing the transparent pixels to the surface
             for(int k = 0; k < count_trans; k++, x++)
@@ -1371,13 +1391,13 @@ bool CFile::read_bob07()
         }
 
         // the end of line should be 0xFF, otherwise an error has ocurred (1 Byte)
-        freadChecked(&endmark, 1, 1, fp);
+        CHECK_READ(libendian::read(&endmark, 1, fp));
         if(endmark != 0xFF)
             return false;
     }
 
     // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has ocurred (1 Byte)
-    freadChecked(&endmark, 1, 1, fp);
+    CHECK_READ(libendian::read(&endmark, 1, fp));
     if(endmark != 0xFF)
         return false;
 
@@ -1419,19 +1439,19 @@ bool CFile::read_bob14()
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
     // length of datablock (1x 4 Bytes)
-    freadChecked(&length, 4, 1, fp);
+    CHECK_READ(libendian::le_read_ui(&length, fp));
     // start offset of data block
     data_start = ftell(fp);
     // jump to first offset after data block
     fseek(fp, length, SEEK_CUR);
     // coordinate for zeropoint x (2 Bytes)
-    freadChecked(&(bmpArray->nx), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->nx), fp));
     // coordinate for zeropoint y (2 Bytes)
-    freadChecked(&(bmpArray->ny), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->ny), fp));
     // width of picture (2 Bytes)
-    freadChecked(&(bmpArray->w), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->w), fp));
     // heigth of picture (2 Bytes)
-    freadChecked(&(bmpArray->h), 2, 1, fp);
+    CHECK_READ(libendian::le_read_us(&(bmpArray->h), fp));
     // skip unknown data (8x 1 Byte)
     fseek(fp, 8, SEEK_CUR);
 
@@ -1457,7 +1477,7 @@ bool CFile::read_bob14()
         for(int x = 0; x < bmpArray->w; x++)
         {
             // read color value (1 Byte)
-            freadChecked(&color_value, 1, 1, fp);
+            CHECK_READ(libendian::read(&color_value, 1, fp));
             // draw
             CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
         }
@@ -1471,14 +1491,4 @@ bool CFile::read_bob14()
     bmpArray++;
 
     return true;
-}
-
-inline void CFile::endian_swap(Uint16& x)
-{
-    x = SDL_Swap16(x);
-}
-
-inline void CFile::endian_swap(Uint32& x)
-{
-    x = SDL_Swap32(x);
 }

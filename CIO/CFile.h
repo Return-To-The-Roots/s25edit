@@ -46,9 +46,6 @@ private:
     static bool read_bob05();
     static bool read_bob07();
     static bool read_bob14();
-    // convert between big- and little-endian
-    static inline void endian_swap(Uint16& x);
-    static inline void endian_swap(Uint32& x);
 
 public:
     CFile();
