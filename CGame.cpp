@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     boost::filesystem::create_directories(global::userMapsPath, ec);
     if(ec)
     {
-        std::cerr << "Could not create " << global::userMapsPath << ": " << ec << std::endl;
+        std::cerr << "Could not create " << global::userMapsPath << ": " << ec.message() << std::endl;
         return 1;
     }
 
