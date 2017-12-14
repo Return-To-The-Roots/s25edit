@@ -90,7 +90,7 @@ void CGame::EventHandling(SDL_Event* Event)
 #endif
                 // F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
                 case SDLK_F5:
-                    if(TRIANGLE_INCREASE < 10)
+                    if(TRIANGLE_INCREASE < 10 && MapObj->getMap())
                     {
                         callback::PleaseWait(INITIALIZING_CALL);
                         TRIANGLE_HEIGHT += 5;
@@ -104,18 +104,21 @@ void CGame::EventHandling(SDL_Event* Event)
                     break;
                 case SDLK_F6:
                 {
-                    callback::PleaseWait(INITIALIZING_CALL);
-                    TRIANGLE_HEIGHT = 28;
-                    TRIANGLE_WIDTH = 56;
-                    TRIANGLE_INCREASE = 5;
-                    bobMAP* myMap = MapObj->getMap();
-                    myMap->updateVertexCoords();
-                    CSurface::get_nodeVectors(myMap);
-                    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                    if(MapObj->getMap())
+                    {
+                        callback::PleaseWait(INITIALIZING_CALL);
+                        TRIANGLE_HEIGHT = 28;
+                        TRIANGLE_WIDTH = 56;
+                        TRIANGLE_INCREASE = 5;
+                        bobMAP* myMap = MapObj->getMap();
+                        myMap->updateVertexCoords();
+                        CSurface::get_nodeVectors(myMap);
+                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                    }
                 }
                 break;
                 case SDLK_F7:
-                    if(TRIANGLE_INCREASE > 1)
+                    if(TRIANGLE_INCREASE > 1 && MapObj->getMap())
                     {
                         callback::PleaseWait(INITIALIZING_CALL);
                         TRIANGLE_HEIGHT -= 5;
