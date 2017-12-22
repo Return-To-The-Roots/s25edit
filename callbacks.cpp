@@ -12,6 +12,8 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <algorithm>
 
 void callback::PleaseWait(int Param)
@@ -819,7 +821,7 @@ void callback::EditorLoadMenu(int Param)
                 MapObj = global::s2->getMapObj();
 
                 TXTF_Filename = WNDLoad->addTextfield(10, 10, 21, 1);
-                TXTF_Filename->setText("MyMap.WLD");
+                TXTF_Filename->setText("MyMap");
                 WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Load");
                 WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "Abort");
             } else
@@ -849,6 +851,7 @@ void callback::EditorLoadMenu(int Param)
             break;
 
         case LOADMAP:
+        {
             PleaseWait(INITIALIZING_CALL);
 
             // we have to close the windows and initialize them again to prevent failures
@@ -862,7 +865,14 @@ void callback::EditorLoadMenu(int Param)
             EditorPlayerMenu(MAP_QUIT);
 
             MapObj->destructMap();
-            MapObj->constructMap(global::userMapsPath + "/" + TXTF_Filename->getText());
+            bfs::path filepath = bfs::path(global::userMapsPath) / TXTF_Filename->getText();
+            if(!filepath.has_extension())
+                filepath.replace_extension("SWD");
+            if(!bfs::exists(filepath))
+                filepath.replace_extension("WLD");
+            if(!bfs::exists(filepath))
+                filepath.replace_extension("SWD");
+            MapObj->constructMap(filepath.string());
 
             // we need to check which of these windows was active before
             /*
@@ -879,6 +889,7 @@ void callback::EditorLoadMenu(int Param)
             PleaseWait(WINDOW_QUIT_MESSAGE);
             EditorLoadMenu(WINDOWQUIT);
             break;
+        }
 
         default: break;
     }
@@ -911,7 +922,7 @@ void callback::EditorSaveMenu(int Param)
 
                 WNDSave->addText("Filename", 100, 2, 9);
                 TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
-                TXTF_Filename->setText("MyMap.WLD");
+                TXTF_Filename->setText("MyMap");
                 WNDSave->addText("Mapname", 98, 38, 9);
                 TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
                 TXTF_Mapname->setText(MapObj->getMapname());
@@ -956,7 +967,10 @@ void callback::EditorSaveMenu(int Param)
 
             MapObj->setMapname(TXTF_Mapname->getText());
             MapObj->setAuthor(TXTF_Author->getText());
-            bool result = CFile::save_file(global::userMapsPath + "/" + TXTF_Filename->getText(), WLD, MapObj->getMap());
+            bfs::path filepath = bfs::path(global::userMapsPath) / TXTF_Filename->getText();
+            if(!filepath.has_extension())
+                filepath.replace_extension("SWD");
+            bool result = CFile::save_file(filepath.string(), WLD, MapObj->getMap());
 
             ShowStatus(INITIALIZING_CALL);
             ShowStatus(result ? 1 : 2);
