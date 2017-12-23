@@ -11,6 +11,7 @@ CGame* global::s2;
 
 std::string global::gameDataFilePath(".");
 std::string global::userMapsPath("./WORLDS");
+WorldDescription global::worldDesc;
 
 unsigned char TRIANGLE_HEIGHT = 28;
 unsigned char TRIANGLE_WIDTH = 56;

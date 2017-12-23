@@ -2,6 +2,11 @@
 #define _DEFINES_H
 
 #include "commonDefines.h"
+#include "Point.h"
+#include "gameData/DescIdx.h"
+#include <vector>
+
+struct TerrainDesc;
 
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
 // in admin mode, there are some key combos to open debugger, resource viewer and so on
@@ -139,11 +144,6 @@ struct DisplayRectangle
     Sint32 x, y;
     Sint32 w, h;
 };
-template<typename T>
-struct Point
-{
-    T x, y;
-};
 typedef Point<Sint16> Point16;
 typedef Point<Sint32> Point32;
 // map strutcture
@@ -164,8 +164,9 @@ struct bobMAP
     char author[20];
     // 250 items from the big map header
     MapHeaderItem header[250];
-    MapNode* vertex;
+    std::vector<MapNode> vertex;
     MapNode& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
+    std::vector<DescIdx<TerrainDesc> > s2IdToTerrain;
     // Initializes or updates the vertex indices and coordinates
     void initVertexCoords();
     /// Updates x,y,z positions (e.g. after height change)

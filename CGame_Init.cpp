@@ -3,6 +3,7 @@
 #include "CSurface.h"
 #include "callbacks.h"
 #include "globals.h"
+#include "lua/GameDataLoader.h"
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
 #include <iostream>
@@ -80,6 +81,13 @@ bool CGame::Init()
     sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
                      surfSplash, 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1, surfSplash->w - 1, surfSplash->h - 1);
     SDL_Flip(Surf_Display);
+
+    GameDataLoader gdLoader(global::worldDesc);
+    if(!gdLoader.Load())
+    {
+        std::cerr << "Failed to load game data!" << std::endl;
+        return false;
+    }
 
     // continue loading pictures
     using namespace boost::assign;

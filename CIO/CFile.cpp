@@ -534,7 +534,7 @@ bool CFile::open_gou()
 
 bobMAP* CFile::open_wld()
 {
-    bobMAP* myMap = (bobMAP*)malloc(sizeof(bobMAP));
+    bobMAP* myMap = new bobMAP();
 
     if(myMap == NULL)
         return myMap;
@@ -573,11 +573,7 @@ bobMAP* CFile::open_wld()
     CHECK_READ(libendian::le_read_us(&myMap->width, fp));
     CHECK_READ(libendian::le_read_us(&myMap->height, fp));
 
-    if((myMap->vertex = (MapNode*)malloc(sizeof(MapNode) * myMap->width * myMap->height)) == NULL)
-    {
-        free(myMap);
-        return NULL;
-    }
+    myMap->vertex.resize(myMap->width * myMap->height);
 
     // go to altitude information (we skip the 16 bytes long map data header that each block has)
     fseek(fp, 16, SEEK_CUR);
@@ -1045,8 +1041,7 @@ bool CFile::read_bob02()
     }
 
     // array for start adresses of picture lines
-    if((starts = (Uint16*)malloc(bmpArray->h * sizeof(Uint16))) == NULL)
-        return false;
+    starts = new Uint16[bmpArray->h];
 
     // read start adresses
     for(int y = 0; y < bmpArray->h; y++)
@@ -1114,7 +1109,7 @@ bool CFile::read_bob02()
     // increment bmpArray for the next picture
     bmpArray++;
 
-    free(starts);
+    delete[] starts;
 
     return true;
 }
@@ -1216,8 +1211,7 @@ bool CFile::read_bob04(int player_color)
     }
 
     // array for start adresses of picture lines
-    if((starts = (Uint16*)malloc(bmpArray->h * sizeof(Uint16))) == NULL)
-        return false;
+    starts = new Uint16[bmpArray->h];
 
     // read start adresses
     for(int y = 0; y < bmpArray->h; y++)
@@ -1289,7 +1283,7 @@ bool CFile::read_bob04(int player_color)
     // increment bmpArray for the next picture
     bmpArray++;
 
-    free(starts);
+    delete[] starts;
 
     return true;
 }
@@ -1356,8 +1350,7 @@ bool CFile::read_bob07()
     }
 
     // array for start adresses of picture lines
-    if((starts = (Uint16*)malloc(shadowArray->h * sizeof(Uint16))) == NULL)
-        return false;
+    starts = new Uint16[shadowArray->h];
 
     // read start adresses
     for(int y = 0; y < shadowArray->h; y++)
@@ -1428,7 +1421,7 @@ bool CFile::read_bob07()
     // increment shadowArray
     shadowArray++;
 
-    free(starts);
+    delete[] starts;
 
     return true;
 }

@@ -118,7 +118,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
             for(int j = -MAX_CHANGE_SECTION; j <= MAX_CHANGE_SECTION - 1; j++)
                 VertexCounter++;
     }
-    Vertices = (struct cursorPoint*)malloc(VertexCounter * sizeof(struct cursorPoint));
+    Vertices.resize(VertexCounter);
     calculateVertices();
     setupVerticesActivity();
     mode = EDITOR_MODE_HEIGHT_RAISE;
@@ -129,12 +129,10 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     MaxRaiseHeight = 0x3C;
     MinReduceHeight = 0x00;
     saveCurrentVertices = false;
-    if((CurrPtr_savedVertices = (struct savedVertices*)malloc(sizeof(struct savedVertices))) != NULL)
-    {
-        CurrPtr_savedVertices->empty = true;
-        CurrPtr_savedVertices->prev = NULL;
-        CurrPtr_savedVertices->next = NULL;
-    }
+    CurrPtr_savedVertices = new SavedVertices;
+    CurrPtr_savedVertices->empty = true;
+    CurrPtr_savedVertices->prev = NULL;
+    CurrPtr_savedVertices->next = NULL;
 
     // we count the players, cause the original editor writes number of players to header no matter if they are set or not
     int CountPlayers = 0;
@@ -175,6 +173,26 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
 
     HorizontalMovementLocked = false;
     VerticalMovementLocked = false;
+
+    DescIdx<LandscapeDesc> lt(0);
+    for(DescIdx<LandscapeDesc> i(0); i.value < global::worldDesc.landscapes.size(); i.value++)
+    {
+        if(global::worldDesc.get(i).s2Id == map->type)
+        {
+            lt = i;
+            break;
+        }
+    }
+    for(DescIdx<TerrainDesc> i(0); i.value < global::worldDesc.terrain.size(); i.value++)
+    {
+        const TerrainDesc& t = global::worldDesc.get(i);
+        if(t.landscape == lt)
+        {
+            if(map->s2IdToTerrain.size() <= t.s2Id)
+                map->s2IdToTerrain.resize(t.s2Id + 1);
+            map->s2IdToTerrain[t.s2Id] = i;
+        }
+    }
 }
 void CMap::destructMap()
 {
@@ -192,9 +210,9 @@ void CMap::destructMap()
         while(CurrPtr_savedVertices->prev != NULL)
         {
             CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-            free(CurrPtr_savedVertices->next);
+            delete CurrPtr_savedVertices->next;
         }
-        free(CurrPtr_savedVertices);
+        delete CurrPtr_savedVertices;
     }
     // free the map surface
     SDL_FreeSurface(Surf_Map);
@@ -203,16 +221,14 @@ void CMap::destructMap()
     SDL_FreeSurface(Surf_RightMenubar);
     Surf_RightMenubar = NULL;
     // free vertex array
-    free(Vertices);
-    // free vertex memory
-    free(map->vertex);
+    Vertices.clear();
     // free map structure memory
-    free(map);
+    delete map;
 }
 
 bobMAP* CMap::generateMap(int width, int height, int type, int texture, int border, int border_texture)
 {
-    bobMAP* myMap = (bobMAP*)malloc(sizeof(bobMAP));
+    bobMAP* myMap = new bobMAP();
     if(!myMap)
         return NULL;
 
@@ -230,11 +246,7 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
         myMap->HQy[i] = 0xFFFF;
     }
 
-    if((myMap->vertex = (MapNode*)malloc(sizeof(MapNode) * myMap->width * myMap->height)) == NULL)
-    {
-        free(myMap);
-        return NULL;
-    }
+    myMap->vertex.resize(myMap->width * myMap->height);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -275,9 +287,7 @@ bobMAP* CMap::generateMap(int width, int height, int type, int texture, int bord
 void CMap::rotateMap()
 {
     // we allocate memory for the new triangle field but with x equals the height and y equals the width
-    MapNode* new_vertex = NULL;
-    if((new_vertex = (MapNode*)malloc(map->height * map->width * sizeof(MapNode))) == NULL)
-        return;
+    std::vector<MapNode> new_vertex(map->vertex.size());
 
     // free concatenated list for "undo" and "do"
     if(CurrPtr_savedVertices != NULL)
@@ -291,7 +301,7 @@ void CMap::rotateMap()
         while(CurrPtr_savedVertices->prev != NULL)
         {
             CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-            free(CurrPtr_savedVertices->next);
+            delete CurrPtr_savedVertices->next;
         }
         CurrPtr_savedVertices->next = NULL;
     }
@@ -306,8 +316,7 @@ void CMap::rotateMap()
     }
 
     // release old map and point to new
-    free(map->vertex);
-    map->vertex = new_vertex;
+    std::swap(map->vertex, new_vertex);
 
     // permute width and height
     Uint16 tmp_height = map->height;
@@ -1151,7 +1160,7 @@ void CMap::render()
     if(modify)
         modifyVertex();
 
-    if(map->vertex != NULL)
+    if(!map->vertex.empty())
         CSurface::DrawTriangleField(Surf_Map, displayRect, map);
 
         // draw pictures to cursor position
@@ -1538,13 +1547,11 @@ void CMap::modifyVertex()
             }
             if(CurrPtr_savedVertices->next == NULL)
             {
-                if((CurrPtr_savedVertices->next = (struct savedVertices*)malloc(sizeof(struct savedVertices))) != NULL)
-                {
-                    CurrPtr_savedVertices->next->empty = true;
-                    CurrPtr_savedVertices->next->prev = CurrPtr_savedVertices;
-                    CurrPtr_savedVertices->next->next = NULL;
-                    CurrPtr_savedVertices = CurrPtr_savedVertices->next;
-                }
+                CurrPtr_savedVertices->next = new SavedVertices;
+                CurrPtr_savedVertices->next->empty = true;
+                CurrPtr_savedVertices->next->prev = CurrPtr_savedVertices;
+                CurrPtr_savedVertices->next->next = NULL;
+                CurrPtr_savedVertices = CurrPtr_savedVertices->next;
             } else
                 CurrPtr_savedVertices = CurrPtr_savedVertices->next;
         }

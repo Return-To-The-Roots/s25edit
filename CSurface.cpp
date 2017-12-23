@@ -5,6 +5,34 @@
 #include <algorithm>
 #include <cassert>
 
+SDL_Rect rect2SDL_Rect(const Rect& rect)
+{
+    Point<Sint16> origin(rect.getOrigin());
+    Point<Uint16> size(rect.getSize());
+    SDL_Rect result{origin.x, origin.y, size.x, size.y};
+    return result;
+}
+
+void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, Point16 p3, SDL_Surface* source, const SDL_Rect& rect,
+                                    Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256])
+{
+    Sint16 right = rect.x + rect.w - 1;
+    Sint16 middle = rect.x + rect.w / Sint16(2);
+    Sint16 bottom = rect.y + rect.h - 1;
+    sge_PreCalcFadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom,
+                                            I1, I2, I2, PreCalcPalettes, &source->format->colorkey, 1);
+}
+
+void DrawFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, Point16 p3, SDL_Surface* source, const SDL_Rect& rect, Sint32 I1,
+                             Sint32 I2)
+{
+    Sint16 right = rect.x + rect.w - 1;
+    Sint16 middle = rect.x + rect.w / Sint16(2);
+    Sint16 bottom = rect.y + rect.h - 1;
+    sge_FadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom, I1,
+                                     I2, I2, &source->format->colorkey, 1);
+}
+
 bool CSurface::drawTextures = false;
 bool CSurface::useOpenGL = false;
 
@@ -464,6 +492,30 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     }
 }
 
+int CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Rect& borderRect)
+{
+    DescIdx<TerrainDesc> idxTop = map.s2IdToTerrain[s2Id1];
+    DescIdx<TerrainDesc> idxBottom = map.s2IdToTerrain[s2Id2];
+    if(idxTop == idxBottom)
+        return 0;
+    const TerrainDesc& t1 = global::worldDesc.get(idxTop);
+    const TerrainDesc& t2 = global::worldDesc.get(idxBottom);
+    if(t1.edgePriority > t2.edgePriority)
+    {
+        if(!t1.edgeType)
+            return 0;
+        borderRect = rect2SDL_Rect(global::worldDesc.get(t1.edgeType).posInTexture);
+        return 1;
+    } else if(t1.edgePriority < t2.edgePriority)
+    {
+        if(!t2.edgeType)
+            return 0;
+        borderRect = rect2SDL_Rect(global::worldDesc.get(t2.edgeType).posInTexture);
+        return -1;
+    }
+    return 0;
+}
+
 void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, MapNode P1, MapNode P2,
                             MapNode P3)
 {
@@ -579,9 +631,6 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
     // find out the texture for the triangle
     // upperX2, ..... are for special use in winterland.
     unsigned char upperX, upperY, leftX, leftY, rightX, rightY, upperX2 = 0, upperY2 = 0, leftX2 = 0, leftY2 = 0, rightX2 = 0, rightY2 = 0;
-    static SDL_Rect BorderRect, BorderRectSnow = {210, 176, 31, 9}, BorderRectMining = {210, 192, 31, 9},
-                                BorderRectSteppe = {210, 208, 31, 9}, BorderRectMeadow = {210, 224, 31, 9},
-                                BorderRectWater = {210, 240, 31, 9};
     Uint8 texture, texture_raw;
     SDL_Surface* Surf_Tileset;
 
@@ -967,293 +1016,54 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
     /// PRIORITY FROM HIGH TO LOW: SNOW, MINING_MEADOW, STEPPE, STEPPE_MEADOW2, MINING, MEADOW, FLOWER, STEPPE_MEADOW1, SWAMP, WATER, LAVA
     if(global::s2->getMapObj()->getRenderBorders())
     {
-        // we have to decide which border to blit, "left or right" or "top or bottom", therefore we are using two bool variables, the first
-        // is left/top, the second is right/bottom
-        bool Border1, Border2;
+        // we have to decide which border to blit, "left or right" or "top or bottom", therefore we are using an int: 0 = nothing,
+        // 1=left/top, -1=right/bottom
+        int borderSide;
+        SDL_Rect BorderRect;
         MapNode tempP;
         // RSU-Triangle
         if(P1.y < P2.y)
         {
-            // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
+            // decide which border to blit (top/bottom) - therefore get the usd-texture from left to compare
             Uint16 col = (P1.VertexX - 1 < 0 ? myMap->width - 1 : P1.VertexX - 1);
             tempP = myMap->getVertex(col, P1.VertexY);
 
-            // only if textures are not the same or textures are both mining or meadow
-            if(!((tempP.usdTexture == P1.rsuTexture)
-                 || ((tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2
-                      || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                      || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                     && (P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-                         || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                         || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR))
-                 || ((tempP.usdTexture == TRIANGLE_TEXTURE_MINING1 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || tempP.usdTexture == TRIANGLE_TEXTURE_MINING3 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING4)
-                     && (P1.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING2
-                         || P1.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING4))))
+            borderSide = CalcBorders(*myMap, tempP.usdTexture, P1.rsuTexture, BorderRect);
+            if(borderSide != 0)
             {
-                Border1 = false;
-                Border2 = false;
+                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
+                Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
+                Point16 tmpP1 = (borderSide > 0) ? shiftedP1 : shiftedP1 + Point16(1, 0);
+                Point16 tmpP2 = (borderSide > 0) ? shiftedP2 : shiftedP2 + Point16(1, 0);
 
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_WATER)
-                {
-                    BorderRect = BorderRectWater;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_WATER)
-                {
-                    BorderRect = BorderRectWater;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_SWAMP || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-                   || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_FLOWER
-                   || tempP.usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1
-                   || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2
-                   || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3
-                   || tempP.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                {
-                    BorderRect = BorderRectMeadow;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_SWAMP || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-                          || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_FLOWER
-                          || P1.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1
-                          || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-                          || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3
-                          || P1.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                {
-                    BorderRect = BorderRectMeadow;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_MINING1 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING2
-                   || tempP.usdTexture == TRIANGLE_TEXTURE_MINING3 || tempP.usdTexture == TRIANGLE_TEXTURE_MINING4)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING2
-                          || P1.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P1.rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_STEPPE)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_STEPPE)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW || tempP.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P1.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.usdTexture == TRIANGLE_TEXTURE_SNOW)
-                {
-                    BorderRect = BorderRectSnow;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P1.rsuTexture == TRIANGLE_TEXTURE_SNOW)
-                {
-                    BorderRect = BorderRectSnow;
-                    Border1 = false;
-                    Border2 = true;
-                }
-
-                if(Border1)
-                {
-                    // usd-right
-                    if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x + 5,
-                                                     shiftedP1.y + 3, shiftedP2.x + 5, shiftedP2.y + 1, Surf_Tileset, BorderRect.x,
-                                                     BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
-                                                     BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
-                                                     P1.shading << 8, P2.shading << 8, gouData[type]);
-                    else
-                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x + 5,
-                                              shiftedP1.y + 3, shiftedP2.x + 5, shiftedP2.y + 1, Surf_Tileset, BorderRect.x, BorderRect.y,
-                                              BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
-                                              BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P1.i, P2.i);
-                } else if(Border2)
-                {
-                    // rsu-left
-                    if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y + 2, shiftedP1.x - 5,
-                                                     shiftedP1.y - 3, shiftedP2.x - 5, shiftedP2.y - 1, Surf_Tileset, BorderRect.x,
-                                                     BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
-                                                     BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
-                                                     P1.shading << 8, P2.shading << 8, gouData[type]);
-                    else
-                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y + 2, shiftedP1.x - 5,
-                                              shiftedP1.y - 3, shiftedP2.x - 5, shiftedP2.y - 1, Surf_Tileset, BorderRect.x, BorderRect.y,
-                                              BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
-                                              BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P1.i, P2.i);
-                }
+                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
+                                                   gouData[type]);
+                else
+                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
         }
         // USD-Triangle
         else
         {
-            // only if textures are not the same or textures are both mining or meadow
-            if(!((P2.rsuTexture == P2.usdTexture)
-                 || ((P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-                      || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                      || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                     && (P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2
-                         || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                         || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR))
-                 || ((P2.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING2
-                      || P2.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                     && (P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2
-                         || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4))))
+            borderSide = CalcBorders(*myMap, P2.rsuTexture, P2.usdTexture, BorderRect);
+
+            if(borderSide != 0)
             {
-                Border1 = false;
-                Border2 = false;
+                Uint16 col = (P1.VertexX - 1 < 0 ? myMap->width - 1 : P1.VertexX - 1);
+                tempP = myMap->getVertex(col, P1.VertexY);
 
-                // decide which border to blit (left/right)
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_WATER)
-                {
-                    BorderRect = BorderRectWater;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_WATER)
-                {
-                    BorderRect = BorderRectWater;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_SWAMP || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-                   || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER
-                   || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1
-                   || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-                   || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3
-                   || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                {
-                    BorderRect = BorderRectMeadow;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_SWAMP || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-                          || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER
-                          || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                {
-                    BorderRect = BorderRectMeadow;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_MINING1 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING2
-                   || P2.rsuTexture == TRIANGLE_TEXTURE_MINING3 || P2.rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_STEPPE)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(P2.rsuTexture == TRIANGLE_TEXTURE_SNOW)
-                {
-                    BorderRect = BorderRectSnow;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_SNOW)
-                {
-                    BorderRect = BorderRectSnow;
-                    Border1 = false;
-                    Border2 = true;
-                }
+                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
+                Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
 
-                if(Border1)
-                {
-                    // rsu-right
-                    if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP1.x, shiftedP1.y + 2, shiftedP2.x, shiftedP2.y, shiftedP1.x + 5,
-                                                     shiftedP1.y - 1, shiftedP2.x + 5, shiftedP2.y - 3, Surf_Tileset, BorderRect.x,
-                                                     BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
-                                                     BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
-                                                     P1.shading << 8, P2.shading << 8, gouData[type]);
-                    else
-                        sge_FadedTexturedRect(display, shiftedP1.x, shiftedP1.y + 2, shiftedP2.x, shiftedP2.y, shiftedP1.x + 5,
-                                              shiftedP1.y - 1, shiftedP2.x + 5, shiftedP2.y - 3, Surf_Tileset, BorderRect.x, BorderRect.y,
-                                              BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
-                                              BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P1.i, P2.i);
-                } else if(Border2)
-                {
-                    // usd-left
-                    if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x, shiftedP1.y, shiftedP2.x - 5,
-                                                     shiftedP2.y + 1, shiftedP1.x - 5, shiftedP1.y + 3, Surf_Tileset, BorderRect.x,
-                                                     BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
-                                                     BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
-                                                     P2.shading << 8, P1.shading << 8, gouData[type]);
-                    else
-                        sge_FadedTexturedRect(display, shiftedP2.x, shiftedP2.y - 2, shiftedP1.x, shiftedP1.y, shiftedP2.x - 5,
-                                              shiftedP2.y + 1, shiftedP1.x - 5, shiftedP1.y + 3, Surf_Tileset, BorderRect.x, BorderRect.y,
-                                              BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
-                                              BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P2.i, P1.i);
-                }
+                Point16 tmpP1 = (borderSide < 0) ? shiftedP1 : shiftedP1 - Point16(1, 0);
+                Point16 tmpP2 = (borderSide < 0) ? shiftedP2 : shiftedP2 - Point16(1, 0);
+
+                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
+                                                   gouData[type]);
+                else
+                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
 
             // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
@@ -1261,165 +1071,16 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
             Uint16 col = (P2.VertexY % 2 == 0 ? P2.VertexX : (P2.VertexX + 1 > myMap->width - 1 ? 0 : P2.VertexX + 1));
             tempP = myMap->getVertex(col, row);
 
-            // only if textures are not the same or textures are both mining or meadow
-            if(!((tempP.rsuTexture == P2.usdTexture)
-                 || ((tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-                      || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                      || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                     && (P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2
-                         || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3 || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                         || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR))
-                 || ((tempP.rsuTexture == TRIANGLE_TEXTURE_MINING1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING2
-                      || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                     && (P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2
-                         || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4))))
+            borderSide = CalcBorders(*myMap, tempP.rsuTexture, P2.usdTexture, BorderRect);
+            if(borderSide != 0)
             {
-                Border1 = false;
-                Border2 = false;
-
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_WATER)
-                {
-                    BorderRect = BorderRectWater;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_WATER)
-                {
-                    BorderRect = BorderRectWater;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_SWAMP || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-                   || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_FLOWER
-                   || tempP.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1
-                   || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-                   || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3
-                   || tempP.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                {
-                    BorderRect = BorderRectMeadow;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_SWAMP || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-                          || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER
-                          || P2.usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR)
-                {
-                    BorderRect = BorderRectMeadow;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_MINING1 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING2
-                   || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING3 || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_MINING1 || P2.usdTexture == TRIANGLE_TEXTURE_MINING2
-                          || P2.usdTexture == TRIANGLE_TEXTURE_MINING3 || P2.usdTexture == TRIANGLE_TEXTURE_MINING4)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || P2.usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_STEPPE)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_STEPPE)
-                {
-                    BorderRect = BorderRectSteppe;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW || tempP.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW || P2.usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-                {
-                    BorderRect = BorderRectMining;
-                    Border1 = false;
-                    Border2 = true;
-                }
-                if(tempP.rsuTexture == TRIANGLE_TEXTURE_SNOW)
-                {
-                    BorderRect = BorderRectSnow;
-                    Border1 = true;
-                    Border2 = false;
-                } else if(P2.usdTexture == TRIANGLE_TEXTURE_SNOW)
-                {
-                    BorderRect = BorderRectSnow;
-                    Border1 = false;
-                    Border2 = true;
-                }
-
-                if(Border1)
-                {
-                    // rsu-down
-                    if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
-                                                     shiftedP2.y + 5, shiftedP3.x + 2, shiftedP3.y + 5, Surf_Tileset, BorderRect.x,
-                                                     BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
-                                                     BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
-                                                     P2.shading << 8, P3.shading << 8, gouData[type]);
-                    else
-                        sge_FadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
-                                              shiftedP2.y + 5, shiftedP3.x + 2, shiftedP3.y + 5, Surf_Tileset, BorderRect.x, BorderRect.y,
-                                              BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
-                                              BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P2.i, P3.i);
-                } else if(Border2)
-                {
-                    // usd-top
-                    if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                        sge_PreCalcFadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
-                                                     shiftedP2.y - 5, shiftedP3.x + 2, shiftedP3.y - 5, Surf_Tileset, BorderRect.x,
-                                                     BorderRect.y, BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x,
-                                                     BorderRect.y + BorderRect.h, BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h,
-                                                     P2.shading << 8, P3.shading << 8, gouData[type]);
-                    else
-                        sge_FadedTexturedRect(display, shiftedP2.x - 2, shiftedP2.y, shiftedP3.x + 2, shiftedP3.y, shiftedP2.x - 2,
-                                              shiftedP2.y - 5, shiftedP3.x + 2, shiftedP3.y - 5, Surf_Tileset, BorderRect.x, BorderRect.y,
-                                              BorderRect.x + BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y + BorderRect.h,
-                                              BorderRect.x + BorderRect.w, BorderRect.y + BorderRect.h, P2.i, P3.i);
-                }
-
-                /// all border-blit functions for copy&paste
-                // rsu-down
-                // sge_TexturedRect(display, P2.x-displayRect.x-2, P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y,
-                // P2.x-displayRect.x-2, P2.y-displayRect.y+5, P3.x-displayRect.x+2, P3.y-displayRect.y+5, Surf_Tileset, BorderRect.x,
-                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h,
-                // BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  rsu-left  sge_TexturedRect(display, P1.x-displayRect.x,
-                // P1.y-displayRect.y, P2.x-displayRect.x, P2.y-displayRect.y+2, P1.x-displayRect.x-5, P1.y-displayRect.y-3,
-                // P2.x-displayRect.x-5, P2.y-displayRect.y-1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w,
-                // BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  rsu-right
-                // sge_TexturedRect(display, P3.x-displayRect.x, P3.y-displayRect.y+2, P1.x-displayRect.x, P1.y-displayRect.y,
-                // P3.x-displayRect.x+5, P3.y-displayRect.y-1, P1.x-displayRect.x+5, P1.y-displayRect.y-3, Surf_Tileset, BorderRect.x,
-                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h,
-                // BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-top  sge_TexturedRect(display, P2.x-displayRect.x-2,
-                // P2.y-displayRect.y, P3.x-displayRect.x+2, P3.y-displayRect.y, P2.x-displayRect.x-2, P2.y-displayRect.y-5,
-                // P3.x-displayRect.x+2, P3.y-displayRect.y-5, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w,
-                // BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-left
-                // sge_TexturedRect(display, P1.x-displayRect.x, P1.y-displayRect.y-2, P2.x-displayRect.x, P2.y-displayRect.y,
-                // P1.x-displayRect.x-5, P1.y-displayRect.y+1, P2.x-displayRect.x-5, P2.y-displayRect.y+3, Surf_Tileset, BorderRect.x,
-                // BorderRect.y, BorderRect.x+BorderRect.w, BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h,
-                // BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);  usd-right  sge_TexturedRect(display, P3.x-displayRect.x,
-                // P3.y-displayRect.y, P1.x-displayRect.x, P1.y-displayRect.y-2, P3.x-displayRect.x+5, P3.y-displayRect.y+3,
-                // P1.x-displayRect.x+5, P1.y-displayRect.y+1, Surf_Tileset, BorderRect.x, BorderRect.y, BorderRect.x+BorderRect.w,
-                // BorderRect.y, BorderRect.x, BorderRect.y+BorderRect.h, BorderRect.x+BorderRect.w, BorderRect.y+BorderRect.h);
+                Point16 thirdPt = (borderSide > 0) ? shiftedP1 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
+                Point16 tipPt = (shiftedP2 + shiftedP3 + thirdPt) / Sint16(3);
+                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
+                    DrawPreCalcFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, P2.shading << 8,
+                                                   P3.shading << 8, gouData[type]);
+                else
+                    DrawFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, P2.i, P3.i);
             }
         }
     }

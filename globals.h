@@ -2,6 +2,7 @@
 #define _GLOBALS_H
 
 #include "includes.h"
+#include "gameData/WorldDescription.h"
 #include <vector>
 
 class CGame;
@@ -19,6 +20,7 @@ extern CGame* s2;
 extern std::string gameDataFilePath;
 // Path where maps will be stored (must not be empty!)
 extern std::string userMapsPath;
+extern WorldDescription worldDesc;
 } // namespace global
 
 extern unsigned char TRIANGLE_HEIGHT;

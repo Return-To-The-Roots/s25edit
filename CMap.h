@@ -32,7 +32,7 @@ private:
     bool modify;
     // necessary for "undo"- and "do"-function
     bool saveCurrentVertices;
-    struct savedVertices
+    struct SavedVertices
     {
         bool empty;
         int VertexX, VertexY;
@@ -41,8 +41,8 @@ private:
         // this ranges up to 10 vertices
         //+ 2 because modifications on a vertex will touch building and shading around
         MapNode PointsArroundVertex[((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1)];
-        struct savedVertices* prev;
-        struct savedVertices* next;
+        struct SavedVertices* prev;
+        struct SavedVertices* next;
     } * CurrPtr_savedVertices;
     // get the number of the triangle nearest to cursor and save it to VertexX and VertexY
     void saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
@@ -67,7 +67,7 @@ private:
     // counts how many vertices we have around the cursor (and including the cursor)
     int VertexCounter;
     // array to store all vertices (editor mode) --> after constructing class CMap this will have 'VertexCounter' elements
-    struct cursorPoint* Vertices;
+    std::vector<cursorPoint> Vertices;
     // these are the new (internal) values for player positions (otherwise we had to walk through the objectXXXX-Blocks step by step)
     Uint16 PlayerHQx[MAXPLAYERS];
     Uint16 PlayerHQy[MAXPLAYERS];
