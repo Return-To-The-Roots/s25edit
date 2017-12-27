@@ -230,6 +230,8 @@ int main(int argc, char* argv[])
 
     global::gameDataFilePath = RTTRCONFIG.ExpandPath("<RTTR_GAME>");
     global::userMapsPath = RTTRCONFIG.ExpandPath(FILE_PATHS[41]);
+    std::cout << "Expecting S2 game files in " << global::gameDataFilePath << std::endl;
+    std::cout << "Maps folder set to " << global::userMapsPath << std::endl;
     boost::system::error_code ec;
     boost::filesystem::create_directories(global::userMapsPath, ec);
     if(ec)
