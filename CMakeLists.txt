@@ -79,6 +79,10 @@ add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
 
 target_link_libraries(s25edit SGE rttrConfig s25Common endian nowide-static ${SDL_LIBRARY})
 
+if(MINGW)
+	target_link_libraries(s25edit -mconsole)
+endif()
+
 if(RTTR_BINDIR)
 	INSTALL(TARGETS s25edit RUNTIME DESTINATION ${RTTR_BINDIR})
 endif()

@@ -7,6 +7,7 @@
 #include "globals.h"
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
+#include <limits>
 
 //#include <vld.h>
 
@@ -219,12 +220,28 @@ void CGame::delMapObj()
     MapObj = NULL;
 }
 
+void WaitForEnter()
+{
+#ifndef _NDEBUG
+
+    static bool waited = false;
+    if(waited)
+        return;
+    waited = true;
+    std::cout << "\n\nPress ENTER to close this window . . ." << std::endl;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.get();
+#endif // !_NDEBUG
+}
+
 #undef main
 int main(int argc, char* argv[])
 {
     if(!RTTRCONFIG.Init())
     {
         std::cerr << "Failed to init program!" << std::endl;
+        WaitForEnter();
         return 1;
     }
 
@@ -237,6 +254,7 @@ int main(int argc, char* argv[])
     if(ec)
     {
         std::cerr << "Could not create " << global::userMapsPath << ": " << ec.message() << std::endl;
+        WaitForEnter();
         return 1;
     }
 
@@ -249,9 +267,11 @@ int main(int argc, char* argv[])
     {
         std::cerr << "Unhandled Exception" << std::endl;
         delete global::s2;
+        WaitForEnter();
         return 1;
     }
     delete global::s2;
 
+    WaitForEnter();
     return 0;
 }

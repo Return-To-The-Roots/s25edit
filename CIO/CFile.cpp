@@ -8,10 +8,10 @@
 #include <stdexcept>
 
 FILE* CFile::fp = NULL;
-bobBMP* CFile::bmpArray = &global::bmpArray[0];
-bobSHADOW* CFile::shadowArray = &global::shadowArray[0];
-bobPAL* CFile::palArray = &global::palArray[0];
-bobPAL* CFile::palActual = &global::palArray[0];
+bobBMP* CFile::bmpArray = NULL;
+bobSHADOW* CFile::shadowArray = NULL;
+bobPAL* CFile::palArray = NULL;
+bobPAL* CFile::palActual = NULL;
 bool CFile::loadPAL = false;
 
 #define STRINGIZE(x) STRINGIZE2(x)
@@ -24,6 +24,16 @@ bool CFile::loadPAL = false;
 CFile::CFile() {}
 
 CFile::~CFile() {}
+
+void CFile::init()
+{
+    fp = NULL;
+    bmpArray = &global::bmpArray[0];
+    shadowArray = &global::shadowArray[0];
+    palArray = &global::palArray[0];
+    palActual = &global::palArray[0];
+    loadPAL = false;
+}
 
 void* CFile::open_file(const std::string& filename, char filetype, bool only_loadPAL)
 {

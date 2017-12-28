@@ -24,6 +24,8 @@ public:
 
 private:
     // Methods
+    CFile();
+    ~CFile();
     static bool open_lst();
     static bool open_bob(); // not implemented yet
     static bool open_idx(const std::string& filename);
@@ -48,8 +50,7 @@ private:
     static bool read_bob14();
 
 public:
-    CFile();
-    ~CFile();
+    static void init();
     static void* open_file(const std::string& filename, char filetype, bool only_loadPAL = false);
     static bool save_file(const std::string& filename, char filetype, void* data);
 };

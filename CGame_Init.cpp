@@ -46,6 +46,8 @@ bool CGame::Init()
     SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", 0);
     SetAppIcon();
 
+    CFile::init();
+
     /*NOTE: its important to load a palette at first,
      *      otherwise all images will be black (in exception of the LBM-Files, they have their own palette).
      *      if its necessary to load pictures from a
