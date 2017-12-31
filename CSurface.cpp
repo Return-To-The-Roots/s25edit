@@ -9,7 +9,11 @@ SDL_Rect rect2SDL_Rect(const Rect& rect)
 {
     Point<Sint16> origin(rect.getOrigin());
     Point<Uint16> size(rect.getSize());
-    SDL_Rect result{origin.x, origin.y, size.x, size.y};
+    SDL_Rect result;
+    result.x = origin.x;
+    result.y = origin.y;
+    result.w = size.x;
+    result.h = size.y;
     return result;
 }
 
