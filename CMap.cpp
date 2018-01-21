@@ -6,6 +6,8 @@
 #include "boost/static_assert.hpp"
 #include "callbacks.h"
 #include "globals.h"
+#include "gameData/LandscapeDesc.h"
+#include "gameData/TerrainDesc.h"
 #include <iostream>
 #include <string>
 

@@ -1,7 +1,10 @@
 #include "CSurface.h"
 #include "CGame.h"
 #include "CMap.h"
+#include "Rect.h"
 #include "globals.h"
+#include "gameData/EdgeDesc.h"
+#include "gameData/TerrainDesc.h"
 #include <algorithm>
 #include <cassert>
 
