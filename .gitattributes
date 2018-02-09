@@ -13,6 +13,12 @@
 *.h text
 *.h++ text
 *.hh text
+*.sh text
+*.md text
+*.rc text
+*.def text
+*.depend text
+INSTALL text
 
 # Compiled Object files
 *.slo binary
@@ -39,3 +45,6 @@
 *.exe binary
 *.out binary
 *.app binary
+
+*.bat text eol=crlf
+*.sh text eol=lf
