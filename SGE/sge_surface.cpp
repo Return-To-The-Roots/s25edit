@@ -956,8 +956,7 @@ struct seg
             sp->dy = DY;                                                                         \
             sp++;                                                                                \
         }                                                                                        \
-    \
-}
+    }
 
 #define POP(Y, XL, XR, DY)  \
     {                       \
@@ -966,8 +965,7 @@ struct seg
         Y = sp->y + sp->dy; \
         XL = sp->xl;        \
         XR = sp->xr;        \
-    \
-}
+    }
 
 /*
  * set the pixel at (x,y) and all of its 4-connected neighbors
@@ -1045,8 +1043,8 @@ void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 //-V:DO_FILL:782
 /* Macro for 8/16/32 bpp */
 #define DO_FILL(UintXX, label)                                                                                   \
-    \
-{                                                                                                           \
+                                                                                                                 \
+    {                                                                                                            \
         Sint16 l, x1, x2, dy;                                                                                    \
         Uint32 oc;                   /* old pixel color */                                                       \
         seg stack[MAX], *sp = stack; /* stack of filled segments */                                              \
@@ -1098,8 +1096,8 @@ void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
                                                                                                                  \
                 if(x > x2 + 1)                                                                                   \
                     PUSH(y, x2 + 1, x - 1, -dy); /* leak on right? */                                            \
-            \
-label:                                                                                                           \
+                                                                                                                 \
+            label:                                                                                               \
                 pixel++;                                                                                         \
                                                                                                                  \
                 for(x++; x <= x2 && *pixel != oc; pixel++)                                                       \
@@ -1108,8 +1106,7 @@ label:                                                                          
                 l = x;                                                                                           \
             } while(x <= x2);                                                                                    \
         }                                                                                                        \
-    \
-}
+    }
 
 // Wrapper function
 void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
