@@ -111,9 +111,8 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
        && (motion.y < y_ + +global::bmpArray[WINDOW_UPPER_FRAME].h - 4))
     {
         // left button was pressed while moving
-        if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))
+        if(clicked)
             moving = true;
-        clicked = true;
     } else if(!moving)
         clicked = false;
 
@@ -209,10 +208,6 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
                 selectboxes[i]->setMouseData(motion);
         }
     }
-
-    // at least call the callback if a mouse button is pressed
-    if(motion.state == SDL_PRESSED)
-        callback_(WINDOW_CLICKED_CALL);
 
     needRender = true;
 }
