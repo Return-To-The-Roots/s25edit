@@ -10,20 +10,6 @@ void CGame::EventHandling(SDL_Event* Event)
 {
     switch(Event->type)
     {
-        case SDL_ACTIVEEVENT:
-        {
-            switch(Event->active.state)
-            {
-                case SDL_APPMOUSEFOCUS: { break;
-                }
-                case SDL_APPINPUTFOCUS: { break;
-                }
-                case SDL_APPACTIVE: { break;
-                }
-            }
-            break;
-        }
-
         case SDL_KEYDOWN:
         {
             // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
@@ -310,15 +296,6 @@ void CGame::EventHandling(SDL_Event* Event)
                     Menus[i]->setMouseData(Event->button);
             }
 
-            switch(Event->button.button)
-            {
-                case SDL_BUTTON_LEFT: { break;
-                }
-                case SDL_BUTTON_RIGHT: { break;
-                }
-                case SDL_BUTTON_MIDDLE: { break;
-                }
-            }
             break;
         }
 
@@ -389,38 +366,11 @@ void CGame::EventHandling(SDL_Event* Event)
                 if(Menus[i] != NULL && Menus[i]->isActive() && !Menus[i]->isWaste())
                     Menus[i]->setMouseData(Event->button);
             }
-
-            switch(Event->button.button)
-            {
-                case SDL_BUTTON_LEFT: { break;
-                }
-                case SDL_BUTTON_RIGHT: { break;
-                }
-                case SDL_BUTTON_MIDDLE: { break;
-                }
-            }
             break;
         }
 
-        case SDL_QUIT:
-        {
-            Running = false;
-            break;
-        }
+        case SDL_QUIT: Running = false; break;
 
-        case SDL_SYSWMEVENT:
-        {
-            // Ignore
-            break;
-        }
-
-        case SDL_VIDEORESIZE: { break;
-        }
-
-        case SDL_VIDEOEXPOSE: { break;
-        }
-
-        default: { break;
-        }
+        default: break;
     }
 }
