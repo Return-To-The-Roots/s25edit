@@ -5,9 +5,12 @@
 #include "RttrConfig.h"
 #include "files.h"
 #include "globals.h"
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/nowide/cstdio.hpp>
 #include <iostream>
 #include <limits>
+
+namespace bfs = boost::filesystem;
 
 //#include <vld.h>
 
@@ -235,18 +238,46 @@ void WaitForEnter()
 #endif // !_NDEBUG
 }
 
+bool checkWriteable(const bfs::path& folder)
+{
+    if(!bfs::exists(folder))
+    {
+        boost::system::error_code ec;
+        bfs::create_directories(folder, ec);
+        if(ec)
+            return false;
+    }
+    bfs::path testFileName = folder / bfs::unique_path();
+    FILE* fp = boost::nowide::fopen(testFileName.string().c_str(), "wb");
+    if(!fp)
+        return false;
+    fclose(fp);
+    bfs::remove(testFileName);
+    return true;
+}
+
 #undef main
 int main(int argc, char* argv[])
 {
     if(!RTTRCONFIG.Init())
     {
-        std::cerr << "Failed to init program!" << std::endl;
+        std::cerr << "FaileduserMapsPathto init program!" << std::endl;
         WaitForEnter();
         return 1;
     }
 
     global::gameDataFilePath = RTTRCONFIG.ExpandPath("<RTTR_GAME>");
-    global::userMapsPath = RTTRCONFIG.ExpandPath(FILE_PATHS[41]);
+    // Prefer application folder over user folder
+    global::userMapsPath = RTTRCONFIG.ExpandPath("WORLDS");
+    if(!checkWriteable(global::userMapsPath))
+    {
+        global::userMapsPath = RTTRCONFIG.ExpandPath(FILE_PATHS[41]);
+        if(!checkWriteable(global::userMapsPath))
+        {
+            std::cerr << "Could not find a writable folder for maps\nCheck " << global::userMapsPath << std::endl;
+            return 1;
+        }
+    }
     std::cout << "Expecting S2 game files in " << global::gameDataFilePath << std::endl;
     std::cout << "Maps folder set to " << global::userMapsPath << std::endl;
     boost::system::error_code ec;
