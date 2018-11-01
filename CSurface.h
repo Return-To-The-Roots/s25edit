@@ -19,11 +19,11 @@ public:
     static void DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
     static void DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     static Uint32 GetPixel(SDL_Surface* surface, int x, int y);
-    static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap);
-    static void DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, MapNode P1, MapNode P2,
-                             MapNode P3);
-    static void get_nodeVectors(bobMAP* myMap);
-    static void update_shading(bobMAP* myMap, int VertexX, int VertexY);
+    static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap);
+    static void DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, Uint8 type, const MapNode& P1,
+                             const MapNode& P2, const MapNode& P3);
+    static void get_nodeVectors(bobMAP& myMap);
+    static void update_shading(bobMAP& myMap, int VertexX, int VertexY);
 
     static bool useOpenGL;
 
@@ -37,9 +37,9 @@ private:
     static Sint32 get_LightIntensity(const vector& node);
     static float absf(float a);
     // update flatVectors around a vertex
-    static void update_flatVectors(bobMAP* myMap, int VertexX, int VertexY);
+    static void update_flatVectors(bobMAP& myMap, int VertexX, int VertexY);
     // update nodeVector based on new flatVectors around it
-    static void update_nodeVector(bobMAP* myMap, int VertexX, int VertexY);
+    static void update_nodeVector(bobMAP& myMap, int VertexX, int VertexY);
 };
 
 #endif

@@ -84,7 +84,7 @@ void CGame::EventHandling(SDL_Event* Event)
                         TRIANGLE_INCREASE += 1;
                         bobMAP* myMap = MapObj->getMap();
                         myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(myMap);
+                        CSurface::get_nodeVectors(*myMap);
                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     }
                     break;
@@ -98,7 +98,7 @@ void CGame::EventHandling(SDL_Event* Event)
                         TRIANGLE_INCREASE = 5;
                         bobMAP* myMap = MapObj->getMap();
                         myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(myMap);
+                        CSurface::get_nodeVectors(*myMap);
                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     }
                 }
@@ -112,7 +112,7 @@ void CGame::EventHandling(SDL_Event* Event)
                         TRIANGLE_INCREASE -= 1;
                         bobMAP* myMap = MapObj->getMap();
                         myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(myMap);
+                        CSurface::get_nodeVectors(*myMap);
                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     }
                     break;

@@ -166,6 +166,7 @@ struct bobMAP
     MapHeaderItem header[250];
     std::vector<MapNode> vertex;
     MapNode& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
+    const MapNode& getVertex(unsigned x, unsigned y) const { return vertex[y * width + x]; }
     std::vector<DescIdx<TerrainDesc> > s2IdToTerrain;
     // Initializes or updates the vertex indices and coordinates
     void initVertexCoords();

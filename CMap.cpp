@@ -80,7 +80,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     // load the right MAP0x.LST for all pictures
     loadMapPics();
 
-    CSurface::get_nodeVectors(map);
+    CSurface::get_nodeVectors(*map);
 #ifdef _EDITORMODE
     // for safety recalculate build and shadow data and test if fishes and water is correct
     for(int i = 0; i < map->height; i++)
@@ -367,7 +367,7 @@ void CMap::rotateMap()
             modifyBuild(x, y);
             modifyShading(x, y);
             modifyResource(x, y);
-            CSurface::update_shading(map, x, y);
+            CSurface::update_shading(*map, x, y);
         }
     }
 
@@ -400,7 +400,7 @@ void CMap::MirrorMapOnXAxis()
             modifyBuild(x, y);
             modifyShading(x, y);
             modifyResource(x, y);
-            CSurface::update_shading(map, x, y);
+            CSurface::update_shading(*map, x, y);
         }
     }
 }
@@ -429,7 +429,7 @@ void CMap::MirrorMapOnYAxis()
             modifyBuild(x, y);
             modifyShading(x, y);
             modifyResource(x, y);
-            CSurface::update_shading(map, x, y);
+            CSurface::update_shading(*map, x, y);
         }
     }
 }
@@ -1163,7 +1163,7 @@ void CMap::render()
         modifyVertex();
 
     if(!map->vertex.empty())
-        CSurface::DrawTriangleField(Surf_Map, displayRect, map);
+        CSurface::DrawTriangleField(Surf_Map, displayRect, *map);
 
         // draw pictures to cursor position
 #ifdef _EDITORMODE
@@ -1664,7 +1664,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     tempP->y -= TRIANGLE_INCREASE;
     tempP->z += TRIANGLE_INCREASE;
     tempP->h += 0x01;
-    CSurface::update_shading(map, VertexX, VertexY);
+    CSurface::update_shading(*map, VertexX, VertexY);
 
     // after (5*TRIANGLE_INCREASE) pixel all vertices around will be raised too
     // update first vertex left upside
@@ -1755,7 +1755,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     tempP->y += TRIANGLE_INCREASE;
     tempP->z -= TRIANGLE_INCREASE;
     tempP->h -= 0x01;
-    CSurface::update_shading(map, VertexX, VertexY);
+    CSurface::update_shading(*map, VertexX, VertexY);
     // after (5*TRIANGLE_INCREASE) pixel all vertices around will be reduced too
     // update first vertex left upside
     X = VertexX - (even ? 1 : 0);

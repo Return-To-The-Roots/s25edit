@@ -315,21 +315,21 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
     }
 }
 
-void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, bobMAP* myMap)
+void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap)
 {
-    Uint16 width = myMap->width;
-    Uint16 height = myMap->height;
-    Uint8 type = myMap->type;
+    Uint16 width = myMap.width;
+    Uint16 height = myMap.height;
+    Uint8 type = myMap.type;
     MapNode tempP1, tempP2, tempP3;
 
     // min size to avoid underflows
     if(width < 8 || height < 8)
         return;
 
-    assert(displayRect.x < myMap->width_pixel);
+    assert(displayRect.x < myMap.width_pixel);
     assert(-displayRect.x <= displayRect.w);
     assert(displayRect.x + displayRect.w > 0);
-    assert(displayRect.y < myMap->height_pixel);
+    assert(displayRect.y < myMap.height_pixel);
     assert(-displayRect.y <= displayRect.h);
     assert(displayRect.y + displayRect.h > 0);
 
@@ -365,19 +365,19 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         row_start = std::max(0, height - 1 - (-displayRect.y / TRIANGLE_HEIGHT) - 1);
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.y + displayRect.h) > myMap->height_pixel)
+                    } else if((displayRect.y + displayRect.h) > myMap.height_pixel)
                     {
                         row_start = 0;
-                        row_end = ((displayRect.y + displayRect.h) - myMap->height_pixel) / TRIANGLE_HEIGHT + 8;
+                        row_end = ((displayRect.y + displayRect.h) - myMap.height_pixel) / TRIANGLE_HEIGHT + 8;
                         view_outside_edges = true;
                     } else if(displayRect.y <= 2 * TRIANGLE_HEIGHT)
                     {
                         // this is for draw triangles that are reduced under the lower map edge (have bigger y-coords as
-                        // myMap->height_pixel)
+                        // myMap.height_pixel)
                         row_start = height - 3;
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.y + displayRect.h) >= (myMap->height_pixel - 8 * TRIANGLE_HEIGHT))
+                    } else if((displayRect.y + displayRect.h) >= (myMap.height_pixel - 8 * TRIANGLE_HEIGHT))
                     {
                         // this is for draw triangles that are raised over the upper map edge (have negative y-coords)
                         row_start = 0;
@@ -399,10 +399,10 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         col_start = width - 2;
                         col_end = width - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.x + displayRect.w) > myMap->width_pixel)
+                    } else if((displayRect.x + displayRect.w) > myMap.width_pixel)
                     {
                         col_start = 0;
-                        col_end = ((displayRect.x + displayRect.w) - myMap->width_pixel) / TRIANGLE_WIDTH + 1;
+                        col_end = ((displayRect.x + displayRect.w) - myMap.width_pixel) / TRIANGLE_WIDTH + 1;
                         view_outside_edges = true;
                     }
                 }
@@ -422,46 +422,46 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                 if(y % 2 == 0)
                 {
                     // first RightSideUp
-                    tempP2 = myMap->getVertex(width - 1, y + 1);
+                    tempP2 = myMap.getVertex(width - 1, y + 1);
                     tempP2.x = 0;
-                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(0, y), tempP2, myMap->getVertex(0, y + 1));
+                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(0, y), tempP2, myMap.getVertex(0, y + 1));
                     for(unsigned x = std::max(col_start, 1); x < width && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x, y), myMap->getVertex(x - 1, y + 1),
-                                     myMap->getVertex(x, y + 1));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x - 1, y + 1),
+                                     myMap.getVertex(x, y + 1));
                         // UpSideDown
                         if(x < width)
-                            DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x - 1, y + 1), myMap->getVertex(x - 1, y),
-                                         myMap->getVertex(x, y));
+                            DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), myMap.getVertex(x - 1, y),
+                                         myMap.getVertex(x, y));
                     }
                     // last UpSideDown
-                    tempP3 = myMap->getVertex(0, y);
-                    tempP3.x = myMap->getVertex(width - 1, y).x + TRIANGLE_WIDTH;
-                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, y + 1), myMap->getVertex(width - 1, y),
+                    tempP3 = myMap.getVertex(0, y);
+                    tempP3.x = myMap.getVertex(width - 1, y).x + TRIANGLE_WIDTH;
+                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1), myMap.getVertex(width - 1, y),
                                  tempP3);
                 } else
                 {
                     for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x, y), myMap->getVertex(x, y + 1),
-                                     myMap->getVertex(x + 1, y + 1));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x, y + 1),
+                                     myMap.getVertex(x + 1, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x + 1, y + 1), myMap->getVertex(x, y),
-                                     myMap->getVertex(x + 1, y));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1), myMap.getVertex(x, y),
+                                     myMap.getVertex(x + 1, y));
                     }
                     // last RightSideUp
-                    tempP3 = myMap->getVertex(0, y + 1);
-                    tempP3.x = myMap->getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
-                    DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, y), myMap->getVertex(width - 1, y + 1),
+                    tempP3 = myMap.getVertex(0, y + 1);
+                    tempP3.x = myMap.getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
+                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y), myMap.getVertex(width - 1, y + 1),
                                  tempP3);
                     // last UpSideDown
-                    tempP1 = myMap->getVertex(0, y + 1);
-                    tempP1.x = myMap->getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
-                    tempP3 = myMap->getVertex(0, y);
-                    tempP3.x = myMap->getVertex(width - 1, y).x + TRIANGLE_WIDTH;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, y), tempP3);
+                    tempP1 = myMap.getVertex(0, y + 1);
+                    tempP1.x = myMap.getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
+                    tempP3 = myMap.getVertex(0, y);
+                    tempP3.x = myMap.getVertex(width - 1, y).x + TRIANGLE_WIDTH;
+                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
                 }
             }
 
@@ -469,33 +469,32 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
             {
                 // RightSideUp
-                tempP2 = myMap->getVertex(x, 0);
-                tempP2.y = height * TRIANGLE_HEIGHT + myMap->getVertex(x, 0).y;
-                tempP3 = myMap->getVertex(x + 1, 0);
-                tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(x, height - 1), tempP2, tempP3);
+                tempP2 = myMap.getVertex(x, 0);
+                tempP2.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x, 0).y;
+                tempP3 = myMap.getVertex(x + 1, 0);
+                tempP3.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x + 1, 0).y;
+                DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, height - 1), tempP2, tempP3);
                 // UpSideDown
-                tempP1 = myMap->getVertex(x + 1, 0);
-                tempP1.y = height * TRIANGLE_HEIGHT + myMap->getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(x, height - 1),
-                             myMap->getVertex(x + 1, height - 1));
+                tempP1 = myMap.getVertex(x + 1, 0);
+                tempP1.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x + 1, 0).y;
+                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1), myMap.getVertex(x + 1, height - 1));
             }
         }
 
         // last RightSideUp
-        tempP2 = myMap->getVertex(width - 1, 0);
+        tempP2 = myMap.getVertex(width - 1, 0);
         tempP2.y += height * TRIANGLE_HEIGHT;
-        tempP3 = myMap->getVertex(0, 0);
-        tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
+        tempP3 = myMap.getVertex(0, 0);
+        tempP3.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
         tempP3.y += height * TRIANGLE_HEIGHT;
-        DrawTriangle(display, displayRect, myMap, type, myMap->getVertex(width - 1, height - 1), tempP2, tempP3);
+        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
         // last UpSideDown
-        tempP1 = myMap->getVertex(0, 0);
-        tempP1.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
+        tempP1 = myMap.getVertex(0, 0);
+        tempP1.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
         tempP1.y += height * TRIANGLE_HEIGHT;
-        tempP3 = myMap->getVertex(0, height - 1);
-        tempP3.x = myMap->getVertex(width - 1, height - 1).x + TRIANGLE_WIDTH;
-        DrawTriangle(display, displayRect, myMap, type, tempP1, myMap->getVertex(width - 1, height - 1), tempP3);
+        tempP3 = myMap.getVertex(0, height - 1);
+        tempP3.x = myMap.getVertex(width - 1, height - 1).x + TRIANGLE_WIDTH;
+        DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, height - 1), tempP3);
     }
 }
 
@@ -523,14 +522,17 @@ int CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Rect& borderRec
     return 0;
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, bobMAP* myMap, Uint8 type, MapNode P1, MapNode P2,
-                            MapNode P3)
+void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, Uint8 type,
+                            const MapNode& node1, const MapNode& node2, const MapNode& node3)
 {
+    Point32 p1(node1.x, node1.y);
+    Point32 p2(node2.x, node2.y);
+    Point32 p3(node3.x, node3.y);
     // prevent drawing triangles that are not shown
-    if(((P1.x < displayRect.x && P2.x < displayRect.x && P3.x < displayRect.x)
-        || (P1.x > (displayRect.x + displayRect.w) && P2.x > (displayRect.x + displayRect.w) && P3.x > (displayRect.x + displayRect.w)))
-       || ((P1.y < displayRect.y && P2.y < displayRect.y && P3.y < displayRect.y)
-           || (P1.y > (displayRect.y + displayRect.h) && P2.y > (displayRect.y + displayRect.h) && P3.y > (displayRect.y + displayRect.h))))
+    if(((p1.x < displayRect.x && p2.x < displayRect.x && p3.x < displayRect.x)
+        || (p1.x > (displayRect.x + displayRect.w) && p2.x > (displayRect.x + displayRect.w) && p3.x > (displayRect.x + displayRect.w)))
+       || ((p1.y < displayRect.y && p2.y < displayRect.y && p3.y < displayRect.y)
+           || (p1.y > (displayRect.y + displayRect.h) && p2.y > (displayRect.y + displayRect.h) && p3.y > (displayRect.y + displayRect.h))))
     {
         bool triangle_shown = false;
 
@@ -538,39 +540,39 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
         {
             int outside_x = displayRect.x;
             int outside_w = -displayRect.x;
-            if((((P1.x - myMap->width_pixel) >= (outside_x)) && ((P1.x - myMap->width_pixel) <= (outside_x + outside_w)))
-               || (((P2.x - myMap->width_pixel) >= (outside_x)) && ((P2.x - myMap->width_pixel) <= (outside_x + outside_w)))
-               || (((P3.x - myMap->width_pixel) >= (outside_x)) && ((P3.x - myMap->width_pixel) <= (outside_x + outside_w))))
+            if((((p1.x - myMap.width_pixel) >= (outside_x)) && ((p1.x - myMap.width_pixel) <= (outside_x + outside_w)))
+               || (((p2.x - myMap.width_pixel) >= (outside_x)) && ((p2.x - myMap.width_pixel) <= (outside_x + outside_w)))
+               || (((p3.x - myMap.width_pixel) >= (outside_x)) && ((p3.x - myMap.width_pixel) <= (outside_x + outside_w))))
             {
-                P1.x -= myMap->width_pixel;
-                P2.x -= myMap->width_pixel;
-                P3.x -= myMap->width_pixel;
+                p1.x -= myMap.width_pixel;
+                p2.x -= myMap.width_pixel;
+                p3.x -= myMap.width_pixel;
                 triangle_shown = true;
             }
         } else if(displayRect.x < TRIANGLE_WIDTH)
         {
             int outside_x = displayRect.x;
             int outside_w = TRIANGLE_WIDTH;
-            if((((P1.x - myMap->width_pixel) >= (outside_x)) && ((P1.x - myMap->width_pixel) <= (outside_x + outside_w)))
-               || (((P2.x - myMap->width_pixel) >= (outside_x)) && ((P2.x - myMap->width_pixel) <= (outside_x + outside_w)))
-               || (((P3.x - myMap->width_pixel) >= (outside_x)) && ((P3.x - myMap->width_pixel) <= (outside_x + outside_w))))
+            if((((p1.x - myMap.width_pixel) >= (outside_x)) && ((p1.x - myMap.width_pixel) <= (outside_x + outside_w)))
+               || (((p2.x - myMap.width_pixel) >= (outside_x)) && ((p2.x - myMap.width_pixel) <= (outside_x + outside_w)))
+               || (((p3.x - myMap.width_pixel) >= (outside_x)) && ((p3.x - myMap.width_pixel) <= (outside_x + outside_w))))
             {
-                P1.x -= myMap->width_pixel;
-                P2.x -= myMap->width_pixel;
-                P3.x -= myMap->width_pixel;
+                p1.x -= myMap.width_pixel;
+                p2.x -= myMap.width_pixel;
+                p3.x -= myMap.width_pixel;
                 triangle_shown = true;
             }
-        } else if((displayRect.x + displayRect.w) > (myMap->width_pixel))
+        } else if((displayRect.x + displayRect.w) > (myMap.width_pixel))
         {
-            int outside_x = myMap->width_pixel;
-            int outside_w = displayRect.x + displayRect.w - myMap->width_pixel;
-            if((((P1.x + myMap->width_pixel) >= (outside_x)) && ((P1.x + myMap->width_pixel) <= (outside_x + outside_w)))
-               || (((P2.x + myMap->width_pixel) >= (outside_x)) && ((P2.x + myMap->width_pixel) <= (outside_x + outside_w)))
-               || (((P3.x + myMap->width_pixel) >= (outside_x)) && ((P3.x + myMap->width_pixel) <= (outside_x + outside_w))))
+            int outside_x = myMap.width_pixel;
+            int outside_w = displayRect.x + displayRect.w - myMap.width_pixel;
+            if((((p1.x + myMap.width_pixel) >= (outside_x)) && ((p1.x + myMap.width_pixel) <= (outside_x + outside_w)))
+               || (((p2.x + myMap.width_pixel) >= (outside_x)) && ((p2.x + myMap.width_pixel) <= (outside_x + outside_w)))
+               || (((p3.x + myMap.width_pixel) >= (outside_x)) && ((p3.x + myMap.width_pixel) <= (outside_x + outside_w))))
             {
-                P1.x += myMap->width_pixel;
-                P2.x += myMap->width_pixel;
-                P3.x += myMap->width_pixel;
+                p1.x += myMap.width_pixel;
+                p2.x += myMap.width_pixel;
+                p3.x += myMap.width_pixel;
                 triangle_shown = true;
             }
         }
@@ -579,54 +581,54 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
         {
             int outside_y = displayRect.y;
             int outside_h = -displayRect.y;
-            if((((P1.y - myMap->height_pixel) >= (outside_y)) && ((P1.y - myMap->height_pixel) <= (outside_y + outside_h)))
-               || (((P2.y - myMap->height_pixel) >= (outside_y)) && ((P2.y - myMap->height_pixel) <= (outside_y + outside_h)))
-               || (((P3.y - myMap->height_pixel) >= (outside_y)) && ((P3.y - myMap->height_pixel) <= (outside_y + outside_h))))
+            if((((p1.y - myMap.height_pixel) >= (outside_y)) && ((p1.y - myMap.height_pixel) <= (outside_y + outside_h)))
+               || (((p2.y - myMap.height_pixel) >= (outside_y)) && ((p2.y - myMap.height_pixel) <= (outside_y + outside_h)))
+               || (((p3.y - myMap.height_pixel) >= (outside_y)) && ((p3.y - myMap.height_pixel) <= (outside_y + outside_h))))
             {
-                P1.y -= myMap->height_pixel;
-                P2.y -= myMap->height_pixel;
-                P3.y -= myMap->height_pixel;
+                p1.y -= myMap.height_pixel;
+                p2.y -= myMap.height_pixel;
+                p3.y -= myMap.height_pixel;
                 triangle_shown = true;
             }
-        } else if((displayRect.y + displayRect.h) > (myMap->height_pixel))
+        } else if((displayRect.y + displayRect.h) > (myMap.height_pixel))
         {
-            int outside_y = myMap->height_pixel;
-            int outside_h = displayRect.y + displayRect.h - myMap->height_pixel;
-            if((((P1.y + myMap->height_pixel) >= (outside_y)) && ((P1.y + myMap->height_pixel) <= (outside_y + outside_h)))
-               || (((P2.y + myMap->height_pixel) >= (outside_y)) && ((P2.y + myMap->height_pixel) <= (outside_y + outside_h)))
-               || (((P3.y + myMap->height_pixel) >= (outside_y)) && ((P3.y + myMap->height_pixel) <= (outside_y + outside_h))))
+            int outside_y = myMap.height_pixel;
+            int outside_h = displayRect.y + displayRect.h - myMap.height_pixel;
+            if((((p1.y + myMap.height_pixel) >= (outside_y)) && ((p1.y + myMap.height_pixel) <= (outside_y + outside_h)))
+               || (((p2.y + myMap.height_pixel) >= (outside_y)) && ((p2.y + myMap.height_pixel) <= (outside_y + outside_h)))
+               || (((p3.y + myMap.height_pixel) >= (outside_y)) && ((p3.y + myMap.height_pixel) <= (outside_y + outside_h))))
             {
-                P1.y += myMap->height_pixel;
-                P2.y += myMap->height_pixel;
-                P3.y += myMap->height_pixel;
+                p1.y += myMap.height_pixel;
+                p2.y += myMap.height_pixel;
+                p3.y += myMap.height_pixel;
                 triangle_shown = true;
             }
         }
 
         // now test if triangle has negative y-coords cause it's raised over the upper map edge
-        if(P1.y < 0 || P2.y < 0 || P3.y < 0)
+        if(p1.y < 0 || p2.y < 0 || p3.y < 0)
         {
-            if((((P1.y + myMap->height_pixel) >= displayRect.y) && ((P1.y + myMap->height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((P2.y + myMap->height_pixel) >= displayRect.y) && ((P2.y + myMap->height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((P3.y + myMap->height_pixel) >= displayRect.y) && ((P3.y + myMap->height_pixel) <= (displayRect.y + displayRect.h))))
+            if((((p1.y + myMap.height_pixel) >= displayRect.y) && ((p1.y + myMap.height_pixel) <= (displayRect.y + displayRect.h)))
+               || (((p2.y + myMap.height_pixel) >= displayRect.y) && ((p2.y + myMap.height_pixel) <= (displayRect.y + displayRect.h)))
+               || (((p3.y + myMap.height_pixel) >= displayRect.y) && ((p3.y + myMap.height_pixel) <= (displayRect.y + displayRect.h))))
             {
-                P1.y += myMap->height_pixel;
-                P2.y += myMap->height_pixel;
-                P3.y += myMap->height_pixel;
+                p1.y += myMap.height_pixel;
+                p2.y += myMap.height_pixel;
+                p3.y += myMap.height_pixel;
                 triangle_shown = true;
             }
         }
 
-        // now test if triangle has bigger y-coords as myMap->height_pixel cause it's reduced under the lower map edge
-        if(P1.y > myMap->height_pixel || P2.y > myMap->height_pixel || P3.y > myMap->height_pixel)
+        // now test if triangle has bigger y-coords as myMap.height_pixel cause it's reduced under the lower map edge
+        if(p1.y > myMap.height_pixel || p2.y > myMap.height_pixel || p3.y > myMap.height_pixel)
         {
-            if((((P1.y - myMap->height_pixel) >= displayRect.y) && ((P1.y - myMap->height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((P2.y - myMap->height_pixel) >= displayRect.y) && ((P2.y - myMap->height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((P3.y - myMap->height_pixel) >= displayRect.y) && ((P3.y - myMap->height_pixel) <= (displayRect.y + displayRect.h))))
+            if((((p1.y - myMap.height_pixel) >= displayRect.y) && ((p1.y - myMap.height_pixel) <= (displayRect.y + displayRect.h)))
+               || (((p2.y - myMap.height_pixel) >= displayRect.y) && ((p2.y - myMap.height_pixel) <= (displayRect.y + displayRect.h)))
+               || (((p3.y - myMap.height_pixel) >= displayRect.y) && ((p3.y - myMap.height_pixel) <= (displayRect.y + displayRect.h))))
             {
-                P1.y -= myMap->height_pixel;
-                P2.y -= myMap->height_pixel;
-                P3.y -= myMap->height_pixel;
+                p1.y -= myMap.height_pixel;
+                p2.y -= myMap.height_pixel;
+                p3.y -= myMap.height_pixel;
                 triangle_shown = true;
             }
         }
@@ -690,22 +692,18 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
             break;
     }
 
-    if(P1.y < P2.y)
-        texture = P1.rsuTexture;
+    if(p1.y < p2.y)
+        texture = node1.rsuTexture;
     else
-        texture = P2.usdTexture;
+        texture = node2.usdTexture;
     texture_raw = texture;
     if(texture_raw >= 0x40)
         // it's a harbour
         texture_raw -= 0x40;
 
-    Point16 shiftedP1, shiftedP2, shiftedP3;
-    shiftedP1.x = static_cast<Sint16>(P1.x - displayRect.x);
-    shiftedP1.y = static_cast<Sint16>(P1.y - displayRect.y);
-    shiftedP2.x = static_cast<Sint16>(P2.x - displayRect.x);
-    shiftedP2.y = static_cast<Sint16>(P2.y - displayRect.y);
-    shiftedP3.x = static_cast<Sint16>(P3.x - displayRect.x);
-    shiftedP3.y = static_cast<Sint16>(P3.y - displayRect.y);
+    const Point16 shiftedP1(p1 - Point32(displayRect.x, displayRect.y));
+    const Point16 shiftedP2(p2 - Point32(displayRect.x, displayRect.y));
+    const Point16 shiftedP3(p3 - Point32(displayRect.x, displayRect.y));
 
     if(drawTextures)
     {
@@ -729,7 +727,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 rightY = 78;
                 break;
             case TRIANGLE_TEXTURE_SNOW:
-                if(P1.y < P2.y)
+                if(p1.y < p2.y)
                 {
                     upperX = 17;
                     upperY = 0;
@@ -748,7 +746,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 }
                 if(type == MAP_WINTERLAND)
                 {
-                    if(P1.y < P2.y)
+                    if(p1.y < p2.y)
                     {
                         upperX2 = 231 - texture_move;
                         upperY2 = 61 + texture_move;
@@ -776,7 +774,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 rightY = 30;
                 if(type == MAP_WINTERLAND)
                 {
-                    if(P1.y < P2.y)
+                    if(p1.y < p2.y)
                     {
                         upperX2 = 231 - texture_move;
                         upperY2 = 61 + texture_move;
@@ -828,7 +826,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 rightY = 30;
                 break;
             case TRIANGLE_TEXTURE_WATER:
-                if(P1.y < P2.y)
+                if(p1.y < p2.y)
                 {
                     upperX = 231 - texture_move;
                     upperY = 61 + texture_move;
@@ -847,7 +845,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 }
                 break;
             case TRIANGLE_TEXTURE_WATER_:
-                if(P1.y < P2.y)
+                if(p1.y < p2.y)
                 {
                     upperX = 231 - texture_move;
                     upperY = 61 + texture_move;
@@ -866,7 +864,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 }
                 break;
             case TRIANGLE_TEXTURE_WATER__:
-                if(P1.y < P2.y)
+                if(p1.y < p2.y)
                 {
                     upperX = 231 - texture_move;
                     upperY = 61 + texture_move;
@@ -949,7 +947,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 rightY = 30;
                 break;
             case TRIANGLE_TEXTURE_LAVA:
-                if(P1.y < P2.y)
+                if(p1.y < p2.y)
                 {
                     upperX = 231 - texture_move;
                     upperY = 117 + texture_move;
@@ -998,22 +996,23 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset,
                                    upperX2, upperY2, leftX2, leftY2, rightX2, rightY2);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(
-                      display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset, upperX, upperY,
-                      leftX, leftY, rightX, rightY, P1.shading << 8, P2.shading << 8, P3.shading << 8, gouData[type], colorkeys, keycount);
+                    sge_PreCalcFadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x,
+                                                            shiftedP3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY,
+                                                            node1.shading << 8, node2.shading << 8, node3.shading << 8, gouData[type],
+                                                            colorkeys, keycount);
                 else
                     sge_FadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                                     Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i, P2.i, P3.i,
+                                                     Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, node1.i, node2.i, node3.i,
                                                      colorkeys, keycount);
             } else
             {
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     sge_PreCalcFadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                                   Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.shading << 8,
-                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
+                                                   Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, node1.shading << 8,
+                                                   node2.shading << 8, node3.shading << 8, gouData[type]);
                 else
                     sge_FadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                            Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, P1.i, P2.i, P3.i);
+                                            Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, node1.i, node2.i, node3.i);
             }
         }
         return;
@@ -1029,13 +1028,13 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
         SDL_Rect BorderRect;
         MapNode tempP;
         // RSU-Triangle
-        if(P1.y < P2.y)
+        if(p1.y < p2.y)
         {
             // decide which border to blit (top/bottom) - therefore get the usd-texture from left to compare
-            Uint16 col = (P1.VertexX - 1 < 0 ? myMap->width - 1 : P1.VertexX - 1);
-            tempP = myMap->getVertex(col, P1.VertexY);
+            Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
+            tempP = myMap.getVertex(col, node1.VertexY);
 
-            borderSide = CalcBorders(*myMap, tempP.usdTexture, P1.rsuTexture, BorderRect);
+            borderSide = CalcBorders(myMap, tempP.usdTexture, node1.rsuTexture, BorderRect);
             if(borderSide != 0)
             {
                 Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
@@ -1044,21 +1043,21 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 Point16 tmpP2 = (borderSide > 0) ? shiftedP2 : shiftedP2 + Point16(1, 0);
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
-                                                   gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.shading << 8,
+                                                   node2.shading << 8, gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
+                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.i, node2.i);
             }
         }
         // USD-Triangle
         else
         {
-            borderSide = CalcBorders(*myMap, P2.rsuTexture, P2.usdTexture, BorderRect);
+            borderSide = CalcBorders(myMap, node2.rsuTexture, node2.usdTexture, BorderRect);
 
             if(borderSide != 0)
             {
-                Uint16 col = (P1.VertexX - 1 < 0 ? myMap->width - 1 : P1.VertexX - 1);
-                tempP = myMap->getVertex(col, P1.VertexY);
+                Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
+                tempP = myMap.getVertex(col, node1.VertexY);
 
                 Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
                 Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
@@ -1067,110 +1066,110 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 Point16 tmpP2 = (borderSide < 0) ? shiftedP2 : shiftedP2 - Point16(1, 0);
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
-                                                   gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.shading << 8,
+                                                   node2.shading << 8, gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
+                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.i, node2.i);
             }
 
             // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
-            Uint16 row = (P2.VertexY - 1 < 0 ? myMap->height - 1 : P2.VertexY - 1);
-            Uint16 col = (P2.VertexY % 2 == 0 ? P2.VertexX : (P2.VertexX + 1 > myMap->width - 1 ? 0 : P2.VertexX + 1));
-            tempP = myMap->getVertex(col, row);
+            Uint16 row = (node2.VertexY - 1 < 0 ? myMap.height - 1 : node2.VertexY - 1);
+            Uint16 col = (node2.VertexY % 2 == 0 ? node2.VertexX : (node2.VertexX + 1 > myMap.width - 1 ? 0 : node2.VertexX + 1));
+            tempP = myMap.getVertex(col, row);
 
-            borderSide = CalcBorders(*myMap, tempP.rsuTexture, P2.usdTexture, BorderRect);
+            borderSide = CalcBorders(myMap, tempP.rsuTexture, node2.usdTexture, BorderRect);
             if(borderSide != 0)
             {
                 Point16 thirdPt = (borderSide > 0) ? shiftedP1 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
                 Point16 tipPt = (shiftedP2 + shiftedP3 + thirdPt) / Sint16(3);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, P2.shading << 8,
-                                                   P3.shading << 8, gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, node2.shading << 8,
+                                                   node3.shading << 8, gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, P2.i, P3.i);
+                    DrawFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, node2.i, node3.i);
             }
         }
     }
 
-    // blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT P1 ON RIGHTSIDEUP-TRIANGLES
+    // blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT node1 ON RIGHTSIDEUP-TRIANGLES
 
     // blit objects
-    if(P2.y < P1.y)
+    if(p2.y < p1.y)
     {
         int objIdx = 0;
-        switch(P2.objectInfo)
+        switch(node2.objectInfo)
         {
             // tree
             case 0xC4:
-                if(P2.objectType >= 0x30 && P2.objectType <= 0x37)
+                if(node2.objectType >= 0x30 && node2.objectType <= 0x37)
                 {
-                    if(P2.objectType + roundCount > 0x37)
-                        objIdx = MAPPIC_TREE_PINE + (P2.objectType - 0x30) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0x37)
+                        objIdx = MAPPIC_TREE_PINE + (node2.objectType - 0x30) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PINE + (P2.objectType - 0x30) + roundCount;
+                        objIdx = MAPPIC_TREE_PINE + (node2.objectType - 0x30) + roundCount;
 
-                } else if(P2.objectType >= 0x70 && P2.objectType <= 0x77)
+                } else if(node2.objectType >= 0x70 && node2.objectType <= 0x77)
                 {
-                    if(P2.objectType + roundCount > 0x77)
-                        objIdx = MAPPIC_TREE_BIRCH + (P2.objectType - 0x70) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0x77)
+                        objIdx = MAPPIC_TREE_BIRCH + (node2.objectType - 0x70) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_BIRCH + (P2.objectType - 0x70) + roundCount;
-                } else if(P2.objectType >= 0xB0 && P2.objectType <= 0xB7)
+                        objIdx = MAPPIC_TREE_BIRCH + (node2.objectType - 0x70) + roundCount;
+                } else if(node2.objectType >= 0xB0 && node2.objectType <= 0xB7)
                 {
-                    if(P2.objectType + roundCount > 0xB7)
-                        objIdx = MAPPIC_TREE_OAK + (P2.objectType - 0xB0) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0xB7)
+                        objIdx = MAPPIC_TREE_OAK + (node2.objectType - 0xB0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_OAK + (P2.objectType - 0xB0) + roundCount;
-                } else if(P2.objectType >= 0xF0 && P2.objectType <= 0xF7)
+                        objIdx = MAPPIC_TREE_OAK + (node2.objectType - 0xB0) + roundCount;
+                } else if(node2.objectType >= 0xF0 && node2.objectType <= 0xF7)
                 {
-                    if(P2.objectType + roundCount > 0xF7)
-                        objIdx = MAPPIC_TREE_PALM1 + (P2.objectType - 0xF0) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0xF7)
+                        objIdx = MAPPIC_TREE_PALM1 + (node2.objectType - 0xF0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PALM1 + (P2.objectType - 0xF0) + roundCount;
+                        objIdx = MAPPIC_TREE_PALM1 + (node2.objectType - 0xF0) + roundCount;
                 }
                 break;
             // tree
             case 0xC5:
-                if(P2.objectType >= 0x30 && P2.objectType <= 0x37)
+                if(node2.objectType >= 0x30 && node2.objectType <= 0x37)
                 {
-                    if(P2.objectType + roundCount > 0x37)
-                        objIdx = MAPPIC_TREE_PALM2 + (P2.objectType - 0x30) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0x37)
+                        objIdx = MAPPIC_TREE_PALM2 + (node2.objectType - 0x30) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PALM2 + (P2.objectType - 0x30) + roundCount;
+                        objIdx = MAPPIC_TREE_PALM2 + (node2.objectType - 0x30) + roundCount;
 
-                } else if(P2.objectType >= 0x70 && P2.objectType <= 0x77)
+                } else if(node2.objectType >= 0x70 && node2.objectType <= 0x77)
                 {
-                    if(P2.objectType + roundCount > 0x77)
-                        objIdx = MAPPIC_TREE_PINEAPPLE + (P2.objectType - 0x70) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0x77)
+                        objIdx = MAPPIC_TREE_PINEAPPLE + (node2.objectType - 0x70) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PINEAPPLE + (P2.objectType - 0x70) + roundCount;
-                } else if(P2.objectType >= 0xB0 && P2.objectType <= 0xB7)
+                        objIdx = MAPPIC_TREE_PINEAPPLE + (node2.objectType - 0x70) + roundCount;
+                } else if(node2.objectType >= 0xB0 && node2.objectType <= 0xB7)
                 {
-                    if(P2.objectType + roundCount > 0xB7)
-                        objIdx = MAPPIC_TREE_CYPRESS + (P2.objectType - 0xB0) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0xB7)
+                        objIdx = MAPPIC_TREE_CYPRESS + (node2.objectType - 0xB0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_CYPRESS + (P2.objectType - 0xB0) + roundCount;
-                } else if(P2.objectType >= 0xF0 && P2.objectType <= 0xF7)
+                        objIdx = MAPPIC_TREE_CYPRESS + (node2.objectType - 0xB0) + roundCount;
+                } else if(node2.objectType >= 0xF0 && node2.objectType <= 0xF7)
                 {
-                    if(P2.objectType + roundCount > 0xF7)
-                        objIdx = MAPPIC_TREE_CHERRY + (P2.objectType - 0xF0) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0xF7)
+                        objIdx = MAPPIC_TREE_CHERRY + (node2.objectType - 0xF0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_CHERRY + (P2.objectType - 0xF0) + roundCount;
+                        objIdx = MAPPIC_TREE_CHERRY + (node2.objectType - 0xF0) + roundCount;
                 }
                 break;
             // tree
             case 0xC6:
-                if(P2.objectType >= 0x30 && P2.objectType <= 0x37)
+                if(node2.objectType >= 0x30 && node2.objectType <= 0x37)
                 {
-                    if(P2.objectType + roundCount > 0x37)
-                        objIdx = MAPPIC_TREE_FIR + (P2.objectType - 0x30) + (roundCount - 7);
+                    if(node2.objectType + roundCount > 0x37)
+                        objIdx = MAPPIC_TREE_FIR + (node2.objectType - 0x30) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_FIR + (P2.objectType - 0x30) + roundCount;
+                        objIdx = MAPPIC_TREE_FIR + (node2.objectType - 0x30) + roundCount;
                 }
                 break;
             // landscape
             case 0xC8:
-                switch(P2.objectType)
+                switch(node2.objectType)
                 {
                     case 0x00: objIdx = MAPPIC_MUSHROOM1; break;
                     case 0x01: objIdx = MAPPIC_MUSHROOM2; break;
@@ -1216,64 +1215,64 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
                 break;
             // stone
             case 0xCC:
-                objIdx = MAPPIC_GRANITE_1_1 + (P2.objectType - 0x01);
+                objIdx = MAPPIC_GRANITE_1_1 + (node2.objectType - 0x01);
                 break;
             // stone
             case 0xCD:
-                objIdx = MAPPIC_GRANITE_2_1 + (P2.objectType - 0x01);
+                objIdx = MAPPIC_GRANITE_2_1 + (node2.objectType - 0x01);
                 break;
             // headquarter
-            case 0x80: // P2.objectType is the number of the player beginning with 0x00
+            case 0x80: // node2.objectType is the number of the player beginning with 0x00
 //%7 cause in the original game there are only 7 players and 7 different flags
 #ifdef _EDITORMODE
-                objIdx = FLAG_BLUE_DARK + P2.objectType % 7;
+                objIdx = FLAG_BLUE_DARK + node2.objectType % 7;
 #endif
                 break;
 
             default: break;
         }
         if(objIdx != 0)
-            Draw(display, global::bmpArray[objIdx].surface, (int)(P2.x - displayRect.x - global::bmpArray[objIdx].nx),
-                 (int)(P2.y - displayRect.y - global::bmpArray[objIdx].ny));
+            Draw(display, global::bmpArray[objIdx].surface, (int)(p2.x - displayRect.x - global::bmpArray[objIdx].nx),
+                 (int)(p2.y - displayRect.y - global::bmpArray[objIdx].ny));
     }
 
 #ifdef _EDITORMODE
     // blit resources
-    if(P2.y < P1.y)
+    if(p2.y < p1.y)
     {
-        if(P2.resource >= 0x41 && P2.resource <= 0x47)
+        if(node2.resource >= 0x41 && node2.resource <= 0x47)
         {
-            for(char i = 0x41; i <= P2.resource; i++)
+            for(char i = 0x41; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface,
-                     (int)(P2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
-                     (int)(P2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
-        } else if(P2.resource >= 0x49 && P2.resource <= 0x4F)
+                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
+                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
+        } else if(node2.resource >= 0x49 && node2.resource <= 0x4F)
         {
-            for(char i = 0x49; i <= P2.resource; i++)
+            for(char i = 0x49; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface,
-                     (int)(P2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
-                     (int)(P2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
+                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
+                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
         }
-        if(P2.resource >= 0x51 && P2.resource <= 0x57)
+        if(node2.resource >= 0x51 && node2.resource <= 0x57)
         {
-            for(char i = 0x51; i <= P2.resource; i++)
+            for(char i = 0x51; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface,
-                     (int)(P2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
-                     (int)(P2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
+                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
+                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
         }
-        if(P2.resource >= 0x59 && P2.resource <= 0x5F)
+        if(node2.resource >= 0x59 && node2.resource <= 0x5F)
         {
-            for(char i = 0x59; i <= P2.resource; i++)
+            for(char i = 0x59; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface,
-                     (int)(P2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
-                     (int)(P2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
+                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
+                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
         }
         // blit animals
-        if(P2.animal > 0x00 && P2.animal <= 0x06)
+        if(node2.animal > 0x00 && node2.animal <= 0x06)
         {
-            Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].surface,
-                 (int)(P2.x - displayRect.x - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].nx),
-                 (int)(P2.y - displayRect.y - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].ny));
+            Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].surface,
+                 (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].nx),
+                 (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].ny));
         }
     }
 #endif
@@ -1281,40 +1280,40 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
     // blit buildings
     if(global::s2->getMapObj()->getRenderBuildHelp())
     {
-        if(P2.y < P1.y)
+        if(p2.y < p1.y)
         {
-            switch(P2.build % 8)
+            switch(node2.build % 8)
             {
                 case 0x01:
-                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(P2.x - displayRect.x - global::bmpArray[MAPPIC_FLAG].nx),
-                         (int)(P2.y - displayRect.y - global::bmpArray[MAPPIC_FLAG].ny));
+                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_FLAG].nx),
+                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_FLAG].ny));
                     break;
                 case 0x02:
                     Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface,
-                         (int)(P2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
-                         (int)(P2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
+                         (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
+                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
                     break;
                 case 0x03:
                     Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface,
-                         (int)(P2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
-                         (int)(P2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
+                         (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
+                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
-                    if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                    if(node2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+                       || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+                       || node2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+                       || node2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
-                             (int)(P2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
-                             (int)(P2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
+                             (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
+                             (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
                     else
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface,
-                             (int)(P2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
-                             (int)(P2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
+                             (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
+                             (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
                     break;
                 case 0x05:
-                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(P2.x - displayRect.x - global::bmpArray[MAPPIC_MINE].nx),
-                         (int)(P2.y - displayRect.y - global::bmpArray[MAPPIC_MINE].ny));
+                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_MINE].nx),
+                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_MINE].ny));
                     break;
                 default: break;
             }
@@ -1322,11 +1321,11 @@ void CSurface::DrawTriangle(SDL_Surface* display, DisplayRectangle displayRect, 
     }
 }
 
-void CSurface::get_nodeVectors(bobMAP* myMap)
+void CSurface::get_nodeVectors(bobMAP& myMap)
 {
     // prepare triangle field
-    int height = myMap->height;
-    int width = myMap->width;
+    int height = myMap.height;
+    int width = myMap.width;
     IntVector tempP2, tempP3;
 
     // get flat vectors
@@ -1336,70 +1335,70 @@ void CSurface::get_nodeVectors(bobMAP* myMap)
         {
             // vector of first triangle
             tempP2.x = 0;
-            tempP2.y = myMap->getVertex(width - 1, j + 1).y;
-            tempP2.z = myMap->getVertex(width - 1, j + 1).z;
-            myMap->getVertex(0, j).flatVector = get_flatVector(myMap->getVertex(0, j), tempP2, myMap->getVertex(0, j + 1));
+            tempP2.y = myMap.getVertex(width - 1, j + 1).y;
+            tempP2.z = myMap.getVertex(width - 1, j + 1).z;
+            myMap.getVertex(0, j).flatVector = get_flatVector(myMap.getVertex(0, j), tempP2, myMap.getVertex(0, j + 1));
 
             for(int i = 1; i < width; i++)
-                myMap->getVertex(i, j).flatVector =
-                  get_flatVector(myMap->getVertex(i, j), myMap->getVertex(i - 1, j + 1), myMap->getVertex(i, j + 1));
+                myMap.getVertex(i, j).flatVector =
+                  get_flatVector(myMap.getVertex(i, j), myMap.getVertex(i - 1, j + 1), myMap.getVertex(i, j + 1));
         } else
         {
             for(int i = 0; i < width - 1; i++)
-                myMap->getVertex(i, j).flatVector =
-                  get_flatVector(myMap->getVertex(i, j), myMap->getVertex(i, j + 1), myMap->getVertex(i + 1, j + 1));
+                myMap.getVertex(i, j).flatVector =
+                  get_flatVector(myMap.getVertex(i, j), myMap.getVertex(i, j + 1), myMap.getVertex(i + 1, j + 1));
 
             // vector of last triangle
-            tempP3.x = myMap->getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
-            tempP3.y = myMap->getVertex(0, j + 1).y;
-            tempP3.z = myMap->getVertex(0, j + 1).z;
-            myMap->getVertex(width - 1, j).flatVector =
-              get_flatVector(myMap->getVertex(width - 1, j), myMap->getVertex(width - 1, j + 1), tempP3);
+            tempP3.x = myMap.getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
+            tempP3.y = myMap.getVertex(0, j + 1).y;
+            tempP3.z = myMap.getVertex(0, j + 1).z;
+            myMap.getVertex(width - 1, j).flatVector =
+              get_flatVector(myMap.getVertex(width - 1, j), myMap.getVertex(width - 1, j + 1), tempP3);
         }
     }
     // flat vectors of last line
     for(int i = 0; i < width - 1; i++)
     {
-        tempP2 = myMap->getVertex(i, 0);
+        tempP2 = myMap.getVertex(i, 0);
         tempP2.y += height * TRIANGLE_HEIGHT;
-        tempP3 = myMap->getVertex(i + 1, 0);
+        tempP3 = myMap.getVertex(i + 1, 0);
         tempP3.y += height * TRIANGLE_HEIGHT;
-        myMap->getVertex(i, height - 1).flatVector = get_flatVector(myMap->getVertex(i, height - 1), tempP2, tempP3);
+        myMap.getVertex(i, height - 1).flatVector = get_flatVector(myMap.getVertex(i, height - 1), tempP2, tempP3);
     }
     // vector of last Triangle
-    tempP2 = myMap->getVertex(width - 1, 0);
+    tempP2 = myMap.getVertex(width - 1, 0);
     tempP2.y += height * TRIANGLE_HEIGHT;
-    tempP3.x = myMap->getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
-    tempP3.y = height * TRIANGLE_HEIGHT + myMap->getVertex(0, 0).y;
-    tempP3.z = myMap->getVertex(0, 0).z;
-    myMap->getVertex(width - 1, height - 1).flatVector = get_flatVector(myMap->getVertex(width - 1, height - 1), tempP2, tempP3);
+    tempP3.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
+    tempP3.y = height * TRIANGLE_HEIGHT + myMap.getVertex(0, 0).y;
+    tempP3.z = myMap.getVertex(0, 0).z;
+    myMap.getVertex(width - 1, height - 1).flatVector = get_flatVector(myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
 
-    // now get the vector at each node and save it to myMap->getVertex(j*width+i, 0).normVector
+    // now get the vector at each node and save it to myMap.getVertex(j*width+i, 0).normVector
     for(int j = 0; j < height; j++)
     {
         if(j % 2 == 0)
         {
             for(int i = 0; i < width; i++)
             {
-                MapNode& curVertex = myMap->getVertex(i, j);
+                MapNode& curVertex = myMap.getVertex(i, j);
                 int iM1 = (i == 0 ? width - 1 : i - 1);
                 if(j == 0) // first line
-                    curVertex.normVector = get_nodeVector(myMap->getVertex(iM1, height - 1).flatVector,
-                                                          myMap->getVertex(i, height - 1).flatVector, curVertex.flatVector);
+                    curVertex.normVector = get_nodeVector(myMap.getVertex(iM1, height - 1).flatVector,
+                                                          myMap.getVertex(i, height - 1).flatVector, curVertex.flatVector);
                 else
                     curVertex.normVector =
-                      get_nodeVector(myMap->getVertex(iM1, j - 1).flatVector, myMap->getVertex(i, j - 1).flatVector, curVertex.flatVector);
+                      get_nodeVector(myMap.getVertex(iM1, j - 1).flatVector, myMap.getVertex(i, j - 1).flatVector, curVertex.flatVector);
                 curVertex.i = get_LightIntensity(curVertex.normVector);
             }
         } else
         {
             for(int i = 0; i < width; i++)
             {
-                MapNode& curVertex = myMap->getVertex(i, j);
+                MapNode& curVertex = myMap.getVertex(i, j);
                 int iP1 = (i + 1 == width ? 0 : i + 1);
 
                 curVertex.normVector =
-                  get_nodeVector(myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
+                  get_nodeVector(myMap.getVertex(i, j - 1).flatVector, myMap.getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
                 curVertex.i = get_LightIntensity(curVertex.normVector);
             }
         }
@@ -1471,7 +1470,7 @@ vector CSurface::get_flatVector(const IntVector& P1, const IntVector& P2, const 
     return cross;
 }
 
-void CSurface::update_shading(bobMAP* myMap, int VertexX, int VertexY)
+void CSurface::update_shading(bobMAP& myMap, int VertexX, int VertexY)
 {
     // vertex count for the points
     int X, Y;
@@ -1487,50 +1486,50 @@ void CSurface::update_shading(bobMAP* myMap, int VertexX, int VertexY)
     // update first vertex left upside
     X = VertexX - (even ? 1 : 0);
     if(X < 0)
-        X += myMap->width;
+        X += myMap.width;
     Y = VertexY - 1;
     if(Y < 0)
-        Y += myMap->height;
+        Y += myMap.height;
     update_nodeVector(myMap, X, Y);
     // update second vertex right upside
     X = VertexX + (even ? 0 : 1);
-    if(X >= myMap->width)
-        X -= myMap->width;
+    if(X >= myMap.width)
+        X -= myMap.width;
     Y = VertexY - 1;
     if(Y < 0)
-        Y += myMap->height;
+        Y += myMap.height;
     update_nodeVector(myMap, X, Y);
     // update third point bottom left
     X = VertexX - 1;
     if(X < 0)
-        X += myMap->width;
+        X += myMap.width;
     Y = VertexY;
     update_nodeVector(myMap, X, Y);
     // update fourth point bottom right
     X = VertexX + 1;
-    if(X >= myMap->width)
-        X -= myMap->width;
+    if(X >= myMap.width)
+        X -= myMap.width;
     Y = VertexY;
     update_nodeVector(myMap, X, Y);
     // update fifth point down left
     X = VertexX - (even ? 1 : 0);
     if(X < 0)
-        X += myMap->width;
+        X += myMap.width;
     Y = VertexY + 1;
-    if(Y >= myMap->height)
-        Y -= myMap->height;
+    if(Y >= myMap.height)
+        Y -= myMap.height;
     update_nodeVector(myMap, X, Y);
     // update sixth point down right
     X = VertexX + (even ? 0 : 1);
-    if(X >= myMap->width)
-        X -= myMap->width;
+    if(X >= myMap.width)
+        X -= myMap.width;
     Y = VertexY + 1;
-    if(Y >= myMap->height)
-        Y -= myMap->height;
+    if(Y >= myMap.height)
+        Y -= myMap.height;
     update_nodeVector(myMap, X, Y);
 }
 
-void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
+void CSurface::update_flatVectors(bobMAP& myMap, int VertexX, int VertexY)
 {
     // point structures for the triangles, Pmiddle is the point in the middle of the hexagon we will update
     MapNode *P1, *P2, *P3, *Pmiddle;
@@ -1541,84 +1540,84 @@ void CSurface::update_flatVectors(bobMAP* myMap, int VertexX, int VertexY)
     if(VertexY % 2 == 0)
         even = true;
 
-    Pmiddle = &myMap->getVertex(VertexX, VertexY);
+    Pmiddle = &myMap.getVertex(VertexX, VertexY);
 
     // update first triangle left upside
     P1x = VertexX - (even ? 1 : 0);
     if(P1x < 0)
-        P1x += myMap->width;
+        P1x += myMap.width;
     P1y = VertexY - 1;
     if(P1y < 0)
-        P1y += myMap->height;
-    P1 = &myMap->getVertex(P1x, P1y);
+        P1y += myMap.height;
+    P1 = &myMap.getVertex(P1x, P1y);
     P2x = VertexX - 1;
     if(P2x < 0)
-        P2x += myMap->width;
+        P2x += myMap.width;
     P2y = VertexY;
-    P2 = &myMap->getVertex(P2x, P2y);
+    P2 = &myMap.getVertex(P2x, P2y);
     P3 = Pmiddle;
     P1->flatVector = get_flatVector(*P1, *P2, *P3);
 
     // update second triangle right upside
     P1x = VertexX + (even ? 0 : 1);
-    if(P1x >= myMap->width)
-        P1x -= myMap->width;
+    if(P1x >= myMap.width)
+        P1x -= myMap.width;
     P1y = VertexY - 1;
     if(P1y < 0)
-        P1y += myMap->height;
-    P1 = &myMap->getVertex(P1x, P1y);
+        P1y += myMap.height;
+    P1 = &myMap.getVertex(P1x, P1y);
     P2 = Pmiddle;
     P3x = VertexX + 1;
-    if(P3x >= myMap->width)
-        P3x -= myMap->width;
+    if(P3x >= myMap.width)
+        P3x -= myMap.width;
     P3y = VertexY;
-    P3 = &myMap->getVertex(P3x, P3y);
+    P3 = &myMap.getVertex(P3x, P3y);
     P1->flatVector = get_flatVector(*P1, *P2, *P3);
 
     // update third triangle down middle
     P1 = Pmiddle;
     P2x = VertexX - (even ? 1 : 0);
     if(P2x < 0)
-        P2x += myMap->width;
+        P2x += myMap.width;
     P2y = VertexY + 1;
-    if(P2y >= myMap->height)
-        P2y -= myMap->height;
-    P2 = &myMap->getVertex(P2x, P2y);
+    if(P2y >= myMap.height)
+        P2y -= myMap.height;
+    P2 = &myMap.getVertex(P2x, P2y);
     P3x = VertexX + (even ? 0 : 1);
-    if(P3x >= myMap->width)
-        P3x -= myMap->width;
+    if(P3x >= myMap.width)
+        P3x -= myMap.width;
     P3y = VertexY + 1;
-    if(P3y >= myMap->height)
-        P3y -= myMap->height;
-    P3 = &myMap->getVertex(P3x, P3y);
+    if(P3y >= myMap.height)
+        P3y -= myMap.height;
+    P3 = &myMap.getVertex(P3x, P3y);
     P1->flatVector = get_flatVector(*P1, *P2, *P3);
 }
 
-void CSurface::update_nodeVector(bobMAP* myMap, int VertexX, int VertexY)
+void CSurface::update_nodeVector(bobMAP& myMap, int VertexX, int VertexY)
 {
     int j = VertexY;
     int i = VertexX;
-    int width = myMap->width;
-    int height = myMap->height;
+    int width = myMap.width;
+    int height = myMap.height;
 
     if(j % 2 == 0)
     {
-        MapNode& curVertex = myMap->getVertex(i, j);
+        MapNode& curVertex = myMap.getVertex(i, j);
         int iM1 = (i == 0 ? width - 1 : i - 1);
         if(j == 0) // first line
-            curVertex.normVector = get_nodeVector(myMap->getVertex(iM1, height - 1).flatVector, myMap->getVertex(i, height - 1).flatVector,
-                                                  curVertex.flatVector);
+            curVertex.normVector =
+              get_nodeVector(myMap.getVertex(iM1, height - 1).flatVector, myMap.getVertex(i, height - 1).flatVector, curVertex.flatVector);
         else
             curVertex.normVector =
-              get_nodeVector(myMap->getVertex(iM1, j - 1).flatVector, myMap->getVertex(i, j - 1).flatVector, curVertex.flatVector);
+              get_nodeVector(myMap.getVertex(iM1, j - 1).flatVector, myMap.getVertex(i, j - 1).flatVector, curVertex.flatVector);
         curVertex.i = get_LightIntensity(curVertex.normVector);
     } else
     {
-        MapNode& curVertex = myMap->getVertex(i, j);
+        MapNode& curVertex = myMap.getVertex(i, j);
         int iP1 = (i + 1 == width ? 0 : i + 1);
 
         curVertex.normVector =
-          get_nodeVector(myMap->getVertex(i, j - 1).flatVector, myMap->getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
+          get_nodeVector(myMap.getVertex(i, j - 1).flatVector, myMap.getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
         curVertex.i = get_LightIntensity(curVertex.normVector);
     }
 }
