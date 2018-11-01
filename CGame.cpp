@@ -225,7 +225,7 @@ void CGame::delMapObj()
 
 void WaitForEnter()
 {
-#ifndef _NDEBUG
+#ifndef NDEBUG
 
     static bool waited = false;
     if(waited)
@@ -235,7 +235,7 @@ void WaitForEnter()
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
-#endif // !_NDEBUG
+#endif // !NDEBUG
 }
 
 bool checkWriteable(const bfs::path& folder)
