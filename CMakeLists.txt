@@ -6,40 +6,6 @@ ENDIF()
 
 project(s25edit)
 
-OPTION(RTTR_ENABLE_WERROR "Build with warnings turned into errors" ON)
-
-IF(MSVC)
-	IF(RTTR_ENABLE_WERROR)
-		add_compile_options(/WX)
-	ENDIF()
-    add_compile_options(/MP) # parallel compilation
-    # disable MSVC posix functions
-    ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_DEPRECATE)
-    ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-    ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-	ADD_DEFINITIONS(/wd"4250")
-else()
-    add_compile_options(-Wall)
-	IF(RTTR_ENABLE_WERROR)
-		add_compile_options(-Werror)
-	ENDIF()
-ENDIF()
-
-if(WIN32)
-    ADD_DEFINITIONS(-DNOMINMAX)
-endif()
-
-if(NOT MSVC)
-    CHECK_CXX_SOURCE_COMPILES("
-        #if __cplusplus >= 201103L
-        int main() {}
-        #endif" COMPILER_IN_CXX11_MODE)
-
-    IF (NOT COMPILER_IN_CXX11_MODE)
-        ADD_DEFINITIONS(-Doverride=)
-    endif()
-ENDIF()
-
 add_subdirectory(SGE)
 
 option(RTTR_EDITOR_EDITORMODE "In editor mode it is possible to load, edit and save created maps" ON)
@@ -50,9 +16,6 @@ endif()
 if(RTTR_EDITOR_ADMINMODE)
 	add_definitions(-D_ADMINMODE)
 endif()
-
-FIND_PACKAGE(SDL REQUIRED)
-include_directories(SYSTEM ${SDL_INCLUDE_DIR})
 
 file(GLOB MAIN_SOURCES *.cpp *.h)
 file(GLOB CIO_SOURCES CIO/*.cpp CIO/*.h)
@@ -78,10 +41,10 @@ ENDIF()
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
 # Disable automatic boost linking
 target_compile_definitions(s25edit PUBLIC -DBOOST_ALL_NO_LIB)
-target_link_libraries(s25edit SGE rttrConfig s25Common gamedata endian nowide-static ${SDL_LIBRARY})
+target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata endian nowide-static)
 
 if(MINGW)
-	target_link_libraries(s25edit -mconsole)
+  target_link_libraries(s25edit PRIVATE -mconsole)
 endif()
 
 if(RTTR_BINDIR)
