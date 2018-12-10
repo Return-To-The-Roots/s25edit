@@ -1,8 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
-IF(NOT CMAKE_VERSION VERSION_LESS 3.1)
-    # Simplified variable expansion. No change for usual variable references so use faster one
-	CMAKE_POLICY(SET CMP0053 NEW)
-ENDIF()
+cmake_minimum_required(VERSION 3.8)
 
 project(s25edit)
 
