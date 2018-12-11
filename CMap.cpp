@@ -1037,7 +1037,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
     }
 }
 
-void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState)
+void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseState*/)
 {
     // if user raises or reduces the height of a vertex, don't let the cursor jump to another vertex
     // if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE) )

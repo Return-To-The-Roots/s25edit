@@ -754,27 +754,27 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
     return return_value;
 }
 
-bool CFile::save_lst(void* data)
+bool CFile::save_lst(void*)
 {
     return false;
 }
 
-bool CFile::save_bob(void* data)
+bool CFile::save_bob(void*)
 {
     return false;
 }
 
-bool CFile::save_idx(void* data, const std::string& filename)
+bool CFile::save_idx(void*, const std::string&)
 {
     return false;
 }
 
-bool CFile::save_bbm(void* data)
+bool CFile::save_bbm(void*)
 {
     return false;
 }
 
-bool CFile::save_lbm(void* data)
+bool CFile::save_lbm(void*)
 {
     return false;
 }

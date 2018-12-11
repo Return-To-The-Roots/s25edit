@@ -142,7 +142,7 @@ protected:
     Uint8 alpha_level; // Alpha level (default: opaque)
 
     SDL_Surface* text_surface;
-    virtual void set_textSurface(SDL_Surface* new_surf) { ; }
+    virtual void set_textSurface(SDL_Surface*) = 0;
 
     // Use what render?
     bool use_tt;

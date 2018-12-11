@@ -257,11 +257,11 @@ bool checkWriteable(const bfs::path& folder)
 }
 
 #undef main
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/ [])
 {
     if(!RTTRCONFIG.Init())
     {
-        std::cerr << "FaileduserMapsPathto init program!" << std::endl;
+        std::cerr << "Failed to init program!" << std::endl;
         WaitForEnter();
         return 1;
     }
