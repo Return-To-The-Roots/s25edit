@@ -7,8 +7,11 @@
 #include <cstdio>
 #ifdef _WIN32
 #include "s25editResource.h"
+#undef WIN32_LEAN_AND_MEAN
 #include <SDL_syswm.h>
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #endif
 
