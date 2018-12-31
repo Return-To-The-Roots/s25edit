@@ -193,7 +193,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                                 break;
                         }
                         j--;
-                        if(Entries[j] != NULL && Entries[j]->getY() > h_ - 10)
+                        if(j >= 0 && Entries[j] != NULL && Entries[j]->getY() > h_ - 10)
                         {
                             for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
                             {

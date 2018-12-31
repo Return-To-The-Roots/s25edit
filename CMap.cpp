@@ -231,8 +231,6 @@ void CMap::destructMap()
 bobMAP* CMap::generateMap(int width, int height, int type, int texture, int border, int border_texture)
 {
     bobMAP* myMap = new bobMAP();
-    if(!myMap)
-        return NULL;
 
     strcpy(myMap->name, "Ohne Namen");
     myMap->width = width;
@@ -1376,7 +1374,7 @@ void CMap::drawMinimap(SDL_Surface* Window)
         if(y % num_y != 0)
             continue;
 
-        row = (Uint32*)Window->pixels + (y + 20) * Window->pitch / 4;
+        row = (Uint32*)Window->pixels + (y + 20) * Window->pitch / 4; //-V206
         for(int x = 0; x < map->width; x++)
         {
             if(x % num_x != 0)
@@ -1471,7 +1469,7 @@ void CMap::drawMinimap(SDL_Surface* Window)
                     break;
             }
 
-            row = (Uint32*)Window->pixels + (y / num_y + 20) * Window->pitch / 4;
+            row = (Uint32*)Window->pixels + (y / num_y + 20) * Window->pitch / 4; //-V206
             //+6 because of the left window frame
             pixel = row + x / num_x + 6;
 

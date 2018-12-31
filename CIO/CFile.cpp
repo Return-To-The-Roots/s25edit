@@ -7,6 +7,9 @@
 #include <iostream>
 #include <stdexcept>
 
+//-V:fseek:303
+//-V:ftell:303
+
 FILE* CFile::fp = NULL;
 bobBMP* CFile::bmpArray = NULL;
 bobSHADOW* CFile::shadowArray = NULL;
@@ -535,9 +538,6 @@ bool CFile::open_gou()
 bobMAP* CFile::open_wld()
 {
     bobMAP* myMap = new bobMAP();
-
-    if(myMap == NULL)
-        return myMap;
 
     // initialize myMap->name and myMap->author (both 20 chars) to prevent filling with random memory content
     for(int i = 0; i < 20; i++)

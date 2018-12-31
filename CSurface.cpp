@@ -160,7 +160,7 @@ void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
         {
             Uint32* bufp;
 
-            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x;
+            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x; //-V206
             *bufp = color;
         }
         break;
@@ -221,7 +221,7 @@ void CSurface::DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G
         {
             Uint32* bufp;
 
-            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x;
+            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x; //-V206
             *bufp = color;
         }
         break;
@@ -281,7 +281,7 @@ void CSurface::DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 
         {
             Uint32* bufp;
 
-            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x;
+            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x; //-V206
             *bufp = color;
         }
         break;
@@ -308,7 +308,8 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
             else
                 return p[0] | p[1] << 8 | p[2] << 16;
 
-        case 4: return *(Uint32*)p;
+        case 4:
+            return *(Uint32*)p; //-V206
 
         default:
             return 0; /* shouldn't happen, but avoids warnings */
@@ -431,9 +432,8 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x - 1, y + 1),
                                      myMap.getVertex(x, y + 1));
                         // UpSideDown
-                        if(x < width)
-                            DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), myMap.getVertex(x - 1, y),
-                                         myMap.getVertex(x, y));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), myMap.getVertex(x - 1, y),
+                                     myMap.getVertex(x, y));
                     }
                     // last UpSideDown
                     tempP3 = myMap.getVertex(0, y);
