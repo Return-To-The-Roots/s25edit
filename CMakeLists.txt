@@ -35,9 +35,7 @@ ELSE()
 ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
-# Disable automatic boost linking
-target_compile_definitions(s25edit PUBLIC -DBOOST_ALL_NO_LIB)
-target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata endian nowide-static)
+target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata endian::static nowide::static PUBLIC Boost::disable_autolinking)
 
 if(MINGW)
   target_link_libraries(s25edit PRIVATE -mconsole)
