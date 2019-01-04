@@ -31,7 +31,7 @@ private:
 public:
     // Constructor - Destructor
     CButton(void callback_(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 w = 20, Uint16 h = 20, int color = BUTTON_GREY,
-            const char* text = NULL, int picture = -1);
+            const char* text = nullptr, int picture = -1);
     ~CButton();
     // Access
     int getX() { return x_; };

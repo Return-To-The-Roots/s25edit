@@ -13,8 +13,8 @@ CFont::CFont(const char* string, int x, int y, int fontsize, int color)
     else
         this->fontsize_ = fontsize;
     this->color_ = color;
-    Surf_Font = NULL;
-    callback = NULL;
+    Surf_Font = nullptr;
+    callback = nullptr;
     clickedParam = 0;
     // create surface and write text to it
     writeText(this->string_);
@@ -43,7 +43,7 @@ void CFont::setColor(int color)
 void CFont::setText(const char* string)
 {
     SDL_FreeSurface(Surf_Font);
-    Surf_Font = NULL;
+    Surf_Font = nullptr;
     this->string_ = string;
     writeText(this->string_);
 }
@@ -56,12 +56,12 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
         if((button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
         {
             // if mouse button is pressed ON the text
-            if((button.state == SDL_PRESSED) && callback != NULL)
+            if((button.state == SDL_PRESSED) && callback != nullptr)
             {
                 setColor(FONT_ORANGE);
             } else if(button.state == SDL_RELEASED)
             {
-                if(color_ == FONT_ORANGE && callback != NULL)
+                if(color_ == FONT_ORANGE && callback != nullptr)
                     callback(clickedParam);
             }
         }
@@ -87,7 +87,7 @@ bool CFont::writeText(const char* string)
     int pos_x = 0;
     int pos_y = 0;
 
-    if(string == NULL && this->string_ == NULL)
+    if(string == nullptr && this->string_ == nullptr)
         return false;
 
     // now lets draw the chiffres
@@ -233,9 +233,9 @@ bool CFont::writeText(const char* string)
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 w = pixel_ctr_w;
                 h = pixel_ctr_h;
-                if(Surf_Font != NULL)
+                if(Surf_Font != nullptr)
                     SDL_FreeSurface(Surf_Font);
-                if((Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
+                if((Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
                     return false;
                 SDL_SetColorKey(Surf_Font, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
                 chiffre = reinterpret_cast<const unsigned char*>(string);
@@ -293,7 +293,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
     int pos_x = x;
     int pos_y = y;
 
-    if(Surf_Dest == NULL || string == NULL)
+    if(Surf_Dest == nullptr || string == nullptr)
         return false;
 
     // only three sizes are available (in pixels)

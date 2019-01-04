@@ -556,7 +556,7 @@ SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, f
 
     // Compute a bounding rectangle
     Sint16 xmin = 0, xmax = 0, ymin = 0, ymax = 0;
-    _calcRect(src, NULL, theta, xscale, yscale, 0, 0, 0, 0, &xmin, &ymin, &xmax, &ymax);
+    _calcRect(src, nullptr, theta, xscale, yscale, 0, 0, 0, 0, &xmin, &ymin, &xmax, &ymax);
 
     Sint16 w = xmax - xmin + 1;
     Sint16 h = ymax - ymin + 1;
@@ -568,7 +568,7 @@ SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, f
     dest = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, src->format->BitsPerPixel, src->format->Rmask, src->format->Gmask, src->format->Bmask,
                                 src->format->Amask);
     if(!dest)
-        return NULL;
+        return nullptr;
 
     sge_ClearSurface(dest, bcol); // Set background color
 
@@ -684,7 +684,7 @@ SDL_Surface* sge_rotate_scaled_surface(SDL_Surface* src, int angle, double scale
     if(!dest)
     {
         SDL_SetError("SGE - Out of memory");
-        return NULL;
+        return nullptr;
     }
     sge_ClearSurface(dest, bcol);
 

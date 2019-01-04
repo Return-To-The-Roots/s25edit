@@ -154,12 +154,12 @@ public:
     // Constructor
     sge_text()
     {
-        tt_font = NULL;
+        tt_font = nullptr;
         color.r = color.b = color.g = 0;
         background.r = background.b = background.g = 0;
-        bm_font = NULL;
+        bm_font = nullptr;
         alpha_level = SDL_ALPHA_OPAQUE;
-        text_surface = NULL;
+        text_surface = nullptr;
         use_tt = true;
         sCursor = false;
     }
@@ -253,7 +253,7 @@ protected:
 public:
     sge_TextSurface(SDL_Surface* screen, Sint16 x = 0, Sint16 y = 0) : sge_surface(screen, screen, x, y)
     {
-        surface = NULL;
+        surface = nullptr;
         current_pos.w = 0;
         current_pos.h = 0;
     }
@@ -276,7 +276,7 @@ protected:
 public:
     sge_TextSsprite(SDL_Surface* screen, Sint16 x = 0, Sint16 y = 0) : sge_ssprite(screen, screen, x, y)
     {
-        surface = NULL;
+        surface = nullptr;
         current_pos.w = 0;
         current_pos.h = 0;
     }
@@ -299,7 +299,7 @@ protected:
 public:
     sge_TextSprite(SDL_Surface* screen, Sint16 x = 0, Sint16 y = 0) : sge_sprite(screen, screen, x, y)
     {
-        surface = NULL;
+        surface = nullptr;
         current_pos.w = 0;
         current_pos.h = 0;
     }

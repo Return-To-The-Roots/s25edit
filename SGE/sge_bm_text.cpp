@@ -49,32 +49,32 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     sge_bmpFont* font;
 
     font = new(nothrow) sge_bmpFont;
-    if(font == NULL)
+    if(font == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
-        return NULL;
+        return nullptr;
     }
 
     if(!(flags & SGE_BFNOCONVERT) && !(flags & SGE_BFSFONT))
     { /* Get a converted copy */
         font->FontSurface = SDL_DisplayFormat(surface);
-        if(font->FontSurface == NULL)
+        if(font->FontSurface == nullptr)
         {
             SDL_SetError("SGE - Out of memory");
             delete font;
-            return NULL;
+            return nullptr;
         }
 
         if(flags & SGE_BFPALETTE)
         { // We want an 8bit surface
             SDL_Surface* tmp;
             tmp = SDL_AllocSurface(SDL_SWSURFACE, surface->w, surface->h, 8, 0, 0, 0, 0);
-            if(tmp == NULL)
+            if(tmp == nullptr)
             {
                 SDL_SetError("SGE - Out of memory");
                 SDL_FreeSurface(font->FontSurface);
                 delete font;
-                return NULL;
+                return nullptr;
             }
 
             // Set the palette
@@ -94,7 +94,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
                     SDL_FreeSurface(font->FontSurface);
                     SDL_FreeSurface(tmp);
                     delete font;
-                    return NULL;
+                    return nullptr;
                 }
 
             // Copy the font to the 8bit surface
@@ -128,11 +128,11 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     else /* Get a copy */
         font->FontSurface = sge_copy_surface(surface);
 
-    if(font->FontSurface == NULL)
+    if(font->FontSurface == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
         delete font;
-        return NULL;
+        return nullptr;
     }
 
     SDL_Surface* fnt = font->FontSurface; // Shorthand
@@ -142,7 +142,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     { /* Fixed width font */
         font->CharWidth = font->FontSurface->w / 256;
         font->CharHeight = font->FontSurface->h;
-        font->CharPos = NULL;
+        font->CharPos = nullptr;
         font->yoffs = 0;
         font->Chars = 256;
     } else
@@ -155,7 +155,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
         {
             SDL_SetError("SGE - Out of memory");
             sge_BF_CloseFont(font);
-            return NULL;
+            return nullptr;
         }
 
         Uint32 color = sge_GetPixel(fnt, 0, 0); // get data color
@@ -211,13 +211,13 @@ sge_bmpFont* sge_BF_OpenFont(char* file, Uint8 flags)
 
 /* load the font bitmap */
 #ifdef _SGE_HAVE_IMG
-    if(NULL == (Temp = IMG_Load(file))) // We have SDL_Img lib!
+    if(nullptr == (Temp = IMG_Load(file))) // We have SDL_Img lib!
 #else
-    if(NULL == (Temp = SDL_LoadBMP(file))) // We can only load bmp files...
+    if(nullptr == (Temp = SDL_LoadBMP(file))) // We can only load bmp files...
 #endif
     {
         sge_SetError("SGE - Couldn't load font file: %s", file);
-        return NULL;
+        return nullptr;
     }
 
     font = sge_BF_CreateFont(Temp, flags | SGE_FLAG8); // SGE_FLAG8 - no need to make a copy of the surface
@@ -237,7 +237,7 @@ SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, S
     ret.w = 0;
     ret.h = 0;
 
-    if(font == NULL)
+    if(font == nullptr)
     {
         return ret;
     }
@@ -297,7 +297,7 @@ SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, S
 //==================================================================================
 SDL_Rect sge_BF_TextSize(sge_bmpFont* font, char* string)
 {
-    return sge_BF_textout(NULL, font, string, 0, 0);
+    return sge_BF_textout(nullptr, font, string, 0, 0);
 }
 
 //==================================================================================
@@ -358,7 +358,7 @@ void sge_BF_CloseFont(sge_bmpFont* font)
 
         delete[] font->CharPos;
         delete font;
-        font = NULL;
+        font = nullptr;
     }
 }
 
@@ -369,7 +369,7 @@ void sge_BF_CloseFont(sge_bmpFont* font)
 //==================================================================================
 void sge_BF_SetColor(sge_bmpFont* font, Uint8 R, Uint8 G, Uint8 B)
 {
-    if(font == NULL)
+    if(font == nullptr)
     {
         return;
     }

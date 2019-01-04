@@ -59,7 +59,7 @@ public:
         text_color = color;
         needRender = true;
     }
-    void setOption(const char* string, void (*callback)(int) = NULL, int param = 0);
+    void setOption(const char* string, void (*callback)(int) = nullptr, int param = 0);
 };
 
 #endif

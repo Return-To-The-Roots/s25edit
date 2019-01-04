@@ -21,12 +21,12 @@ CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsiz
     // allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
     text_.resize((this->cols + 1) * this->rows + 2);
 
-    Surf_Text = NULL;
+    Surf_Text = nullptr;
     needSurface = true;
     needRender = true;
     rendered = false;
     this->button_style = button_style;
-    textObj = new CFont((const char*)NULL, x, y, fontsize, text_color);
+    textObj = new CFont((const char*)nullptr, x, y, fontsize, text_color);
 }
 
 CTextfield::~CTextfield()
@@ -266,8 +266,8 @@ bool CTextfield::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Text);
-        Surf_Text = NULL;
-        if((Surf_Text = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
+        Surf_Text = nullptr;
+        if((Surf_Text = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
             return false;
         needSurface = false;
     }
@@ -417,7 +417,7 @@ bool CTextfield::render()
             }
         }
     } else
-        SDL_FillRect(Surf_Text, NULL, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
+        SDL_FillRect(Surf_Text, nullptr, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
 
     char* txtPtr = &text_[0];
 
@@ -435,7 +435,7 @@ bool CTextfield::render()
     // write text
     // textObj->setText(text);
     delete textObj;
-    textObj = NULL;
+    textObj = nullptr;
     textObj = new CFont(&text_[0], x_, y_, fontsize_, textColor_);
 
     // delete blinking chiffre (otherwise it could be written between user input chiffres)

@@ -5,7 +5,6 @@
 #include "globals.h"
 #include "lua/GameDataLoader.h"
 #include <boost/assign/std/vector.hpp>
-#include <boost/foreach.hpp>
 #include <iostream>
 #include <vector>
 
@@ -28,7 +27,7 @@ bool CGame::Init()
     {
         Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
         Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
-        if(Surf_Display == NULL || Surf_DisplayGL == NULL)
+        if(Surf_Display == nullptr || Surf_DisplayGL == nullptr)
         {
             std::cout << "failure";
             return false;
@@ -37,7 +36,7 @@ bool CGame::Init()
     {
         Surf_Display =
           SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-        if(Surf_Display == NULL)
+        if(Surf_Display == nullptr)
         {
             std::cout << "failure";
             return false;
@@ -94,7 +93,7 @@ bool CGame::Init()
     std::vector<std::string> paths;
     paths += "/GFX/PICS/SETUP000.LBM", "/GFX/PICS/SETUP010.LBM", "/GFX/PICS/SETUP011.LBM", "/GFX/PICS/SETUP012.LBM",
       "/GFX/PICS/SETUP013.LBM", "/GFX/PICS/SETUP014.LBM", "/GFX/PICS/SETUP015.LBM";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, LBM))
@@ -114,7 +113,7 @@ bool CGame::Init()
     paths += "/GFX/PICS/SETUP666.LBM", "/GFX/PICS/SETUP667.LBM", "/GFX/PICS/SETUP801.LBM", "/GFX/PICS/SETUP802.LBM",
       "/GFX/PICS/SETUP803.LBM", "/GFX/PICS/SETUP804.LBM", "/GFX/PICS/SETUP805.LBM", "/GFX/PICS/SETUP806.LBM", "/GFX/PICS/SETUP810.LBM",
       "/GFX/PICS/SETUP811.LBM", "/GFX/PICS/SETUP895.LBM", "/GFX/PICS/SETUP896.LBM";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, LBM))
@@ -126,7 +125,7 @@ bool CGame::Init()
 
     paths.clear();
     paths += "/GFX/PICS/SETUP897.LBM", "/GFX/PICS/SETUP898.LBM";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, LBM))
@@ -145,7 +144,7 @@ bool CGame::Init()
     paths.clear();
     paths += "/GFX/PICS/SETUP899.LBM", "/GFX/PICS/SETUP990.LBM", "/GFX/PICS/WORLD.LBM", "/GFX/PICS/WORLDMSK.LBM";
     std::cout << "\nLoading file: /GFX/PICS/SETUP899.LBM...";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, LBM))
@@ -159,7 +158,7 @@ bool CGame::Init()
     paths.clear();
     paths += "/DATA/TEXTURES/GOU5.DAT", "/DATA/TEXTURES/GOU6.DAT", "/DATA/TEXTURES/GOU7.DAT";
     std::cout << "\nLoading file: /DATA/TEXTURES/GOU5.DAT...";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, GOU))
@@ -250,7 +249,7 @@ bool CGame::Init()
     // texture tilesets
     paths.clear();
     paths += "/GFX/TEXTURES/TEX5.LBM", "/GFX/TEXTURES/TEX6.LBM", "/GFX/TEXTURES/TEX7.LBM";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, LBM))
@@ -273,7 +272,7 @@ bool CGame::Init()
     paths.clear();
     paths += "/DATA/MIS0BOBS.LST", "/DATA/MIS1BOBS.LST", "/DATA/MIS2BOBS.LST", "/DATA/MIS3BOBS.LST", "/DATA/MIS4BOBS.LST",
       "/DATA/MIS5BOBS.LST";
-    BOOST_FOREACH(const std::string& file, paths)
+    for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath + file, LST))

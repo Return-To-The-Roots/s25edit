@@ -38,7 +38,7 @@ int sge_Random(int min, int max)
 //==================================================================================
 void sge_Randomize()
 {
-    srand(static_cast<unsigned>(time(NULL)));
+    srand(static_cast<unsigned>(time(nullptr)));
 }
 
 //==================================================================================

@@ -16,15 +16,15 @@ CSelectBox::CSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int
     setColor(bg_color);
     // initialize CFont array
     for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
-        Entries[i] = NULL;
+        Entries[i] = nullptr;
 
-    Surf_SelectBox = NULL;
+    Surf_SelectBox = nullptr;
     needSurface = true;
     needRender = true;
     rendered = false;
     // button position is relative to the selectbox
-    ScrollUpButton = new CButton(NULL, 0, w - 1 - 20, 0, 20, 20, BUTTON_GREY, NULL, PICTURE_SMALL_ARROW_UP);
-    ScrollDownButton = new CButton(NULL, 0, w - 1 - 20, h - 1 - 20, 20, 20, BUTTON_GREY, NULL, PICTURE_SMALL_ARROW_DOWN);
+    ScrollUpButton = new CButton(nullptr, 0, w - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
+    ScrollDownButton = new CButton(nullptr, 0, w - 1 - 20, h - 1 - 20, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
 CSelectBox::~CSelectBox()
@@ -34,7 +34,7 @@ CSelectBox::~CSelectBox()
         if(Entries[i])
         {
             delete Entries[i];
-            Entries[i] = NULL;
+            Entries[i] = nullptr;
         }
     }
     delete ScrollUpButton;
@@ -49,7 +49,7 @@ void CSelectBox::setOption(const char* string, void (*callback)(int), int param)
 
     for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
     {
-        if(Entries[i] == NULL)
+        if(Entries[i] == nullptr)
         {
             Entries[i] = new CFont(string, 10, last_text_pos_y, fontsize, FONT_YELLOW);
             Entries[i]->setCallback(callback, param);
@@ -156,7 +156,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 
                 for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
                 {
-                    if(Entries[i] != NULL)
+                    if(Entries[i] != nullptr)
                         Entries[i]->setMouseData(button);
                 }
             }
@@ -170,11 +170,11 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                     if((button.x > x_ + w_ - 20) && (button.y < y_ + 20))
                     {
                         // test if first entry is on the most upper position
-                        if(Entries[0] != NULL && Entries[0]->getY() < 10)
+                        if(Entries[0] != nullptr && Entries[0]->getY() < 10)
                         {
                             for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
                             {
-                                if(Entries[i] != NULL)
+                                if(Entries[i] != nullptr)
                                     Entries[i]->setY(Entries[i]->getY() + 10);
                             }
                         }
@@ -189,15 +189,15 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                         int j;
                         for(j = 0; j < MAXSELECTBOXENTRIES; j++)
                         {
-                            if(Entries[j] == NULL)
+                            if(Entries[j] == nullptr)
                                 break;
                         }
                         j--;
-                        if(j >= 0 && Entries[j] != NULL && Entries[j]->getY() > h_ - 10)
+                        if(j >= 0 && Entries[j] != nullptr && Entries[j]->getY() > h_ - 10)
                         {
                             for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
                             {
-                                if(Entries[i] != NULL)
+                                if(Entries[i] != nullptr)
                                     Entries[i]->setY(Entries[i]->getY() - 10);
                             }
                         }
@@ -212,7 +212,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 
                 for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
                 {
-                    if(Entries[i] != NULL)
+                    if(Entries[i] != nullptr)
                         Entries[i]->setMouseData(button);
                 }
             }
@@ -250,8 +250,8 @@ bool CSelectBox::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_SelectBox);
-        Surf_SelectBox = NULL;
-        if((Surf_SelectBox = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == NULL)
+        Surf_SelectBox = nullptr;
+        if((Surf_SelectBox = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == nullptr)
             return false;
         needSurface = false;
     }
@@ -301,11 +301,11 @@ bool CSelectBox::render()
                                Surf_SelectBox->h - pos_y);
         }
     } else
-        SDL_FillRect(Surf_SelectBox, NULL, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));
+        SDL_FillRect(Surf_SelectBox, nullptr, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));
 
     for(int i = 0; i < MAXSELECTBOXENTRIES; i++)
     {
-        if(Entries[i] != NULL)
+        if(Entries[i] != nullptr)
             CSurface::Draw(Surf_SelectBox, Entries[i]->getSurface(), Entries[i]->getX(), Entries[i]->getY());
     }
 

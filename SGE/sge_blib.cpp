@@ -3971,10 +3971,11 @@ struct pline_p
 pline* rsort(pline* inlist)
 {
     if(!inlist)
-        return NULL;
+        return nullptr;
 
     // 16 radix-buckets
-    pline* bucket[16] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    pline* bucket[16] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
     pline* bi[16]; // bucket itterator (points to last element in bucket)
 
     pline* plist = inlist;
@@ -3999,7 +4000,7 @@ pline* rsort(pline* inlist)
         }
 
         // Empty buckets (recombine list)
-        j = NULL;
+        j = nullptr;
         for(k = 0; k < 16; k++)
         {
             if(bucket[k])
@@ -4011,9 +4012,9 @@ pline* rsort(pline* inlist)
 
                 j = bi[k];
             }
-            bucket[k] = NULL; // Empty
+            bucket[k] = nullptr; // Empty
         }
-        j->next = NULL; // Terminate list
+        j->next = nullptr; // Terminate list
     }
 
     return plist;
@@ -4022,9 +4023,9 @@ pline* rsort(pline* inlist)
 /* Calculate the scanline for y */
 pline* get_scanline(pline_p* plist, Uint16 n, Sint32 y)
 {
-    pline* p = NULL;
-    pline* list = NULL;
-    pline* li = NULL;
+    pline* p = nullptr;
+    pline* list = nullptr;
+    pline* li = nullptr;
 
     for(int i = 0; i < n; i++)
     {
@@ -4045,7 +4046,7 @@ pline* get_scanline(pline_p* plist, Uint16 n, Sint32 y)
     }
 
     if(li)
-        li->next = NULL; // terminate
+        li->next = nullptr; // terminate
 
     // Sort list
     return rsort(list);
@@ -4144,7 +4145,7 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Ui
         else
             line[i].fm = 0;
 
-        line[i].next = NULL;
+        line[i].next = nullptr;
 
         // Add to list
         plist[i].p = &line[i];
@@ -4158,8 +4159,8 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Ui
     if(SDL_MUSTLOCK(dest) && _sge_lock && alpha == SDL_ALPHA_OPAQUE)
         SDL_UnlockSurface(dest);
 
-    pline* list = NULL;
-    pline* li = NULL; // list itterator
+    pline* list = nullptr;
+    pline* li = nullptr; // list itterator
 
     // Scan y-lines
     for(sy = ymin; sy <= ymax; sy++)
@@ -4315,7 +4316,7 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint3
         else
             line[i].fm = 0;
 
-        line[i].next = NULL;
+        line[i].next = nullptr;
 
         // Add to list
         plist[i].p = &line[i];
@@ -4327,8 +4328,8 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint3
     if(SDL_MUSTLOCK(dest) && _sge_lock)
         SDL_UnlockSurface(dest);
 
-    pline* list = NULL;
-    pline* li = NULL; // list itterator
+    pline* list = nullptr;
+    pline* li = nullptr; // list itterator
 
     // Scan y-lines
     for(sy = ymin; sy <= ymax; sy++)
@@ -4528,7 +4529,7 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uin
             line[i].fmb = 0;
         }
 
-        line[i].next = NULL;
+        line[i].next = nullptr;
 
         // Add to list
         plist[i].p = &line[i];
@@ -4539,8 +4540,8 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uin
                          _PutPixel); // Can't do this with alpha, might overlap with the filling
     }
 
-    fpline* list = NULL;
-    fpline* li = NULL; // list itterator
+    fpline* list = nullptr;
+    fpline* li = nullptr; // list itterator
 
     // Scan y-lines
     for(sy = ymin; sy <= ymax; sy++)
@@ -4729,7 +4730,7 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8*
             line[i].fmb = 0;
         }
 
-        line[i].next = NULL;
+        line[i].next = nullptr;
 
         // Add to list
         plist[i].p = &line[i];
@@ -4738,8 +4739,8 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8*
         _AAmcLineAlpha(dest, x1, y1, x2, y2, r1, g1, b1, r2, g2, b2, SDL_ALPHA_OPAQUE);
     }
 
-    fpline* list = NULL;
-    fpline* li = NULL; // list itterator
+    fpline* list = nullptr;
+    fpline* li = nullptr; // list itterator
 
     // Scan y-lines
     for(sy = ymin; sy <= ymax; sy++)

@@ -10,11 +10,11 @@
 //-V:fseek:303
 //-V:ftell:303
 
-FILE* CFile::fp = NULL;
-bobBMP* CFile::bmpArray = NULL;
-bobSHADOW* CFile::shadowArray = NULL;
-bobPAL* CFile::palArray = NULL;
-bobPAL* CFile::palActual = NULL;
+FILE* CFile::fp = nullptr;
+bobBMP* CFile::bmpArray = nullptr;
+bobSHADOW* CFile::shadowArray = nullptr;
+bobPAL* CFile::palArray = nullptr;
+bobPAL* CFile::palActual = nullptr;
 bool CFile::loadPAL = false;
 
 #define STRINGIZE(x) STRINGIZE2(x)
@@ -30,7 +30,7 @@ CFile::~CFile() {}
 
 void CFile::init()
 {
-    fp = NULL;
+    fp = nullptr;
     bmpArray = &global::bmpArray[0];
     shadowArray = &global::shadowArray[0];
     palArray = &global::palArray[0];
@@ -40,13 +40,13 @@ void CFile::init()
 
 void* CFile::open_file(const std::string& filename, char filetype, bool only_loadPAL)
 {
-    void* return_value = NULL;
+    void* return_value = nullptr;
 
-    if(filename.empty() || bmpArray == NULL || shadowArray == NULL || palArray == NULL || palActual == NULL)
-        return NULL;
+    if(filename.empty() || bmpArray == nullptr || shadowArray == nullptr || palArray == nullptr || palActual == nullptr)
+        return nullptr;
 
-    else if((fp = boost::nowide::fopen(filename.c_str(), "rb")) == NULL)
-        return NULL;
+    else if((fp = boost::nowide::fopen(filename.c_str(), "rb")) == nullptr)
+        return nullptr;
 
     if(only_loadPAL)
         loadPAL = true;
@@ -103,10 +103,10 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
         std::cerr << "Error while reading " << filename << ": " << e.what() << std::endl;
     }
 
-    if(fp != NULL)
+    if(fp != nullptr)
     {
         fclose(fp);
-        fp = NULL;
+        fp = nullptr;
     }
 
     loadPAL = false;
@@ -213,7 +213,7 @@ bool CFile::open_idx(const std::string& filename)
     // save global filepointer
     fp_tmp = fp;
     // get a new filepointer to the '.IDX'-File
-    if((fp_idx = boost::nowide::fopen(filename.c_str(), "rb")) == NULL)
+    if((fp_idx = boost::nowide::fopen(filename.c_str(), "rb")) == nullptr)
         return false;
     // following code will open the corresponding '******.DAT'-File
     // allocate memory for new name
@@ -226,7 +226,7 @@ bool CFile::open_idx(const std::string& filename)
     filename_dat[fileending + 1] = 'A';
     filename_dat[fileending + 2] = 'T';
     // get the filepointer of the corresponging '******.DAT'-File
-    if((fp_dat = boost::nowide::fopen(filename_dat.c_str(), "rb")) == NULL)
+    if((fp_dat = boost::nowide::fopen(filename_dat.c_str(), "rb")) == nullptr)
         return false;
     // we are finished opening the 'DAT'-File, now we can handle the content
 
@@ -438,7 +438,7 @@ bool CFile::open_lbm(const std::string& filename)
     CHECK_READ(libendian::be_read_ui(&length, fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
+    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
     SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, colors, 0, 256);
 
@@ -507,7 +507,7 @@ bool CFile::open_lbm(const std::string& filename)
         SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
         bmpArray++;
-        if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32, 0, 0, 0, 0)) != NULL)
+        if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32, 0, 0, 0, 0)) != nullptr)
         {
             SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
             CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface, 0, 0);
@@ -718,10 +718,10 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
 {
     bool return_value = false;
 
-    if(filename.empty() || data == NULL)
+    if(filename.empty() || data == nullptr)
         return return_value;
 
-    if((fp = boost::nowide::fopen(filename.c_str(), "wb")) == NULL)
+    if((fp = boost::nowide::fopen(filename.c_str(), "wb")) == nullptr)
         return return_value;
 
     switch(filetype)
@@ -745,10 +745,10 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
             break;
     }
 
-    if(fp != NULL)
+    if(fp != nullptr)
     {
         fclose(fp);
-        fp = NULL;
+        fp = nullptr;
     }
 
     return return_value;
@@ -1048,7 +1048,7 @@ bool CFile::read_bob02()
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
+    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
     SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
     SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
@@ -1218,7 +1218,7 @@ bool CFile::read_bob04(int player_color)
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
+    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
 
     SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
@@ -1357,7 +1357,7 @@ bool CFile::read_bob07()
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((shadowArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == NULL)
+    if((shadowArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
     SDL_SetPalette(shadowArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
     // SDL_SetAlpha(shadowArray->surface, SDL_SRCALPHA, 128);
@@ -1416,7 +1416,7 @@ bool CFile::read_bob07()
     ***---THIS CODE IS NOT USEFUL.**/
     // We have to blit picture and shadow together and because of transparency we need to set the colorkey
     // SDL_SetColorKey(shadowArray->surface, SDL_SRCCOLORKEY, SDL_MapRGBA(shadowArray->surface->format, 0, 0, 0, 0));
-    // SDL_BlitSurface(shadowArray->surface, NULL, (shadowArray-1)->surface, NULL);
+    // SDL_BlitSurface(shadowArray->surface, nullptr, (shadowArray-1)->surface, nullptr);
     // SDL_FreeSurface(shadowArray->surface);
     // increment shadowArray
     shadowArray++;
@@ -1466,7 +1466,7 @@ bool CFile::read_bob14()
         return true;
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == NULL)
+    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
     SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
 

@@ -20,7 +20,7 @@ CButton::CButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint1
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
     motionLeaveParam = -1;
-    Surf_Button = NULL;
+    Surf_Button = nullptr;
     needSurface = true;
     needRender = true;
 }
@@ -100,13 +100,13 @@ void CButton::setMouseData(const SDL_MouseMotionEvent& motion)
         if(motion.state == SDL_RELEASED)
         {
             marked = true;
-            if(motionEntryParam >= 0 && callback_ != NULL)
+            if(motionEntryParam >= 0 && callback_ != nullptr)
                 callback_(motionEntryParam);
         }
     } else
     {
         // button was marked before and mouse cursor is on the button now, so do the callback
-        if(motionLeaveParam >= 0 && callback_ != NULL && marked == true)
+        if(motionLeaveParam >= 0 && callback_ != nullptr && marked == true)
             callback_(motionLeaveParam);
         marked = false;
     }
@@ -127,7 +127,7 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
         {
             clicked = false;
             // if mouse button is released ON the BUTTON (marked = true), then do the callback
-            if(marked && callback_ != NULL)
+            if(marked && callback_ != nullptr)
                 callback_(clickedParam);
         }
     }
@@ -153,8 +153,8 @@ bool CButton::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Button);
-        Surf_Button = NULL;
-        if((Surf_Button = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
+        Surf_Button = nullptr;
+        if((Surf_Button = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
             return false;
         needSurface = false;
     }
@@ -311,7 +311,7 @@ bool CButton::render()
             button_picture = -1;
             button_text = "PIC";
         }
-    } else if(button_text != NULL)
+    } else if(button_text != nullptr)
         CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), 11, button_text_color, ALIGN_MIDDLE);
 
     return true;

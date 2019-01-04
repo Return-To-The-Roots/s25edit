@@ -18,7 +18,7 @@
 void CGame::SetAppIcon()
 {
 #ifdef _WIN32
-    LPARAM icon = (LPARAM)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SYMBOL));
+    LPARAM icon = (LPARAM)LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_SYMBOL));
     SendMessage(GetConsoleWindow(), WM_SETICON, ICON_BIG, icon);
     SendMessage(GetConsoleWindow(), WM_SETICON, ICON_SMALL, icon);
 
@@ -35,11 +35,11 @@ void CGame::SetAppIcon()
 void CGame::Render()
 {
     // clear the surface before drawing new (in normal case not needed)
-    // SDL_FillRect( Surf_Display, NULL, SDL_MapRGB(Surf_Display->format,0,0,0) );
+    // SDL_FillRect( Surf_Display, nullptr, SDL_MapRGB(Surf_Display->format,0,0,0) );
 
     // check resolution
     /*
-    if (MapObj == NULL || !MapObj->isActive())
+    if (MapObj == nullptr || !MapObj->isActive())
     {
         //we are in menu
         if ( (Surf_Display->w != MenuResolutionX || Surf_Display->h != MenuResolutionY) ||
@@ -59,7 +59,7 @@ void CGame::Render()
        || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0))
     {
         SDL_FreeSurface(Surf_Display);
-        Surf_Display = NULL;
+        Surf_Display = nullptr;
 
         if(CSurface::useOpenGL)
         {
@@ -87,7 +87,7 @@ void CGame::Render()
 
         if(CSurface::useOpenGL)
         {
-            // SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
+            // SDL_BlitSurface(Surf_Display, nullptr, Surf_DisplayGL, nullptr);
             // SDL_Flip(Surf_DisplayGL);
             SDL_GL_SwapBuffers();
         } else
@@ -96,13 +96,13 @@ void CGame::Render()
     }
 
     // render the map if active
-    if(MapObj != NULL && MapObj->isActive())
+    if(MapObj != nullptr && MapObj->isActive())
         CSurface::Draw(Surf_Display, MapObj->getSurface(), 0, 0);
 
     // render active menus
     for(int i = 0; i < MAXMENUS; i++)
     {
-        if(Menus[i] != NULL && Menus[i]->isActive())
+        if(Menus[i] != nullptr && Menus[i]->isActive())
             CSurface::Draw(Surf_Display, Menus[i]->getSurface(), 0, 0);
     }
 
@@ -111,7 +111,7 @@ void CGame::Render()
     // first find the highest priority
     for(int i = 0; i < MAXWINDOWS; i++)
     {
-        if(Windows[i] != NULL && Windows[i]->getPriority() > highestPriority)
+        if(Windows[i] != nullptr && Windows[i]->getPriority() > highestPriority)
             highestPriority = Windows[i]->getPriority();
     }
     // render from lowest priority to highest
@@ -119,7 +119,7 @@ void CGame::Render()
     {
         for(int i = 0; i < MAXWINDOWS; i++)
         {
-            if(Windows[i] != NULL && Windows[i]->getPriority() == actualPriority)
+            if(Windows[i] != nullptr && Windows[i]->getPriority() == actualPriority)
                 CSurface::Draw(Surf_Display, Windows[i]->getSurface(), Windows[i]->getX(), Windows[i]->getY());
         }
     }
@@ -140,7 +140,7 @@ void CGame::Render()
 
     if(CSurface::useOpenGL)
     {
-        SDL_BlitSurface(Surf_Display, NULL, Surf_DisplayGL, NULL);
+        SDL_BlitSurface(Surf_Display, nullptr, Surf_DisplayGL, nullptr);
         SDL_Flip(Surf_DisplayGL);
         SDL_GL_SwapBuffers();
     } else

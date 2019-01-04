@@ -2,7 +2,7 @@
 #define _CMAP_H
 
 #include "includes.h"
-#include <boost/array.hpp>
+#include <array>
 #include <string>
 
 class CMap
@@ -172,7 +172,7 @@ private:
     //          X=14    X=5     X=6     X=15
     //              X=16    X=17    X=18
     template<size_t T_size>
-    void calculateVerticesAround(boost::array<Point32, T_size>& Vertices, int VertexX, int VertexY);
+    void calculateVerticesAround(std::array<Point32, T_size>& Vertices, int VertexX, int VertexY);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
     int correctMouseBlitX(int VertexX, int VertexY);

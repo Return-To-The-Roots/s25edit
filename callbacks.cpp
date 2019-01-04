@@ -32,7 +32,7 @@ void callback::PleaseWait(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDWait != NULL)
+            if(WNDWait != nullptr)
                 break;
             WNDWait = new CWindow(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, //-V807
                                   global::s2->getDisplaySurface()->h / 2 - 35, 212, 70, "Please wait");
@@ -50,7 +50,7 @@ void callback::PleaseWait(int Param)
             } else
             {
                 delete WNDWait;
-                WNDWait = NULL;
+                WNDWait = nullptr;
                 return;
             }
             break;
@@ -58,20 +58,20 @@ void callback::PleaseWait(int Param)
         case CALL_FROM_GAMELOOP: // This window gives a "Please Wait"-string, so it is shown while there is an intensive operation
             // during ONE gameloop. Therefore it is only shown DURING this ONE operation. If the next gameloop
             // appears, the operation MUST have been finished and we can destroy this window.
-            if(WNDWait != NULL)
+            if(WNDWait != nullptr)
             {
                 global::s2->UnregisterCallback(PleaseWait);
                 WNDWait->setWaste();
-                WNDWait = NULL;
+                WNDWait = nullptr;
             }
             break;
 
         case WINDOW_QUIT_MESSAGE: // this is the global window quit message, callback is explicit called with this value, so destroy the
                                   // window
-            if(WNDWait != NULL)
+            if(WNDWait != nullptr)
             {
                 WNDWait->setWaste();
-                WNDWait = NULL;
+                WNDWait = nullptr;
             }
             break;
 
@@ -81,8 +81,8 @@ void callback::PleaseWait(int Param)
 
 void callback::ShowStatus(int Param)
 {
-    static CWindow* WND = NULL;
-    static CFont* txt = NULL;
+    static CWindow* WND = nullptr;
+    static CFont* txt = nullptr;
 
     enum
     {
@@ -94,7 +94,7 @@ void callback::ShowStatus(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WND != NULL)
+            if(WND != nullptr)
                 break;
             WND =
               new CWindow(ShowStatus, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, global::s2->getDisplaySurface()->h / 2 - 35,
@@ -105,7 +105,7 @@ void callback::ShowStatus(int Param)
             } else
             {
                 delete WND;
-                WND = NULL;
+                WND = nullptr;
                 return;
             }
             break;
@@ -120,10 +120,10 @@ void callback::ShowStatus(int Param)
 
         case WINDOWQUIT:
         case MAP_QUIT:
-            if(WND != NULL)
+            if(WND != nullptr)
             {
                 WND->setWaste();
-                WND = NULL;
+                WND = nullptr;
             }
             break;
 
@@ -133,7 +133,7 @@ void callback::ShowStatus(int Param)
 
 void callback::mainmenu(int Param)
 {
-    static CMenu* MainMenu = NULL;
+    static CMenu* MainMenu = nullptr;
 
     enum
     {
@@ -149,7 +149,7 @@ void callback::mainmenu(int Param)
             if(!global::s2->RegisterMenu(MainMenu))
             {
                 delete MainMenu;
-                MainMenu = NULL;
+                MainMenu = nullptr;
                 return;
             }
             MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Quit program");
@@ -164,7 +164,7 @@ void callback::mainmenu(int Param)
 
         case ENDGAME:
             MainMenu->setWaste();
-            MainMenu = NULL;
+            MainMenu = nullptr;
             global::s2->Running = false;
             break;
 
@@ -172,13 +172,13 @@ void callback::mainmenu(int Param)
             PleaseWait(INITIALIZING_CALL);
             global::s2->setMapObj(new CMap(""));
             MainMenu->setWaste();
-            MainMenu = NULL;
+            MainMenu = nullptr;
             PleaseWait(WINDOW_QUIT_MESSAGE);
             break;
 
         case OPTIONS:
             MainMenu->setWaste();
-            MainMenu = NULL;
+            MainMenu = nullptr;
             submenuOptions(INITIALIZING_CALL);
 
         default: break;
@@ -187,12 +187,12 @@ void callback::mainmenu(int Param)
 
 void callback::submenuOptions(int Param)
 {
-    static CMenu* SubMenu = NULL;
-    static CFont* TextResolution = NULL;
-    static CButton* ButtonFullscreen = NULL;
-    static CButton* ButtonOpenGL = NULL;
+    static CMenu* SubMenu = nullptr;
+    static CFont* TextResolution = nullptr;
+    static CButton* ButtonFullscreen = nullptr;
+    static CButton* ButtonOpenGL = nullptr;
     char puffer[80];
-    static CSelectBox* SelectBoxRes = NULL;
+    static CSelectBox* SelectBoxRes = nullptr;
 
     enum
     {
@@ -251,10 +251,10 @@ void callback::submenuOptions(int Param)
             if(!global::s2->RegisterMenu(SubMenu))
             {
                 delete SubMenu;
-                TextResolution = NULL;
-                ButtonFullscreen = NULL;
-                SelectBoxRes = NULL;
-                SubMenu = NULL;
+                TextResolution = nullptr;
+                ButtonFullscreen = nullptr;
+                SelectBoxRes = nullptr;
+                SubMenu = nullptr;
                 return;
             }
             // add button for "back to main menu"
@@ -262,16 +262,16 @@ void callback::submenuOptions(int Param)
             // add menu title
             SubMenu->addText("Options", (int)(global::s2->GameResolutionX / 2 - 20), 10, 14);
             // add screen resolution
-            if(TextResolution != NULL)
+            if(TextResolution != nullptr)
                 SubMenu->delText(TextResolution);
             sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY,
                     (global::s2->fullscreen ? "Fullscreen" : "Window"));
             TextResolution = SubMenu->addText(puffer, (int)(global::s2->GameResolutionX / 2 - 110), 50, 11);
-            if(ButtonFullscreen != NULL)
+            if(ButtonFullscreen != nullptr)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolutionX / 2 - 100), 190, 200, 20,
                                                   BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            if(ButtonOpenGL != NULL)
+            if(ButtonOpenGL != nullptr)
                 SubMenu->delButton(ButtonOpenGL);
             // ButtonOpenGL = SubMenu->addButton(submenuOptions, OPENGL, (int)(global::s2->GameResolutionX/2-100), 210, 200, 20,
             // BUTTON_RED1, (CSurface::useOpenGL ? "Software-Rendering" : "OpenGL"));  add selectbox for resolutions
@@ -322,11 +322,11 @@ void callback::submenuOptions(int Param)
 
         case MAINMENU:
             SubMenu->setWaste();
-            TextResolution = NULL;
-            ButtonFullscreen = NULL;
-            ButtonOpenGL = NULL;
-            SelectBoxRes = NULL;
-            SubMenu = NULL;
+            TextResolution = nullptr;
+            ButtonFullscreen = nullptr;
+            ButtonOpenGL = nullptr;
+            SelectBoxRes = nullptr;
+            SubMenu = nullptr;
             mainmenu(INITIALIZING_CALL);
             break;
 
@@ -350,11 +350,11 @@ void callback::submenuOptions(int Param)
 
         case GRAPHICS_CHANGE:
             SubMenu->setWaste();
-            TextResolution = NULL;
-            ButtonFullscreen = NULL;
-            ButtonOpenGL = NULL;
-            SelectBoxRes = NULL;
-            SubMenu = NULL;
+            TextResolution = nullptr;
+            ButtonFullscreen = nullptr;
+            ButtonOpenGL = nullptr;
+            SelectBoxRes = nullptr;
+            SubMenu = nullptr;
             submenuOptions(INITIALIZING_CALL);
             break;
 
@@ -634,7 +634,7 @@ void callback::EditorHelpMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDHelp != NULL)
+            if(WNDHelp != nullptr)
                 break;
             WNDHelp = new CWindow(EditorHelpMenu, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 320,
                                   global::s2->getDisplaySurface()->h / 2 - 240, 640, 380, "Hilfe", WINDOW_GREEN2,
@@ -698,8 +698,8 @@ void callback::EditorHelpMenu(int Param)
             } else
             {
                 delete WNDHelp;
-                WNDHelp = NULL;
-                SelectBoxHelp = NULL;
+                WNDHelp = nullptr;
+                SelectBoxHelp = nullptr;
                 return;
             }
             break;
@@ -708,29 +708,29 @@ void callback::EditorHelpMenu(int Param)
 
         case WINDOW_QUIT_MESSAGE: // this is the global window quit message, callback is explicit called with this value, so destroy the
                                   // window
-            if(WNDHelp != NULL)
+            if(WNDHelp != nullptr)
             {
                 WNDHelp->setWaste();
-                WNDHelp = NULL;
-                SelectBoxHelp = NULL;
+                WNDHelp = nullptr;
+                SelectBoxHelp = nullptr;
             }
             break;
 
         case WINDOWQUIT: // this is the own window quit message of the callback
-            if(WNDHelp != NULL)
+            if(WNDHelp != nullptr)
             {
                 WNDHelp->setWaste();
-                WNDHelp = NULL;
-                SelectBoxHelp = NULL;
+                WNDHelp = nullptr;
+                SelectBoxHelp = nullptr;
             }
             break;
 
         case MAP_QUIT: // this is the global window quit message, callback is explicit called with this value, so destroy the window
-            if(WNDHelp != NULL)
+            if(WNDHelp != nullptr)
             {
                 WNDHelp->setWaste();
-                WNDHelp = NULL;
-                SelectBoxHelp = NULL;
+                WNDHelp = nullptr;
+                SelectBoxHelp = nullptr;
             }
             break;
 
@@ -740,7 +740,7 @@ void callback::EditorHelpMenu(int Param)
 
 void callback::EditorMainMenu(int Param)
 {
-    static CWindow* WNDMain = NULL;
+    static CWindow* WNDMain = nullptr;
 
     enum
     {
@@ -753,7 +753,7 @@ void callback::EditorMainMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDMain != NULL)
+            if(WNDMain != nullptr)
                 break;
             WNDMain = new CWindow(EditorMainMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 110, global::s2->GameResolutionY / 2 - 160,
                                   220, 320, "Main menu", WINDOW_GREEN1, WINDOW_CLOSE);
@@ -766,24 +766,24 @@ void callback::EditorMainMenu(int Param)
             } else
             {
                 delete WNDMain;
-                WNDMain = NULL;
+                WNDMain = nullptr;
                 return;
             }
             break;
 
         case WINDOWQUIT:
-            if(WNDMain != NULL)
+            if(WNDMain != nullptr)
             {
                 WNDMain->setWaste();
-                WNDMain = NULL;
+                WNDMain = nullptr;
             }
             break;
 
         case MAP_QUIT:
-            if(WNDMain != NULL)
+            if(WNDMain != nullptr)
             {
                 WNDMain->setWaste();
-                WNDMain = NULL;
+                WNDMain = nullptr;
             }
             break;
 
@@ -799,9 +799,9 @@ void callback::EditorMainMenu(int Param)
 
 void callback::EditorLoadMenu(int Param)
 {
-    static CWindow* WNDLoad = NULL;
-    static CTextfield* TXTF_Filename = NULL;
-    static CMap* MapObj = NULL;
+    static CWindow* WNDLoad = nullptr;
+    static CTextfield* TXTF_Filename = nullptr;
+    static CMap* MapObj = nullptr;
 
     enum
     {
@@ -812,7 +812,7 @@ void callback::EditorLoadMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDLoad != NULL)
+            if(WNDLoad != nullptr)
                 break;
             WNDLoad = new CWindow(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 140, global::s2->GameResolutionY / 2 - 45,
                                   280, 120, "Load", WINDOW_GREEN1, WINDOW_CLOSE);
@@ -827,27 +827,27 @@ void callback::EditorLoadMenu(int Param)
             } else
             {
                 delete WNDLoad;
-                WNDLoad = NULL;
+                WNDLoad = nullptr;
                 return;
             }
             break;
 
         case WINDOWQUIT:
-            if(WNDLoad != NULL)
+            if(WNDLoad != nullptr)
             {
                 WNDLoad->setWaste();
-                WNDLoad = NULL;
+                WNDLoad = nullptr;
             }
-            TXTF_Filename = NULL;
+            TXTF_Filename = nullptr;
             break;
 
         case MAP_QUIT:
-            if(WNDLoad != NULL)
+            if(WNDLoad != nullptr)
             {
                 WNDLoad->setWaste();
-                WNDLoad = NULL;
+                WNDLoad = nullptr;
             }
-            TXTF_Filename = NULL;
+            TXTF_Filename = nullptr;
             break;
 
         case LOADMAP:
@@ -897,11 +897,11 @@ void callback::EditorLoadMenu(int Param)
 
 void callback::EditorSaveMenu(int Param)
 {
-    static CWindow* WNDSave = NULL;
-    static CTextfield* TXTF_Filename = NULL;
-    static CTextfield* TXTF_Mapname = NULL;
-    static CTextfield* TXTF_Author = NULL;
-    static CMap* MapObj = NULL;
+    static CWindow* WNDSave = nullptr;
+    static CTextfield* TXTF_Filename = nullptr;
+    static CTextfield* TXTF_Mapname = nullptr;
+    static CTextfield* TXTF_Author = nullptr;
+    static CMap* MapObj = nullptr;
 
     enum
     {
@@ -912,7 +912,7 @@ void callback::EditorSaveMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDSave != NULL)
+            if(WNDSave != nullptr)
                 break;
             WNDSave = new CWindow(EditorSaveMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 140, global::s2->GameResolutionY / 2 - 100,
                                   280, 200, "Save", WINDOW_GREEN1, WINDOW_CLOSE);
@@ -934,31 +934,31 @@ void callback::EditorSaveMenu(int Param)
             } else
             {
                 delete WNDSave;
-                WNDSave = NULL;
+                WNDSave = nullptr;
                 return;
             }
             break;
 
         case WINDOWQUIT:
-            if(WNDSave != NULL)
+            if(WNDSave != nullptr)
             {
                 WNDSave->setWaste();
-                WNDSave = NULL;
+                WNDSave = nullptr;
             }
-            TXTF_Filename = NULL;
-            TXTF_Mapname = NULL;
-            TXTF_Author = NULL;
+            TXTF_Filename = nullptr;
+            TXTF_Mapname = nullptr;
+            TXTF_Author = nullptr;
             break;
 
         case MAP_QUIT:
-            if(WNDSave != NULL)
+            if(WNDSave != nullptr)
             {
                 WNDSave->setWaste();
-                WNDSave = NULL;
+                WNDSave = nullptr;
             }
-            TXTF_Filename = NULL;
-            TXTF_Mapname = NULL;
-            TXTF_Author = NULL;
+            TXTF_Filename = nullptr;
+            TXTF_Mapname = nullptr;
+            TXTF_Author = nullptr;
             break;
 
         case SAVEMAP:
@@ -986,7 +986,7 @@ void callback::EditorSaveMenu(int Param)
 
 void callback::EditorQuitMenu(int Param)
 {
-    static CWindow* WNDBackToMainMenu = NULL;
+    static CWindow* WNDBackToMainMenu = nullptr;
 
     enum
     {
@@ -998,27 +998,27 @@ void callback::EditorQuitMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDBackToMainMenu != NULL)
+            if(WNDBackToMainMenu != nullptr)
                 break;
             WNDBackToMainMenu = new CWindow(EditorQuitMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 106,
                                             global::s2->GameResolutionY / 2 - 55, 212, 110, "Exit?");
             if(global::s2->RegisterWindow(WNDBackToMainMenu))
             {
-                WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, 0, 0, 100, 80, BUTTON_GREEN2, NULL, PICTURE_SMALL_TICK);
-                WNDBackToMainMenu->addButton(EditorQuitMenu, NOTBACKTOMAIN, 100, 0, 100, 80, BUTTON_RED1, NULL, PICTURE_SMALL_CROSS);
+                WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, 0, 0, 100, 80, BUTTON_GREEN2, nullptr, PICTURE_SMALL_TICK);
+                WNDBackToMainMenu->addButton(EditorQuitMenu, NOTBACKTOMAIN, 100, 0, 100, 80, BUTTON_RED1, nullptr, PICTURE_SMALL_CROSS);
             } else
             {
                 delete WNDBackToMainMenu;
-                WNDBackToMainMenu = NULL;
+                WNDBackToMainMenu = nullptr;
                 return;
             }
             break;
 
         case BACKTOMAIN:
-            if(global::s2->getMapObj() != NULL)
+            if(global::s2->getMapObj() != nullptr)
                 global::s2->delMapObj();
             WNDBackToMainMenu->setWaste();
-            WNDBackToMainMenu = NULL;
+            WNDBackToMainMenu = nullptr;
             // now call all EditorMenu callbacks (from the menubar) with MAP_QUIT
             EditorHelpMenu(MAP_QUIT);
             EditorMainMenu(MAP_QUIT);
@@ -1038,10 +1038,10 @@ void callback::EditorQuitMenu(int Param)
             break;
 
         case NOTBACKTOMAIN:
-            if(WNDBackToMainMenu != NULL)
+            if(WNDBackToMainMenu != nullptr)
             {
                 WNDBackToMainMenu->setWaste();
-                WNDBackToMainMenu = NULL;
+                WNDBackToMainMenu = nullptr;
             }
             break;
 
@@ -1051,9 +1051,9 @@ void callback::EditorQuitMenu(int Param)
 
 void callback::EditorTextureMenu(int Param)
 {
-    static CWindow* WNDTexture = NULL;
-    static CMap* MapObj = NULL;
-    static bobMAP* map = NULL;
+    static CWindow* WNDTexture = nullptr;
+    static CMap* MapObj = nullptr;
+    static bobMAP* map = nullptr;
     static int textureIndex = 0;
     static int harbourPictureCross = 0; // this have to be -1 if we use the harbour button
     static int lastContent = 0x00;
@@ -1085,7 +1085,7 @@ void callback::EditorTextureMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDTexture != NULL)
+            if(WNDTexture != nullptr)
                 break;
             WNDTexture = new CWindow(EditorTextureMenu, WINDOWQUIT, PosX, PosY, 220, 133, "Terrain", WINDOW_GREEN1,
                                      WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1123,12 +1123,12 @@ void callback::EditorTextureMenu(int Param)
                 if(map->type != MAP_WASTELAND)
                     WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, 138, 70, textureIndex);
 
-                // WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, NULL, MAPPIC_HOUSE_HARBOUR);
+                // WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, nullptr, MAPPIC_HOUSE_HARBOUR);
                 // harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
             } else
             {
                 delete WNDTexture;
-                WNDTexture = NULL;
+                WNDTexture = nullptr;
                 return;
             }
             break;
@@ -1310,7 +1310,7 @@ void callback::EditorTextureMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 MapObj->setMode(EDITOR_MODE_TEXTURE);
                 MapObj->setModeContent(lastContent);
@@ -1318,34 +1318,34 @@ void callback::EditorTextureMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDTexture != NULL)
+            if(WNDTexture != nullptr)
             {
                 PosX = WNDTexture->getX();
                 PosY = WNDTexture->getY();
                 WNDTexture->setWaste();
-                WNDTexture = NULL;
+                WNDTexture = nullptr;
             }
             MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
             MapObj->setModeContent(0x00);
             lastContent = 0x00;
-            MapObj = NULL;
-            map = NULL;
+            MapObj = nullptr;
+            map = nullptr;
             textureIndex = 0;
             harbourPictureCross = 0; // this have to be -1 if we use the harbour button
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDTexture != NULL)
+            if(WNDTexture != nullptr)
             {
                 PosX = WNDTexture->getX();
                 PosY = WNDTexture->getY();
                 WNDTexture->setWaste();
-                WNDTexture = NULL;
+                WNDTexture = nullptr;
             }
             lastContent = 0x00;
-            MapObj = NULL;
-            map = NULL;
+            MapObj = nullptr;
+            map = nullptr;
             textureIndex = 0;
             harbourPictureCross = 0; // this have to be -1 if we use the harbour button
             break;
@@ -1356,9 +1356,9 @@ void callback::EditorTextureMenu(int Param)
 
 void callback::EditorTreeMenu(int Param)
 {
-    static CWindow* WNDTree = NULL;
-    static CMap* MapObj = NULL;
-    static bobMAP* map = NULL;
+    static CWindow* WNDTree = nullptr;
+    static CMap* MapObj = nullptr;
+    static bobMAP* map = nullptr;
     static int lastContent = 0x00;
     static int lastContent2 = 0x00;
     static int PosX = 230, PosY = 0;
@@ -1384,7 +1384,7 @@ void callback::EditorTreeMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDTree != NULL)
+            if(WNDTree != nullptr)
                 break;
             WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, PosX, PosY, 148, 140, "Trees", WINDOW_GREEN1,
                                   WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1431,7 +1431,7 @@ void callback::EditorTreeMenu(int Param)
             } else
             {
                 delete WNDTree;
-                WNDTree = NULL;
+                WNDTree = nullptr;
                 return;
             }
             break;
@@ -1516,7 +1516,7 @@ void callback::EditorTreeMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 MapObj->setMode(EDITOR_MODE_TREE);
                 MapObj->setModeContent(lastContent);
@@ -1525,35 +1525,35 @@ void callback::EditorTreeMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDTree != NULL)
+            if(WNDTree != nullptr)
             {
                 PosX = WNDTree->getX();
                 PosY = WNDTree->getY();
                 WNDTree->setWaste();
-                WNDTree = NULL;
+                WNDTree = nullptr;
             }
             MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
             MapObj->setModeContent(0x00);
             MapObj->setModeContent2(0x00);
             lastContent = 0x00;
             lastContent2 = 0x00;
-            MapObj = NULL;
-            map = NULL;
+            MapObj = nullptr;
+            map = nullptr;
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDTree != NULL)
+            if(WNDTree != nullptr)
             {
                 PosX = WNDTree->getX();
                 PosY = WNDTree->getY();
                 WNDTree->setWaste();
-                WNDTree = NULL;
+                WNDTree = nullptr;
             }
             lastContent = 0x00;
             lastContent2 = 0x00;
-            MapObj = NULL;
-            map = NULL;
+            MapObj = nullptr;
+            map = nullptr;
             break;
 
         default: break;
@@ -1562,8 +1562,8 @@ void callback::EditorTreeMenu(int Param)
 
 void callback::EditorResourceMenu(int Param)
 {
-    static CWindow* WNDResource = NULL;
-    static CMap* MapObj = NULL;
+    static CWindow* WNDResource = nullptr;
+    static CMap* MapObj = nullptr;
     static int lastContent = 0x00;
     static int PosX = 0, PosY = 140;
 
@@ -1579,7 +1579,7 @@ void callback::EditorResourceMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDResource != NULL)
+            if(WNDResource != nullptr)
                 break;
             WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, PosX, PosY, 148, 55, "Resources", WINDOW_GREEN1,
                                       WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1598,7 +1598,7 @@ void callback::EditorResourceMenu(int Param)
             } else
             {
                 delete WNDResource;
-                WNDResource = NULL;
+                WNDResource = nullptr;
                 return;
             }
             break;
@@ -1621,7 +1621,7 @@ void callback::EditorResourceMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 MapObj->setMode(EDITOR_MODE_RESOURCE_RAISE);
                 MapObj->setModeContent(lastContent);
@@ -1629,30 +1629,30 @@ void callback::EditorResourceMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDResource != NULL)
+            if(WNDResource != nullptr)
             {
                 PosX = WNDResource->getX();
                 PosY = WNDResource->getY();
                 WNDResource->setWaste();
-                WNDResource = NULL;
+                WNDResource = nullptr;
             }
             MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
             MapObj->setModeContent(0x00);
             lastContent = 0x00;
-            MapObj = NULL;
+            MapObj = nullptr;
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDResource != NULL)
+            if(WNDResource != nullptr)
             {
                 PosX = WNDResource->getX();
                 PosY = WNDResource->getY();
                 WNDResource->setWaste();
-                WNDResource = NULL;
+                WNDResource = nullptr;
             }
             lastContent = 0x00;
-            MapObj = NULL;
+            MapObj = nullptr;
             break;
 
         default: break;
@@ -1661,9 +1661,9 @@ void callback::EditorResourceMenu(int Param)
 
 void callback::EditorLandscapeMenu(int Param)
 {
-    static CWindow* WNDLandscape = NULL;
-    static CMap* MapObj = NULL;
-    static bobMAP* map = NULL;
+    static CWindow* WNDLandscape = nullptr;
+    static CMap* MapObj = nullptr;
+    static bobMAP* map = nullptr;
     static int lastContent = 0x00;
     static int lastContent2 = 0x00;
     static int PosX = 390, PosY = 0;
@@ -1687,7 +1687,7 @@ void callback::EditorLandscapeMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDLandscape != NULL)
+            if(WNDLandscape != nullptr)
                 break;
             WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, PosX, PosY, 112, 174, "Landscape", WINDOW_GREEN1,
                                        WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1741,7 +1741,7 @@ void callback::EditorLandscapeMenu(int Param)
             } else
             {
                 delete WNDLandscape;
-                WNDLandscape = NULL;
+                WNDLandscape = nullptr;
                 return;
             }
             break;
@@ -1814,7 +1814,7 @@ void callback::EditorLandscapeMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 MapObj->setMode(EDITOR_MODE_LANDSCAPE);
                 MapObj->setModeContent(lastContent);
@@ -1823,35 +1823,35 @@ void callback::EditorLandscapeMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDLandscape != NULL)
+            if(WNDLandscape != nullptr)
             {
                 PosX = WNDLandscape->getX();
                 PosY = WNDLandscape->getY();
                 WNDLandscape->setWaste();
-                WNDLandscape = NULL;
+                WNDLandscape = nullptr;
             }
             MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
             MapObj->setModeContent(0x00);
             MapObj->setModeContent2(0x00);
             lastContent = 0x00;
             lastContent2 = 0x00;
-            MapObj = NULL;
-            map = NULL;
+            MapObj = nullptr;
+            map = nullptr;
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDLandscape != NULL)
+            if(WNDLandscape != nullptr)
             {
                 PosX = WNDLandscape->getX();
                 PosY = WNDLandscape->getY();
                 WNDLandscape->setWaste();
-                WNDLandscape = NULL;
+                WNDLandscape = nullptr;
             }
             lastContent = 0x00;
             lastContent2 = 0x00;
-            MapObj = NULL;
-            map = NULL;
+            MapObj = nullptr;
+            map = nullptr;
             break;
 
         default: break;
@@ -1860,8 +1860,8 @@ void callback::EditorLandscapeMenu(int Param)
 
 void callback::EditorAnimalMenu(int Param)
 {
-    static CWindow* WNDAnimal = NULL;
-    static CMap* MapObj = NULL;
+    static CWindow* WNDAnimal = nullptr;
+    static CMap* MapObj = nullptr;
     static int lastContent = 0x00;
     static int PosX = 510, PosY = 0;
 
@@ -1879,7 +1879,7 @@ void callback::EditorAnimalMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDAnimal != NULL)
+            if(WNDAnimal != nullptr)
                 break;
             WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, PosX, PosY, 116, 106, "Animals", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1899,7 +1899,7 @@ void callback::EditorAnimalMenu(int Param)
             } else
             {
                 delete WNDAnimal;
-                WNDAnimal = NULL;
+                WNDAnimal = nullptr;
                 return;
             }
             break;
@@ -1930,7 +1930,7 @@ void callback::EditorAnimalMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 MapObj->setMode(EDITOR_MODE_ANIMAL);
                 MapObj->setModeContent(lastContent);
@@ -1938,30 +1938,30 @@ void callback::EditorAnimalMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDAnimal != NULL)
+            if(WNDAnimal != nullptr)
             {
                 PosX = WNDAnimal->getX();
                 PosY = WNDAnimal->getY();
                 WNDAnimal->setWaste();
-                WNDAnimal = NULL;
+                WNDAnimal = nullptr;
             }
             MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
             MapObj->setModeContent(0x00);
             lastContent = 0x00;
-            MapObj = NULL;
+            MapObj = nullptr;
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDAnimal != NULL)
+            if(WNDAnimal != nullptr)
             {
                 PosX = WNDAnimal->getX();
                 PosY = WNDAnimal->getY();
                 WNDAnimal->setWaste();
-                WNDAnimal = NULL;
+                WNDAnimal = nullptr;
             }
             lastContent = 0x00;
-            MapObj = NULL;
+            MapObj = nullptr;
             break;
 
         default: break;
@@ -1970,14 +1970,14 @@ void callback::EditorAnimalMenu(int Param)
 
 void callback::EditorPlayerMenu(int Param)
 {
-    static CWindow* WNDPlayer = NULL;
-    static CMap* MapObj = NULL;
+    static CWindow* WNDPlayer = nullptr;
+    static CMap* MapObj = nullptr;
     static int PlayerNumber = 0x00;
-    static CFont* PlayerNumberText = NULL;
+    static CFont* PlayerNumberText = nullptr;
     char puffer[30];
     static DisplayRectangle tempRect;
-    static Uint16* PlayerHQx = NULL;
-    static Uint16* PlayerHQy = NULL;
+    static Uint16* PlayerHQx = nullptr;
+    static Uint16* PlayerHQy = nullptr;
     static int PosX = 0, PosY = 200;
 
     enum
@@ -1991,7 +1991,7 @@ void callback::EditorPlayerMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDPlayer != NULL)
+            if(WNDPlayer != nullptr)
                 break;
             WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, PosX, PosY, 100, 80, "Players", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -2013,7 +2013,7 @@ void callback::EditorPlayerMenu(int Param)
             } else
             {
                 delete WNDPlayer;
-                WNDPlayer = NULL;
+                WNDPlayer = nullptr;
                 return;
             }
             break;
@@ -2051,7 +2051,7 @@ void callback::EditorPlayerMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 MapObj->setMode(EDITOR_MODE_FLAG);
                 MapObj->setModeContent(PlayerNumber);
@@ -2059,37 +2059,37 @@ void callback::EditorPlayerMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDPlayer != NULL)
+            if(WNDPlayer != nullptr)
             {
                 PosX = WNDPlayer->getX();
                 PosY = WNDPlayer->getY();
                 WNDPlayer->setWaste();
-                WNDPlayer = NULL;
+                WNDPlayer = nullptr;
             }
             MapObj->setMode(EDITOR_MODE_HEIGHT_RAISE);
             MapObj->setModeContent(0x00);
             MapObj->setModeContent2(0x00);
-            MapObj = NULL;
+            MapObj = nullptr;
             PlayerNumber = 0x01;
-            PlayerNumberText = NULL;
-            PlayerHQx = NULL;
-            PlayerHQy = NULL;
+            PlayerNumberText = nullptr;
+            PlayerHQx = nullptr;
+            PlayerHQy = nullptr;
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDPlayer != NULL)
+            if(WNDPlayer != nullptr)
             {
                 PosX = WNDPlayer->getX();
                 PosY = WNDPlayer->getY();
                 WNDPlayer->setWaste();
-                WNDPlayer = NULL;
+                WNDPlayer = nullptr;
             }
-            MapObj = NULL;
+            MapObj = nullptr;
             PlayerNumber = 0x01;
-            PlayerNumberText = NULL;
-            PlayerHQx = NULL;
-            PlayerHQy = NULL;
+            PlayerNumberText = nullptr;
+            PlayerHQx = nullptr;
+            PlayerHQy = nullptr;
             break;
 
         default: break;
@@ -2098,13 +2098,13 @@ void callback::EditorPlayerMenu(int Param)
 
 void callback::EditorCursorMenu(int Param)
 {
-    static CWindow* WNDCursor = NULL;
-    static CMap* MapObj = NULL;
+    static CWindow* WNDCursor = nullptr;
+    static CMap* MapObj = nullptr;
     static int trianglePictureArrowUp = -1;
     static int trianglePictureArrowDown = -1;
     static int trianglePictureRandom = -1;
-    static CButton* CursorModeButton = NULL;
-    static CButton* CursorRandomButton = NULL;
+    static CButton* CursorModeButton = nullptr;
+    static CButton* CursorRandomButton = nullptr;
     static int PosX = 0, PosY = 0;
 
     enum
@@ -2118,7 +2118,7 @@ void callback::EditorCursorMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDCursor != NULL)
+            if(WNDCursor != nullptr)
                 break;
             WNDCursor = new CWindow(EditorCursorMenu, WINDOWQUIT, PosX, PosY, 210, 130, "Cursor", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -2126,13 +2126,13 @@ void callback::EditorCursorMenu(int Param)
             {
                 MapObj = global::s2->getMapObj();
 
-                WNDCursor->addButton(EditorCursorMenu, TRIANGLE, 2, 66, 32, 32, BUTTON_GREY, NULL);
+                WNDCursor->addButton(EditorCursorMenu, TRIANGLE, 2, 66, 32, 32, BUTTON_GREY, nullptr);
                 trianglePictureArrowUp = WNDCursor->addStaticPicture(8, 74, CURSOR_SYMBOL_ARROW_UP);
                 trianglePictureArrowDown = WNDCursor->addStaticPicture(17, 77, CURSOR_SYMBOL_ARROW_DOWN);
                 CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, 2, 2, 96, 32, BUTTON_GREY, "Hexagon");
                 CursorRandomButton =
                   WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Activity: static");
-                if(MapObj != NULL)
+                if(MapObj != nullptr)
                 {
                     MapObj->setVertexFillRSU(true);
                     MapObj->setVertexFillUSD(true);
@@ -2143,7 +2143,7 @@ void callback::EditorCursorMenu(int Param)
             } else
             {
                 delete WNDCursor;
-                WNDCursor = NULL;
+                WNDCursor = nullptr;
                 return;
             }
             break;
@@ -2209,10 +2209,10 @@ void callback::EditorCursorMenu(int Param)
             break;
 
         case CURSORMODE:
-            if(CursorModeButton != NULL)
+            if(CursorModeButton != nullptr)
             {
                 WNDCursor->delButton(CursorModeButton);
-                CursorModeButton = NULL;
+                CursorModeButton = nullptr;
             }
             if(MapObj->getHexagonMode())
             {
@@ -2225,10 +2225,10 @@ void callback::EditorCursorMenu(int Param)
             }
             break;
         case CURSORRANDOM:
-            if(CursorRandomButton != NULL)
+            if(CursorRandomButton != nullptr)
             {
                 WNDCursor->delButton(CursorRandomButton);
-                CursorRandomButton = NULL;
+                CursorRandomButton = nullptr;
             }
             if(MapObj->getVertexActivityRandom())
             {
@@ -2246,36 +2246,36 @@ void callback::EditorCursorMenu(int Param)
         case WINDOW_CLICKED_CALL: break;
 
         case WINDOWQUIT:
-            if(WNDCursor != NULL)
+            if(WNDCursor != nullptr)
             {
                 PosX = WNDCursor->getX();
                 PosY = WNDCursor->getY();
                 WNDCursor->setWaste();
-                WNDCursor = NULL;
+                WNDCursor = nullptr;
             }
-            MapObj = NULL;
+            MapObj = nullptr;
             trianglePictureArrowUp = -1;
             trianglePictureArrowDown = -1;
             trianglePictureRandom = -1;
-            CursorModeButton = NULL;
-            CursorRandomButton = NULL;
+            CursorModeButton = nullptr;
+            CursorRandomButton = nullptr;
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT
-            if(WNDCursor != NULL)
+            if(WNDCursor != nullptr)
             {
                 PosX = WNDCursor->getX();
                 PosY = WNDCursor->getY();
                 WNDCursor->setWaste();
-                WNDCursor = NULL;
+                WNDCursor = nullptr;
             }
-            MapObj = NULL;
+            MapObj = nullptr;
             trianglePictureArrowUp = -1;
             trianglePictureArrowDown = -1;
             trianglePictureRandom = -1;
-            CursorModeButton = NULL;
-            CursorRandomButton = NULL;
+            CursorModeButton = nullptr;
+            CursorRandomButton = nullptr;
             break;
 
         default: break;
@@ -2285,20 +2285,20 @@ void callback::EditorCursorMenu(int Param)
 //"create world" menu
 void callback::EditorCreateMenu(int Param)
 {
-    static CWindow* WNDCreate = NULL;
-    static CMap* MapObj = NULL;
-    static CFont* TextWidth = NULL;
+    static CWindow* WNDCreate = nullptr;
+    static CMap* MapObj = nullptr;
+    static CFont* TextWidth = nullptr;
     static int width = 32;
-    static CFont* TextHeight = NULL;
+    static CFont* TextHeight = nullptr;
     static int height = 32;
-    static CButton* ButtonLandscape = NULL;
+    static CButton* ButtonLandscape = nullptr;
     static int LandscapeType = 0; // 0 = Greenland, 1 = Wasteland, 2 = Winterland
     static int PicTextureIndex = -1;
     static int PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
     static int texture = TRIANGLE_TEXTURE_SNOW;
     static int PicBorderTextureIndex = -1;
     static int PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
-    static CFont* TextBorder = NULL;
+    static CFont* TextBorder = nullptr;
     static int border = 0;
     static int border_texture = TRIANGLE_TEXTURE_SNOW;
     static char puffer[5];
@@ -2332,7 +2332,7 @@ void callback::EditorCreateMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDCreate != NULL)
+            if(WNDCreate != nullptr)
                 break;
             WNDCreate = new CWindow(EditorCreateMenu, WINDOWQUIT, PosX, PosY, 250, 350, "Create world", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE);
@@ -2387,7 +2387,7 @@ void callback::EditorCreateMenu(int Param)
             } else
             {
                 delete WNDCreate;
-                WNDCreate = NULL;
+                WNDCreate = nullptr;
                 return;
             }
             break;
@@ -2981,51 +2981,51 @@ void callback::EditorCreateMenu(int Param)
             break;
 
         case MAP_QUIT:
-            if(WNDCreate != NULL)
+            if(WNDCreate != nullptr)
             {
                 PosX = WNDCreate->getX();
                 PosY = WNDCreate->getY();
                 WNDCreate->setWaste();
-                WNDCreate = NULL;
+                WNDCreate = nullptr;
             }
-            MapObj = NULL;
-            TextWidth = NULL;
+            MapObj = nullptr;
+            TextWidth = nullptr;
             width = 32;
-            TextHeight = NULL;
+            TextHeight = nullptr;
             height = 32;
-            ButtonLandscape = NULL;
+            ButtonLandscape = nullptr;
             LandscapeType = 0;
             PicTextureIndex = -1;
             PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
             texture = TRIANGLE_TEXTURE_SNOW;
             PicBorderTextureIndex = -1;
             PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
-            TextBorder = NULL;
+            TextBorder = nullptr;
             border = 0;
             border_texture = TRIANGLE_TEXTURE_SNOW;
             break;
 
         case WINDOWQUIT:
-            if(WNDCreate != NULL)
+            if(WNDCreate != nullptr)
             {
                 PosX = WNDCreate->getX();
                 PosY = WNDCreate->getY();
                 WNDCreate->setWaste();
-                WNDCreate = NULL;
+                WNDCreate = nullptr;
             }
-            MapObj = NULL;
-            TextWidth = NULL;
+            MapObj = nullptr;
+            TextWidth = nullptr;
             width = 32;
-            TextHeight = NULL;
+            TextHeight = nullptr;
             height = 32;
-            ButtonLandscape = NULL;
+            ButtonLandscape = nullptr;
             LandscapeType = 0;
             PicTextureIndex = -1;
             PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
             texture = TRIANGLE_TEXTURE_SNOW;
             PicBorderTextureIndex = -1;
             PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
-            TextBorder = NULL;
+            TextBorder = nullptr;
             border = 0;
             border_texture = TRIANGLE_TEXTURE_SNOW;
             break;
@@ -3039,7 +3039,7 @@ void callback::EditorCreateMenu(int Param)
 
 void callback::GameMenu(int Param)
 {
-    static CWindow* WNDBackToMainMenu = NULL;
+    static CWindow* WNDBackToMainMenu = nullptr;
 
     enum
     {
@@ -3050,7 +3050,7 @@ void callback::GameMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDBackToMainMenu != NULL)
+            if(WNDBackToMainMenu != nullptr)
                 break;
             WNDBackToMainMenu =
               new CWindow(GameMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 125, global::s2->GameResolutionY / 2 - 60, 250, 140,
@@ -3061,24 +3061,24 @@ void callback::GameMenu(int Param)
             } else
             {
                 delete WNDBackToMainMenu;
-                WNDBackToMainMenu = NULL;
+                WNDBackToMainMenu = nullptr;
                 return;
             }
             break;
 
         case BACKTOMAIN:
-            if(global::s2->getMapObj() != NULL)
+            if(global::s2->getMapObj() != nullptr)
                 global::s2->delMapObj();
             WNDBackToMainMenu->setWaste();
-            WNDBackToMainMenu = NULL;
+            WNDBackToMainMenu = nullptr;
             mainmenu(INITIALIZING_CALL);
             break;
 
         case WINDOWQUIT:
-            if(WNDBackToMainMenu != NULL)
+            if(WNDBackToMainMenu != nullptr)
             {
                 WNDBackToMainMenu->setWaste();
-                WNDBackToMainMenu = NULL;
+                WNDBackToMainMenu = nullptr;
             }
             break;
 
@@ -3089,9 +3089,9 @@ void callback::GameMenu(int Param)
 
 void callback::MinimapMenu(int Param)
 {
-    static CWindow* WNDMinimap = NULL;
-    static CMap* MapObj = NULL;
-    static SDL_Surface* WndSurface = NULL;
+    static CWindow* WNDMinimap = nullptr;
+    static CMap* MapObj = nullptr;
+    static SDL_Surface* WndSurface = nullptr;
     static int scaleNum = 1;
     // only in case INITIALIZING_CALL needed to create the window
     int width;
@@ -3105,7 +3105,7 @@ void callback::MinimapMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDMinimap != NULL)
+            if(WNDMinimap != nullptr)
                 break;
             {
                 // this variables are needed to reduce the size of minimap-windows of big maps
@@ -3126,20 +3126,20 @@ void callback::MinimapMenu(int Param)
                 else
                 {
                     delete WNDMinimap;
-                    WNDMinimap = NULL;
-                    MapObj = NULL;
+                    WNDMinimap = nullptr;
+                    MapObj = nullptr;
                     return;
                 }
             }
             break;
 
         case CALL_FROM_GAMELOOP:
-            if(MapObj != NULL && WndSurface != NULL)
+            if(MapObj != nullptr && WndSurface != nullptr)
                 MapObj->drawMinimap(WndSurface);
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != NULL)
+            if(MapObj != nullptr)
             {
                 int MouseX, MouseY;
                 if(SDL_GetMouseState(&MouseX, &MouseY) & SDL_BUTTON(1))
@@ -3159,25 +3159,25 @@ void callback::MinimapMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDMinimap != NULL)
+            if(WNDMinimap != nullptr)
             {
                 WNDMinimap->setWaste();
-                WNDMinimap = NULL;
+                WNDMinimap = nullptr;
             }
-            MapObj = NULL;
-            WndSurface = NULL;
+            MapObj = nullptr;
+            WndSurface = nullptr;
             global::s2->UnregisterCallback(MinimapMenu);
             break;
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT
-            if(WNDMinimap != NULL)
+            if(WNDMinimap != nullptr)
             {
                 WNDMinimap->setWaste();
-                WNDMinimap = NULL;
+                WNDMinimap = nullptr;
             }
-            MapObj = NULL;
-            WndSurface = NULL;
+            MapObj = nullptr;
+            WndSurface = nullptr;
             global::s2->UnregisterCallback(MinimapMenu);
             break;
 
@@ -3191,23 +3191,23 @@ void callback::MinimapMenu(int Param)
 // then the debugger-function will destruct the object
 void callback::debugger(int Param)
 {
-    static CDebug* Debugger = NULL;
+    static CDebug* Debugger = nullptr;
 
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(Debugger != NULL)
+            if(Debugger != nullptr)
                 break;
             Debugger = new CDebug(debugger, DEBUGGER_QUIT);
             break;
 
         case DEBUGGER_QUIT:
             delete Debugger;
-            Debugger = NULL;
+            Debugger = nullptr;
             break;
 
         default:
-            if(Debugger != NULL)
+            if(Debugger != nullptr)
                 Debugger->sendParam(Param);
             break;
     }
@@ -3216,11 +3216,11 @@ void callback::debugger(int Param)
 // this is the picture-viewer
 void callback::viewer(int Param)
 {
-    static CWindow* WNDViewer = NULL;
+    static CWindow* WNDViewer = nullptr;
     static int index = 0;
     static int PicInWndIndex = -1;
     static char PicInfos[50];
-    static CFont* PicInfosText = NULL;
+    static CFont* PicInfosText = nullptr;
 
     enum
     {
@@ -3236,7 +3236,7 @@ void callback::viewer(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDViewer != NULL)
+            if(WNDViewer != nullptr)
                 break;
             WNDViewer = new CWindow(viewer, WINDOWQUIT, 0, 0, 250, 140, "Viewer", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE);
@@ -3252,7 +3252,7 @@ void callback::viewer(int Param)
             } else
             {
                 delete WNDViewer;
-                WNDViewer = NULL;
+                WNDViewer = nullptr;
                 return;
             }
             break;
@@ -3262,12 +3262,12 @@ void callback::viewer(int Param)
                 WNDViewer->delStaticPicture(PicInWndIndex);
             PicInWndIndex = WNDViewer->addStaticPicture(5, 30, index);
 
-            if(PicInfosText != NULL)
+            if(PicInfosText != nullptr)
             {
                 if(WNDViewer->delText(PicInfosText))
-                    PicInfosText = NULL;
+                    PicInfosText = nullptr;
             }
-            if(PicInfosText == NULL)
+            if(PicInfosText == nullptr)
             {
                 sprintf(PicInfos, "index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w, global::bmpArray[index].h,
                         global::bmpArray[index].nx, global::bmpArray[index].ny);
@@ -3308,10 +3308,10 @@ void callback::viewer(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDViewer != NULL)
+            if(WNDViewer != nullptr)
             {
                 WNDViewer->setWaste();
-                WNDViewer = NULL;
+                WNDViewer = nullptr;
                 global::s2->UnregisterCallback(viewer);
                 index = 0;
                 PicInWndIndex = -1;
@@ -3325,21 +3325,21 @@ void callback::viewer(int Param)
 // this is a submenu for testing
 void callback::submenu1(int Param)
 {
-    static CMenu* SubMenu = NULL;
-    static CButton* greatMoon = NULL;
-    static CFont* greatMoonText = NULL;
-    static CFont* counterText = NULL;
-    static CPicture* picObject = NULL;
+    static CMenu* SubMenu = nullptr;
+    static CButton* greatMoon = nullptr;
+    static CFont* greatMoonText = nullptr;
+    static CFont* counterText = nullptr;
+    static CPicture* picObject = nullptr;
     static int counter = 0;
-    static CWindow* testWindow = NULL;
-    static CWindow* testWindow2 = NULL;
-    static CPicture* testWindowPicture = NULL;
-    static CFont* testWindowText = NULL;
-    static CFont* testWindowText2 = NULL;
-    static CTextfield* testTextfield = NULL;
-    static CFont* TextFrom_testTextfield = NULL;
-    static CTextfield* testTextfield_testWindow = NULL;
-    static CSelectBox* testSelectBox = NULL;
+    static CWindow* testWindow = nullptr;
+    static CWindow* testWindow2 = nullptr;
+    static CPicture* testWindowPicture = nullptr;
+    static CFont* testWindowText = nullptr;
+    static CFont* testWindowText2 = nullptr;
+    static CTextfield* testTextfield = nullptr;
+    static CFont* TextFrom_testTextfield = nullptr;
+    static CTextfield* testTextfield_testWindow = nullptr;
+    static CSelectBox* testSelectBox = nullptr;
 
     static int picIndex = -1;
     char puffer[80];
@@ -3377,15 +3377,16 @@ void callback::submenu1(int Param)
             if(!global::s2->RegisterMenu(SubMenu))
             {
                 delete SubMenu;
-                SubMenu = NULL;
+                SubMenu = nullptr;
                 return;
             }
             SubMenu->addButton(submenu1, MAINMENU, 400, 440, 200, 20, BUTTON_RED1, "back");
-            greatMoon = SubMenu->addButton(submenu1, GREATMOON, 100, 100, 200, 200, BUTTON_STONE, NULL, MOON);
+            greatMoon = SubMenu->addButton(submenu1, GREATMOON, 100, 100, 200, 200, BUTTON_STONE, nullptr, MOON);
             greatMoon->setMotionParams(GREATMOONENTRY, GREATMOONLEAVE);
-            SubMenu->addButton(submenu1, SMALLMOON, 100, 350, global::bmpArray[MOON].w, global::bmpArray[MOON].h, BUTTON_STONE, NULL, MOON);
-            SubMenu->addButton(submenu1, TOOSMALL, 100, 400, global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1, BUTTON_STONE, NULL,
+            SubMenu->addButton(submenu1, SMALLMOON, 100, 350, global::bmpArray[MOON].w, global::bmpArray[MOON].h, BUTTON_STONE, nullptr,
                                MOON);
+            SubMenu->addButton(submenu1, TOOSMALL, 100, 400, global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1, BUTTON_STONE,
+                               nullptr, MOON);
             SubMenu->addButton(submenu1, CREATEWINDOW, 500, 10, 130, 30, BUTTON_GREEN1, "Create window");
             picObject = SubMenu->addPicture(submenu1, PICOBJECT, 200, 30, MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
@@ -3401,27 +3402,27 @@ void callback::submenu1(int Param)
 
         case MAINMENU:
             SubMenu->setWaste();
-            SubMenu = NULL;
-            greatMoon = NULL;
-            greatMoonText = NULL;
-            counterText = NULL;
-            testWindowPicture = NULL;
-            testWindowText = NULL;
-            testWindowText2 = NULL;
-            testTextfield = NULL;
-            TextFrom_testTextfield = NULL;
-            testTextfield_testWindow = NULL;
-            testSelectBox = NULL;
+            SubMenu = nullptr;
+            greatMoon = nullptr;
+            greatMoonText = nullptr;
+            counterText = nullptr;
+            testWindowPicture = nullptr;
+            testWindowText = nullptr;
+            testWindowText2 = nullptr;
+            testTextfield = nullptr;
+            TextFrom_testTextfield = nullptr;
+            testTextfield_testWindow = nullptr;
+            testSelectBox = nullptr;
             global::s2->UnregisterCallback(submenu1);
-            if(testWindow != NULL)
+            if(testWindow != nullptr)
             {
                 testWindow->setWaste();
-                testWindow = NULL;
+                testWindow = nullptr;
             }
-            if(testWindow2 != NULL)
+            if(testWindow2 != nullptr)
             {
                 testWindow2->setWaste();
-                testWindow2 = NULL;
+                testWindow2 = nullptr;
             }
             picIndex = -1;
             break;
@@ -3444,7 +3445,7 @@ void callback::submenu1(int Param)
             break;
 
         case CREATEWINDOW:
-            if(testWindow == NULL)
+            if(testWindow == nullptr)
             {
                 testWindow = new CWindow(submenu1, TESTWINDOWQUITMESSAGE, 5, 5, 350, 240, "Window", WINDOW_GREEN1,
                                          WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
@@ -3460,11 +3461,11 @@ void callback::submenu1(int Param)
                 } else
                 {
                     delete testWindow;
-                    testWindow = NULL;
+                    testWindow = nullptr;
                     return;
                 }
             }
-            if(testWindow2 == NULL)
+            if(testWindow2 == nullptr)
             {
                 testWindow2 = new CWindow(submenu1, TESTWINDOW2QUITMESSAGE, 200, 5, 350, 240, "Another Window", WINDOW_GREEN1,
                                           WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
@@ -3475,102 +3476,102 @@ void callback::submenu1(int Param)
                 } else
                 {
                     delete testWindow2;
-                    testWindow2 = NULL;
+                    testWindow2 = nullptr;
                     return;
                 }
             }
             break;
 
         case GREATMOONENTRY:
-            if(greatMoonText == NULL)
+            if(greatMoonText == nullptr)
                 greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
             break;
 
         case GREATMOONLEAVE:
-            if(greatMoonText != NULL)
+            if(greatMoonText != nullptr)
             {
                 SubMenu->delText(greatMoonText);
-                greatMoonText = NULL;
+                greatMoonText = nullptr;
             }
             break;
 
         case PICOBJECT:
-            if(greatMoon != NULL)
+            if(greatMoon != nullptr)
             {
                 SubMenu->delButton(greatMoon);
-                greatMoon = NULL;
+                greatMoon = nullptr;
             }
             break;
 
         case PICOBJECTENTRY:
-            if(greatMoonText == NULL)
+            if(greatMoonText == nullptr)
                 greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
             break;
 
         case PICOBJECTLEAVE:
-            if(greatMoonText != NULL)
+            if(greatMoonText != nullptr)
             {
                 SubMenu->delText(greatMoonText);
-                greatMoonText = NULL;
+                greatMoonText = nullptr;
             }
             break;
 
         case TESTWINDOWPICTURE:
-            if(testWindowText == NULL)
+            if(testWindowText == nullptr)
                 testWindowText = testWindow->addText("Clicked on castle", 10, 200, 11);
             else
             {
                 testWindow->delText(testWindowText);
-                testWindowText = NULL;
+                testWindowText = nullptr;
             }
             break;
 
         case TESTWINDOWPICTUREENTRY:
-            if(testWindowText2 != NULL)
+            if(testWindowText2 != nullptr)
             {
                 testWindow->delText(testWindowText2);
-                testWindowText2 = NULL;
+                testWindowText2 = nullptr;
             }
             testWindowText2 = testWindow->addText("Bildbereich betreten", 10, 220, 11);
             break;
 
         case TESTWINDOWPICTURELEAVE:
-            if(testWindowText2 != NULL)
+            if(testWindowText2 != nullptr)
             {
                 testWindow->delText(testWindowText2);
-                testWindowText2 = NULL;
+                testWindowText2 = nullptr;
             }
             testWindowText2 = testWindow->addText("Bildbereich verlassen", 10, 220, 11);
             break;
 
         case TESTWINDOWQUITMESSAGE:
             testWindow->setWaste();
-            testWindow = NULL;
+            testWindow = nullptr;
             break;
 
         case TESTWINDOW2QUITMESSAGE:
             testWindow2->setWaste();
-            testWindow2 = NULL;
+            testWindow2 = nullptr;
             break;
 
         case CALL_FROM_GAMELOOP:
             if(counter % 10 == 0)
             {
-                if(counterText != NULL)
+                if(counterText != nullptr)
                 {
                     if(SubMenu->delText(counterText))
-                        counterText = NULL;
+                        counterText = nullptr;
                 }
-                if(counterText == NULL)
+                if(counterText == nullptr)
                 {
                     sprintf(puffer, "counter: %d", counter);
                     counterText = SubMenu->addText(puffer, 100, 20, 9);
                 }
 
-                if(TextFrom_testTextfield != NULL)
+                if(TextFrom_testTextfield != nullptr)
                 {
                     SubMenu->delText(TextFrom_testTextfield);
-                    TextFrom_testTextfield = NULL;
+                    TextFrom_testTextfield = nullptr;
                 }
                 sprintf(puffer, "Der Text im Textfeld lautet: %s", testTextfield->getText());
                 TextFrom_testTextfield = SubMenu->addText(puffer, 200, 400, 14);

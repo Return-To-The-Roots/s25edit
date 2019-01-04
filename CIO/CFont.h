@@ -41,7 +41,7 @@ public:
     }
     void unsetCallback()
     {
-        callback = NULL;
+        callback = nullptr;
         clickedParam = 0;
     }
     void setMouseData(SDL_MouseButtonEvent button);

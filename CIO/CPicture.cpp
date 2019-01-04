@@ -18,7 +18,7 @@ CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
     motionLeaveParam = -1;
-    Surf_Picture = NULL;
+    Surf_Picture = nullptr;
     needSurface = true;
     needRender = true;
 }
@@ -36,13 +36,13 @@ void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
         if(motion.state == SDL_RELEASED)
         {
             marked = true;
-            if(motionEntryParam >= 0 && callback != NULL)
+            if(motionEntryParam >= 0 && callback != nullptr)
                 callback(motionEntryParam);
         }
     } else
     {
         // picture was marked before and mouse cursor is on the picture now, so do the callback
-        if(motionLeaveParam >= 0 && callback != NULL && marked == true)
+        if(motionLeaveParam >= 0 && callback != nullptr && marked == true)
             callback(motionLeaveParam);
         marked = false;
     }
@@ -63,7 +63,7 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
         {
             clicked = false;
             // if mouse button is released ON the PICTURE (marked = true), then do the callback
-            if(marked && callback != NULL)
+            if(marked && callback != nullptr)
                 callback(clickedParam);
         }
     }
@@ -80,8 +80,8 @@ bool CPicture::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Picture);
-        Surf_Picture = NULL;
-        if((Surf_Picture = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == NULL)
+        Surf_Picture = nullptr;
+        if((Surf_Picture = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
             return false;
         SDL_SetColorKey(Surf_Picture, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
         needSurface = false;

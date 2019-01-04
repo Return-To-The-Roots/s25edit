@@ -27,7 +27,7 @@
 
 using namespace std;
 
-sge_screen* the_screen = NULL; // The pointer to the active screen class (or NULL)
+sge_screen* the_screen = nullptr; // The pointer to the active screen class (or nullptr)
 
 //==================================================================================
 // sge_screen
@@ -481,7 +481,7 @@ sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, Sint16 x, Sint16
     // Create the first frame
     current_frame = new sge_frame; // User has to catch bad_alloc himself
     current_frame->img = img;
-    current_frame->cdata = NULL;
+    current_frame->cdata = nullptr;
     frames.push_back(current_frame);
 
     current_fi = frames.begin();
@@ -559,7 +559,7 @@ bool sge_ssprite::check_border()
 
 void sge_ssprite::add_frame(SDL_Surface* img)
 {
-    add_frame(img, NULL);
+    add_frame(img, nullptr);
 }
 
 void sge_ssprite::add_frame(SDL_Surface* img, sge_cdata* cdata)

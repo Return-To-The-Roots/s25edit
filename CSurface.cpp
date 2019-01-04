@@ -47,7 +47,7 @@ CSurface::CSurface() {}
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
 {
-    if(Surf_Dest == NULL || Surf_Src == NULL)
+    if(Surf_Dest == nullptr || Surf_Src == nullptr)
         return false;
 
     SDL_Rect DestR;
@@ -55,14 +55,14 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
     DestR.x = X;
     DestR.y = Y;
 
-    SDL_BlitSurface(Surf_Src, NULL, Surf_Dest, &DestR);
+    SDL_BlitSurface(Surf_Src, nullptr, Surf_Dest, &DestR);
 
     return true;
 }
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle)
 {
-    if(Surf_Dest == NULL || Surf_Src == NULL)
+    if(Surf_Dest == nullptr || Surf_Src == nullptr)
         return false;
 
     Uint16 px, py;
@@ -91,7 +91,7 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
 {
-    if(Surf_Dest == NULL || Surf_Src == NULL)
+    if(Surf_Dest == nullptr || Surf_Src == nullptr)
         return false;
 
     SDL_Rect DestR;

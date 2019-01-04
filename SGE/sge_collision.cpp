@@ -46,7 +46,7 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     if(!cdata)
     {
         SDL_SetError("SGE - Out of memory");
-        return NULL;
+        return nullptr;
     }
     cdata->w = img->w;
     cdata->h = img->h;
@@ -56,7 +56,7 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     {
         SDL_SetError("SGE - Out of memory");
         delete cdata;
-        return NULL;
+        return nullptr;
     }
     memset(cdata->map, 0x00, offs + 2);
 
@@ -229,7 +229,7 @@ int memand(Uint8* s1, Uint8* s2, int shift1, int shift2, int N)
 //==================================================================================
 int _sge_cmcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2, Sint16 y2)
 {
-    if(cd1->map == NULL || cd2->map == NULL)
+    if(cd1->map == nullptr || cd2->map == nullptr)
         return 0;
 
     Sint16 w1 = cd1->w;
@@ -331,7 +331,7 @@ int sge_cmcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2,
     if(!sge_bbcheck(cd1, x1, y1, cd2, x2, y2))
         return 0;
 
-    if(cd1->map == NULL || cd2->map == NULL)
+    if(cd1->map == nullptr || cd2->map == nullptr)
         return 1;
 
     return _sge_cmcheck(cd1, x1, y1, cd2, x2, y2);

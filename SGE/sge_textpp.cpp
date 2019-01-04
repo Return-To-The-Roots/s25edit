@@ -103,7 +103,7 @@ sge_TextEditor::sge_TextEditor()
     chars = 0;
     mChars = 0;
     cursor_char = 124; // The charactar for the cursor - '|'
-    cursor = end = start = new_node(NULL, NULL, cursor_char);
+    cursor = end = start = new_node(nullptr, nullptr, cursor_char);
     text_changed = false;
 }
 
@@ -131,7 +131,7 @@ bool sge_TextEditor::insert(Uint16 c)
     } else
     {
         // New first node - update list metadata
-        cursor->prev = start = new_node(NULL, cursor, c);
+        cursor->prev = start = new_node(nullptr, cursor, c);
     }
 
     chars++;
@@ -198,7 +198,7 @@ bool sge_TextEditor::move_start()
         else
             end = cursor->prev;
 
-        cursor->prev = NULL;
+        cursor->prev = nullptr;
         cursor->next = start;
         start->prev = cursor;
         start = cursor;
@@ -220,7 +220,7 @@ bool sge_TextEditor::move_end()
         else
             start = cursor->next;
 
-        cursor->next = NULL;
+        cursor->next = nullptr;
         cursor->prev = end;
         end->next = cursor;
         end = cursor;
@@ -265,7 +265,7 @@ basic_string<Uint16> sge_TextEditor::get_ustring(bool wCursor)
 
 Uint16* sge_TextEditor::get_ucstring(bool wCursor)
 {
-    Uint16* str = NULL;
+    Uint16* str = nullptr;
 
     if(wCursor)
         str = new Uint16[chars + 2];
@@ -326,7 +326,7 @@ void sge_TextEditor::clear_text()
         i = tmp;
     }
 
-    cursor = end = start = new_node(NULL, NULL, cursor_char);
+    cursor = end = start = new_node(nullptr, nullptr, cursor_char);
 
     chars = 0;
     text_changed = true;
@@ -418,7 +418,7 @@ bool sge_text::update_textSurface(bool force)
         {
             if(bm_font->CharPos && bm_font->FontSurface->format->Amask)
             {
-                set_textSurface(NULL);
+                set_textSurface(nullptr);
                 return true; /* These fonts can't be buffered (SFonts) */
             }
 
@@ -713,7 +713,7 @@ int sge_text_input(sge_TextSurface* tc, Uint8 flags)
     Uint8 update = _sge_update;
 
     SDL_Surface* screen = tc->get_dest();
-    SDL_Surface* buffer = NULL;
+    SDL_Surface* buffer = nullptr;
 
     SDL_Color bg;
     bg.r = bg.g = bg.b = 0;
@@ -722,7 +722,7 @@ int sge_text_input(sge_TextSurface* tc, Uint8 flags)
     if(flags & SGE_FLAG1 || !is_ttf)
     { /* Keep background? */
         buffer = SDL_DisplayFormat(screen);
-        if(buffer == NULL)
+        if(buffer == nullptr)
         {
             SDL_SetError("SGE - Out of memory");
             return -3;

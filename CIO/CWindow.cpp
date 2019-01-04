@@ -40,11 +40,11 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
     priority = 0;
     pic_background = color;
     for(int i = 0; i < MAXBUTTONS; i++)
-        buttons[i] = NULL;
+        buttons[i] = nullptr;
     for(int i = 0; i < MAXTEXTS; i++)
-        texts[i] = NULL;
+        texts[i] = nullptr;
     for(int i = 0; i < MAXPICTURES; i++)
-        pictures[i] = NULL;
+        pictures[i] = nullptr;
     for(int i = 0; i < MAXPICTURES; i++)
     {
         static_pictures[i].x_ = 0;
@@ -52,14 +52,14 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
         static_pictures[i].pic = -1;
     }
     for(int i = 0; i < MAXTEXTFIELDS; i++)
-        textfields[i] = NULL;
+        textfields[i] = nullptr;
     for(int i = 0; i < MAXSELECTBOXES; i++)
-        selectboxes[i] = NULL;
+        selectboxes[i] = nullptr;
 
     this->title = title;
     this->callback_ = callback;
     this->callbackQuitMessage = callbackQuitMessage;
-    Surf_Window = NULL;
+    Surf_Window = nullptr;
     needSurface = true;
     needRender = true;
     active = true;
@@ -98,7 +98,7 @@ void CWindow::setColor(int color)
 bool CWindow::hasActiveInputElement()
 {
     for(int i = 0; i < MAXTEXTFIELDS; i++)
-        if(textfields[i] != NULL && textfields[i]->isActive())
+        if(textfields[i] != nullptr && textfields[i]->isActive())
             return true;
     return false;
 }
@@ -116,7 +116,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     } else if(!moving)
         clicked = false;
 
-    if(!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)))
+    if(!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
         moving = false;
     if(moving && canMove)
     {
@@ -161,13 +161,13 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
            && (motion.y >= y_ + h_ - global::bmpArray[WINDOW_BUTTON_RESIZE].h + 2) && (motion.y < y_ + h_ - 2))
         {
             // left button was pressed while moving
-            if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))
+            if(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT))
                 resizing = true;
             canResize_marked = true;
         } else if(!resizing)
             canResize_marked = false;
 
-        if(!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)))
+        if(!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
             resizing = false;
         if(resizing)
         {
@@ -194,17 +194,17 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
         motion.y -= y_;
         for(int i = 0; i < MAXPICTURES; i++)
         {
-            if(pictures[i] != NULL)
+            if(pictures[i] != nullptr)
                 pictures[i]->setMouseData(motion);
         }
         for(int i = 0; i < MAXBUTTONS; i++)
         {
-            if(buttons[i] != NULL)
+            if(buttons[i] != nullptr)
                 buttons[i]->setMouseData(motion);
         }
         for(int i = 0; i < MAXSELECTBOXES; i++)
         {
-            if(selectboxes[i] != NULL)
+            if(selectboxes[i] != nullptr)
                 selectboxes[i]->setMouseData(motion);
         }
     }
@@ -253,7 +253,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
         {
             canClose_clicked = false;
             // if mouse button is released ON the close button (marked = true), then send the quit message to the callback
-            if(canClose_marked && callback_ != NULL)
+            if(canClose_marked && callback_ != nullptr)
             {
                 callback_(callbackQuitMessage);
                 return;
@@ -301,22 +301,22 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
         button.y -= y_;
         for(int i = 0; i < MAXPICTURES; i++)
         {
-            if(pictures[i] != NULL)
+            if(pictures[i] != nullptr)
                 pictures[i]->setMouseData(button);
         }
         for(int i = 0; i < MAXBUTTONS; i++)
         {
-            if(buttons[i] != NULL)
+            if(buttons[i] != nullptr)
                 buttons[i]->setMouseData(button);
         }
         for(int i = 0; i < MAXTEXTFIELDS; i++)
         {
-            if(textfields[i] != NULL)
+            if(textfields[i] != nullptr)
                 textfields[i]->setMouseData(button);
         }
         for(int i = 0; i < MAXSELECTBOXES; i++)
         {
-            if(selectboxes[i] != NULL)
+            if(selectboxes[i] != nullptr)
                 selectboxes[i]->setMouseData(button);
         }
     }
@@ -331,7 +331,7 @@ void CWindow::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if(textfields[i] != NULL)
+        if(textfields[i] != nullptr)
             textfields[i]->setKeyboardData(key);
     }
     needRender = true;
@@ -346,19 +346,19 @@ CButton* CWindow::addButton(void callback(int), int clickedParam, Uint16 x, Uint
 
     for(int i = 0; i < MAXBUTTONS; i++)
     {
-        if(buttons[i] == NULL)
+        if(buttons[i] == nullptr)
         {
             buttons[i] = new CButton(callback, clickedParam, x_abs, y_abs, w, h, color, text, picture);
             needRender = true;
             return buttons[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool CWindow::delButton(CButton* ButtonToDelete)
 {
-    if(ButtonToDelete == NULL)
+    if(ButtonToDelete == nullptr)
         return false;
 
     for(int i = 0; i < MAXBUTTONS; i++)
@@ -366,7 +366,7 @@ bool CWindow::delButton(CButton* ButtonToDelete)
         if(buttons[i] == ButtonToDelete)
         {
             delete buttons[i];
-            buttons[i] = NULL;
+            buttons[i] = nullptr;
             needRender = true;
             return true;
         }
@@ -382,19 +382,19 @@ CFont* CWindow::addText(const char* string, int x, int y, int fontsize, int colo
 
     for(int i = 0; i < MAXTEXTS; i++)
     {
-        if(texts[i] == NULL)
+        if(texts[i] == nullptr)
         {
             texts[i] = new CFont(string, x_abs, y_abs, fontsize, color);
             needRender = true;
             return texts[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool CWindow::delText(CFont* TextToDelete)
 {
-    if(TextToDelete == NULL)
+    if(TextToDelete == nullptr)
         return false;
 
     for(int i = 0; i < MAXTEXTS; i++)
@@ -402,7 +402,7 @@ bool CWindow::delText(CFont* TextToDelete)
         if(texts[i] == TextToDelete)
         {
             delete texts[i];
-            texts[i] = NULL;
+            texts[i] = nullptr;
             needRender = true;
             return true;
         }
@@ -418,19 +418,19 @@ CPicture* CWindow::addPicture(void callback(int), int clickedParam, Uint16 x, Ui
 
     for(int i = 0; i < MAXPICTURES; i++)
     {
-        if(pictures[i] == NULL)
+        if(pictures[i] == nullptr)
         {
             pictures[i] = new CPicture(callback, clickedParam, x_abs, y_abs, picture);
             needRender = true;
             return pictures[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool CWindow::delPicture(CPicture* PictureToDelete)
 {
-    if(PictureToDelete == NULL)
+    if(PictureToDelete == nullptr)
         return false;
 
     for(int i = 0; i < MAXPICTURES; i++)
@@ -438,7 +438,7 @@ bool CWindow::delPicture(CPicture* PictureToDelete)
         if(pictures[i] == PictureToDelete)
         {
             delete pictures[i];
-            pictures[i] = NULL;
+            pictures[i] = nullptr;
             needRender = true;
             return true;
         }
@@ -491,19 +491,19 @@ CTextfield* CWindow::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, 
 
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if(textfields[i] == NULL)
+        if(textfields[i] == nullptr)
         {
             textfields[i] = new CTextfield(x_abs, y_abs, cols, rows, fontsize, text_color, bg_color, button_style);
             needRender = true;
             return textfields[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool CWindow::delTextfield(CTextfield* TextfieldToDelete)
 {
-    if(TextfieldToDelete == NULL)
+    if(TextfieldToDelete == nullptr)
         return false;
 
     for(int i = 0; i < MAXTEXTFIELDS; i++)
@@ -511,7 +511,7 @@ bool CWindow::delTextfield(CTextfield* TextfieldToDelete)
         if(textfields[i] == TextfieldToDelete)
         {
             delete textfields[i];
-            textfields[i] = NULL;
+            textfields[i] = nullptr;
             needRender = true;
             return true;
         }
@@ -521,24 +521,24 @@ bool CWindow::delTextfield(CTextfield* TextfieldToDelete)
 
 CSelectBox* CWindow::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
-    if(Surf_Window != NULL && (x >= Surf_Window->w || y >= Surf_Window->h))
-        return NULL;
+    if(Surf_Window != nullptr && (x >= Surf_Window->w || y >= Surf_Window->h))
+        return nullptr;
 
     for(int i = 0; i < MAXSELECTBOXES; i++)
     {
-        if(selectboxes[i] == NULL)
+        if(selectboxes[i] == nullptr)
         {
             selectboxes[i] = new CSelectBox(x, y, w, h, fontsize, text_color, bg_color);
             needRender = true;
             return selectboxes[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool CWindow::delSelectBox(CSelectBox* SelectBoxToDelete)
 {
-    if(SelectBoxToDelete == NULL)
+    if(SelectBoxToDelete == nullptr)
         return false;
 
     for(int i = 0; i < MAXSELECTBOXES; i++)
@@ -546,7 +546,7 @@ bool CWindow::delSelectBox(CSelectBox* SelectBoxToDelete)
         if(selectboxes[i] == SelectBoxToDelete)
         {
             delete selectboxes[i];
-            selectboxes[i] = NULL;
+            selectboxes[i] = nullptr;
             needRender = true;
             return true;
         }
@@ -574,7 +574,7 @@ bool CWindow::render()
     // test if a textfield has changed
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if(textfields[i] != NULL)
+        if(textfields[i] != nullptr)
             if(textfields[i]->hasRendered())
                 needRender = true;
     }
@@ -587,8 +587,8 @@ bool CWindow::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Window);
-        Surf_Window = NULL;
-        if((Surf_Window = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == NULL)
+        Surf_Window = nullptr;
+        if((Surf_Window = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == nullptr)
             return false;
         needSurface = false;
     }
@@ -640,7 +640,7 @@ bool CWindow::render()
     {
         for(int i = 0; i < MAXBUTTONS; i++)
         {
-            if(buttons[i] != NULL && buttons[i]->getX() < Surf_Window->w && buttons[i]->getY() < Surf_Window->h)
+            if(buttons[i] != nullptr && buttons[i]->getX() < Surf_Window->w && buttons[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, buttons[i]->getSurface(), buttons[i]->getX(), buttons[i]->getY());
         }
         for(int i = 0; i < MAXPICTURES; i++)
@@ -650,22 +650,22 @@ bool CWindow::render()
         }
         for(int i = 0; i < MAXPICTURES; i++)
         {
-            if(pictures[i] != NULL && pictures[i]->getX() < Surf_Window->w && pictures[i]->getY() < Surf_Window->h)
+            if(pictures[i] != nullptr && pictures[i]->getX() < Surf_Window->w && pictures[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, pictures[i]->getSurface(), pictures[i]->getX(), pictures[i]->getY());
         }
         for(int i = 0; i < MAXTEXTS; i++)
         {
-            if(texts[i] != NULL && texts[i]->getX() < Surf_Window->w && texts[i]->getY() < Surf_Window->h)
+            if(texts[i] != nullptr && texts[i]->getX() < Surf_Window->w && texts[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, texts[i]->getSurface(), texts[i]->getX(), texts[i]->getY());
         }
         for(int i = 0; i < MAXTEXTFIELDS; i++)
         {
-            if(textfields[i] != NULL && textfields[i]->getX() < Surf_Window->w && textfields[i]->getY() < Surf_Window->h)
+            if(textfields[i] != nullptr && textfields[i]->getX() < Surf_Window->w && textfields[i]->getY() < Surf_Window->h)
                 CSurface::Draw(Surf_Window, textfields[i]->getSurface(), textfields[i]->getX(), textfields[i]->getY());
         }
         for(int i = 0; i < MAXSELECTBOXES; i++)
         {
-            if(selectboxes[i] != NULL)
+            if(selectboxes[i] != nullptr)
                 CSurface::Draw(Surf_Window, selectboxes[i]->getSurface(), selectboxes[i]->getX(), selectboxes[i]->getY());
         }
     }
@@ -694,7 +694,7 @@ bool CWindow::render()
     if(Surf_Window->w - pos_x > 0)
         CSurface::Draw(Surf_Window, global::bmpArray[upperframe].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     // write text in the upper frame
-    if(title != NULL)
+    if(title != nullptr)
         CFont::writeText(Surf_Window, title, (int)w_ / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
                          ALIGN_MIDDLE);
 
@@ -802,7 +802,7 @@ void CWindow::setInactive()
 
     for(int i = 0; i < MAXTEXTFIELDS; i++)
     {
-        if(textfields[i] != NULL)
+        if(textfields[i] != nullptr)
             textfields[i]->setInactive();
     }
 }

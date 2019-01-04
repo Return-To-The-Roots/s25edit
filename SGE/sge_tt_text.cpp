@@ -265,7 +265,7 @@ sge_TTFont* sge_TTF_OpenFontIndexRW(SDL_RWops* src, int freesrc, int ptsize, lon
     if(!_sge_TTF_initialized)
     {
         SDL_SetError("SGE - Freetype not initialized");
-        return NULL;
+        return nullptr;
     }
 
     /* Check to make sure we can seek in this stream */
@@ -273,14 +273,14 @@ sge_TTFont* sge_TTF_OpenFontIndexRW(SDL_RWops* src, int freesrc, int ptsize, lon
     if(position < 0)
     {
         SDL_SetError("SGE - Can't seek in font stream");
-        return NULL;
+        return nullptr;
     }
 
     font = (sge_TTFont*)malloc(sizeof(*font));
-    if(font == NULL)
+    if(font == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
-        return (NULL);
+        return (nullptr);
     }
     memset(font, 0, sizeof(*font));
 
@@ -288,11 +288,11 @@ sge_TTFont* sge_TTF_OpenFontIndexRW(SDL_RWops* src, int freesrc, int ptsize, lon
     font->freesrc = freesrc;
 
     stream = (FT_Stream)malloc(sizeof(*stream));
-    if(stream == NULL)
+    if(stream == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
         sge_TTF_CloseFont(font);
-        return NULL;
+        return nullptr;
     }
     memset(stream, 0, sizeof(*stream));
 
@@ -313,7 +313,7 @@ sge_TTFont* sge_TTF_OpenFontIndexRW(SDL_RWops* src, int freesrc, int ptsize, lon
     {
         SDL_SetError("SGE - Couldn't open font face");
         sge_TTF_CloseFont(font);
-        return NULL;
+        return nullptr;
     }
     face = font->face;
 
@@ -326,7 +326,7 @@ sge_TTFont* sge_TTF_OpenFontIndexRW(SDL_RWops* src, int freesrc, int ptsize, lon
         {
             SDL_SetError("SGE - Couldn't set font size");
             sge_TTF_CloseFont(font);
-            return NULL;
+            return nullptr;
         }
 
         /* Get the scalable font metrics for this font */
@@ -856,10 +856,10 @@ Uint16* sge_Latin1_Uni(const char* text)
     /* Copy the Latin-1 text to a UNICODE text buffer */
     unicode_len = static_cast<int>(strlen(text));
     unicode_text = (Uint16*)malloc((unicode_len + 1) * (sizeof *unicode_text));
-    if(unicode_text == NULL)
+    if(unicode_text == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
-        return (NULL);
+        return (nullptr);
     }
     for(i = 0; i < unicode_len; ++i)
     {
@@ -912,10 +912,10 @@ Uint16* sge_UTF8_Uni(const char* text)
     /* Copy the UTF-8 text to a UNICODE text buffer */
     unicode_len = static_cast<int>(strlen(text));
     unicode_text = (Uint16*)malloc((unicode_len + 1) * (sizeof *unicode_text));
-    if(unicode_text == NULL)
+    if(unicode_text == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
-        return (NULL);
+        return (nullptr);
     }
 
     return UTF8_to_UNICODE(unicode_text, text, unicode_len);
@@ -1051,7 +1051,7 @@ SDL_Rect sge_TTF_TextSize(sge_TTFont* font, char* text)
     /* Copy the Latin-1 text to a UNICODE text buffer */
     unicode_len = strlen(text);
     unicode_text = (Uint16*)malloc((unicode_len + 1) * (sizeof *unicode_text));
-    if(unicode_text == NULL)
+    if(unicode_text == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
         return ret;
@@ -1100,7 +1100,7 @@ SDL_Surface* sge_TTF_Render(sge_TTFont* font, const Uint16* text, SDL_Color fg, 
     if(!w)
     {
         SDL_SetError("SGE - Text has zero width");
-        return (NULL);
+        return (nullptr);
     }
 
     /* Create the target surface */
@@ -1125,10 +1125,10 @@ SDL_Surface* sge_TTF_Render(sge_TTFont* font, const Uint16* text, SDL_Color fg, 
         textbuf = SDL_AllocSurface(SDL_SWSURFACE, w, h, 32, Rmask, Gmask, Bmask, Amask);
     }
 
-    if(textbuf == NULL)
+    if(textbuf == nullptr)
     {
         SDL_SetError("SGE - Out of memory");
-        return (NULL);
+        return (nullptr);
     }
 
     /* Setup our colors */
@@ -1344,7 +1344,7 @@ SDL_Rect sge_tt_textout_UNI(SDL_Surface* Surface, sge_TTFont* font, const Uint16
     SDL_Surface* text;
 
     text = sge_TTF_Render(font, uni, sge_GetRGB(Surface, fcolor), sge_GetRGB(Surface, bcolor), Alpha);
-    if(text == NULL)
+    if(text == nullptr)
     {
         return ret;
     }
@@ -1381,7 +1381,7 @@ SDL_Rect sge_tt_textout_UNI(SDL_Surface* Surface, sge_TTFont* font, const Uint16
     SDL_Surface* text;
 
     text = sge_TTF_Render(font, uni, sge_FillPaletteEntry(fR, fG, fB), sge_FillPaletteEntry(bR, bG, bB), Alpha);
-    if(text == NULL)
+    if(text == nullptr)
     {
         return ret;
     }

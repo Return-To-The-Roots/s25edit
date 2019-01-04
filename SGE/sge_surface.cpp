@@ -611,7 +611,7 @@ void sge_read_block32(SDL_Surface* Surface, Uint32* block, Sint16 y)
 //==================================================================================
 void sge_ClearSurface(SDL_Surface* Surface, Uint32 color)
 {
-    SDL_FillRect(Surface, NULL, color);
+    SDL_FillRect(Surface, nullptr, color);
 
     if(_sge_update != 1)
     {

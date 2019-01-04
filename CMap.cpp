@@ -63,9 +63,9 @@ CMap::~CMap()
 
 void CMap::constructMap(const std::string& filename, int width, int height, int type, int texture, int border, int border_texture)
 {
-    map = NULL;
-    Surf_Map = NULL;
-    Surf_RightMenubar = NULL;
+    map = nullptr;
+    Surf_Map = nullptr;
+    Surf_RightMenubar = nullptr;
     displayRect.x = 0;
     displayRect.y = 0;
     displayRect.w = global::s2->GameResolutionX;
@@ -74,7 +74,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     if(!filename.empty())
         map = (bobMAP*)CFile::open_file(filename, WLD);
 
-    if(map == NULL)
+    if(map == nullptr)
         map = generateMap(width, height, type, texture, border, border_texture);
 
     // load the right MAP0x.LST for all pictures
@@ -133,8 +133,8 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     saveCurrentVertices = false;
     CurrPtr_savedVertices = new SavedVertices;
     CurrPtr_savedVertices->empty = true;
-    CurrPtr_savedVertices->prev = NULL;
-    CurrPtr_savedVertices->next = NULL;
+    CurrPtr_savedVertices->prev = nullptr;
+    CurrPtr_savedVertices->next = nullptr;
 
     // we count the players, cause the original editor writes number of players to header no matter if they are set or not
     int CountPlayers = 0;
@@ -201,15 +201,15 @@ void CMap::destructMap()
     // free all surfaces that MAP0x.LST needed
     unloadMapPics();
     // free concatenated list for "undo" and "do"
-    if(CurrPtr_savedVertices != NULL)
+    if(CurrPtr_savedVertices != nullptr)
     {
         // go to the end
-        while(CurrPtr_savedVertices->next != NULL)
+        while(CurrPtr_savedVertices->next != nullptr)
         {
             CurrPtr_savedVertices = CurrPtr_savedVertices->next;
         }
         // and now free all pointers from behind
-        while(CurrPtr_savedVertices->prev != NULL)
+        while(CurrPtr_savedVertices->prev != nullptr)
         {
             CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
             delete CurrPtr_savedVertices->next;
@@ -218,10 +218,10 @@ void CMap::destructMap()
     }
     // free the map surface
     SDL_FreeSurface(Surf_Map);
-    Surf_Map = NULL;
+    Surf_Map = nullptr;
     // free the surface of the right menubar
     SDL_FreeSurface(Surf_RightMenubar);
-    Surf_RightMenubar = NULL;
+    Surf_RightMenubar = nullptr;
     // free vertex array
     Vertices.clear();
     // free map structure memory
@@ -290,20 +290,20 @@ void CMap::rotateMap()
     std::vector<MapNode> new_vertex(map->vertex.size());
 
     // free concatenated list for "undo" and "do"
-    if(CurrPtr_savedVertices != NULL)
+    if(CurrPtr_savedVertices != nullptr)
     {
         // go to the end
-        while(CurrPtr_savedVertices->next != NULL)
+        while(CurrPtr_savedVertices->next != nullptr)
         {
             CurrPtr_savedVertices = CurrPtr_savedVertices->next;
         }
         // and now free all pointers from behind
-        while(CurrPtr_savedVertices->prev != NULL)
+        while(CurrPtr_savedVertices->prev != nullptr)
         {
             CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
             delete CurrPtr_savedVertices->next;
         }
-        CurrPtr_savedVertices->next = NULL;
+        CurrPtr_savedVertices->next = nullptr;
     }
 
     // copy old to new while permuting x and y
@@ -501,7 +501,7 @@ void CMap::unloadMapPics()
     for(int i = MAPPIC_ARROWCROSS_YELLOW; i <= MAPPIC_LAST_ENTRY; i++)
     {
         SDL_FreeSurface(global::bmpArray[i].surface);
-        global::bmpArray[i].surface = NULL;
+        global::bmpArray[i].surface = nullptr;
     }
     // set back bmpArray-pointer, cause MAP0x.LST is no longer needed
     CFile::set_bmpArray(&global::bmpArray[MAPPIC_ARROWCROSS_YELLOW]);
@@ -838,10 +838,10 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
         {
             if(!saveCurrentVertices)
             {
-                if(CurrPtr_savedVertices != NULL && CurrPtr_savedVertices->prev != NULL)
+                if(CurrPtr_savedVertices != nullptr && CurrPtr_savedVertices->prev != nullptr)
                 {
                     CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-                    // if (CurrPtr_savedVertices->next->empty && CurrPtr_savedVertices->prev != NULL)
+                    // if (CurrPtr_savedVertices->next->empty && CurrPtr_savedVertices->prev != nullptr)
                     //    CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
                     for(int i = CurrPtr_savedVertices->VertexX - MAX_CHANGE_SECTION - 10 - 2, k = 0;
                         i <= CurrPtr_savedVertices->VertexX + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
@@ -870,9 +870,9 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
         {
             if (!saveCurrentVertices)
             {
-                if (CurrPtr_savedVertices != NULL)
+                if (CurrPtr_savedVertices != nullptr)
                 {
-                    if (CurrPtr_savedVertices->next != NULL)
+                    if (CurrPtr_savedVertices->next != nullptr)
                         CurrPtr_savedVertices = CurrPtr_savedVertices->next;
                     if (!CurrPtr_savedVertices->empty)
                     {
@@ -1145,8 +1145,8 @@ void CMap::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Map);
-        Surf_Map = NULL;
-        if((Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, BitsPerPixel, 0, 0, 0, 0)) == NULL)
+        Surf_Map = nullptr;
+        if((Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, BitsPerPixel, 0, 0, 0, 0)) == nullptr)
             return;
         if(BitsPerPixel == 8)
             SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors, 0, 256);
@@ -1154,7 +1154,7 @@ void CMap::render()
     }
     // else
     // clear the surface before drawing new (in normal case not needed)
-    // SDL_FillRect( Surf_Map, NULL, SDL_MapRGB(Surf_Map->format,0,0,0) );
+    // SDL_FillRect( Surf_Map, nullptr, SDL_MapRGB(Surf_Map->format,0,0,0) );
 
     // touch vertex data if user modifies it
     if(modify)
@@ -1303,12 +1303,12 @@ void CMap::render()
 #ifdef _EDITORMODE
     // right menubar
     // do we need a surface?
-    if(Surf_RightMenubar == NULL)
+    if(Surf_RightMenubar == nullptr)
     {
         // we permute width and height, cause we want to rotate the menubar 90 degrees
         if((Surf_RightMenubar =
               SDL_CreateRGBSurface(SDL_SWSURFACE, global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, 8, 0, 0, 0, 0))
-           != NULL)
+           != nullptr)
         {
             SDL_SetPalette(Surf_RightMenubar, SDL_LOGPAL, global::palArray[PAL_RESOURCE].colors, 0, 256);
             SDL_SetColorKey(Surf_RightMenubar, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
@@ -1521,7 +1521,7 @@ void CMap::modifyVertex()
     // save vertices for "undo" and "do"
     if(saveCurrentVertices)
     {
-        if(CurrPtr_savedVertices != NULL)
+        if(CurrPtr_savedVertices != nullptr)
         {
             CurrPtr_savedVertices->empty = false;
             CurrPtr_savedVertices->VertexX = VertexX_;
@@ -1545,12 +1545,12 @@ void CMap::modifyVertex()
                     CurrPtr_savedVertices->PointsArroundVertex[l * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) + k] = map->getVertex(m, n);
                 }
             }
-            if(CurrPtr_savedVertices->next == NULL)
+            if(CurrPtr_savedVertices->next == nullptr)
             {
                 CurrPtr_savedVertices->next = new SavedVertices;
                 CurrPtr_savedVertices->next->empty = true;
                 CurrPtr_savedVertices->next->prev = CurrPtr_savedVertices;
-                CurrPtr_savedVertices->next->next = NULL;
+                CurrPtr_savedVertices->next->next = nullptr;
                 CurrPtr_savedVertices = CurrPtr_savedVertices->next;
             } else
                 CurrPtr_savedVertices = CurrPtr_savedVertices->next;
@@ -1645,7 +1645,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     int X, Y;
     MapNode* tempP = &map->getVertex(VertexX, VertexY);
     // this is to setup the building depending on the vertices around
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, VertexX, VertexY);
 
     bool even = false;
@@ -1736,7 +1736,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     int X, Y;
     MapNode* tempP = &map->getVertex(VertexX, VertexY);
     // this is to setup the building depending on the vertices around
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, VertexX, VertexY);
 
     bool even = false;
@@ -1833,7 +1833,7 @@ void CMap::modifyHeightPlane(int VertexX, int VertexY, Uint8 h)
 void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
 {
     // at first save all vertices we need to calculate the new building
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, VertexX, VertexY);
 
     MapNode& middleVertex = map->getVertex(VertexX, VertexY);
@@ -1888,7 +1888,7 @@ void CMap::modifyShading(int VertexX, int VertexY)
     // temporary to keep the lines short
     int X, Y;
     // this is to setup the shading depending on the vertices around (2 sections from the cursor)
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, VertexX, VertexY);
     MapNode& middleVertex = map->getVertex(VertexX, VertexY);
 
@@ -1958,7 +1958,7 @@ void CMap::modifyTexture(int VertexX, int VertexY, bool rsu, bool usd)
     }
 
     // at least setup the possible building and the resources at the vertex and 1 section/2 sections around
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, VertexX, VertexY);
     for(int i = 0; i < 19; i++)
     {
@@ -2138,7 +2138,7 @@ void CMap::modifyObject(int x, int y)
         }
     }
     // at least setup the possible building at the vertex and 1 section around
-    boost::array<Point32, 7> tempVertices;
+    std::array<Point32, 7> tempVertices;
     calculateVerticesAround(tempVertices, x, y);
     for(int i = 0; i < 7; i++)
         modifyBuild(tempVertices[i].x, tempVertices[i].y);
@@ -2163,7 +2163,7 @@ void CMap::modifyAnimal(int VertexX, int VertexY)
 void CMap::modifyBuild(int x, int y)
 {
     // at first save all vertices we need to calculate the new building
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, x, y);
 
     /// evtl. keine festen werte sondern addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine 0x00 sondern 0x68)
@@ -2255,7 +2255,7 @@ void CMap::modifyBuild(int x, int y)
         }
     }
 
-    boost::array<const MapNode*, 7> mapVertices;
+    std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
         mapVertices[i] = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
 
@@ -2402,10 +2402,10 @@ void CMap::modifyBuild(int x, int y)
 void CMap::modifyResource(int x, int y)
 {
     // at first save all vertices we need to check
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, x, y);
     MapNode& curVertex = map->getVertex(x, y);
-    boost::array<const MapNode*, 7> mapVertices;
+    std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
         mapVertices[i] = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
 
@@ -2604,7 +2604,7 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
     }
 
     // at least setup the possible building at the vertex and 2 sections around
-    boost::array<Point32, 19> tempVertices;
+    std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, VertexX, VertexY);
     for(int i = 0; i < 19; i++)
         modifyBuild(tempVertices[i].x, tempVertices[i].y);
@@ -2676,9 +2676,9 @@ void CMap::calculateVertices()
 }
 
 template<size_t T_size>
-void CMap::calculateVerticesAround(boost::array<Point32, T_size>& newVertices, int x, int y)
+void CMap::calculateVerticesAround(std::array<Point32, T_size>& newVertices, int x, int y)
 {
-    BOOST_STATIC_ASSERT_MSG(T_size == 1u || T_size == 7u || T_size == 19u, "Only 1, 7 or 19 are allowed");
+    static_assert(T_size == 1u || T_size == 7u || T_size == 19u, "Only 1, 7 or 19 are allowed");
     bool even = false;
     if(y % 2 == 0)
         even = true;
