@@ -675,6 +675,8 @@ void callback::EditorHelpMenu(int Param)
                 SelectBoxHelp->setOption("(can't decrease below this)\n");
                 SelectBoxHelp->setOption("Undo............................................................................................."
                                          "...................Q\n");
+                SelectBoxHelp->setOption("Undo............................................................................................."
+                                         "...................W\n");
                 SelectBoxHelp->setOption("(just actions made with the cursor)\n");
                 SelectBoxHelp->setOption(
                   "Build help on/off.............................................................................................Space\n");

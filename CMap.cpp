@@ -130,10 +130,8 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     MaxRaiseHeight = 0x3C;
     MinReduceHeight = 0x00;
     saveCurrentVertices = false;
-    CurrPtr_savedVertices = new SavedVertices;
-    CurrPtr_savedVertices->empty = true;
-    CurrPtr_savedVertices->prev = nullptr;
-    CurrPtr_savedVertices->next = nullptr;
+    undoBuffer.clear();
+    redoBuffer.clear();
 
     // we count the players, cause the original editor writes number of players to header no matter if they are set or not
     int CountPlayers = 0;
@@ -199,22 +197,8 @@ void CMap::destructMap()
 {
     // free all surfaces that MAP0x.LST needed
     unloadMapPics();
-    // free concatenated list for "undo" and "do"
-    if(CurrPtr_savedVertices)
-    {
-        // go to the end
-        while(CurrPtr_savedVertices->next != nullptr)
-        {
-            CurrPtr_savedVertices = CurrPtr_savedVertices->next;
-        }
-        // and now free all pointers from behind
-        while(CurrPtr_savedVertices->prev != nullptr)
-        {
-            CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-            delete CurrPtr_savedVertices->next;
-        }
-        delete CurrPtr_savedVertices;
-    }
+    undoBuffer.clear();
+    redoBuffer.clear();
     // free the map surface
     SDL_FreeSurface(Surf_Map);
     Surf_Map = nullptr;
@@ -288,22 +272,8 @@ void CMap::rotateMap()
     // we allocate memory for the new triangle field but with x equals the height and y equals the width
     std::vector<MapNode> new_vertex(map->vertex.size());
 
-    // free concatenated list for "undo" and "do"
-    if(CurrPtr_savedVertices)
-    {
-        // go to the end
-        while(CurrPtr_savedVertices->next != nullptr)
-        {
-            CurrPtr_savedVertices = CurrPtr_savedVertices->next;
-        }
-        // and now free all pointers from behind
-        while(CurrPtr_savedVertices->prev != nullptr)
-        {
-            CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-            delete CurrPtr_savedVertices->next;
-        }
-        CurrPtr_savedVertices->next = nullptr;
-    }
+    undoBuffer.clear();
+    redoBuffer.clear();
 
     // copy old to new while permuting x and y
     for(int y = 0; y < map->height; y++)
@@ -543,7 +513,7 @@ void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
     }
 
-    saveVertex(motion.x, motion.y, motion.state);
+    storeVerticesFromMouse(motion.x, motion.y, motion.state);
 }
 
 void CMap::setMouseData(const SDL_MouseButtonEvent& button)
@@ -710,6 +680,52 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
     }
 }
 
+SavedVertex saveVertex(Position pt, const bobMAP& map)
+{
+    SavedVertex res;
+    res.pos = pt;
+    for(int i = pt.x - MAX_CHANGE_SECTION - 10 - 2, k = 0; i <= pt.x + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
+    {
+        for(int j = pt.y - MAX_CHANGE_SECTION - 10 - 2, l = 0; j <= pt.y + MAX_CHANGE_SECTION + 10 + 2; j++, l++)
+        {
+            // i und j muessen wegen den mapraendern noch korrigiert werden!
+            int m = i;
+            if(m < 0)
+                m += map.width;
+            else if(m >= map.width)
+                m -= map.width;
+            int n = j;
+            if(n < 0)
+                n += map.height;
+            else if(n >= map.height)
+                n -= map.height;
+            res.PointsArroundVertex[l][k] = map.getVertex(m, n);
+        }
+    }
+    return res;
+}
+
+void restoreVertex(const SavedVertex& vertex, bobMAP& map)
+{
+    for(int i = vertex.pos.x - MAX_CHANGE_SECTION - 10 - 2, k = 0; i <= vertex.pos.x + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
+    {
+        for(int j = vertex.pos.y - MAX_CHANGE_SECTION - 10 - 2, l = 0; j <= vertex.pos.y + MAX_CHANGE_SECTION + 10 + 2; j++, l++)
+        {
+            int m = i;
+            if(m < 0)
+                m += map.width;
+            else if(m >= map.width)
+                m -= map.width;
+            int n = j;
+            if(n < 0)
+                n += map.height;
+            else if(n >= map.height)
+                n -= map.height;
+            map.getVertex(m, n) = vertex.PointsArroundVertex[l][k];
+        }
+    }
+}
+
 void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     if(key.type == SDL_KEYDOWN)
@@ -834,9 +850,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
         {
             ChangeSection_ = 8;
             setupVerticesActivity();
-        }
-
-        else if(key.keysym.sym == SDLK_SPACE)
+        } else if(key.keysym.sym == SDLK_SPACE)
         {
             RenderBuildHelp = !RenderBuildHelp;
         } else if(key.keysym.sym == SDLK_F11)
@@ -844,68 +858,21 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             RenderBorders = !RenderBorders;
         } else if(key.keysym.sym == SDLK_q)
         {
-            if(!saveCurrentVertices)
+            if(!saveCurrentVertices && !undoBuffer.empty())
             {
-                if(CurrPtr_savedVertices != nullptr && CurrPtr_savedVertices->prev != nullptr)
-                {
-                    CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-                    // if (CurrPtr_savedVertices->next->empty && CurrPtr_savedVertices->prev != nullptr)
-                    //    CurrPtr_savedVertices = CurrPtr_savedVertices->prev;
-                    for(int i = CurrPtr_savedVertices->VertexX - MAX_CHANGE_SECTION - 10 - 2, k = 0;
-                        i <= CurrPtr_savedVertices->VertexX + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
-                    {
-                        for(int j = CurrPtr_savedVertices->VertexY - MAX_CHANGE_SECTION - 10 - 2, l = 0;
-                            j <= CurrPtr_savedVertices->VertexY + MAX_CHANGE_SECTION + 10 + 2; j++, l++)
-                        {
-                            int m = i;
-                            if(m < 0)
-                                m += map->width;
-                            else if(m >= map->width)
-                                m -= map->width;
-                            int n = j;
-                            if(n < 0)
-                                n += map->height;
-                            else if(n >= map->height)
-                                n -= map->height;
-                            map->getVertex(m, n) =
-                              CurrPtr_savedVertices->PointsArroundVertex[l * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) + k];
-                        }
-                    }
-                }
+                redoBuffer.push_back(saveVertex(undoBuffer.back().pos, *map));
+                restoreVertex(undoBuffer.back(), *map);
+                undoBuffer.pop_back();
             }
-        }
-        /*else if (key.keysym.sym == SDLK_w)
+        } else if(key.keysym.sym == SDLK_w)
         {
-            if (!saveCurrentVertices)
+            if(!saveCurrentVertices && !redoBuffer.empty())
             {
-                if (CurrPtr_savedVertices)
-                {
-                    if (CurrPtr_savedVertices->next != nullptr)
-                        CurrPtr_savedVertices = CurrPtr_savedVertices->next;
-                    if (!CurrPtr_savedVertices->empty)
-                    {
-                        for (int i = CurrPtr_savedVertices->VertexX-MAX_CHANGE_SECTION-10-2, k = 0; i <=
-        CurrPtr_savedVertices->VertexX+MAX_CHANGE_SECTION+10+2; i++, k++)
-                        {
-
-                            for (int j = CurrPtr_savedVertices->VertexY-MAX_CHANGE_SECTION-10-2, l = 0; j <=
-        CurrPtr_savedVertices->VertexY+MAX_CHANGE_SECTION+10+2; j++, l++)
-                            {
-                                int m = i;
-                                if (m < 0)  m += map->width;
-                                else if (m >= map->width) m -= map->width;
-                                int n = j;
-                                if (n < 0)  n += map->height;
-                                else if (n >= map->height) n -= map->height;
-                                map->vertex[n*map->width+m] =
-        CurrPtr_savedVertices->PointsArroundVertex[l*((MAX_CHANGE_SECTION+10+2)*2+1)+k];
-                            }
-                        }
-                    }
-                }
+                undoBuffer.push_back(saveVertex(redoBuffer.back().pos, *map));
+                restoreVertex(redoBuffer.back(), *map);
+                redoBuffer.pop_back();
             }
-        }*/
-        else if(key.keysym.sym == SDLK_UP || key.keysym.sym == SDLK_DOWN || key.keysym.sym == SDLK_LEFT || key.keysym.sym == SDLK_RIGHT)
+        } else if(key.keysym.sym == SDLK_UP || key.keysym.sym == SDLK_DOWN || key.keysym.sym == SDLK_LEFT || key.keysym.sym == SDLK_RIGHT)
         {
             Position offset{key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0),
                             key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0)};
@@ -1032,7 +999,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
     }
 }
 
-void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseState*/)
+void CMap::storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseState*/)
 {
     // if user raises or reduces the height of a vertex, don't let the cursor jump to another vertex
     // if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE) )
@@ -1545,43 +1512,12 @@ void CMap::modifyVertex()
     else
         TimeOfLastModification = SDL_GetTicks();
 
-    // save vertices for "undo" and "do"
+    // save vertices for "undo"
     if(saveCurrentVertices)
     {
-        if(CurrPtr_savedVertices)
-        {
-            CurrPtr_savedVertices->empty = false;
-            CurrPtr_savedVertices->VertexX = VertexX_;
-            CurrPtr_savedVertices->VertexY = VertexY_;
-            for(int i = VertexX_ - MAX_CHANGE_SECTION - 10 - 2, k = 0; i <= VertexX_ + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
-            {
-                for(int j = VertexY_ - MAX_CHANGE_SECTION - 10 - 2, l = 0; j <= VertexY_ + MAX_CHANGE_SECTION + 10 + 2; j++, l++)
-                {
-                    // i und j muessen wegen den mapraendern noch korrigiert werden!
-                    int m = i;
-                    if(m < 0)
-                        m += map->width;
-                    else if(m >= map->width)
-                        m -= map->width;
-                    int n = j;
-                    if(n < 0)
-                        n += map->height;
-                    else if(n >= map->height)
-                        n -= map->height;
-                    // printf("\n X=%d Y=%d i=%d j=%d k=%d l=%d m=%d n=%d", VertexX, VertexY, i, j, k, l, m, n);
-                    CurrPtr_savedVertices->PointsArroundVertex[l * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) + k] = map->getVertex(m, n);
-                }
-            }
-            if(CurrPtr_savedVertices->next == nullptr)
-            {
-                CurrPtr_savedVertices->next = new SavedVertices;
-                CurrPtr_savedVertices->next->empty = true;
-                CurrPtr_savedVertices->next->prev = CurrPtr_savedVertices;
-                CurrPtr_savedVertices->next->next = nullptr;
-                CurrPtr_savedVertices = CurrPtr_savedVertices->next;
-            } else
-                CurrPtr_savedVertices = CurrPtr_savedVertices->next;
-        }
+        // Cannot redo anymore
+        redoBuffer.clear();
+        undoBuffer.push_back(saveVertex(Position(VertexX_, VertexY_), *map));
         saveCurrentVertices = false;
     }
 
@@ -2035,8 +1971,8 @@ void CMap::modifyObject(int x, int y)
                     newContent = 0x70;
                 else
                     newContent = 0xB0;
-                // we set different start pictures for the tree, cause the trees should move different, so we add a random value that walks
-                // from 0 to 7
+                // we set different start pictures for the tree, cause the trees should move different, so we add a random value that
+                // walks from 0 to 7
                 curVertex.objectType = newContent + rand() % 8;
                 curVertex.objectInfo = modeContent2;
             }
@@ -2054,15 +1990,15 @@ void CMap::modifyObject(int x, int y)
                     newContent = 0xF0;
                     newContent2 = 0xC4;
                 }
-                // we set different start pictures for the tree, cause the trees should move different, so we add a random value that walks
-                // from 0 to 7
+                // we set different start pictures for the tree, cause the trees should move different, so we add a random value that
+                // walks from 0 to 7
                 curVertex.objectType = newContent + rand() % 8;
                 curVertex.objectInfo = newContent2;
             }
         } else
         {
-            // we set different start pictures for the tree, cause the trees should move different, so we add a random value that walks from
-            // 0 to 7
+            // we set different start pictures for the tree, cause the trees should move different, so we add a random value that walks
+            // from 0 to 7
             curVertex.objectType = modeContent + rand() % 8;
             curVertex.objectInfo = modeContent2;
         }
@@ -2193,7 +2129,8 @@ void CMap::modifyBuild(int x, int y)
     std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, x, y);
 
-    /// evtl. keine festen werte sondern addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine 0x00 sondern 0x68)
+    /// evtl. keine festen werte sondern addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine 0x00 sondern
+    /// 0x68)
 
     Uint8 building;
     MapNode& curVertex = map->getVertex(x, y);
@@ -2380,8 +2317,8 @@ void CMap::modifyBuild(int x, int y)
     }
 
     // test for headquarters around the point
-    // NOTE: In EDITORMODE don't test AT the point, cause in Original game we need a big house AT the point, otherwise the game wouldn't set
-    // a player there
+    // NOTE: In EDITORMODE don't test AT the point, cause in Original game we need a big house AT the point, otherwise the game wouldn't
+    // set a player there
     if(building > 0x00)
     {
         for(int i = 1; i < 7; i++)
@@ -2578,7 +2515,8 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
             vertex.objectType = modeContent;
             vertex.objectInfo = 0x80;
 
-            // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the first 7 players)
+            // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the first 7
+            // players)
             if(modeContent >= 0 && modeContent < 7)
             {
                 map->HQx[modeContent] = VertexX;

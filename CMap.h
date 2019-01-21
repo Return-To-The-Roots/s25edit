@@ -5,6 +5,16 @@
 #include <array>
 #include <string>
 
+struct SavedVertex
+{
+    Position pos;
+    // MAX_CHANGE_SECTION * 2 + 1 = number of vertices in one row or col
+    //+ 10 because if we raise a vertex then the other vertices will be raised too after 5 times
+    // this ranges up to 10 vertices
+    //+ 2 because modifications on a vertex will touch building and shading around
+    std::array<std::array<MapNode, (MAX_CHANGE_SECTION + 10 + 2) * 2 + 1>, (MAX_CHANGE_SECTION + 10 + 2) * 2 + 1> PointsArroundVertex;
+};
+
 class CMap
 {
     friend class CDebug;
@@ -32,20 +42,10 @@ private:
     bool modify;
     // necessary for "undo"- and "do"-function
     bool saveCurrentVertices;
-    struct SavedVertices
-    {
-        bool empty;
-        int VertexX, VertexY;
-        // MAX_CHANGE_SECTION * 2 + 1 = number of vertices in one row or col
-        //+ 10 because if we raise a vertex then the other vertices will be raised too after 5 times
-        // this ranges up to 10 vertices
-        //+ 2 because modifications on a vertex will touch building and shading around
-        MapNode PointsArroundVertex[((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1) * ((MAX_CHANGE_SECTION + 10 + 2) * 2 + 1)];
-        struct SavedVertices* prev;
-        struct SavedVertices* next;
-    } * CurrPtr_savedVertices;
+    std::list<SavedVertex> undoBuffer;
+    std::list<SavedVertex> redoBuffer;
     // get the number of the triangle nearest to cursor and save it to VertexX and VertexY
-    void saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
+    void storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
     // blitting coords for the mouse cursor
     int MouseBlitX;
     int MouseBlitY;
