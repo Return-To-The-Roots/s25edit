@@ -26,6 +26,7 @@ private:
     CFont* RegisteredWindowsText;
     // text for Registered Callbacks
     CFont* RegisteredCallbacksText;
+    CFont* DisplayRectText;
     // text for mouse cursor data
     CFont* MouseText;
     // text for map name
@@ -61,8 +62,6 @@ private:
     CFont* shadingText;
     CFont* unknown5Text;
     CFont* editorModeText;
-    // some puffers to write texts with sprintf()
-    char puffer1[100]; //-V730_NOINIT
     // fontsize for debugging window (remember: only 9, 11 or 14)
     int fontsize;
     // temporary pointer to Map-Object

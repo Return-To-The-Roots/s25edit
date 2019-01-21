@@ -90,6 +90,7 @@ public:
     bool isMoving() { return moving; }
     bool isResizing() { return resizing; }
     bool isMarked() { return marked; }
+    void setDirty() { needRender = true; }
     // we can not trust this information, cause if minimized is false, it is possible, that we still have the old minimized surface
     // bool isMinimized() { return minimized; };
     // we need an information if a input-element (textfield etc.) is active to not deliver the input to other gui-element in the event
