@@ -2,11 +2,11 @@
 #include "../CSurface.h"
 #include "../globals.h"
 
-CFont::CFont(const char* string, int x, int y, int fontsize, int color)
+CFont::CFont(std::string text, int x, int y, int fontsize, int color)
 {
     this->x_ = x;
     this->y_ = y;
-    this->string_ = string;
+    this->string_ = std::move(text);
     // only three sizes are available (in pixels)
     if(fontsize != 9 && fontsize != 11 && fontsize != 14)
         this->fontsize_ = 9;
@@ -17,7 +17,7 @@ CFont::CFont(const char* string, int x, int y, int fontsize, int color)
     callback = nullptr;
     clickedParam = 0;
     // create surface and write text to it
-    writeText(this->string_);
+    writeText();
 }
 
 CFont::~CFont()
@@ -31,21 +31,23 @@ void CFont::setFontsize(int fontsize)
         this->fontsize_ = 9;
     else
         this->fontsize_ = fontsize;
-    writeText(string_);
+    writeText();
 }
 
 void CFont::setColor(int color)
 {
     this->color_ = color;
-    writeText(string_);
+    writeText();
 }
 
-void CFont::setText(const char* string)
+void CFont::setText(std::string text)
 {
+    if(text == string_)
+        return;
     SDL_FreeSurface(Surf_Font);
     Surf_Font = nullptr;
-    this->string_ = string;
-    writeText(this->string_);
+    this->string_ = std::move(text);
+    writeText();
 }
 
 void CFont::setMouseData(SDL_MouseButtonEvent button)
@@ -68,8 +70,10 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
     }
 }
 
-bool CFont::writeText(const char* string)
+bool CFont::writeText()
 {
+    if(string_.empty())
+        return true;
     // data for counting pixels to create the surface
     unsigned int pixel_ctr_w = 0;
     unsigned int pixel_ctr_w_tmp = 0;
@@ -79,18 +83,13 @@ bool CFont::writeText(const char* string)
     bool pixel_count_loop = true;
     // the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
-    // pointer to the chiffres
-    if(!string)
-        string = this->string_;
-    if(!string)
-        return false;
-    const unsigned char* chiffre = reinterpret_cast<const unsigned char*>(string);
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = 0;
     int pos_y = 0;
 
     // now lets draw the chiffres
-    while(*chiffre != '\0')
+    auto chiffre = string_.begin();
+    while(chiffre != string_.end())
     {
         // set chiffre_index to the first chiffre (spacebar) depending on the fontsize
         switch(fontsize_)
@@ -226,7 +225,7 @@ bool CFont::writeText(const char* string)
             }
 
             // if this was the last chiffre setup width, create surface and go in normal mode to write text to the surface
-            if(*chiffre == '\0')
+            if(chiffre == string_.end())
             {
                 if(pixel_ctr_w_tmp > pixel_ctr_w)
                     pixel_ctr_w = pixel_ctr_w_tmp;
@@ -237,7 +236,7 @@ bool CFont::writeText(const char* string)
                 if(!(Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)))
                     return false;
                 SDL_SetColorKey(Surf_Font, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
-                chiffre = reinterpret_cast<const unsigned char*>(string);
+                chiffre = string_.begin();
                 pixel_count_loop = false;
                 continue;
             } else

@@ -2,6 +2,7 @@
 #define _CFONT_H
 
 #include "../includes.h"
+#include <string>
 
 class CFont
 {
@@ -13,7 +14,7 @@ private:
     Sint16 y_;
     Uint16 w;
     Uint16 h;
-    const char* string_;
+    std::string string_;
     int fontsize_; //== Uint16 h;
     int color_;
     void (*callback)(int);
@@ -21,7 +22,7 @@ private:
 
 public:
     // Constructor - Destructor
-    CFont(const char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
+    CFont(std::string text, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
     ~CFont();
     // Access
     int getX() { return x_; };
@@ -33,7 +34,7 @@ public:
     void setFontsize(int fontsize);
     void setColor(int color);
     int getColor() { return color_; }
-    void setText(const char* string);
+    void setText(std::string text);
     void setCallback(void (*callback)(int), int param)
     {
         this->callback = callback;
@@ -48,7 +49,7 @@ public:
     SDL_Surface* getSurface() { return Surf_Font; };
     // Methods
     // fontsize can be 9, 11 or 14 (otherwise it will be set to 9) ---- '\n' is possible
-    bool writeText(const char* string);
+    bool writeText();
     // this function can be used as CFont::writeText to write text directly to a surface without creating an object
     static bool writeText(SDL_Surface* Surf_Dest, const char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW,
                           int align = ALIGN_LEFT);
