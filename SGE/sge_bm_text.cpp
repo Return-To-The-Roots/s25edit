@@ -49,7 +49,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     sge_bmpFont* font;
 
     font = new(nothrow) sge_bmpFont;
-    if(font == nullptr)
+    if(!font)
     {
         SDL_SetError("SGE - Out of memory");
         return nullptr;
@@ -58,7 +58,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     if(!(flags & SGE_BFNOCONVERT) && !(flags & SGE_BFSFONT))
     { /* Get a converted copy */
         font->FontSurface = SDL_DisplayFormat(surface);
-        if(font->FontSurface == nullptr)
+        if(!font->FontSurface)
         {
             SDL_SetError("SGE - Out of memory");
             delete font;
@@ -69,7 +69,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
         { // We want an 8bit surface
             SDL_Surface* tmp;
             tmp = SDL_AllocSurface(SDL_SWSURFACE, surface->w, surface->h, 8, 0, 0, 0, 0);
-            if(tmp == nullptr)
+            if(!tmp)
             {
                 SDL_SetError("SGE - Out of memory");
                 SDL_FreeSurface(font->FontSurface);
@@ -128,7 +128,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
     else /* Get a copy */
         font->FontSurface = sge_copy_surface(surface);
 
-    if(font->FontSurface == nullptr)
+    if(!font->FontSurface)
     {
         SDL_SetError("SGE - Out of memory");
         delete font;
@@ -237,7 +237,7 @@ SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, S
     ret.w = 0;
     ret.h = 0;
 
-    if(font == nullptr)
+    if(!font)
     {
         return ret;
     }
@@ -369,7 +369,7 @@ void sge_BF_CloseFont(sge_bmpFont* font)
 //==================================================================================
 void sge_BF_SetColor(sge_bmpFont* font, Uint8 R, Uint8 G, Uint8 B)
 {
-    if(font == nullptr)
+    if(!font)
     {
         return;
     }

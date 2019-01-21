@@ -15,14 +15,8 @@ namespace bfs = boost::filesystem;
 //#include <vld.h>
 
 CGame::CGame()
+    : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), Surf_Display(nullptr), Surf_DisplayGL(nullptr)
 {
-    GameResolutionX = 1024;
-    GameResolutionY = 768;
-    MenuResolutionX = 640;
-    MenuResolutionY = 480;
-    fullscreen = false;
-    showLoadScreen = true;
-
 #ifdef _ADMINMODE
     FrameCounter = 0;
     RegisteredCallbacks = 0;
@@ -32,9 +26,6 @@ CGame::CGame()
 
     msWait = 0;
 
-    Surf_Display = nullptr;
-    Surf_DisplayGL = nullptr;
-    Running = true;
     // mouse cursor data
     Cursor.x = 0;
     Cursor.y = 0;
@@ -42,12 +33,12 @@ CGame::CGame()
     Cursor.button.left = false;
     Cursor.button.right = false;
 
-    for(int i = 0; i < MAXMENUS; i++)
-        Menus[i] = nullptr;
-    for(int i = 0; i < MAXWINDOWS; i++)
-        Windows[i] = nullptr;
-    for(int i = 0; i < MAXCALLBACKS; i++)
-        Callbacks[i] = nullptr;
+    for(auto& Menu : Menus)
+        Menu = nullptr;
+    for(auto& Window : Windows)
+        Window = nullptr;
+    for(auto& Callback : Callbacks)
+        Callback = nullptr;
     MapObj = nullptr;
 }
 
@@ -78,27 +69,27 @@ bool CGame::RegisterMenu(CMenu* Menu)
 {
     bool success = false;
 
-    if(Menu == nullptr)
+    if(!Menu)
         return success;
-    for(int i = 0; i < MAXMENUS; i++)
+    for(auto& i : Menus)
     {
-        if(!success && Menus[i] == nullptr)
+        if(!success && !i)
         {
-            Menus[i] = Menu;
-            Menus[i]->setActive();
+            i = Menu;
+            i->setActive();
             success = true;
 #ifdef _ADMINMODE
             RegisteredMenus++;
 #endif
-        } else if(Menus[i] != nullptr)
-            Menus[i]->setInactive();
+        } else if(i)
+            i->setInactive();
     }
     return success;
 }
 
 bool CGame::UnregisterMenu(CMenu* Menu)
 {
-    if(Menu == nullptr)
+    if(!Menu)
         return false;
     for(int i = 0; i < MAXMENUS; i++)
     {
@@ -106,7 +97,7 @@ bool CGame::UnregisterMenu(CMenu* Menu)
         {
             for(int j = i - 1; j >= 0; j--)
             {
-                if(Menus[j] != nullptr)
+                if(Menus[j])
                 {
                     Menus[j]->setActive();
                     break;
@@ -129,34 +120,34 @@ bool CGame::RegisterWindow(CWindow* Window)
     int highestPriority = 0;
 
     // first find the highest priority
-    for(int i = 0; i < MAXWINDOWS; i++)
+    for(auto& Window : Windows)
     {
-        if(Windows[i] != nullptr && Windows[i]->getPriority() > highestPriority)
-            highestPriority = Windows[i]->getPriority();
+        if(Window && Window->getPriority() > highestPriority)
+            highestPriority = Window->getPriority();
     }
 
-    if(Window == nullptr)
+    if(!Window)
         return success;
-    for(int i = 0; i < MAXWINDOWS; i++)
+    for(auto& i : Windows)
     {
-        if(!success && Windows[i] == nullptr)
+        if(!success && !i)
         {
-            Windows[i] = Window;
-            Windows[i]->setActive();
-            Windows[i]->setPriority(highestPriority + 1);
+            i = Window;
+            i->setActive();
+            i->setPriority(highestPriority + 1);
             success = true;
 #ifdef _ADMINMODE
             RegisteredWindows++;
 #endif
-        } else if(Windows[i] != nullptr)
-            Windows[i]->setInactive();
+        } else if(i)
+            i->setInactive();
     }
     return success;
 }
 
 bool CGame::UnregisterWindow(CWindow* Window)
 {
-    if(Window == nullptr)
+    if(!Window)
         return false;
     for(int i = 0; i < MAXWINDOWS; i++)
     {
@@ -183,13 +174,13 @@ bool CGame::UnregisterWindow(CWindow* Window)
 
 bool CGame::RegisterCallback(void (*callback)(int))
 {
-    if(callback == nullptr)
+    if(!callback)
         return false;
-    for(int i = 0; i < MAXCALLBACKS; i++)
+    for(auto& Callback : Callbacks)
     {
-        if(Callbacks[i] == nullptr)
+        if(!Callback)
         {
-            Callbacks[i] = callback;
+            Callback = callback;
 #ifdef _ADMINMODE
             RegisteredCallbacks++;
 #endif
@@ -201,13 +192,13 @@ bool CGame::RegisterCallback(void (*callback)(int))
 
 bool CGame::UnregisterCallback(void (*callback)(int))
 {
-    if(callback == nullptr)
+    if(!callback)
         return false;
-    for(int i = 0; i < MAXCALLBACKS; i++)
+    for(auto& Callback : Callbacks)
     {
-        if(Callbacks[i] == callback)
+        if(Callback == callback)
         {
-            Callbacks[i] = nullptr;
+            Callback = nullptr;
 #ifdef _ADMINMODE
             RegisteredCallbacks--;
 #endif

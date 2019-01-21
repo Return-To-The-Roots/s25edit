@@ -8,6 +8,31 @@
 #include <iostream>
 #include <vector>
 
+bool CGame::ReCreateWindow()
+{
+    SDL_FreeSurface(Surf_Display);
+    Surf_Display = nullptr;
+    SDL_FreeSurface(Surf_DisplayGL);
+    Surf_DisplayGL = nullptr;
+    if(CSurface::useOpenGL)
+    {
+        Surf_DisplayGL = SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
+        Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolution.x, GameResolution.y, 32, 0, 0, 0, 0);
+        if(!Surf_Display || !Surf_DisplayGL)
+            return false;
+    } else
+    {
+        Surf_Display =
+          SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+        if(!Surf_Display)
+            return false;
+    }
+
+    SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", 0);
+    SetAppIcon();
+    return true;
+}
+
 bool CGame::Init()
 {
     std::cout << "Return to the Roots Mapeditor\n";
@@ -23,29 +48,11 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "\nCreate Window...";
-    if(CSurface::useOpenGL)
+    if(!ReCreateWindow())
     {
-        Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
-        Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
-        if(Surf_Display == nullptr || Surf_DisplayGL == nullptr)
-        {
-            std::cout << "failure";
-            return false;
-        }
-    } else
-    {
-        Surf_Display =
-          SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-        if(Surf_Display == nullptr)
-        {
-            std::cout << "failure";
-            return false;
-        }
+        std::cout << "failure";
+        return false;
     }
-
-    SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", 0);
-    SetAppIcon();
-
     CFile::init();
 
     /*NOTE: its important to load a palette at first,

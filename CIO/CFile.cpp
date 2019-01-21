@@ -24,10 +24,6 @@ bool CFile::loadPAL = false;
     if(!readCmd)            \
     throw std::runtime_error("Read failed at line " LINE_STRING)
 
-CFile::CFile() {}
-
-CFile::~CFile() {}
-
 void CFile::init()
 {
     fp = nullptr;
@@ -42,10 +38,10 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
 {
     void* return_value = nullptr;
 
-    if(filename.empty() || bmpArray == nullptr || shadowArray == nullptr || palArray == nullptr || palActual == nullptr)
+    if(filename.empty() || !bmpArray || !shadowArray || !palArray || !palActual)
         return nullptr;
 
-    else if((fp = boost::nowide::fopen(filename.c_str(), "rb")) == nullptr)
+    else if(!(fp = boost::nowide::fopen(filename.c_str(), "rb")))
         return nullptr;
 
     if(only_loadPAL)
@@ -103,7 +99,7 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
         std::cerr << "Error while reading " << filename << ": " << e.what() << std::endl;
     }
 
-    if(fp != nullptr)
+    if(fp)
     {
         fclose(fp);
         fp = nullptr;
@@ -213,7 +209,7 @@ bool CFile::open_idx(const std::string& filename)
     // save global filepointer
     fp_tmp = fp;
     // get a new filepointer to the '.IDX'-File
-    if((fp_idx = boost::nowide::fopen(filename.c_str(), "rb")) == nullptr)
+    if(!(fp_idx = boost::nowide::fopen(filename.c_str(), "rb")))
         return false;
     // following code will open the corresponding '******.DAT'-File
     // allocate memory for new name
@@ -226,7 +222,7 @@ bool CFile::open_idx(const std::string& filename)
     filename_dat[fileending + 1] = 'A';
     filename_dat[fileending + 2] = 'T';
     // get the filepointer of the corresponging '******.DAT'-File
-    if((fp_dat = boost::nowide::fopen(filename_dat.c_str(), "rb")) == nullptr)
+    if(!(fp_dat = boost::nowide::fopen(filename_dat.c_str(), "rb")))
         return false;
     // we are finished opening the 'DAT'-File, now we can handle the content
 
@@ -319,11 +315,11 @@ bool CFile::open_bbm()
     // skip header (48 Bytes)
     fseek(fp, 48, SEEK_CUR);
 
-    for(int i = 0; i < 256; i++)
+    for(auto& color : palArray->colors)
     {
-        CHECK_READ(libendian::read(&((palArray->colors[i]).r), 1, fp));
-        CHECK_READ(libendian::read(&((palArray->colors[i]).g), 1, fp));
-        CHECK_READ(libendian::read(&((palArray->colors[i]).b), 1, fp));
+        CHECK_READ(libendian::read(&(color.r), 1, fp));
+        CHECK_READ(libendian::read(&(color.g), 1, fp));
+        CHECK_READ(libendian::read(&(color.b), 1, fp));
     }
 
     palArray++;
@@ -406,11 +402,11 @@ bool CFile::open_lbm(const std::string& filename)
     if(length != 3u * 256u)
         return false;
     // palette
-    for(int i = 0; i < 256; i++)
+    for(auto& color : colors)
     {
-        CHECK_READ(libendian::read(&colors[i].r, 1, fp));
-        CHECK_READ(libendian::read(&colors[i].g, 1, fp));
-        CHECK_READ(libendian::read(&colors[i].b, 1, fp));
+        CHECK_READ(libendian::read(&color.r, 1, fp));
+        CHECK_READ(libendian::read(&color.g, 1, fp));
+        CHECK_READ(libendian::read(&color.b, 1, fp));
     }
 
     /* READ THIRD CHUNK "BODY" */
@@ -438,7 +434,7 @@ bool CFile::open_lbm(const std::string& filename)
     CHECK_READ(libendian::be_read_ui(&length, fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
+    if(!(bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)))
         return false;
     SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, colors, 0, 256);
 
@@ -507,7 +503,7 @@ bool CFile::open_lbm(const std::string& filename)
         SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
         bmpArray++;
-        if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32, 0, 0, 0, 0)) != nullptr)
+        if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32, 0, 0, 0, 0)))
         {
             SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
             CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface, 0, 0);
@@ -553,19 +549,19 @@ bobMAP* CFile::open_wld()
     CHECK_READ(libendian::read(&myMap->type, 1, fp));
     CHECK_READ(libendian::read(&myMap->player, 1, fp));
     CHECK_READ(libendian::read(myMap->author, 20, fp));
-    for(int i = 0; i < 7; i++)
-        CHECK_READ(libendian::le_read_us(&myMap->HQx[i], fp));
-    for(int i = 0; i < 7; i++)
-        CHECK_READ(libendian::le_read_us(&myMap->HQy[i], fp));
+    for(unsigned short& i : myMap->HQx)
+        CHECK_READ(libendian::le_read_us(&i, fp));
+    for(unsigned short& i : myMap->HQy)
+        CHECK_READ(libendian::le_read_us(&i, fp));
 
     // go to big map header and read it
     fseek(fp, 92, SEEK_SET);
-    for(int i = 0; i < 250; i++)
+    for(auto& i : myMap->header)
     {
-        CHECK_READ(libendian::read(&myMap->header[i].type, 1, fp));
-        CHECK_READ(libendian::le_read_us(&myMap->header[i].x, fp));
-        CHECK_READ(libendian::le_read_us(&myMap->header[i].y, fp));
-        CHECK_READ(libendian::le_read_ui(&myMap->header[i].area, fp));
+        CHECK_READ(libendian::read(&i.type, 1, fp));
+        CHECK_READ(libendian::le_read_us(&i.x, fp));
+        CHECK_READ(libendian::le_read_us(&i.y, fp));
+        CHECK_READ(libendian::le_read_ui(&i.area, fp));
     }
 
     // go to real map height and width
@@ -718,10 +714,10 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
 {
     bool return_value = false;
 
-    if(filename.empty() || data == nullptr)
+    if(filename.empty() || !data)
         return return_value;
 
-    if((fp = boost::nowide::fopen(filename.c_str(), "wb")) == nullptr)
+    if(!(fp = boost::nowide::fopen(filename.c_str(), "wb")))
         return return_value;
 
     switch(filetype)
@@ -745,7 +741,7 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
             break;
     }
 
-    if(fp != nullptr)
+    if(fp)
     {
         fclose(fp);
         fp = nullptr;
@@ -817,21 +813,21 @@ bool CFile::save_wld(void* data)
     // author
     libendian::write(myMap->author, 20, fp);
     // headquarters x
-    for(int i = 0; i < 7; i++)
-        libendian::le_write_us(myMap->HQx[i], fp);
+    for(unsigned short i : myMap->HQx)
+        libendian::le_write_us(i, fp);
     // headquarters y
-    for(int i = 0; i < 7; i++)
-        libendian::le_write_us(myMap->HQy[i], fp);
+    for(unsigned short i : myMap->HQy)
+        libendian::le_write_us(i, fp);
     // unknown data (8 Bytes)
     for(int i = 0; i < 8; i++)
         libendian::write(&zero, 1, fp);
     // big map header with area information
-    for(int i = 0; i < 250; i++)
+    for(auto& i : myMap->header)
     {
-        libendian::write(&myMap->header[i].type, 1, fp);
-        libendian::le_write_us(myMap->header[i].x, fp);
-        libendian::le_write_us(myMap->header[i].y, fp);
-        libendian::le_write_ui(myMap->header[i].area, fp);
+        libendian::write(&i.type, 1, fp);
+        libendian::le_write_us(i.x, fp);
+        libendian::le_write_us(i.y, fp);
+        libendian::le_write_ui(i.area, fp);
     }
     // 0x11 0x27
     temp = 0x11;
@@ -1293,11 +1289,11 @@ bool CFile::read_bob05()
     // skip: unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
 
-    for(int i = 0; i < 256; i++)
+    for(auto& color : palArray->colors)
     {
-        CHECK_READ(libendian::read(&((palArray->colors[i]).r), 1, fp));
-        CHECK_READ(libendian::read(&((palArray->colors[i]).g), 1, fp));
-        CHECK_READ(libendian::read(&((palArray->colors[i]).b), 1, fp));
+        CHECK_READ(libendian::read(&(color.r), 1, fp));
+        CHECK_READ(libendian::read(&(color.g), 1, fp));
+        CHECK_READ(libendian::read(&(color.b), 1, fp));
     }
 
     palArray++;

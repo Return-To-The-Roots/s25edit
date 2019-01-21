@@ -8,7 +8,6 @@ class CSurface
     friend class CDebug;
 
 public:
-    CSurface();
     // blits from source on destination to position X,Y
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y);
     // blits from source on destination to position X,Y and rotates (angle --> degrees --> 90, 180, 270)

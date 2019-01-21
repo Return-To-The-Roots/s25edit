@@ -88,6 +88,7 @@ public:
     void loadMapPics();
     void unloadMapPics();
 
+    void moveMap(Position offset);
     void setMouseData(const SDL_MouseMotionEvent& motion);
     void setMouseData(const SDL_MouseButtonEvent& button);
     void setKeyboardData(const SDL_KeyboardEvent& key);

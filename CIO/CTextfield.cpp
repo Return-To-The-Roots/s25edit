@@ -266,8 +266,8 @@ bool CTextfield::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Text);
-        Surf_Text = nullptr;
-        if((Surf_Text = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
+        Surf_Text = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
+        if(!Surf_Text)
             return false;
         needSurface = false;
     }

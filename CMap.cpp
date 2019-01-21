@@ -66,15 +66,14 @@ void CMap::constructMap(const std::string& filename, int width, int height, int 
     map = nullptr;
     Surf_Map = nullptr;
     Surf_RightMenubar = nullptr;
-    displayRect.x = 0;
-    displayRect.y = 0;
-    displayRect.w = global::s2->GameResolutionX;
-    displayRect.h = global::s2->GameResolutionY;
+    displayRect.left = 0;
+    displayRect.top = 0;
+    displayRect.setSize(global::s2->GameResolution);
 
     if(!filename.empty())
         map = (bobMAP*)CFile::open_file(filename, WLD);
 
-    if(map == nullptr)
+    if(!map)
         map = generateMap(width, height, type, texture, border, border_texture);
 
     // load the right MAP0x.LST for all pictures
@@ -201,7 +200,7 @@ void CMap::destructMap()
     // free all surfaces that MAP0x.LST needed
     unloadMapPics();
     // free concatenated list for "undo" and "do"
-    if(CurrPtr_savedVertices != nullptr)
+    if(CurrPtr_savedVertices)
     {
         // go to the end
         while(CurrPtr_savedVertices->next != nullptr)
@@ -290,7 +289,7 @@ void CMap::rotateMap()
     std::vector<MapNode> new_vertex(map->vertex.size());
 
     // free concatenated list for "undo" and "do"
-    if(CurrPtr_savedVertices != nullptr)
+    if(CurrPtr_savedVertices)
     {
         // go to the end
         while(CurrPtr_savedVertices->next != nullptr)
@@ -375,8 +374,8 @@ void CMap::rotateMap()
     MouseBlitX = correctMouseBlitX(VertexX_, VertexY_);
     MouseBlitY = correctMouseBlitY(VertexX_, VertexY_);
     calculateVertices();
-    displayRect.x = 0;
-    displayRect.y = 0;
+    displayRect.left = 0;
+    displayRect.top = 0;
 }
 
 void CMap::MirrorMapOnXAxis()
@@ -510,41 +509,38 @@ void CMap::unloadMapPics()
     CFile::set_palArray(&global::palArray[PAL_IO + 1]);
 }
 
+void CMap::moveMap(Position offset)
+{
+    displayRect.setOrigin(displayRect.getOrigin() + offset);
+    // reset coords of displayRects when end of map is reached
+    if(displayRect.left >= map->width_pixel)
+        displayRect.move(Position(-map->width_pixel, 0));
+    else if(displayRect.left <= -static_cast<int>(displayRect.getSize().x))
+        displayRect.setOrigin(Position(map->width_pixel - displayRect.getSize().x, displayRect.top));
+
+    if(displayRect.top >= map->height_pixel)
+        displayRect.move(Position(0, -map->height_pixel));
+    else if(displayRect.top <= -static_cast<int>(displayRect.getSize().y))
+        displayRect.setOrigin(Position(displayRect.left, map->height_pixel - displayRect.getSize().y));
+}
+
 void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // following code important for blitting the right field of the map
-    static bool warping = false;
-    // SDL_Event TempEvent;
     // is right mouse button pressed?
     if(motion.state & SDL_BUTTON(3))
     {
+        Position offset{};
+        if(!HorizontalMovementLocked)
+            offset.x = motion.xrel;
+        if(!VerticalMovementLocked)
+            offset.y = motion.yrel;
+        moveMap(offset);
+
         // this whole "warping-thing" is to prevent cursor-moving WITHIN the window while user moves over the map
-        if(warping == false)
-        {
-            if(!HorizontalMovementLocked)
-                displayRect.x += motion.xrel;
-            if(!VerticalMovementLocked)
-                displayRect.y += motion.yrel;
-
-            // warping = true;
-            SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-            SDL_WarpMouse(motion.x - motion.xrel, motion.y - motion.yrel);
-            SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
-            // SDL_PumpEvents();
-            // SDL_PeepEvents(&TempEvent, 1, SDL_GETEVENT, SDL_EVENTMASK(SDL_MOUSEMOTION));
-        } else
-            warping = false;
-
-        // reset coords of displayRects when end of map is reached
-        if(displayRect.x >= map->width * TRIANGLE_WIDTH)
-            displayRect.x = 0;
-        else if(displayRect.x <= -displayRect.w)
-            displayRect.x = map->width * TRIANGLE_WIDTH - displayRect.w;
-
-        if(displayRect.y >= map->height * TRIANGLE_HEIGHT)
-            displayRect.y = 0;
-        else if(displayRect.y <= -displayRect.h)
-            displayRect.y = map->height * TRIANGLE_HEIGHT - displayRect.h;
+        SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+        SDL_WarpMouse(motion.x - motion.xrel, motion.y - motion.yrel);
+        SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
     }
 
     saveVertex(motion.x, motion.y, motion.state);
@@ -557,49 +553,56 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
 #ifdef _EDITORMODE
         // find out if user clicked on one of the game menu pictures
         // we start with lower menubar
-        if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 236) && button.x <= (displayRect.w / 2 - 199)
-           && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 236)
+           && button.x <= (displayRect.getSize().x / 2 - 199) && button.y >= (displayRect.getSize().y - 35)
+           && button.y <= (displayRect.getSize().y - 3))
         {
             // the height-mode picture was clicked
             mode = EDITOR_MODE_HEIGHT_RAISE;
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 199) && button.x <= (displayRect.w / 2 - 162)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 199)
+                  && button.x <= (displayRect.getSize().x / 2 - 162) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the texture-mode picture was clicked
             mode = EDITOR_MODE_TEXTURE;
             callback::EditorTextureMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 162) && button.x <= (displayRect.w / 2 - 125)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 162)
+                  && button.x <= (displayRect.getSize().x / 2 - 125) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the tree-mode picture was clicked
             mode = EDITOR_MODE_TREE;
             callback::EditorTreeMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 125) && button.x <= (displayRect.w / 2 - 88)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 125)
+                  && button.x <= (displayRect.getSize().x / 2 - 88) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the resource-mode picture was clicked
             mode = EDITOR_MODE_RESOURCE_RAISE;
             callback::EditorResourceMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 88) && button.x <= (displayRect.w / 2 - 51)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 88)
+                  && button.x <= (displayRect.getSize().x / 2 - 51) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the landscape-mode picture was clicked
             mode = EDITOR_MODE_LANDSCAPE;
             callback::EditorLandscapeMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 51) && button.x <= (displayRect.w / 2 - 14)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 51)
+                  && button.x <= (displayRect.getSize().x / 2 - 14) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the animal-mode picture was clicked
             mode = EDITOR_MODE_ANIMAL;
             callback::EditorAnimalMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 14) && button.x <= (displayRect.w / 2 + 23)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 14)
+                  && button.x <= (displayRect.getSize().x / 2 + 23) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the player-mode picture was clicked
             mode = EDITOR_MODE_FLAG;
@@ -607,34 +610,38 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
             setupVerticesActivity();
             callback::EditorPlayerMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 + 96) && button.x <= (displayRect.w / 2 + 133)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 96)
+                  && button.x <= (displayRect.getSize().x / 2 + 133) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the build-help picture was clicked
             RenderBuildHelp = !RenderBuildHelp;
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 + 131) && button.x <= (displayRect.w / 2 + 168)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 131)
+                  && button.x <= (displayRect.getSize().x / 2 + 168) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the minimap picture was clicked
             callback::MinimapMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 + 166) && button.x <= (displayRect.w / 2 + 203)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 166)
+                  && button.x <= (displayRect.getSize().x / 2 + 203) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the create-world picture was clicked
             callback::EditorCreateMenu(INITIALIZING_CALL);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 + 203) && button.x <= (displayRect.w / 2 + 240)
-                  && button.y >= (displayRect.h - 35) && button.y <= (displayRect.h - 3))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 203)
+                  && button.x <= (displayRect.getSize().x / 2 + 240) && button.y >= (displayRect.getSize().y - 35)
+                  && button.y <= (displayRect.getSize().y - 3))
         {
             // the editor-main-menu picture was clicked
             callback::EditorMainMenu(INITIALIZING_CALL);
             return;
         }
         // now we check the right menubar
-        else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w - 37) && button.x <= (displayRect.w)
-                && button.y >= (displayRect.h / 2 + 162) && button.y <= (displayRect.h / 2 + 199))
+        else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x - 37) && button.x <= (displayRect.getSize().x)
+                && button.y >= (displayRect.getSize().y / 2 + 162) && button.y <= (displayRect.getSize().y / 2 + 199))
         {
             // the bugkill picture was clicked for quickload
             callback::PleaseWait(INITIALIZING_CALL);
@@ -652,8 +659,8 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
             constructMap(global::userMapsPath + "/quicksave.swd");
             callback::PleaseWait(WINDOW_QUIT_MESSAGE);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w - 37) && button.x <= (displayRect.w)
-                  && button.y >= (displayRect.h / 2 + 200) && button.y <= (displayRect.h / 2 + 237))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x - 37) && button.x <= (displayRect.getSize().x)
+                  && button.y >= (displayRect.getSize().y / 2 + 200) && button.y <= (displayRect.getSize().y / 2 + 237))
         {
             // the bugkill picture was clicked for quicksave
             callback::PleaseWait(INITIALIZING_CALL);
@@ -664,8 +671,8 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
             }
             callback::PleaseWait(WINDOW_QUIT_MESSAGE);
             return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w - 37) && button.x <= (displayRect.w)
-                  && button.y >= (displayRect.h / 2 - 239) && button.y <= (displayRect.h / 2 - 202))
+        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x - 37) && button.x <= (displayRect.getSize().x)
+                  && button.y >= (displayRect.getSize().y / 2 - 239) && button.y <= (displayRect.getSize().y / 2 - 202))
         {
             // the cursor picture was clicked
             callback::EditorCursorMenu(INITIALIZING_CALL);
@@ -683,8 +690,9 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
         }
 #else
         // find out if user clicked on one of the game menu pictures
-        if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.w / 2 - 74) && button.x <= (displayRect.w / 2 - 37)
-           && button.y >= (displayRect.h - 37) && button.y <= (displayRect.h - 4))
+        if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 74)
+           && button.x <= (displayRect.getSize().x / 2 - 37) && button.y >= (displayRect.getSize().y - 37)
+           && button.y <= (displayRect.getSize().y - 4))
         {
             // the first picture was clicked
             callback::GameMenu(INITIALIZING_CALL);
@@ -870,7 +878,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
         {
             if (!saveCurrentVertices)
             {
-                if (CurrPtr_savedVertices != nullptr)
+                if (CurrPtr_savedVertices)
                 {
                     if (CurrPtr_savedVertices->next != nullptr)
                         CurrPtr_savedVertices = CurrPtr_savedVertices->next;
@@ -899,20 +907,9 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
         }*/
         else if(key.keysym.sym == SDLK_UP || key.keysym.sym == SDLK_DOWN || key.keysym.sym == SDLK_LEFT || key.keysym.sym == SDLK_RIGHT)
         {
-            // move displayRect
-            displayRect.x += (key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0));
-            displayRect.y += (key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0));
-
-            // reset coords of displayRects when end of map is reached
-            if(displayRect.x >= map->width_pixel)
-                displayRect.x = 0;
-            else if(displayRect.x <= -displayRect.w)
-                displayRect.x = map->width_pixel - displayRect.w;
-
-            if(displayRect.y >= map->height_pixel)
-                displayRect.y = 0;
-            else if(displayRect.y <= -displayRect.h)
-                displayRect.y = map->height_pixel - displayRect.h;
+            Position offset{key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0),
+                            key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0)};
+            moveMap(offset);
         }
 #ifdef _EDITORMODE
         // help menu
@@ -1046,26 +1043,26 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseState*/)
 
     // get X
     // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor) we subtract
-    // "TRIANGLE_WIDTH/2"  Xeven = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
-    Xeven = (MouseX + displayRect.x - TRIANGLE_WIDTH / 2) / TRIANGLE_WIDTH;
+    // "TRIANGLE_WIDTH/2"  Xeven = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
+    Xeven = (MouseX + displayRect.left - TRIANGLE_WIDTH / 2) / TRIANGLE_WIDTH;
     if(Xeven < 0)
         Xeven += (map->width);
     else if(Xeven > map->width - 1)
         Xeven -= (map->width - 1);
     // Add rows are already shifted by TRIANGLE_WIDTH / 2
-    Xodd = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
-    // Xodd = (MouseX + displayRect.x) / TRIANGLE_WIDTH;
+    Xodd = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
+    // Xodd = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
     if(Xodd < 0)
         Xodd += (map->width - 1);
     else if(Xodd > map->width - 1)
         Xodd -= (map->width);
 
-    MousePosY = MouseY + displayRect.y;
+    MousePosY = MouseY + displayRect.top;
     // correct mouse position Y if displayRect is outside map edges
     if(MousePosY < 0)
         MousePosY += map->height_pixel;
     else if(MousePosY > map->height_pixel)
-        MousePosY = MouseY - (map->height_pixel - displayRect.y);
+        MousePosY = MouseY - (map->height_pixel - displayRect.top);
 
     // get Y
     for(int j = 0; j < map->height; j++)
@@ -1109,22 +1106,22 @@ void CMap::saveVertex(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseState*/)
 int CMap::correctMouseBlitX(int VertexX, int VertexY)
 {
     int newBlitx = map->getVertex(VertexX, VertexY).x;
-    if(newBlitx < displayRect.x)
+    if(newBlitx < displayRect.left)
         newBlitx += map->width_pixel;
-    else if(newBlitx > (displayRect.x + displayRect.w))
+    else if(newBlitx > displayRect.right)
         newBlitx -= map->width_pixel;
-    newBlitx -= displayRect.x;
+    newBlitx -= displayRect.left;
 
     return newBlitx;
 }
 int CMap::correctMouseBlitY(int VertexX, int VertexY)
 {
     int newBlity = map->getVertex(VertexX, VertexY).y;
-    if(newBlity < displayRect.y)
+    if(newBlity < displayRect.top)
         newBlity += map->height_pixel;
-    else if(newBlity > (displayRect.y + displayRect.h))
+    else if(newBlity > displayRect.bottom)
         newBlity -= map->height_pixel;
-    newBlity -= displayRect.y;
+    newBlity -= displayRect.top;
 
     return newBlity;
 }
@@ -1134,10 +1131,9 @@ void CMap::render()
     char textBuffer[100];
 
     // check if gameresolution has been changed
-    if(displayRect.w != global::s2->GameResolutionX || displayRect.h != global::s2->GameResolutionY)
+    if(displayRect.getSize() != global::s2->GameResolution)
     {
-        displayRect.w = global::s2->GameResolutionX;
-        displayRect.h = global::s2->GameResolutionY;
+        displayRect.setSize(global::s2->GameResolution);
         needSurface = true;
     }
 
@@ -1146,7 +1142,8 @@ void CMap::render()
     {
         SDL_FreeSurface(Surf_Map);
         Surf_Map = nullptr;
-        if((Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.w, displayRect.h, BitsPerPixel, 0, 0, 0, 0)) == nullptr)
+        if((Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.getSize().x, displayRect.getSize().y, BitsPerPixel, 0, 0, 0, 0))
+           == nullptr)
             return;
         if(BitsPerPixel == 8)
             SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors, 0, 256);
@@ -1223,79 +1220,93 @@ void CMap::render()
 #endif
 
     // draw the frame
-    if(displayRect.w == 640 && displayRect.h == 480)
+    if(displayRect.getSize() == Extent(640, 480))
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0);
-    else if(displayRect.w == 800 && displayRect.h == 600)
+    else if(displayRect.getSize() == Extent(800, 600))
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_800_600].surface, 0, 0);
-    else if(displayRect.w == 1024 && displayRect.h == 768)
+    else if(displayRect.getSize() == Extent(1024, 768))
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_1024_768].surface, 0, 0);
-    else if(displayRect.w == 1280 && displayRect.h == 1024)
+    else if(displayRect.getSize() == Extent(1280, 1024))
     {
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_LEFT_1280_1024].surface, 0, 0);
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_RIGHT_1280_1024].surface, 640, 0);
     } else
     {
-        int x = 150, y = 150;
         // draw the corners
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0, 0, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.h - 150, 0, 480 - 150, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.w - 150, 0, 640 - 150, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.w - 150, displayRect.h - 150, 640 - 150,
-                       480 - 150, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.getSize().y - 150, 0, 480 - 150, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, 0, 640 - 150, 0, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, displayRect.getSize().y - 150,
+                       640 - 150, 480 - 150, 150, 150);
         // draw the edges
-        while(x < displayRect.w - 150)
+        unsigned x = 150, y = 150;
+        while(x + 150 < displayRect.getSize().x)
         {
             CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, 0, 150, 0, 150, 12);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.h - 12, 150, 0, 150, 12);
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.getSize().y - 12, 150, 0, 150, 12);
             x += 150;
         }
-        while(y < displayRect.h - 150)
+        while(y + 150 < displayRect.getSize().y)
         {
             CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, y, 0, 150, 12, 150);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.w - 12, y, 0, 150, 12, 150);
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 12, y, 0, 150, 12, 150);
             y += 150;
         }
     }
 
     // draw the statues at the frame
     CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_LEFT].surface, 12, 12);
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_RIGHT].surface, displayRect.w - global::bmpArray[STATUE_UP_RIGHT].w - 12, 12);
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_LEFT].surface, 12, displayRect.h - global::bmpArray[STATUE_DOWN_LEFT].h - 12);
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_RIGHT].surface, displayRect.w - global::bmpArray[STATUE_DOWN_RIGHT].w - 12,
-                   displayRect.h - global::bmpArray[STATUE_DOWN_RIGHT].h - 12);
+    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_RIGHT].surface, displayRect.getSize().x - global::bmpArray[STATUE_UP_RIGHT].w - 12,
+                   12);
+    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_LEFT].surface, 12,
+                   displayRect.getSize().y - global::bmpArray[STATUE_DOWN_LEFT].h - 12);
+    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_RIGHT].surface,
+                   displayRect.getSize().x - global::bmpArray[STATUE_DOWN_RIGHT].w - 12,
+                   displayRect.getSize().y - global::bmpArray[STATUE_DOWN_RIGHT].h - 12);
 
     // lower menubar
     // draw lower menubar
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR].surface, displayRect.w / 2 - global::bmpArray[MENUBAR].w / 2,
-                   displayRect.h - global::bmpArray[MENUBAR].h);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR].surface, displayRect.getSize().x / 2 - global::bmpArray[MENUBAR].w / 2,
+                   displayRect.getSize().y - global::bmpArray[MENUBAR].h);
 
     // draw pictures to lower menubar
 #ifdef _EDITORMODE
     // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 236, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 199, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 162, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 125, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 88, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 51, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 - 14, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 + 92, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 + 129, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 + 166, displayRect.h - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w / 2 + 203, displayRect.h - 36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 236, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 199, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 162, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 125, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 88, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 51, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 14, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 + 92, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 + 129, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 + 166, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 + 203, displayRect.getSize().y - 36,
+                   0, 0, 37, 32);
     // pictures
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, displayRect.w / 2 - 232, displayRect.h - 35);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, displayRect.w / 2 - 195, displayRect.h - 35);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TREE].surface, displayRect.w / 2 - 158, displayRect.h - 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_RESOURCE].surface, displayRect.w / 2 - 121, displayRect.h - 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_LANDSCAPE].surface, displayRect.w / 2 - 84, displayRect.h - 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_ANIMAL].surface, displayRect.w / 2 - 48, displayRect.h - 36);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_PLAYER].surface, displayRect.w / 2 - 10, displayRect.h - 34);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, displayRect.getSize().x / 2 - 232, displayRect.getSize().y - 35);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, displayRect.getSize().x / 2 - 195, displayRect.getSize().y - 35);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TREE].surface, displayRect.getSize().x / 2 - 158, displayRect.getSize().y - 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_RESOURCE].surface, displayRect.getSize().x / 2 - 121, displayRect.getSize().y - 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_LANDSCAPE].surface, displayRect.getSize().x / 2 - 84, displayRect.getSize().y - 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_ANIMAL].surface, displayRect.getSize().x / 2 - 48, displayRect.getSize().y - 36);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_PLAYER].surface, displayRect.getSize().x / 2 - 10, displayRect.getSize().y - 34);
 
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.w / 2 + 96, displayRect.h - 35);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, displayRect.w / 2 + 131, displayRect.h - 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_NEWWORLD].surface, displayRect.w / 2 + 166, displayRect.h - 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.w / 2 + 207, displayRect.h - 35);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, displayRect.getSize().x / 2 + 96, displayRect.getSize().y - 35);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, displayRect.getSize().x / 2 + 131, displayRect.getSize().y - 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_NEWWORLD].surface, displayRect.getSize().x / 2 + 166, displayRect.getSize().y - 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.getSize().x / 2 + 207, displayRect.getSize().y - 35);
 #else
 
 #endif
@@ -1303,7 +1314,7 @@ void CMap::render()
 #ifdef _EDITORMODE
     // right menubar
     // do we need a surface?
-    if(Surf_RightMenubar == nullptr)
+    if(!Surf_RightMenubar)
     {
         // we permute width and height, cause we want to rotate the menubar 90 degrees
         if((Surf_RightMenubar =
@@ -1316,36 +1327,51 @@ void CMap::render()
         }
     }
     // draw right menubar (remember permutation of width and height)
-    CSurface::Draw(Surf_Map, Surf_RightMenubar, displayRect.w - global::bmpArray[MENUBAR].h,
-                   displayRect.h / 2 - global::bmpArray[MENUBAR].w / 2);
+    CSurface::Draw(Surf_Map, Surf_RightMenubar, displayRect.getSize().x - global::bmpArray[MENUBAR].h,
+                   displayRect.getSize().y / 2 - global::bmpArray[MENUBAR].w / 2);
 
     // draw pictures to right menubar
     // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 - 239, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 - 202, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 - 165, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 - 128, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 - 22, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 + 15, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 + 52, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 + 89, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 + 126, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 + 163, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.w - 36, displayRect.h / 2 + 200, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 - 239,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 - 202,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 - 165,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 - 128,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 - 22,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 + 15,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 + 52,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 + 89,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 + 126,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 + 163,
+                   0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x - 36, displayRect.getSize().y / 2 + 200,
+                   0, 0, 32, 37);
     // pictures
     // four cursor menu pictures
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.w - 33, displayRect.h / 2 - 237);
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.w - 20, displayRect.h / 2 - 235);
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.w - 33, displayRect.h / 2 - 220);
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.w - 20, displayRect.h / 2 - 220);
+    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.getSize().x - 33,
+                   displayRect.getSize().y / 2 - 237);
+    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.getSize().x - 20,
+                   displayRect.getSize().y / 2 - 235);
+    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, displayRect.getSize().x - 33,
+                   displayRect.getSize().y / 2 - 220);
+    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, displayRect.getSize().x - 20,
+                   displayRect.getSize().y / 2 - 220);
     // bugkill picture for quickload with text
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w - 37, displayRect.h / 2 + 162);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.getSize().x - 37, displayRect.getSize().y / 2 + 162);
     sprintf(textBuffer, "Load");
-    CFont::writeText(Surf_Map, textBuffer, displayRect.w - 35, displayRect.h / 2 + 193);
+    CFont::writeText(Surf_Map, textBuffer, displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 193);
     // bugkill picture for quicksave with text
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.w - 37, displayRect.h / 2 + 200);
+    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.getSize().x - 37, displayRect.getSize().y / 2 + 200);
     sprintf(textBuffer, "Save");
-    CFont::writeText(Surf_Map, textBuffer, displayRect.w - 35, displayRect.h / 2 + 231);
+    CFont::writeText(Surf_Map, textBuffer, displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 231);
 
 #endif
 }
@@ -1504,9 +1530,10 @@ void CMap::drawMinimap(SDL_Surface* Window)
 #endif
 
     // draw the arrow --> 6px is width of left window frame and 20px is the height of the upper window frame
-    CSurface::Draw(Window, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].surface,
-                   6 + (displayRect.x + displayRect.w / 2) / TRIANGLE_WIDTH / num_x - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
-                   20 + (displayRect.y + displayRect.h / 2) / TRIANGLE_HEIGHT / num_y - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
+    CSurface::Draw(
+      Window, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].surface,
+      6 + (displayRect.left + displayRect.getSize().x / 2) / TRIANGLE_WIDTH / num_x - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
+      20 + (displayRect.top + displayRect.getSize().y / 2) / TRIANGLE_HEIGHT / num_y - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
 }
 
 void CMap::modifyVertex()
@@ -1521,7 +1548,7 @@ void CMap::modifyVertex()
     // save vertices for "undo" and "do"
     if(saveCurrentVertices)
     {
-        if(CurrPtr_savedVertices != nullptr)
+        if(CurrPtr_savedVertices)
         {
             CurrPtr_savedVertices->empty = false;
             CurrPtr_savedVertices->VertexX = VertexX_;
@@ -2256,8 +2283,8 @@ void CMap::modifyBuild(int x, int y)
     }
 
     std::array<const MapNode*, 7> mapVertices;
-    for(unsigned i = 0; i < mapVertices.size(); i++)
-        mapVertices[i] = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
+    for(auto& mapVertice : mapVertices)
+        mapVertice = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
 
     // test if there is snow or lava at the vertex or around the vertex and touching the vertex (first section)
     if(building > 0x00)
@@ -2406,8 +2433,8 @@ void CMap::modifyResource(int x, int y)
     calculateVerticesAround(tempVertices, x, y);
     MapNode& curVertex = map->getVertex(x, y);
     std::array<const MapNode*, 7> mapVertices;
-    for(unsigned i = 0; i < mapVertices.size(); i++)
-        mapVertices[i] = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
+    for(auto& mapVertice : mapVertices)
+        mapVertice = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
 
     // SPECIAL CASE: test if we should set water only
     // test if vertex is surrounded by meadow and meadow-like textures

@@ -34,47 +34,10 @@ void CGame::SetAppIcon()
 
 void CGame::Render()
 {
-    // clear the surface before drawing new (in normal case not needed)
-    // SDL_FillRect( Surf_Display, nullptr, SDL_MapRGB(Surf_Display->format,0,0,0) );
-
-    // check resolution
-    /*
-    if (MapObj == nullptr || !MapObj->isActive())
+    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0))
     {
-        //we are in menu
-        if ( (Surf_Display->w != MenuResolutionX || Surf_Display->h != MenuResolutionY) ||
-            ( (fullscreen && !(Surf_Display->flags&SDL_FULLSCREEN)) || (!fullscreen && (Surf_Display->flags&SDL_FULLSCREEN)) )
-           )
-        {
-            SDL_FreeSurface(Surf_Display);
-            Surf_Display = SDL_SetVideoMode(MenuResolutionX, MenuResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ?
-    SDL_FULLSCREEN : 0));
-        }
+        ReCreateWindow();
     }
-    else
-    {
-    */
-    // we are in game
-    if((Surf_Display->w != GameResolutionX || Surf_Display->h != GameResolutionY)
-       || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0))
-    {
-        SDL_FreeSurface(Surf_Display);
-        Surf_Display = nullptr;
-
-        if(CSurface::useOpenGL)
-        {
-            SDL_FreeSurface(Surf_DisplayGL);
-
-            Surf_DisplayGL = SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
-            Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolutionX, GameResolutionY, 32, 0, 0, 0, 0);
-        } else
-        {
-            Surf_Display =
-              SDL_SetVideoMode(GameResolutionX, GameResolutionY, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
-        }
-        SetAppIcon();
-    }
-    //}
 
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
@@ -86,41 +49,38 @@ void CGame::Render()
                          surfLoadScreen->h - 1);
 
         if(CSurface::useOpenGL)
-        {
-            // SDL_BlitSurface(Surf_Display, nullptr, Surf_DisplayGL, nullptr);
-            // SDL_Flip(Surf_DisplayGL);
             SDL_GL_SwapBuffers();
-        } else
+        else
             SDL_Flip(Surf_Display);
         return;
     }
 
     // render the map if active
-    if(MapObj != nullptr && MapObj->isActive())
+    if(MapObj && MapObj->isActive())
         CSurface::Draw(Surf_Display, MapObj->getSurface(), 0, 0);
 
     // render active menus
-    for(int i = 0; i < MAXMENUS; i++)
+    for(auto& Menu : Menus)
     {
-        if(Menus[i] != nullptr && Menus[i]->isActive())
-            CSurface::Draw(Surf_Display, Menus[i]->getSurface(), 0, 0);
+        if(Menu && Menu->isActive())
+            CSurface::Draw(Surf_Display, Menu->getSurface(), 0, 0);
     }
 
     // render windows ordered by priority
     int highestPriority = 0;
     // first find the highest priority
-    for(int i = 0; i < MAXWINDOWS; i++)
+    for(auto& Window : Windows)
     {
-        if(Windows[i] != nullptr && Windows[i]->getPriority() > highestPriority)
-            highestPriority = Windows[i]->getPriority();
+        if(Window && Window->getPriority() > highestPriority)
+            highestPriority = Window->getPriority();
     }
     // render from lowest priority to highest
     for(int actualPriority = 0; actualPriority <= highestPriority; actualPriority++)
     {
-        for(int i = 0; i < MAXWINDOWS; i++)
+        for(auto& Window : Windows)
         {
-            if(Windows[i] != nullptr && Windows[i]->getPriority() == actualPriority)
-                CSurface::Draw(Surf_Display, Windows[i]->getSurface(), Windows[i]->getX(), Windows[i]->getY());
+            if(Window && Window->getPriority() == actualPriority)
+                CSurface::Draw(Surf_Display, Window->getSurface(), Window->getX(), Window->getY());
         }
     }
 

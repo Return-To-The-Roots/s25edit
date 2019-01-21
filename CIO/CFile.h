@@ -24,8 +24,6 @@ public:
 
 private:
     // Methods
-    CFile();
-    ~CFile();
     static bool open_lst();
     static bool open_bob(); // not implemented yet
     static bool open_idx(const std::string& filename);

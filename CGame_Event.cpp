@@ -18,18 +18,18 @@ void CGame::EventHandling(SDL_Event* Event)
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
             // we have to change the prioritys of the windows (for rendering), so find the highest one
             int highestPriority = 0;
-            for(int j = 0; j < MAXWINDOWS; j++)
+            for(auto& Window : Windows)
             {
-                if(Windows[j] != nullptr && Windows[j]->getPriority() > highestPriority)
-                    highestPriority = Windows[j]->getPriority();
+                if(Window && Window->getPriority() > highestPriority)
+                    highestPriority = Window->getPriority();
             }
 
-            for(int i = 0; i < MAXWINDOWS; i++)
+            for(auto& Window : Windows)
             {
-                if(Windows[i] != nullptr && !Windows[i]->isWaste() && Windows[i]->isMarked() && Windows[i]->getPriority() == highestPriority
-                   && Windows[i]->hasActiveInputElement())
+                if(Window && !Window->isWaste() && Window->isMarked() && Window->getPriority() == highestPriority
+                   && Window->hasActiveInputElement())
                 {
-                    Windows[i]->setKeyboardData(Event->key);
+                    Window->setKeyboardData(Event->key);
                     delivered = true;
                     break;
                 }
@@ -40,7 +40,7 @@ void CGame::EventHandling(SDL_Event* Event)
             // deliver keyboard data to map if active
             if(!delivered)
             {
-                if(MapObj != nullptr && MapObj->isActive())
+                if(MapObj && MapObj->isActive())
                 {
                     MapObj->setKeyboardData(Event->key);
                     // data has been delivered to map, so no menu is in the foreground --> stop delivering
@@ -48,10 +48,10 @@ void CGame::EventHandling(SDL_Event* Event)
                 }
 
                 // deliver keyboard data to active menus
-                for(int i = 0; i < MAXMENUS; i++)
+                for(auto& Menu : Menus)
                 {
-                    if(Menus[i] != nullptr && Menus[i]->isActive() && !Menus[i]->isWaste())
-                        Menus[i]->setKeyboardData(Event->key);
+                    if(Menu && Menu->isActive() && !Menu->isWaste())
+                        Menu->setKeyboardData(Event->key);
                 }
             }
 
@@ -126,7 +126,7 @@ void CGame::EventHandling(SDL_Event* Event)
         case SDL_KEYUP:
         {
             // deliver keyboard data to map
-            if(MapObj != nullptr)
+            if(MapObj)
                 MapObj->setKeyboardData(Event->key);
 
             break;
@@ -135,7 +135,7 @@ void CGame::EventHandling(SDL_Event* Event)
         case SDL_MOUSEMOTION:
         {
             // setup mouse cursor data
-            if(MapObj != nullptr && MapObj->isActive())
+            if(MapObj && MapObj->isActive())
             {
                 if((Event->motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) == 0)
                 {
@@ -171,26 +171,26 @@ void CGame::EventHandling(SDL_Event* Event)
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
             // we have to change the prioritys of the windows (for rendering), so find the highest one
             int highestPriority = 0;
-            for(int j = 0; j < MAXWINDOWS; j++)
+            for(auto& Window : Windows)
             {
-                if(Windows[j] != nullptr && Windows[j]->getPriority() > highestPriority)
-                    highestPriority = Windows[j]->getPriority();
+                if(Window && Window->getPriority() > highestPriority)
+                    highestPriority = Window->getPriority();
             }
 
             for(int actualPriority = highestPriority; actualPriority >= 0; actualPriority--)
             {
-                for(int i = 0; i < MAXWINDOWS; i++)
+                for(auto& Window : Windows)
                 {
-                    if(Windows[i] != nullptr && !Windows[i]->isWaste() && Windows[i]->getPriority() == actualPriority)
+                    if(Window && !Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window or does the user move or resize the window?
-                        if(((Event->motion.x >= Windows[i]->getX()) && (Event->motion.x < Windows[i]->getX() + Windows[i]->getW())
-                            && (Event->motion.y >= Windows[i]->getY()) && (Event->motion.y < Windows[i]->getY() + Windows[i]->getH()))
-                           || Windows[i]->isMoving() || Windows[i]->isResizing())
+                        if(((Event->motion.x >= Window->getX()) && (Event->motion.x < Window->getX() + Window->getW())
+                            && (Event->motion.y >= Window->getY()) && (Event->motion.y < Window->getY() + Window->getH()))
+                           || Window->isMoving() || Window->isResizing())
                         {
                             // Windows[i]->setActive();
                             // Windows[i]->setPriority(highestPriority+1);
-                            Windows[i]->setMouseData(Event->motion);
+                            Window->setMouseData(Event->motion);
                             delivered = true;
                             break;
                         }
@@ -204,7 +204,7 @@ void CGame::EventHandling(SDL_Event* Event)
                 break;
 
             // deliver mouse motion data to map if active
-            if(MapObj != nullptr && MapObj->isActive())
+            if(MapObj && MapObj->isActive())
             {
                 MapObj->setMouseData(Event->motion);
                 // data has been delivered to map, so no menu is in the foreground --> stop delivering
@@ -212,11 +212,11 @@ void CGame::EventHandling(SDL_Event* Event)
             }
 
             // deliver mouse motion data to active menus
-            for(int i = 0; i < MAXMENUS; i++)
+            for(auto& Menu : Menus)
             {
-                if(Menus[i] != nullptr && Menus[i]->isActive() && !Menus[i]->isWaste())
+                if(Menu && Menu->isActive() && !Menu->isWaste())
                 {
-                    Menus[i]->setMouseData(Event->motion);
+                    Menu->setMouseData(Event->motion);
                     break;
                 }
             }
@@ -249,29 +249,29 @@ void CGame::EventHandling(SDL_Event* Event)
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
             // we have to change the prioritys of the windows (for rendering), so find the highest one
             int highestPriority = 0;
-            for(int j = 0; j < MAXWINDOWS; j++)
+            for(auto& Window : Windows)
             {
-                if(Windows[j] != nullptr && Windows[j]->getPriority() > highestPriority)
-                    highestPriority = Windows[j]->getPriority();
+                if(Window && Window->getPriority() > highestPriority)
+                    highestPriority = Window->getPriority();
             }
 
             for(int actualPriority = highestPriority; actualPriority >= 0; actualPriority--)
             {
-                for(int i = 0; i < MAXWINDOWS; i++)
+                for(auto& Window : Windows)
                 {
-                    if(Windows[i] != nullptr && !Windows[i]->isWaste() && Windows[i]->getPriority() == actualPriority)
+                    if(Window && !Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window?
-                        if((Event->button.x >= Windows[i]->getX()) && (Event->button.x < Windows[i]->getX() + Windows[i]->getW())
-                           && (Event->button.y >= Windows[i]->getY()) && (Event->button.y < Windows[i]->getY() + Windows[i]->getH()))
+                        if((Event->button.x >= Window->getX()) && (Event->button.x < Window->getX() + Window->getW())
+                           && (Event->button.y >= Window->getY()) && (Event->button.y < Window->getY() + Window->getH()))
                         {
-                            Windows[i]->setActive();
-                            Windows[i]->setPriority(highestPriority + 1);
-                            Windows[i]->setMouseData(Event->button);
+                            Window->setActive();
+                            Window->setPriority(highestPriority + 1);
+                            Window->setMouseData(Event->button);
                             delivered = true;
                             break;
-                        } else if(Windows[i]->isActive())
-                            Windows[i]->setInactive();
+                        } else if(Window->isActive())
+                            Window->setInactive();
                     }
                 }
                 if(delivered)
@@ -282,7 +282,7 @@ void CGame::EventHandling(SDL_Event* Event)
                 break;
 
             // deliver mouse button data to map if active
-            if(MapObj != nullptr && MapObj->isActive())
+            if(MapObj && MapObj->isActive())
             {
                 MapObj->setMouseData(Event->button);
                 // data has been delivered to map, so no menu is in the foreground --> stop delivering
@@ -290,10 +290,10 @@ void CGame::EventHandling(SDL_Event* Event)
             }
 
             // deliver mouse button data to active menus
-            for(int i = 0; i < MAXMENUS; i++)
+            for(auto& Menu : Menus)
             {
-                if(Menus[i] != nullptr && Menus[i]->isActive() && !Menus[i]->isWaste())
-                    Menus[i]->setMouseData(Event->button);
+                if(Menu && Menu->isActive() && !Menu->isWaste())
+                    Menu->setMouseData(Event->button);
             }
 
             break;
@@ -310,25 +310,25 @@ void CGame::EventHandling(SDL_Event* Event)
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
             // we have to change the prioritys of the windows (for rendering), so find the highest one
             int highestPriority = 0;
-            for(int j = 0; j < MAXWINDOWS; j++)
+            for(auto& Window : Windows)
             {
-                if(Windows[j] != nullptr && Windows[j]->getPriority() > highestPriority)
-                    highestPriority = Windows[j]->getPriority();
+                if(Window && Window->getPriority() > highestPriority)
+                    highestPriority = Window->getPriority();
             }
 
             for(int actualPriority = highestPriority; actualPriority >= 0; actualPriority--)
             {
-                for(int i = 0; i < MAXWINDOWS; i++)
+                for(auto& Window : Windows)
                 {
-                    if(Windows[i] != nullptr && !Windows[i]->isWaste() && Windows[i]->getPriority() == actualPriority)
+                    if(Window && !Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window?
-                        if((Event->button.x >= Windows[i]->getX()) && (Event->button.x < Windows[i]->getX() + Windows[i]->getW())
-                           && (Event->button.y >= Windows[i]->getY()) && (Event->button.y < Windows[i]->getY() + Windows[i]->getH()))
+                        if((Event->button.x >= Window->getX()) && (Event->button.x < Window->getX() + Window->getW())
+                           && (Event->button.y >= Window->getY()) && (Event->button.y < Window->getY() + Window->getH()))
                         {
                             // Windows[i]->setActive();
                             // Windows[i]->setPriority(highestPriority+1);
-                            Windows[i]->setMouseData(Event->button);
+                            Window->setMouseData(Event->button);
                             delivered = true;
                             break;
                         }
@@ -349,7 +349,7 @@ void CGame::EventHandling(SDL_Event* Event)
             // if still not delivered, keep delivering to secondary elements like menu or map
 
             // deliver mouse button data to map if active
-            if(MapObj != nullptr && MapObj->isActive())
+            if(MapObj && MapObj->isActive())
             {
                 MapObj->setMouseData(Event->button);
                 // data has been delivered to map, so no menu is in the foreground --> stop delivering
@@ -361,10 +361,10 @@ void CGame::EventHandling(SDL_Event* Event)
                 break;
 
             // deliver mouse button data to active menus
-            for(int i = 0; i < MAXMENUS; i++)
+            for(auto& Menu : Menus)
             {
-                if(Menus[i] != nullptr && Menus[i]->isActive() && !Menus[i]->isWaste())
-                    Menus[i]->setMouseData(Event->button);
+                if(Menu && Menu->isActive() && !Menu->isWaste())
+                    Menu->setMouseData(Event->button);
             }
             break;
         }

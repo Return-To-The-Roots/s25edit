@@ -100,13 +100,13 @@ void CButton::setMouseData(const SDL_MouseMotionEvent& motion)
         if(motion.state == SDL_RELEASED)
         {
             marked = true;
-            if(motionEntryParam >= 0 && callback_ != nullptr)
+            if(motionEntryParam >= 0 && callback_)
                 callback_(motionEntryParam);
         }
     } else
     {
         // button was marked before and mouse cursor is on the button now, so do the callback
-        if(motionLeaveParam >= 0 && callback_ != nullptr && marked == true)
+        if(motionLeaveParam >= 0 && callback_ && marked == true)
             callback_(motionLeaveParam);
         marked = false;
     }
@@ -127,7 +127,7 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
         {
             clicked = false;
             // if mouse button is released ON the BUTTON (marked = true), then do the callback
-            if(marked && callback_ != nullptr)
+            if(marked && callback_)
                 callback_(clickedParam);
         }
     }
@@ -311,7 +311,7 @@ bool CButton::render()
             button_picture = -1;
             button_text = "PIC";
         }
-    } else if(button_text != nullptr)
+    } else if(button_text)
         CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), 11, button_text_color, ALIGN_MIDDLE);
 
     return true;

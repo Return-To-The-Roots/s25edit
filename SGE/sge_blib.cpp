@@ -3945,7 +3945,7 @@ void sge_PreCalcFadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint1
 class pline
 {
 public:
-    virtual ~pline() {}
+    virtual ~pline() = default;
     Sint16 x1, x2, y1, y2;
 
     Sint32 fx, fm;

@@ -65,6 +65,7 @@ public:
     int getY() { return y_; };
     int getW() { return w_; };
     int getH() { return h_; };
+    Rect getRect() const { return Rect(x_, y_, w_, h_); }
     int getPriority() { return priority; }
     void setPriority(int priority) { this->priority = priority; }
     void setTitle(const char* title);

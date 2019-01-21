@@ -56,12 +56,12 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
         if((button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
         {
             // if mouse button is pressed ON the text
-            if((button.state == SDL_PRESSED) && callback != nullptr)
+            if((button.state == SDL_PRESSED) && callback)
             {
                 setColor(FONT_ORANGE);
             } else if(button.state == SDL_RELEASED)
             {
-                if(color_ == FONT_ORANGE && callback != nullptr)
+                if(color_ == FONT_ORANGE && callback)
                     callback(clickedParam);
             }
         }
@@ -82,13 +82,12 @@ bool CFont::writeText(const char* string)
     // pointer to the chiffres
     if(!string)
         string = this->string_;
+    if(!string)
+        return false;
     const unsigned char* chiffre = reinterpret_cast<const unsigned char*>(string);
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = 0;
     int pos_y = 0;
-
-    if(string == nullptr && this->string_ == nullptr)
-        return false;
 
     // now lets draw the chiffres
     while(*chiffre != '\0')
@@ -233,9 +232,9 @@ bool CFont::writeText(const char* string)
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 w = pixel_ctr_w;
                 h = pixel_ctr_h;
-                if(Surf_Font != nullptr)
+                if(Surf_Font)
                     SDL_FreeSurface(Surf_Font);
-                if((Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
+                if(!(Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)))
                     return false;
                 SDL_SetColorKey(Surf_Font, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
                 chiffre = reinterpret_cast<const unsigned char*>(string);
@@ -293,7 +292,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
     int pos_x = x;
     int pos_y = y;
 
-    if(Surf_Dest == nullptr || string == nullptr)
+    if(!Surf_Dest || !string)
         return false;
 
     // only three sizes are available (in pixels)

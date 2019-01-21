@@ -106,7 +106,7 @@ void CDebug::sendParam(int Param)
 void CDebug::actualizeData()
 {
     // del FrameCounterText before drawing new
-    if(FrameCounterText != nullptr)
+    if(FrameCounterText)
         dbgWnd->delText(FrameCounterText);
     // write new FrameCounterText and draw it
     sprintf(puffer1, "Actual Frame:    %lu", global::s2->FrameCounter);
@@ -117,7 +117,7 @@ void CDebug::actualizeData()
     if(tmpFrameCtr == 10)
     {
         // del FramesPerSecText before drawing new
-        if(FramesPerSecText != nullptr)
+        if(FramesPerSecText)
             dbgWnd->delText(FramesPerSecText);
         // write new FramesPerSecText and draw it
         sprintf(puffer1, "Frames per Sec: %.2f", tmpFrameCtr / (((float)SDL_GetTicks() - tmpTickCtr) / 1000));
@@ -129,14 +129,14 @@ void CDebug::actualizeData()
         tmpFrameCtr++;
 
     // del msWaitText before drawing new
-    if(msWaitText != nullptr)
+    if(msWaitText)
         dbgWnd->delText(msWaitText);
     // write new msWaitText and draw it
     sprintf(puffer1, "Wait: %ums", global::s2->msWait);
     msWaitText = dbgWnd->addText(puffer1, 0, 35, fontsize);
 
     // del MouseText before drawing new
-    if(MouseText != nullptr)
+    if(MouseText)
         dbgWnd->delText(MouseText);
     // write new MouseText and draw it
     sprintf(puffer1, "Mouse: x=%d y=%d %s", global::s2->Cursor.x, global::s2->Cursor.y,
@@ -146,21 +146,21 @@ void CDebug::actualizeData()
     MouseText = dbgWnd->addText(puffer1, 0, 50, fontsize);
 
     // del RegisteredMenusText before drawing new
-    if(RegisteredMenusText != nullptr)
+    if(RegisteredMenusText)
         dbgWnd->delText(RegisteredMenusText);
     // write new RegisteredMenusText and draw it
     sprintf(puffer1, "Registered Menus: %d (max. %d)", global::s2->RegisteredMenus, MAXMENUS);
     RegisteredMenusText = dbgWnd->addText(puffer1, 0, 60, fontsize);
 
     // del RegisteredWindowsText before drawing new
-    if(RegisteredWindowsText != nullptr)
+    if(RegisteredWindowsText)
         dbgWnd->delText(RegisteredWindowsText);
     // write new RegisteredWindowsText and draw it
     sprintf(puffer1, "Registered Windows: %d (max. %d)", global::s2->RegisteredWindows, MAXWINDOWS);
     RegisteredWindowsText = dbgWnd->addText(puffer1, 0, 70, fontsize);
 
     // del RegisteredCallbacksText before drawing new
-    if(RegisteredCallbacksText != nullptr)
+    if(RegisteredCallbacksText)
         dbgWnd->delText(RegisteredCallbacksText);
     // write new RegisteredCallbacksText and draw it
     sprintf(puffer1, "Registered Callbacks: %d (max. %d)", global::s2->RegisteredCallbacks, MAXCALLBACKS);
@@ -168,47 +168,47 @@ void CDebug::actualizeData()
 
     // we will now write the map data if a map is active
     MapObj = global::s2->MapObj;
-    if(MapObj != nullptr)
+    if(MapObj)
     {
         map = MapObj->map;
         const MapNode& vertex = map->getVertex(MapObj->VertexX_, MapObj->VertexY_);
 
-        if(MapNameText != nullptr)
+        if(MapNameText)
         {
             if(dbgWnd->delText(MapNameText))
                 MapNameText = nullptr;
         }
-        if(MapNameText == nullptr)
+        if(!MapNameText)
         {
             sprintf(puffer1, "Map Name: %s", map->name);
             MapNameText = dbgWnd->addText(puffer1, 260, 10, fontsize);
         }
-        if(MapSizeText != nullptr)
+        if(MapSizeText)
         {
             if(dbgWnd->delText(MapSizeText))
                 MapSizeText = nullptr;
         }
-        if(MapSizeText == nullptr)
+        if(!MapSizeText)
         {
             sprintf(puffer1, "Width: %d  Height: %d", map->width, map->height);
             MapSizeText = dbgWnd->addText(puffer1, 260, 20, fontsize);
         }
-        if(MapAuthorText != nullptr)
+        if(MapAuthorText)
         {
             if(dbgWnd->delText(MapAuthorText))
                 MapAuthorText = nullptr;
         }
-        if(MapAuthorText == nullptr)
+        if(!MapAuthorText)
         {
             sprintf(puffer1, "Author: %s", map->author);
             MapAuthorText = dbgWnd->addText(puffer1, 260, 30, fontsize);
         }
-        if(MapTypeText != nullptr)
+        if(MapTypeText)
         {
             if(dbgWnd->delText(MapTypeText))
                 MapTypeText = nullptr;
         }
-        if(MapTypeText == nullptr)
+        if(!MapTypeText)
         {
             sprintf(puffer1, "Type: %d (%s)", map->type,
                     (map->type == MAP_GREENLAND ?
@@ -216,193 +216,193 @@ void CDebug::actualizeData()
                        (map->type == MAP_WASTELAND ? "Wasteland" : (map->type == MAP_WINTERLAND ? "Winterland" : "Unknown"))));
             MapTypeText = dbgWnd->addText(puffer1, 260, 40, fontsize);
         }
-        if(MapPlayerText != nullptr)
+        if(MapPlayerText)
         {
             if(dbgWnd->delText(MapPlayerText))
                 MapPlayerText = nullptr;
         }
-        if(MapPlayerText == nullptr)
+        if(!MapPlayerText)
         {
             sprintf(puffer1, "Player: %d", map->player);
             MapPlayerText = dbgWnd->addText(puffer1, 260, 50, fontsize);
         }
-        if(VertexText != nullptr)
+        if(VertexText)
         {
             if(dbgWnd->delText(VertexText))
                 VertexText = nullptr;
         }
-        if(VertexText == nullptr)
+        if(!VertexText)
         {
             sprintf(puffer1, "Vertex: %d, %d", MapObj->VertexX_, MapObj->VertexY_);
             VertexText = dbgWnd->addText(puffer1, 260, 60, fontsize);
         }
-        if(VertexDataText != nullptr)
+        if(VertexDataText)
         {
             if(dbgWnd->delText(VertexDataText))
                 VertexDataText = nullptr;
         }
-        if(VertexDataText == nullptr)
+        if(!VertexDataText)
         {
             sprintf(puffer1, "Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y, vertex.z, ((float)vertex.i) / pow(2, 16),
                     vertex.h);
             VertexDataText = dbgWnd->addText(puffer1, 260, 70, fontsize);
         }
-        if(VertexVectorText != nullptr)
+        if(VertexVectorText)
         {
             if(dbgWnd->delText(VertexVectorText))
                 VertexVectorText = nullptr;
         }
-        if(VertexVectorText == nullptr)
+        if(!VertexVectorText)
         {
             sprintf(puffer1, "Vertex Vector: (%.2f, %.2f, %.2f)", vertex.normVector.x, vertex.normVector.y, vertex.normVector.z);
             VertexVectorText = dbgWnd->addText(puffer1, 260, 80, fontsize);
         }
-        if(FlatVectorText != nullptr)
+        if(FlatVectorText)
         {
             if(dbgWnd->delText(FlatVectorText))
                 FlatVectorText = nullptr;
         }
-        if(FlatVectorText == nullptr)
+        if(!FlatVectorText)
         {
             sprintf(puffer1, "Flat Vector: (%.2f, %.2f, %.2f)", vertex.flatVector.x, vertex.flatVector.y, vertex.flatVector.z);
             FlatVectorText = dbgWnd->addText(puffer1, 260, 90, fontsize);
         }
-        if(rsuTextureText != nullptr)
+        if(rsuTextureText)
         {
             if(dbgWnd->delText(rsuTextureText))
                 rsuTextureText = nullptr;
         }
-        if(rsuTextureText == nullptr)
+        if(!rsuTextureText)
         {
             sprintf(puffer1, "RSU-Texture: %#04x", vertex.rsuTexture);
             rsuTextureText = dbgWnd->addText(puffer1, 260, 100, fontsize);
         }
-        if(usdTextureText != nullptr)
+        if(usdTextureText)
         {
             if(dbgWnd->delText(usdTextureText))
                 usdTextureText = nullptr;
         }
-        if(usdTextureText == nullptr)
+        if(!usdTextureText)
         {
             sprintf(puffer1, "USD-Texture: %#04x", vertex.usdTexture);
             usdTextureText = dbgWnd->addText(puffer1, 260, 110, fontsize);
         }
-        if(roadText != nullptr)
+        if(roadText)
         {
             if(dbgWnd->delText(roadText))
                 roadText = nullptr;
         }
-        if(roadText == nullptr)
+        if(!roadText)
         {
             sprintf(puffer1, "road: %#04x", vertex.road);
             roadText = dbgWnd->addText(puffer1, 260, 120, fontsize);
         }
-        if(objectTypeText != nullptr)
+        if(objectTypeText)
         {
             if(dbgWnd->delText(objectTypeText))
                 objectTypeText = nullptr;
         }
-        if(objectTypeText == nullptr)
+        if(!objectTypeText)
         {
             sprintf(puffer1, "objectType: %#04x", vertex.objectType);
             objectTypeText = dbgWnd->addText(puffer1, 260, 130, fontsize);
         }
-        if(objectInfoText != nullptr)
+        if(objectInfoText)
         {
             if(dbgWnd->delText(objectInfoText))
                 objectInfoText = nullptr;
         }
-        if(objectInfoText == nullptr)
+        if(!objectInfoText)
         {
             sprintf(puffer1, "objectInfo: %#04x", vertex.objectInfo);
             objectInfoText = dbgWnd->addText(puffer1, 260, 140, fontsize);
         }
-        if(animalText != nullptr)
+        if(animalText)
         {
             if(dbgWnd->delText(animalText))
                 animalText = nullptr;
         }
-        if(animalText == nullptr)
+        if(!animalText)
         {
             sprintf(puffer1, "animal: %#04x", vertex.animal);
             animalText = dbgWnd->addText(puffer1, 260, 150, fontsize);
         }
-        if(unknown1Text != nullptr)
+        if(unknown1Text)
         {
             if(dbgWnd->delText(unknown1Text))
                 unknown1Text = nullptr;
         }
-        if(unknown1Text == nullptr)
+        if(!unknown1Text)
         {
             sprintf(puffer1, "unknown1: %#04x", vertex.unknown1);
             unknown1Text = dbgWnd->addText(puffer1, 260, 160, fontsize);
         }
-        if(buildText != nullptr)
+        if(buildText)
         {
             if(dbgWnd->delText(buildText))
                 buildText = nullptr;
         }
-        if(buildText == nullptr)
+        if(!buildText)
         {
             sprintf(puffer1, "build: %#04x", vertex.build);
             buildText = dbgWnd->addText(puffer1, 260, 170, fontsize);
         }
-        if(unknown2Text != nullptr)
+        if(unknown2Text)
         {
             if(dbgWnd->delText(unknown2Text))
                 unknown2Text = nullptr;
         }
-        if(unknown2Text == nullptr)
+        if(!unknown2Text)
         {
             sprintf(puffer1, "unknown2: %#04x", vertex.unknown2);
             unknown2Text = dbgWnd->addText(puffer1, 260, 180, fontsize);
         }
-        if(unknown3Text != nullptr)
+        if(unknown3Text)
         {
             if(dbgWnd->delText(unknown3Text))
                 unknown3Text = nullptr;
         }
-        if(unknown3Text == nullptr)
+        if(!unknown3Text)
         {
             sprintf(puffer1, "unknown3: %#04x", vertex.unknown3);
             unknown3Text = dbgWnd->addText(puffer1, 260, 190, fontsize);
         }
-        if(resourceText != nullptr)
+        if(resourceText)
         {
             if(dbgWnd->delText(resourceText))
                 resourceText = nullptr;
         }
-        if(resourceText == nullptr)
+        if(!resourceText)
         {
             sprintf(puffer1, "resource: %#04x", vertex.resource);
             resourceText = dbgWnd->addText(puffer1, 260, 200, fontsize);
         }
-        if(shadingText != nullptr)
+        if(shadingText)
         {
             if(dbgWnd->delText(shadingText))
                 shadingText = nullptr;
         }
-        if(shadingText == nullptr)
+        if(!shadingText)
         {
             sprintf(puffer1, "shading: %#04x", vertex.shading);
             shadingText = dbgWnd->addText(puffer1, 260, 210, fontsize);
         }
-        if(unknown5Text != nullptr)
+        if(unknown5Text)
         {
             if(dbgWnd->delText(unknown5Text))
                 unknown5Text = nullptr;
         }
-        if(unknown5Text == nullptr)
+        if(!unknown5Text)
         {
             sprintf(puffer1, "unknown5: %#04x", vertex.unknown5);
             unknown5Text = dbgWnd->addText(puffer1, 260, 220, fontsize);
         }
-        if(editorModeText != nullptr)
+        if(editorModeText)
         {
             if(dbgWnd->delText(editorModeText))
                 editorModeText = nullptr;
         }
-        if(editorModeText == nullptr)
+        if(!editorModeText)
         {
             sprintf(puffer1, "Editor --> Mode: %d Content: %#04x Content2: %#04x", MapObj->mode, MapObj->modeContent, MapObj->modeContent2);
             editorModeText = dbgWnd->addText(puffer1, 260, 230, fontsize);
@@ -410,123 +410,123 @@ void CDebug::actualizeData()
     } else
     {
         // del MapNameText before drawing new
-        if(MapNameText != nullptr)
+        if(MapNameText)
         {
             if(dbgWnd->delText(MapNameText))
                 MapNameText = nullptr;
         }
-        if(MapNameText == nullptr)
+        if(!MapNameText)
         {
             // write new MapNameText and draw it
             sprintf(puffer1, "No Map loaded!");
             MapNameText = dbgWnd->addText(puffer1, 260, 10, fontsize);
         }
-        if(MapSizeText != nullptr)
+        if(MapSizeText)
         {
             if(dbgWnd->delText(MapSizeText))
                 MapSizeText = nullptr;
         }
-        if(MapAuthorText != nullptr)
+        if(MapAuthorText)
         {
             if(dbgWnd->delText(MapAuthorText))
                 MapAuthorText = nullptr;
         }
-        if(MapTypeText != nullptr)
+        if(MapTypeText)
         {
             if(dbgWnd->delText(MapTypeText))
                 MapTypeText = nullptr;
         }
-        if(MapPlayerText != nullptr)
+        if(MapPlayerText)
         {
             if(dbgWnd->delText(MapPlayerText))
                 MapPlayerText = nullptr;
         }
-        if(VertexText != nullptr)
+        if(VertexText)
         {
             if(dbgWnd->delText(VertexText))
                 VertexText = nullptr;
         }
-        if(VertexDataText != nullptr)
+        if(VertexDataText)
         {
             if(dbgWnd->delText(VertexDataText))
                 VertexDataText = nullptr;
         }
-        if(VertexVectorText != nullptr)
+        if(VertexVectorText)
         {
             if(dbgWnd->delText(VertexVectorText))
                 VertexVectorText = nullptr;
         }
-        if(FlatVectorText != nullptr)
+        if(FlatVectorText)
         {
             if(dbgWnd->delText(FlatVectorText))
                 FlatVectorText = nullptr;
         }
-        if(rsuTextureText != nullptr)
+        if(rsuTextureText)
         {
             if(dbgWnd->delText(rsuTextureText))
                 rsuTextureText = nullptr;
         }
-        if(usdTextureText != nullptr)
+        if(usdTextureText)
         {
             if(dbgWnd->delText(usdTextureText))
                 usdTextureText = nullptr;
         }
-        if(roadText != nullptr)
+        if(roadText)
         {
             if(dbgWnd->delText(roadText))
                 roadText = nullptr;
         }
-        if(objectTypeText != nullptr)
+        if(objectTypeText)
         {
             if(dbgWnd->delText(objectTypeText))
                 objectTypeText = nullptr;
         }
-        if(objectInfoText != nullptr)
+        if(objectInfoText)
         {
             if(dbgWnd->delText(objectInfoText))
                 objectInfoText = nullptr;
         }
-        if(animalText != nullptr)
+        if(animalText)
         {
             if(dbgWnd->delText(animalText))
                 animalText = nullptr;
         }
-        if(unknown1Text != nullptr)
+        if(unknown1Text)
         {
             if(dbgWnd->delText(unknown1Text))
                 unknown1Text = nullptr;
         }
-        if(buildText != nullptr)
+        if(buildText)
         {
             if(dbgWnd->delText(buildText))
                 buildText = nullptr;
         }
-        if(unknown2Text != nullptr)
+        if(unknown2Text)
         {
             if(dbgWnd->delText(unknown2Text))
                 unknown2Text = nullptr;
         }
-        if(unknown3Text != nullptr)
+        if(unknown3Text)
         {
             if(dbgWnd->delText(unknown3Text))
                 unknown3Text = nullptr;
         }
-        if(resourceText != nullptr)
+        if(resourceText)
         {
             if(dbgWnd->delText(resourceText))
                 resourceText = nullptr;
         }
-        if(shadingText != nullptr)
+        if(shadingText)
         {
             if(dbgWnd->delText(shadingText))
                 shadingText = nullptr;
         }
-        if(unknown5Text != nullptr)
+        if(unknown5Text)
         {
             if(dbgWnd->delText(unknown5Text))
                 unknown5Text = nullptr;
         }
-        if(editorModeText != nullptr)
+        if(editorModeText)
         {
             if(dbgWnd->delText(editorModeText))
                 editorModeText = nullptr;

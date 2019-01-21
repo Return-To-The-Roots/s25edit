@@ -3,6 +3,7 @@
 
 #include "commonDefines.h"
 #include "Point.h"
+#include "Rect.h"
 #include "gameData/DescIdx.h"
 #include <vector>
 
@@ -139,11 +140,7 @@ struct MapNode
     }
 };
 // structure for display, cause SDL_Rect's datatypes are too small
-struct DisplayRectangle
-{
-    Sint32 x, y;
-    Sint32 w, h;
-};
+using DisplayRectangle = RectBase<Sint32>;
 typedef Point<Sint16> Point16;
 typedef Point<Sint32> Point32;
 // map strutcture

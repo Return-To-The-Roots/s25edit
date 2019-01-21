@@ -722,7 +722,7 @@ int sge_text_input(sge_TextSurface* tc, Uint8 flags)
     if(flags & SGE_FLAG1 || !is_ttf)
     { /* Keep background? */
         buffer = SDL_DisplayFormat(screen);
-        if(buffer == nullptr)
+        if(!buffer)
         {
             SDL_SetError("SGE - Out of memory");
             return -3;

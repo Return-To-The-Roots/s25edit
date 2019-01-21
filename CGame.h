@@ -12,11 +12,7 @@ class CGame
     friend class CDebug;
 
 public:
-    int GameResolutionX;
-    int GameResolutionY;
-    // MenuResolution is old and not used anymore
-    int MenuResolutionX;
-    int MenuResolutionY;
+    Extent GameResolution;
     bool fullscreen;
 
     bool Running;
@@ -63,6 +59,7 @@ public:
     int Execute();
 
     bool Init();
+    bool ReCreateWindow();
 
     void EventHandling(SDL_Event* Event);
 
@@ -83,8 +80,7 @@ public:
     void delMapObj();
     SDL_Surface* getDisplaySurface() { return Surf_Display; };
     SDL_Surface* getDisplayGLSurface() { return Surf_DisplayGL; };
-    int getResX() { return GameResolutionX; }
-    int getResY() { return GameResolutionY; }
+    auto getRes() { return GameResolution; }
 };
 
 #endif

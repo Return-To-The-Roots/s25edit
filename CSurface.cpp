@@ -43,11 +43,9 @@ void DrawFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, Point16 
 bool CSurface::drawTextures = false;
 bool CSurface::useOpenGL = false;
 
-CSurface::CSurface() {}
-
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
 {
-    if(Surf_Dest == nullptr || Surf_Src == nullptr)
+    if(!Surf_Dest || !Surf_Src)
         return false;
 
     SDL_Rect DestR;
@@ -62,7 +60,7 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle)
 {
-    if(Surf_Dest == nullptr || Surf_Src == nullptr)
+    if(!Surf_Dest || !Surf_Src)
         return false;
 
     Uint16 px, py;
@@ -91,7 +89,7 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
 {
-    if(Surf_Dest == nullptr || Surf_Src == nullptr)
+    if(!Surf_Dest || !Surf_Src)
         return false;
 
     SDL_Rect DestR;
@@ -114,56 +112,34 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
 // this is the example function from the sdl-documentation to draw pixels
 void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
 {
+    int bpp = screen->format->BytesPerPixel;
+    /* Here p is the address to the pixel we want to retrieve */
+    Uint8* p = (Uint8*)screen->pixels + y * screen->pitch + x * bpp;
+
     if(SDL_MUSTLOCK(screen))
         SDL_LockSurface(screen);
 
-    switch(screen->format->BytesPerPixel)
+    switch(bpp)
     {
-        case 1:
-        {
-            Uint8* bufp;
+        case 1: *p = color; break;
 
-            bufp = (Uint8*)screen->pixels + y * screen->pitch + x;
-            *bufp = color;
-        }
-        break;
-
-        case 2:
-        {
-            Uint16* bufp;
-
-            bufp = (Uint16*)screen->pixels + y * screen->pitch / 2 + x;
-            *bufp = color;
-        }
-        break;
+        case 2: *(Uint16*)p = color; break;
 
         case 3:
-        {
-            Uint8* bufp;
-
-            bufp = (Uint8*)screen->pixels + y * screen->pitch + x * 3;
             if(SDL_BYTEORDER == SDL_LIL_ENDIAN)
             {
-                bufp[0] = color;
-                bufp[1] = color >> 8;
-                bufp[2] = color >> 16;
+                p[0] = color;
+                p[1] = color >> 8;
+                p[2] = color >> 16;
             } else
             {
-                bufp[2] = color;
-                bufp[1] = color >> 8;
-                bufp[0] = color >> 16;
+                p[2] = color;
+                p[1] = color >> 8;
+                p[0] = color >> 16;
             }
-        }
-        break;
+            break;
 
-        case 4:
-        {
-            Uint32* bufp;
-
-            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x; //-V206
-            *bufp = color;
-        }
-        break;
+        case 4: *(Uint32*)p = color; break;
     }
 
     if(SDL_MUSTLOCK(screen))
@@ -173,122 +149,12 @@ void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
 // this is the example function from the sdl-documentation to draw pixels
 void CSurface::DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
 {
-    if(SDL_MUSTLOCK(screen))
-        SDL_LockSurface(screen);
-
-    Uint32 color = SDL_MapRGB(screen->format, R, G, B);
-
-    switch(screen->format->BytesPerPixel)
-    {
-        case 1:
-        {
-            Uint8* bufp;
-
-            bufp = (Uint8*)screen->pixels + y * screen->pitch + x;
-            *bufp = color;
-        }
-        break;
-
-        case 2:
-        {
-            Uint16* bufp;
-
-            bufp = (Uint16*)screen->pixels + y * screen->pitch / 2 + x;
-            *bufp = color;
-        }
-        break;
-
-        case 3:
-        {
-            Uint8* bufp;
-
-            bufp = (Uint8*)screen->pixels + y * screen->pitch + x * 3;
-            if(SDL_BYTEORDER == SDL_LIL_ENDIAN)
-            {
-                bufp[0] = color;
-                bufp[1] = color >> 8;
-                bufp[2] = color >> 16;
-            } else
-            {
-                bufp[2] = color;
-                bufp[1] = color >> 8;
-                bufp[0] = color >> 16;
-            }
-        }
-        break;
-
-        case 4:
-        {
-            Uint32* bufp;
-
-            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x; //-V206
-            *bufp = color;
-        }
-        break;
-    }
-
-    if(SDL_MUSTLOCK(screen))
-        SDL_UnlockSurface(screen);
+    DrawPixel_Color(screen, x, y, SDL_MapRGB(screen->format, R, G, B));
 }
 
 void CSurface::DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
 {
-    if(SDL_MUSTLOCK(screen))
-        SDL_LockSurface(screen);
-
-    Uint32 color = SDL_MapRGBA(screen->format, R, G, B, A);
-
-    switch(screen->format->BytesPerPixel)
-    {
-        case 1:
-        {
-            Uint8* bufp;
-
-            bufp = (Uint8*)screen->pixels + y * screen->pitch + x;
-            *bufp = color;
-        }
-        break;
-
-        case 2:
-        {
-            Uint16* bufp;
-
-            bufp = (Uint16*)screen->pixels + y * screen->pitch / 2 + x;
-            *bufp = color;
-        }
-        break;
-
-        case 3:
-        {
-            Uint8* bufp;
-
-            bufp = (Uint8*)screen->pixels + y * screen->pitch + x * 3;
-            if(SDL_BYTEORDER == SDL_LIL_ENDIAN)
-            {
-                bufp[0] = color;
-                bufp[1] = color >> 8;
-                bufp[2] = color >> 16;
-            } else
-            {
-                bufp[2] = color;
-                bufp[1] = color >> 8;
-                bufp[0] = color >> 16;
-            }
-        }
-        break;
-
-        case 4:
-        {
-            Uint32* bufp;
-
-            bufp = (Uint32*)screen->pixels + y * screen->pitch / 4 + x; //-V206
-            *bufp = color;
-        }
-        break;
-    }
-
-    if(SDL_MUSTLOCK(screen))
-        SDL_UnlockSurface(screen);
+    DrawPixel_Color(screen, x, y, SDL_MapRGBA(screen->format, R, G, B, A));
 }
 
 Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
@@ -327,12 +193,10 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     if(width < 8 || height < 8)
         return;
 
-    assert(displayRect.x < myMap.width_pixel);
-    assert(-displayRect.x <= displayRect.w);
-    assert(displayRect.x + displayRect.w > 0);
-    assert(displayRect.y < myMap.height_pixel);
-    assert(-displayRect.y <= displayRect.h);
-    assert(displayRect.y + displayRect.h > 0);
+    assert(displayRect.left < myMap.width_pixel);
+    assert(displayRect.right > 0);
+    assert(displayRect.top < myMap.height_pixel);
+    assert(displayRect.bottom > 0);
 
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
@@ -347,10 +211,10 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             // IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
 
             // at first call DrawTriangle for all triangles inside the map edges
-            int row_start = std::max(displayRect.y, 2 * TRIANGLE_HEIGHT) / TRIANGLE_HEIGHT - 2;
-            int row_end = (displayRect.y + displayRect.h) / TRIANGLE_HEIGHT + 8;
-            int col_start = std::max<int>(displayRect.x, TRIANGLE_WIDTH) / TRIANGLE_WIDTH - 1;
-            int col_end = (displayRect.x + displayRect.w) / TRIANGLE_WIDTH + 1;
+            int row_start = std::max(displayRect.top, 2 * TRIANGLE_HEIGHT) / TRIANGLE_HEIGHT - 2;
+            int row_end = (displayRect.bottom) / TRIANGLE_HEIGHT + 8;
+            int col_start = std::max<int>(displayRect.left, TRIANGLE_WIDTH) / TRIANGLE_WIDTH - 1;
+            int col_end = (displayRect.right) / TRIANGLE_WIDTH + 1;
             bool view_outside_edges;
 
             if(k > 0)
@@ -361,24 +225,24 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                 if(k == 1 || k == 3)
                 {
                     // at first call DrawTriangle for all triangles up or down outside
-                    if(displayRect.y < 0)
+                    if(displayRect.top < 0)
                     {
-                        row_start = std::max(0, height - 1 - (-displayRect.y / TRIANGLE_HEIGHT) - 1);
+                        row_start = std::max(0, height - 1 - (-displayRect.top / TRIANGLE_HEIGHT) - 1);
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.y + displayRect.h) > myMap.height_pixel)
+                    } else if(displayRect.bottom > myMap.height_pixel)
                     {
                         row_start = 0;
-                        row_end = ((displayRect.y + displayRect.h) - myMap.height_pixel) / TRIANGLE_HEIGHT + 8;
+                        row_end = (displayRect.bottom - myMap.height_pixel) / TRIANGLE_HEIGHT + 8;
                         view_outside_edges = true;
-                    } else if(displayRect.y <= 2 * TRIANGLE_HEIGHT)
+                    } else if(displayRect.top <= 2 * TRIANGLE_HEIGHT)
                     {
                         // this is for draw triangles that are reduced under the lower map edge (have bigger y-coords as
                         // myMap.height_pixel)
                         row_start = height - 3;
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.y + displayRect.h) >= (myMap.height_pixel - 8 * TRIANGLE_HEIGHT))
+                    } else if(displayRect.bottom >= (myMap.height_pixel - 8 * TRIANGLE_HEIGHT))
                     {
                         // this is for draw triangles that are raised over the upper map edge (have negative y-coords)
                         row_start = 0;
@@ -390,20 +254,20 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                 if(k == 2 || k == 3)
                 {
                     // now call DrawTriangle for all triangles left or right outside
-                    if(displayRect.x <= 0)
+                    if(displayRect.left <= 0)
                     {
-                        col_start = std::max(0, width - 1 - (-displayRect.x / TRIANGLE_WIDTH) - 1);
+                        col_start = std::max(0, width - 1 - (-displayRect.left / TRIANGLE_WIDTH) - 1);
                         col_end = width - 1;
                         view_outside_edges = true;
-                    } else if(displayRect.x < TRIANGLE_WIDTH)
+                    } else if(displayRect.left < TRIANGLE_WIDTH)
                     {
                         col_start = width - 2;
                         col_end = width - 1;
                         view_outside_edges = true;
-                    } else if((displayRect.x + displayRect.w) > myMap.width_pixel)
+                    } else if(displayRect.right > myMap.width_pixel)
                     {
                         col_start = 0;
-                        col_end = ((displayRect.x + displayRect.w) - myMap.width_pixel) / TRIANGLE_WIDTH + 1;
+                        col_end = (displayRect.right - myMap.width_pixel) / TRIANGLE_WIDTH + 1;
                         view_outside_edges = true;
                     }
                 }
@@ -529,17 +393,17 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     Point32 p2(node2.x, node2.y);
     Point32 p3(node3.x, node3.y);
     // prevent drawing triangles that are not shown
-    if(((p1.x < displayRect.x && p2.x < displayRect.x && p3.x < displayRect.x)
-        || (p1.x > (displayRect.x + displayRect.w) && p2.x > (displayRect.x + displayRect.w) && p3.x > (displayRect.x + displayRect.w)))
-       || ((p1.y < displayRect.y && p2.y < displayRect.y && p3.y < displayRect.y)
-           || (p1.y > (displayRect.y + displayRect.h) && p2.y > (displayRect.y + displayRect.h) && p3.y > (displayRect.y + displayRect.h))))
+    if(((p1.x < displayRect.left && p2.x < displayRect.left && p3.x < displayRect.left)
+        || (p1.x > displayRect.right && p2.x > displayRect.right && p3.x > displayRect.right))
+       || ((p1.y < displayRect.top && p2.y < displayRect.top && p3.y < displayRect.top)
+           || (p1.y > displayRect.bottom && p2.y > displayRect.bottom && p3.y > displayRect.bottom)))
     {
         bool triangle_shown = false;
 
-        if(displayRect.x <= 0)
+        if(displayRect.left <= 0)
         {
-            int outside_x = displayRect.x;
-            int outside_w = -displayRect.x;
+            int outside_x = displayRect.left;
+            int outside_w = -displayRect.left;
             if((((p1.x - myMap.width_pixel) >= (outside_x)) && ((p1.x - myMap.width_pixel) <= (outside_x + outside_w)))
                || (((p2.x - myMap.width_pixel) >= (outside_x)) && ((p2.x - myMap.width_pixel) <= (outside_x + outside_w)))
                || (((p3.x - myMap.width_pixel) >= (outside_x)) && ((p3.x - myMap.width_pixel) <= (outside_x + outside_w))))
@@ -549,9 +413,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 p3.x -= myMap.width_pixel;
                 triangle_shown = true;
             }
-        } else if(displayRect.x < TRIANGLE_WIDTH)
+        } else if(displayRect.left < TRIANGLE_WIDTH)
         {
-            int outside_x = displayRect.x;
+            int outside_x = displayRect.left;
             int outside_w = TRIANGLE_WIDTH;
             if((((p1.x - myMap.width_pixel) >= (outside_x)) && ((p1.x - myMap.width_pixel) <= (outside_x + outside_w)))
                || (((p2.x - myMap.width_pixel) >= (outside_x)) && ((p2.x - myMap.width_pixel) <= (outside_x + outside_w)))
@@ -562,10 +426,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 p3.x -= myMap.width_pixel;
                 triangle_shown = true;
             }
-        } else if((displayRect.x + displayRect.w) > (myMap.width_pixel))
+        } else if(displayRect.right > (myMap.width_pixel))
         {
             int outside_x = myMap.width_pixel;
-            int outside_w = displayRect.x + displayRect.w - myMap.width_pixel;
+            int outside_w = displayRect.right - myMap.width_pixel;
             if((((p1.x + myMap.width_pixel) >= (outside_x)) && ((p1.x + myMap.width_pixel) <= (outside_x + outside_w)))
                || (((p2.x + myMap.width_pixel) >= (outside_x)) && ((p2.x + myMap.width_pixel) <= (outside_x + outside_w)))
                || (((p3.x + myMap.width_pixel) >= (outside_x)) && ((p3.x + myMap.width_pixel) <= (outside_x + outside_w))))
@@ -577,10 +441,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             }
         }
 
-        if(displayRect.y < 0)
+        if(displayRect.top < 0)
         {
-            int outside_y = displayRect.y;
-            int outside_h = -displayRect.y;
+            int outside_y = displayRect.top;
+            int outside_h = -displayRect.top;
             if((((p1.y - myMap.height_pixel) >= (outside_y)) && ((p1.y - myMap.height_pixel) <= (outside_y + outside_h)))
                || (((p2.y - myMap.height_pixel) >= (outside_y)) && ((p2.y - myMap.height_pixel) <= (outside_y + outside_h)))
                || (((p3.y - myMap.height_pixel) >= (outside_y)) && ((p3.y - myMap.height_pixel) <= (outside_y + outside_h))))
@@ -590,10 +454,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 p3.y -= myMap.height_pixel;
                 triangle_shown = true;
             }
-        } else if((displayRect.y + displayRect.h) > (myMap.height_pixel))
+        } else if(displayRect.bottom > (myMap.height_pixel))
         {
             int outside_y = myMap.height_pixel;
-            int outside_h = displayRect.y + displayRect.h - myMap.height_pixel;
+            int outside_h = displayRect.bottom - myMap.height_pixel;
             if((((p1.y + myMap.height_pixel) >= (outside_y)) && ((p1.y + myMap.height_pixel) <= (outside_y + outside_h)))
                || (((p2.y + myMap.height_pixel) >= (outside_y)) && ((p2.y + myMap.height_pixel) <= (outside_y + outside_h)))
                || (((p3.y + myMap.height_pixel) >= (outside_y)) && ((p3.y + myMap.height_pixel) <= (outside_y + outside_h))))
@@ -608,9 +472,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // now test if triangle has negative y-coords cause it's raised over the upper map edge
         if(p1.y < 0 || p2.y < 0 || p3.y < 0)
         {
-            if((((p1.y + myMap.height_pixel) >= displayRect.y) && ((p1.y + myMap.height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((p2.y + myMap.height_pixel) >= displayRect.y) && ((p2.y + myMap.height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((p3.y + myMap.height_pixel) >= displayRect.y) && ((p3.y + myMap.height_pixel) <= (displayRect.y + displayRect.h))))
+            if((((p1.y + myMap.height_pixel) >= displayRect.top) && ((p1.y + myMap.height_pixel) <= displayRect.bottom))
+               || (((p2.y + myMap.height_pixel) >= displayRect.top) && ((p2.y + myMap.height_pixel) <= displayRect.bottom))
+               || (((p3.y + myMap.height_pixel) >= displayRect.top) && ((p3.y + myMap.height_pixel) <= displayRect.bottom)))
             {
                 p1.y += myMap.height_pixel;
                 p2.y += myMap.height_pixel;
@@ -622,9 +486,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // now test if triangle has bigger y-coords as myMap.height_pixel cause it's reduced under the lower map edge
         if(p1.y > myMap.height_pixel || p2.y > myMap.height_pixel || p3.y > myMap.height_pixel)
         {
-            if((((p1.y - myMap.height_pixel) >= displayRect.y) && ((p1.y - myMap.height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((p2.y - myMap.height_pixel) >= displayRect.y) && ((p2.y - myMap.height_pixel) <= (displayRect.y + displayRect.h)))
-               || (((p3.y - myMap.height_pixel) >= displayRect.y) && ((p3.y - myMap.height_pixel) <= (displayRect.y + displayRect.h))))
+            if((((p1.y - myMap.height_pixel) >= displayRect.top) && ((p1.y - myMap.height_pixel) <= displayRect.bottom))
+               || (((p2.y - myMap.height_pixel) >= displayRect.top) && ((p2.y - myMap.height_pixel) <= displayRect.bottom))
+               || (((p3.y - myMap.height_pixel) >= displayRect.top) && ((p3.y - myMap.height_pixel) <= displayRect.bottom)))
             {
                 p1.y -= myMap.height_pixel;
                 p2.y -= myMap.height_pixel;
@@ -701,9 +565,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // it's a harbour
         texture_raw -= 0x40;
 
-    const Point16 shiftedP1(p1 - Point32(displayRect.x, displayRect.y));
-    const Point16 shiftedP2(p2 - Point32(displayRect.x, displayRect.y));
-    const Point16 shiftedP3(p3 - Point32(displayRect.x, displayRect.y));
+    const Point16 shiftedP1(p1 - Point32(displayRect.left, displayRect.top));
+    const Point16 shiftedP2(p2 - Point32(displayRect.left, displayRect.top));
+    const Point16 shiftedP3(p3 - Point32(displayRect.left, displayRect.top));
 
     if(drawTextures)
     {
@@ -1037,7 +901,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             borderSide = CalcBorders(myMap, tempP.usdTexture, node1.rsuTexture, BorderRect);
             if(borderSide != 0)
             {
-                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
+                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.left, tempP.y - displayRect.top);
                 Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
                 Point16 tmpP1 = (borderSide > 0) ? shiftedP1 : shiftedP1 + Point16(1, 0);
                 Point16 tmpP2 = (borderSide > 0) ? shiftedP2 : shiftedP2 + Point16(1, 0);
@@ -1059,7 +923,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
                 tempP = myMap.getVertex(col, node1.VertexY);
 
-                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
+                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.left, tempP.y - displayRect.top);
                 Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
 
                 Point16 tmpP1 = (borderSide < 0) ? shiftedP1 : shiftedP1 - Point16(1, 0);
@@ -1080,7 +944,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             borderSide = CalcBorders(myMap, tempP.rsuTexture, node2.usdTexture, BorderRect);
             if(borderSide != 0)
             {
-                Point16 thirdPt = (borderSide > 0) ? shiftedP1 : Point16(tempP.x - displayRect.x, tempP.y - displayRect.y);
+                Point16 thirdPt = (borderSide > 0) ? shiftedP1 : Point16(tempP.x - displayRect.left, tempP.y - displayRect.top);
                 Point16 tipPt = (shiftedP2 + shiftedP3 + thirdPt) / Sint16(3);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     DrawPreCalcFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, node2.shading << 8,
@@ -1232,8 +1096,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             default: break;
         }
         if(objIdx != 0)
-            Draw(display, global::bmpArray[objIdx].surface, (int)(p2.x - displayRect.x - global::bmpArray[objIdx].nx),
-                 (int)(p2.y - displayRect.y - global::bmpArray[objIdx].ny));
+            Draw(display, global::bmpArray[objIdx].surface, (int)(p2.x - displayRect.left - global::bmpArray[objIdx].nx),
+                 (int)(p2.y - displayRect.top - global::bmpArray[objIdx].ny));
     }
 
 #ifdef _EDITORMODE
@@ -1244,35 +1108,35 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         {
             for(char i = 0x41; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface,
-                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
-                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
+                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
+                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
         } else if(node2.resource >= 0x49 && node2.resource <= 0x4F)
         {
             for(char i = 0x49; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface,
-                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
-                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
+                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
+                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
         }
         if(node2.resource >= 0x51 && node2.resource <= 0x57)
         {
             for(char i = 0x51; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface,
-                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
-                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
+                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
+                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
         }
         if(node2.resource >= 0x59 && node2.resource <= 0x5F)
         {
             for(char i = 0x59; i <= node2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface,
-                     (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
-                     (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
+                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
+                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
         }
         // blit animals
         if(node2.animal > 0x00 && node2.animal <= 0x06)
         {
             Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].surface,
-                 (int)(p2.x - displayRect.x - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].nx),
-                 (int)(p2.y - displayRect.y - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].ny));
+                 (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].nx),
+                 (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].ny));
         }
     }
 #endif
@@ -1285,18 +1149,18 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             switch(node2.build % 8)
             {
                 case 0x01:
-                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_FLAG].nx),
-                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_FLAG].ny));
+                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_FLAG].nx),
+                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_FLAG].ny));
                     break;
                 case 0x02:
                     Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface,
-                         (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
-                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
+                         (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
+                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
                     break;
                 case 0x03:
                     Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface,
-                         (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
-                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
+                         (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
+                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
                     if(node2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
@@ -1304,16 +1168,16 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                        || node2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
                        || node2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
-                             (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
-                             (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
+                             (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
+                             (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
                     else
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface,
-                             (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
-                             (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
+                             (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
+                             (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
                     break;
                 case 0x05:
-                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(p2.x - displayRect.x - global::bmpArray[MAPPIC_MINE].nx),
-                         (int)(p2.y - displayRect.y - global::bmpArray[MAPPIC_MINE].ny));
+                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_MINE].nx),
+                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_MINE].ny));
                     break;
                 default: break;
             }

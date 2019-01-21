@@ -32,7 +32,7 @@ void callback::PleaseWait(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDWait != nullptr)
+            if(WNDWait)
                 break;
             WNDWait = new CWindow(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, //-V807
                                   global::s2->getDisplaySurface()->h / 2 - 35, 212, 70, "Please wait");
@@ -58,7 +58,7 @@ void callback::PleaseWait(int Param)
         case CALL_FROM_GAMELOOP: // This window gives a "Please Wait"-string, so it is shown while there is an intensive operation
             // during ONE gameloop. Therefore it is only shown DURING this ONE operation. If the next gameloop
             // appears, the operation MUST have been finished and we can destroy this window.
-            if(WNDWait != nullptr)
+            if(WNDWait)
             {
                 global::s2->UnregisterCallback(PleaseWait);
                 WNDWait->setWaste();
@@ -68,7 +68,7 @@ void callback::PleaseWait(int Param)
 
         case WINDOW_QUIT_MESSAGE: // this is the global window quit message, callback is explicit called with this value, so destroy the
                                   // window
-            if(WNDWait != nullptr)
+            if(WNDWait)
             {
                 WNDWait->setWaste();
                 WNDWait = nullptr;
@@ -94,7 +94,7 @@ void callback::ShowStatus(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WND != nullptr)
+            if(WND)
                 break;
             WND =
               new CWindow(ShowStatus, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, global::s2->getDisplaySurface()->h / 2 - 35,
@@ -120,7 +120,7 @@ void callback::ShowStatus(int Param)
 
         case WINDOWQUIT:
         case MAP_QUIT:
-            if(WND != nullptr)
+            if(WND)
             {
                 WND->setWaste();
                 WND = nullptr;
@@ -258,24 +258,24 @@ void callback::submenuOptions(int Param)
                 return;
             }
             // add button for "back to main menu"
-            SubMenu->addButton(submenuOptions, MAINMENU, (int)(global::s2->GameResolutionX / 2 - 100), 440, 200, 20, BUTTON_RED1, "back");
+            SubMenu->addButton(submenuOptions, MAINMENU, (int)(global::s2->GameResolution.x / 2 - 100), 440, 200, 20, BUTTON_RED1, "back");
             // add menu title
-            SubMenu->addText("Options", (int)(global::s2->GameResolutionX / 2 - 20), 10, 14);
+            SubMenu->addText("Options", (int)(global::s2->GameResolution.x / 2 - 20), 10, 14);
             // add screen resolution
-            if(TextResolution != nullptr)
+            if(TextResolution)
                 SubMenu->delText(TextResolution);
-            sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolutionX, global::s2->GameResolutionY,
+            sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolution.x, global::s2->GameResolution.y,
                     (global::s2->fullscreen ? "Fullscreen" : "Window"));
-            TextResolution = SubMenu->addText(puffer, (int)(global::s2->GameResolutionX / 2 - 110), 50, 11);
-            if(ButtonFullscreen != nullptr)
+            TextResolution = SubMenu->addText(puffer, (int)(global::s2->GameResolution.x / 2 - 110), 50, 11);
+            if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
-            ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolutionX / 2 - 100), 190, 200, 20,
+            ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 190, 200, 20,
                                                   BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            if(ButtonOpenGL != nullptr)
+            if(ButtonOpenGL)
                 SubMenu->delButton(ButtonOpenGL);
-            // ButtonOpenGL = SubMenu->addButton(submenuOptions, OPENGL, (int)(global::s2->GameResolutionX/2-100), 210, 200, 20,
+            // ButtonOpenGL = SubMenu->addButton(submenuOptions, OPENGL, (int)(global::s2->GameResolution.x/2-100), 210, 200, 20,
             // BUTTON_RED1, (CSurface::useOpenGL ? "Software-Rendering" : "OpenGL"));  add selectbox for resolutions
-            SelectBoxRes = SubMenu->addSelectBox((int)(global::s2->GameResolutionX / 2 - 100), 70, 200, 110, 11, FONT_YELLOW, BUTTON_GREY);
+            SelectBoxRes = SubMenu->addSelectBox((int)(global::s2->GameResolution.x / 2 - 100), 70, 200, 110, 11, FONT_YELLOW, BUTTON_GREY);
             SelectBoxRes->setOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->setOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
             SelectBoxRes->setOption("960 x 540 (QHD)", submenuOptions, SELECTBOX_960_540);
@@ -359,254 +359,254 @@ void callback::submenuOptions(int Param)
             break;
 
         case SELECTBOX_800_600:
-            global::s2->GameResolutionX = 800;
-            global::s2->GameResolutionY = 600;
+            global::s2->GameResolution.x = 800;
+            global::s2->GameResolution.y = 600;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_832_624:
-            global::s2->GameResolutionX = 832;
-            global::s2->GameResolutionY = 624;
+            global::s2->GameResolution.x = 832;
+            global::s2->GameResolution.y = 624;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_960_540:
-            global::s2->GameResolutionX = 960;
-            global::s2->GameResolutionY = 540;
+            global::s2->GameResolution.x = 960;
+            global::s2->GameResolution.y = 540;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_964_544:
-            global::s2->GameResolutionX = 964;
-            global::s2->GameResolutionY = 544;
+            global::s2->GameResolution.x = 964;
+            global::s2->GameResolution.y = 544;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_960_640:
-            global::s2->GameResolutionX = 960;
-            global::s2->GameResolutionY = 640;
+            global::s2->GameResolution.x = 960;
+            global::s2->GameResolution.y = 640;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_960_720:
-            global::s2->GameResolutionX = 960;
-            global::s2->GameResolutionY = 720;
+            global::s2->GameResolution.x = 960;
+            global::s2->GameResolution.y = 720;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1024_576:
-            global::s2->GameResolutionX = 1024;
-            global::s2->GameResolutionY = 576;
+            global::s2->GameResolution.x = 1024;
+            global::s2->GameResolution.y = 576;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1024_600:
-            global::s2->GameResolutionX = 1024;
-            global::s2->GameResolutionY = 600;
+            global::s2->GameResolution.x = 1024;
+            global::s2->GameResolution.y = 600;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1072_600:
-            global::s2->GameResolutionX = 1072;
-            global::s2->GameResolutionY = 600;
+            global::s2->GameResolution.x = 1072;
+            global::s2->GameResolution.y = 600;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1152_768:
-            global::s2->GameResolutionX = 1152;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1152;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1024_768:
-            global::s2->GameResolutionX = 1024;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1024;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1152_864:
-            global::s2->GameResolutionX = 1152;
-            global::s2->GameResolutionY = 864;
+            global::s2->GameResolution.x = 1152;
+            global::s2->GameResolution.y = 864;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1152_870:
-            global::s2->GameResolutionX = 1152;
-            global::s2->GameResolutionY = 870;
+            global::s2->GameResolution.x = 1152;
+            global::s2->GameResolution.y = 870;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1152_900:
-            global::s2->GameResolutionX = 1152;
-            global::s2->GameResolutionY = 900;
+            global::s2->GameResolution.x = 1152;
+            global::s2->GameResolution.y = 900;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1200_800:
-            global::s2->GameResolutionX = 1200;
-            global::s2->GameResolutionY = 800;
+            global::s2->GameResolution.x = 1200;
+            global::s2->GameResolution.y = 800;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1200_900:
-            global::s2->GameResolutionX = 1200;
-            global::s2->GameResolutionY = 900;
+            global::s2->GameResolution.x = 1200;
+            global::s2->GameResolution.y = 900;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1280_720:
-            global::s2->GameResolutionX = 1280;
-            global::s2->GameResolutionY = 720;
+            global::s2->GameResolution.x = 1280;
+            global::s2->GameResolution.y = 720;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1280_768:
-            global::s2->GameResolutionX = 1280;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1280;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1280_800:
-            global::s2->GameResolutionX = 1280;
-            global::s2->GameResolutionY = 800;
+            global::s2->GameResolution.x = 1280;
+            global::s2->GameResolution.y = 800;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1280_854:
-            global::s2->GameResolutionX = 1280;
-            global::s2->GameResolutionY = 854;
+            global::s2->GameResolution.x = 1280;
+            global::s2->GameResolution.y = 854;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1360_768:
-            global::s2->GameResolutionX = 1360;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1360;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1366_768:
-            global::s2->GameResolutionX = 1366;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1366;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1376_768:
-            global::s2->GameResolutionX = 1376;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1376;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1400_900:
-            global::s2->GameResolutionX = 1400;
-            global::s2->GameResolutionY = 900;
+            global::s2->GameResolution.x = 1400;
+            global::s2->GameResolution.y = 900;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1440_900:
-            global::s2->GameResolutionX = 1440;
-            global::s2->GameResolutionY = 900;
+            global::s2->GameResolution.x = 1440;
+            global::s2->GameResolution.y = 900;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1440_960:
-            global::s2->GameResolutionX = 1440;
-            global::s2->GameResolutionY = 960;
+            global::s2->GameResolution.x = 1440;
+            global::s2->GameResolution.y = 960;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1280_960:
-            global::s2->GameResolutionX = 1280;
-            global::s2->GameResolutionY = 960;
+            global::s2->GameResolution.x = 1280;
+            global::s2->GameResolution.y = 960;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1280_1024:
-            global::s2->GameResolutionX = 1280;
-            global::s2->GameResolutionY = 1024;
+            global::s2->GameResolution.x = 1280;
+            global::s2->GameResolution.y = 1024;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1360_1024:
-            global::s2->GameResolutionX = 1360;
-            global::s2->GameResolutionY = 1024;
+            global::s2->GameResolution.x = 1360;
+            global::s2->GameResolution.y = 1024;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1366_1024:
-            global::s2->GameResolutionX = 1366;
-            global::s2->GameResolutionY = 1024;
+            global::s2->GameResolution.x = 1366;
+            global::s2->GameResolution.y = 1024;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1600_768:
-            global::s2->GameResolutionX = 1600;
-            global::s2->GameResolutionY = 768;
+            global::s2->GameResolution.x = 1600;
+            global::s2->GameResolution.y = 768;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1600_900:
-            global::s2->GameResolutionX = 1600;
-            global::s2->GameResolutionY = 900;
+            global::s2->GameResolution.x = 1600;
+            global::s2->GameResolution.y = 900;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1600_1024:
-            global::s2->GameResolutionX = 1600;
-            global::s2->GameResolutionY = 1024;
+            global::s2->GameResolution.x = 1600;
+            global::s2->GameResolution.y = 1024;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1400_1050:
-            global::s2->GameResolutionX = 1400;
-            global::s2->GameResolutionY = 1050;
+            global::s2->GameResolution.x = 1400;
+            global::s2->GameResolution.y = 1050;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1680_1050:
-            global::s2->GameResolutionX = 1680;
-            global::s2->GameResolutionY = 1050;
+            global::s2->GameResolution.x = 1680;
+            global::s2->GameResolution.y = 1050;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1600_1200:
-            global::s2->GameResolutionX = 1600;
-            global::s2->GameResolutionY = 1200;
+            global::s2->GameResolution.x = 1600;
+            global::s2->GameResolution.y = 1200;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1920_1080:
-            global::s2->GameResolutionX = 1920;
-            global::s2->GameResolutionY = 1080;
+            global::s2->GameResolution.x = 1920;
+            global::s2->GameResolution.y = 1080;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1920_1200:
-            global::s2->GameResolutionX = 1920;
-            global::s2->GameResolutionY = 1200;
+            global::s2->GameResolution.x = 1920;
+            global::s2->GameResolution.y = 1200;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1920_1400:
-            global::s2->GameResolutionX = 1920;
-            global::s2->GameResolutionY = 1400;
+            global::s2->GameResolution.x = 1920;
+            global::s2->GameResolution.y = 1400;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_1920_1440:
-            global::s2->GameResolutionX = 1920;
-            global::s2->GameResolutionY = 1440;
+            global::s2->GameResolution.x = 1920;
+            global::s2->GameResolution.y = 1440;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_2048_1152:
-            global::s2->GameResolutionX = 2048;
-            global::s2->GameResolutionY = 1152;
+            global::s2->GameResolution.x = 2048;
+            global::s2->GameResolution.y = 1152;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
         case SELECTBOX_2048_1536:
-            global::s2->GameResolutionX = 2048;
-            global::s2->GameResolutionY = 1536;
+            global::s2->GameResolution.x = 2048;
+            global::s2->GameResolution.y = 1536;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
@@ -634,7 +634,7 @@ void callback::EditorHelpMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDHelp != nullptr)
+            if(WNDHelp)
                 break;
             WNDHelp = new CWindow(EditorHelpMenu, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 320,
                                   global::s2->getDisplaySurface()->h / 2 - 240, 640, 380, "Hilfe", WINDOW_GREEN2,
@@ -708,7 +708,7 @@ void callback::EditorHelpMenu(int Param)
 
         case WINDOW_QUIT_MESSAGE: // this is the global window quit message, callback is explicit called with this value, so destroy the
                                   // window
-            if(WNDHelp != nullptr)
+            if(WNDHelp)
             {
                 WNDHelp->setWaste();
                 WNDHelp = nullptr;
@@ -717,7 +717,7 @@ void callback::EditorHelpMenu(int Param)
             break;
 
         case WINDOWQUIT: // this is the own window quit message of the callback
-            if(WNDHelp != nullptr)
+            if(WNDHelp)
             {
                 WNDHelp->setWaste();
                 WNDHelp = nullptr;
@@ -726,7 +726,7 @@ void callback::EditorHelpMenu(int Param)
             break;
 
         case MAP_QUIT: // this is the global window quit message, callback is explicit called with this value, so destroy the window
-            if(WNDHelp != nullptr)
+            if(WNDHelp)
             {
                 WNDHelp->setWaste();
                 WNDHelp = nullptr;
@@ -753,10 +753,10 @@ void callback::EditorMainMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDMain != nullptr)
+            if(WNDMain)
                 break;
-            WNDMain = new CWindow(EditorMainMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 110, global::s2->GameResolutionY / 2 - 160,
-                                  220, 320, "Main menu", WINDOW_GREEN1, WINDOW_CLOSE);
+            WNDMain = new CWindow(EditorMainMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 110,
+                                  global::s2->GameResolution.y / 2 - 160, 220, 320, "Main menu", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDMain))
             {
                 WNDMain->addButton(EditorMainMenu, LOADMENU, 8, 100, 190, 20, BUTTON_GREEN2, "Load map");
@@ -772,7 +772,7 @@ void callback::EditorMainMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDMain != nullptr)
+            if(WNDMain)
             {
                 WNDMain->setWaste();
                 WNDMain = nullptr;
@@ -780,7 +780,7 @@ void callback::EditorMainMenu(int Param)
             break;
 
         case MAP_QUIT:
-            if(WNDMain != nullptr)
+            if(WNDMain)
             {
                 WNDMain->setWaste();
                 WNDMain = nullptr;
@@ -812,9 +812,9 @@ void callback::EditorLoadMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDLoad != nullptr)
+            if(WNDLoad)
                 break;
-            WNDLoad = new CWindow(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 140, global::s2->GameResolutionY / 2 - 45,
+            WNDLoad = new CWindow(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 140, global::s2->GameResolution.y / 2 - 45,
                                   280, 120, "Load", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDLoad))
             {
@@ -833,7 +833,7 @@ void callback::EditorLoadMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDLoad != nullptr)
+            if(WNDLoad)
             {
                 WNDLoad->setWaste();
                 WNDLoad = nullptr;
@@ -842,7 +842,7 @@ void callback::EditorLoadMenu(int Param)
             break;
 
         case MAP_QUIT:
-            if(WNDLoad != nullptr)
+            if(WNDLoad)
             {
                 WNDLoad->setWaste();
                 WNDLoad = nullptr;
@@ -912,10 +912,10 @@ void callback::EditorSaveMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDSave != nullptr)
+            if(WNDSave)
                 break;
-            WNDSave = new CWindow(EditorSaveMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 140, global::s2->GameResolutionY / 2 - 100,
-                                  280, 200, "Save", WINDOW_GREEN1, WINDOW_CLOSE);
+            WNDSave = new CWindow(EditorSaveMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 140,
+                                  global::s2->GameResolution.y / 2 - 100, 280, 200, "Save", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDSave))
             {
                 MapObj = global::s2->getMapObj();
@@ -940,7 +940,7 @@ void callback::EditorSaveMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDSave != nullptr)
+            if(WNDSave)
             {
                 WNDSave->setWaste();
                 WNDSave = nullptr;
@@ -951,7 +951,7 @@ void callback::EditorSaveMenu(int Param)
             break;
 
         case MAP_QUIT:
-            if(WNDSave != nullptr)
+            if(WNDSave)
             {
                 WNDSave->setWaste();
                 WNDSave = nullptr;
@@ -998,10 +998,10 @@ void callback::EditorQuitMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDBackToMainMenu != nullptr)
+            if(WNDBackToMainMenu)
                 break;
-            WNDBackToMainMenu = new CWindow(EditorQuitMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 106,
-                                            global::s2->GameResolutionY / 2 - 55, 212, 110, "Exit?");
+            WNDBackToMainMenu = new CWindow(EditorQuitMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 106,
+                                            global::s2->GameResolution.y / 2 - 55, 212, 110, "Exit?");
             if(global::s2->RegisterWindow(WNDBackToMainMenu))
             {
                 WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, 0, 0, 100, 80, BUTTON_GREEN2, nullptr, PICTURE_SMALL_TICK);
@@ -1015,7 +1015,7 @@ void callback::EditorQuitMenu(int Param)
             break;
 
         case BACKTOMAIN:
-            if(global::s2->getMapObj() != nullptr)
+            if(global::s2->getMapObj())
                 global::s2->delMapObj();
             WNDBackToMainMenu->setWaste();
             WNDBackToMainMenu = nullptr;
@@ -1038,7 +1038,7 @@ void callback::EditorQuitMenu(int Param)
             break;
 
         case NOTBACKTOMAIN:
-            if(WNDBackToMainMenu != nullptr)
+            if(WNDBackToMainMenu)
             {
                 WNDBackToMainMenu->setWaste();
                 WNDBackToMainMenu = nullptr;
@@ -1085,7 +1085,7 @@ void callback::EditorTextureMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDTexture != nullptr)
+            if(WNDTexture)
                 break;
             WNDTexture = new CWindow(EditorTextureMenu, WINDOWQUIT, PosX, PosY, 220, 133, "Terrain", WINDOW_GREEN1,
                                      WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1310,7 +1310,7 @@ void callback::EditorTextureMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
                 MapObj->setMode(EDITOR_MODE_TEXTURE);
                 MapObj->setModeContent(lastContent);
@@ -1318,7 +1318,7 @@ void callback::EditorTextureMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDTexture != nullptr)
+            if(WNDTexture)
             {
                 PosX = WNDTexture->getX();
                 PosY = WNDTexture->getY();
@@ -1336,7 +1336,7 @@ void callback::EditorTextureMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDTexture != nullptr)
+            if(WNDTexture)
             {
                 PosX = WNDTexture->getX();
                 PosY = WNDTexture->getY();
@@ -1384,7 +1384,7 @@ void callback::EditorTreeMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDTree != nullptr)
+            if(WNDTree)
                 break;
             WNDTree = new CWindow(EditorTreeMenu, WINDOWQUIT, PosX, PosY, 148, 140, "Trees", WINDOW_GREEN1,
                                   WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1516,7 +1516,7 @@ void callback::EditorTreeMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
                 MapObj->setMode(EDITOR_MODE_TREE);
                 MapObj->setModeContent(lastContent);
@@ -1525,7 +1525,7 @@ void callback::EditorTreeMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDTree != nullptr)
+            if(WNDTree)
             {
                 PosX = WNDTree->getX();
                 PosY = WNDTree->getY();
@@ -1543,7 +1543,7 @@ void callback::EditorTreeMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDTree != nullptr)
+            if(WNDTree)
             {
                 PosX = WNDTree->getX();
                 PosY = WNDTree->getY();
@@ -1579,7 +1579,7 @@ void callback::EditorResourceMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDResource != nullptr)
+            if(WNDResource)
                 break;
             WNDResource = new CWindow(EditorResourceMenu, WINDOWQUIT, PosX, PosY, 148, 55, "Resources", WINDOW_GREEN1,
                                       WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1621,7 +1621,7 @@ void callback::EditorResourceMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
                 MapObj->setMode(EDITOR_MODE_RESOURCE_RAISE);
                 MapObj->setModeContent(lastContent);
@@ -1629,7 +1629,7 @@ void callback::EditorResourceMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDResource != nullptr)
+            if(WNDResource)
             {
                 PosX = WNDResource->getX();
                 PosY = WNDResource->getY();
@@ -1644,7 +1644,7 @@ void callback::EditorResourceMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDResource != nullptr)
+            if(WNDResource)
             {
                 PosX = WNDResource->getX();
                 PosY = WNDResource->getY();
@@ -1687,7 +1687,7 @@ void callback::EditorLandscapeMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDLandscape != nullptr)
+            if(WNDLandscape)
                 break;
             WNDLandscape = new CWindow(EditorLandscapeMenu, WINDOWQUIT, PosX, PosY, 112, 174, "Landscape", WINDOW_GREEN1,
                                        WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1814,7 +1814,7 @@ void callback::EditorLandscapeMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
                 MapObj->setMode(EDITOR_MODE_LANDSCAPE);
                 MapObj->setModeContent(lastContent);
@@ -1823,7 +1823,7 @@ void callback::EditorLandscapeMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDLandscape != nullptr)
+            if(WNDLandscape)
             {
                 PosX = WNDLandscape->getX();
                 PosY = WNDLandscape->getY();
@@ -1841,7 +1841,7 @@ void callback::EditorLandscapeMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDLandscape != nullptr)
+            if(WNDLandscape)
             {
                 PosX = WNDLandscape->getX();
                 PosY = WNDLandscape->getY();
@@ -1879,7 +1879,7 @@ void callback::EditorAnimalMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDAnimal != nullptr)
+            if(WNDAnimal)
                 break;
             WNDAnimal = new CWindow(EditorAnimalMenu, WINDOWQUIT, PosX, PosY, 116, 106, "Animals", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -1930,7 +1930,7 @@ void callback::EditorAnimalMenu(int Param)
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
                 MapObj->setMode(EDITOR_MODE_ANIMAL);
                 MapObj->setModeContent(lastContent);
@@ -1938,7 +1938,7 @@ void callback::EditorAnimalMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDAnimal != nullptr)
+            if(WNDAnimal)
             {
                 PosX = WNDAnimal->getX();
                 PosY = WNDAnimal->getY();
@@ -1953,7 +1953,7 @@ void callback::EditorAnimalMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDAnimal != nullptr)
+            if(WNDAnimal)
             {
                 PosX = WNDAnimal->getX();
                 PosY = WNDAnimal->getY();
@@ -1991,7 +1991,7 @@ void callback::EditorPlayerMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDPlayer != nullptr)
+            if(WNDPlayer)
                 break;
             WNDPlayer = new CWindow(EditorPlayerMenu, WINDOWQUIT, PosX, PosY, 100, 80, "Players", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -2044,14 +2044,14 @@ void callback::EditorPlayerMenu(int Param)
             if(PlayerHQx[PlayerNumber] != 0xFFFF && PlayerHQy[PlayerNumber] != 0xFFFF)
             {
                 tempRect = MapObj->getDisplayRect();
-                tempRect.x = PlayerHQx[PlayerNumber] * TRIANGLE_WIDTH - tempRect.w / 2;
-                tempRect.y = PlayerHQy[PlayerNumber] * TRIANGLE_HEIGHT - tempRect.h / 2;
+                tempRect.setOrigin(Position(PlayerHQx[PlayerNumber], PlayerHQy[PlayerNumber]) * Position(TRIANGLE_WIDTH, TRIANGLE_HEIGHT)
+                                   - tempRect.getSize() / 2);
                 MapObj->setDisplayRect(tempRect);
             }
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
                 MapObj->setMode(EDITOR_MODE_FLAG);
                 MapObj->setModeContent(PlayerNumber);
@@ -2059,7 +2059,7 @@ void callback::EditorPlayerMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDPlayer != nullptr)
+            if(WNDPlayer)
             {
                 PosX = WNDPlayer->getX();
                 PosY = WNDPlayer->getY();
@@ -2078,7 +2078,7 @@ void callback::EditorPlayerMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
-            if(WNDPlayer != nullptr)
+            if(WNDPlayer)
             {
                 PosX = WNDPlayer->getX();
                 PosY = WNDPlayer->getY();
@@ -2118,7 +2118,7 @@ void callback::EditorCursorMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDCursor != nullptr)
+            if(WNDCursor)
                 break;
             WNDCursor = new CWindow(EditorCursorMenu, WINDOWQUIT, PosX, PosY, 210, 130, "Cursor", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE);
@@ -2132,7 +2132,7 @@ void callback::EditorCursorMenu(int Param)
                 CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, 2, 2, 96, 32, BUTTON_GREY, "Hexagon");
                 CursorRandomButton =
                   WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, 2, 34, 196, 32, BUTTON_GREY, "Cursor-Activity: static");
-                if(MapObj != nullptr)
+                if(MapObj)
                 {
                     MapObj->setVertexFillRSU(true);
                     MapObj->setVertexFillUSD(true);
@@ -2209,7 +2209,7 @@ void callback::EditorCursorMenu(int Param)
             break;
 
         case CURSORMODE:
-            if(CursorModeButton != nullptr)
+            if(CursorModeButton)
             {
                 WNDCursor->delButton(CursorModeButton);
                 CursorModeButton = nullptr;
@@ -2225,7 +2225,7 @@ void callback::EditorCursorMenu(int Param)
             }
             break;
         case CURSORRANDOM:
-            if(CursorRandomButton != nullptr)
+            if(CursorRandomButton)
             {
                 WNDCursor->delButton(CursorRandomButton);
                 CursorRandomButton = nullptr;
@@ -2246,7 +2246,7 @@ void callback::EditorCursorMenu(int Param)
         case WINDOW_CLICKED_CALL: break;
 
         case WINDOWQUIT:
-            if(WNDCursor != nullptr)
+            if(WNDCursor)
             {
                 PosX = WNDCursor->getX();
                 PosY = WNDCursor->getY();
@@ -2263,7 +2263,7 @@ void callback::EditorCursorMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT
-            if(WNDCursor != nullptr)
+            if(WNDCursor)
             {
                 PosX = WNDCursor->getX();
                 PosY = WNDCursor->getY();
@@ -2302,7 +2302,7 @@ void callback::EditorCreateMenu(int Param)
     static int border = 0;
     static int border_texture = TRIANGLE_TEXTURE_SNOW;
     static char puffer[5];
-    int PosX = global::s2->GameResolutionX / 2 - 125, PosY = global::s2->GameResolutionY / 2 - 175;
+    int PosX = global::s2->GameResolution.x / 2 - 125, PosY = global::s2->GameResolution.y / 2 - 175;
 
     enum
     {
@@ -2332,7 +2332,7 @@ void callback::EditorCreateMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDCreate != nullptr)
+            if(WNDCreate)
                 break;
             WNDCreate = new CWindow(EditorCreateMenu, WINDOWQUIT, PosX, PosY, 250, 350, "Create world", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE);
@@ -2981,7 +2981,7 @@ void callback::EditorCreateMenu(int Param)
             break;
 
         case MAP_QUIT:
-            if(WNDCreate != nullptr)
+            if(WNDCreate)
             {
                 PosX = WNDCreate->getX();
                 PosY = WNDCreate->getY();
@@ -3006,7 +3006,7 @@ void callback::EditorCreateMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDCreate != nullptr)
+            if(WNDCreate)
             {
                 PosX = WNDCreate->getX();
                 PosY = WNDCreate->getY();
@@ -3050,10 +3050,10 @@ void callback::GameMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDBackToMainMenu != nullptr)
+            if(WNDBackToMainMenu)
                 break;
             WNDBackToMainMenu =
-              new CWindow(GameMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - 125, global::s2->GameResolutionY / 2 - 60, 250, 140,
+              new CWindow(GameMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 125, global::s2->GameResolution.y / 2 - 60, 250, 140,
                           "Back to the main menu?", WINDOW_GREEN1, WINDOW_CLOSE);
             if(global::s2->RegisterWindow(WNDBackToMainMenu))
             {
@@ -3075,7 +3075,7 @@ void callback::GameMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDBackToMainMenu != nullptr)
+            if(WNDBackToMainMenu)
             {
                 WNDBackToMainMenu->setWaste();
                 WNDBackToMainMenu = nullptr;
@@ -3105,7 +3105,7 @@ void callback::MinimapMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDMinimap != nullptr)
+            if(WNDMinimap)
                 break;
             {
                 // this variables are needed to reduce the size of minimap-windows of big maps
@@ -3118,8 +3118,8 @@ void callback::MinimapMenu(int Param)
                 //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
                 if((global::s2->getDisplaySurface()->w - 12 < width) || (global::s2->getDisplaySurface()->h - 30 < height))
                     break;
-                WNDMinimap = new CWindow(MinimapMenu, WINDOWQUIT, global::s2->GameResolutionX / 2 - width / 2 - 6,
-                                         global::s2->GameResolutionY / 2 - height / 2 - 15, width + 12, height + 30, "Overview",
+                WNDMinimap = new CWindow(MinimapMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - width / 2 - 6,
+                                         global::s2->GameResolution.y / 2 - height / 2 - 15, width + 12, height + 30, "Overview",
                                          WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE);
                 if(global::s2->RegisterWindow(WNDMinimap) && global::s2->RegisterCallback(MinimapMenu))
                     WndSurface = WNDMinimap->getSurface();
@@ -3134,24 +3134,24 @@ void callback::MinimapMenu(int Param)
             break;
 
         case CALL_FROM_GAMELOOP:
-            if(MapObj != nullptr && WndSurface != nullptr)
+            if(MapObj && WndSurface)
                 MapObj->drawMinimap(WndSurface);
             break;
 
         case WINDOW_CLICKED_CALL:
-            if(MapObj != nullptr)
+            if(MapObj)
             {
-                int MouseX, MouseY;
-                if(SDL_GetMouseState(&MouseX, &MouseY) & SDL_BUTTON(1))
+                Position mouse;
+                if(SDL_GetMouseState(&mouse.x, &mouse.y) & SDL_BUTTON(1))
                 {
-                    if(MouseX > (WNDMinimap->getX() + 6) && MouseX < (WNDMinimap->getX() + WNDMinimap->getW() - 6)
-                       && MouseY > (WNDMinimap->getY() + 20) && MouseY < (WNDMinimap->getY() + WNDMinimap->getH() - 10))
+                    if(mouse.x > (WNDMinimap->getX() + 6) && mouse.x < (WNDMinimap->getX() + WNDMinimap->getW() - 6)
+                       && mouse.y > (WNDMinimap->getY() + 20) && mouse.y < (WNDMinimap->getY() + WNDMinimap->getH() - 10))
                     {
                         DisplayRectangle displayRect = MapObj->getDisplayRect();
-                        displayRect.x =
-                          (MouseX - WNDMinimap->getX() - 6 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx) * TRIANGLE_WIDTH * scaleNum;
-                        displayRect.y =
-                          (MouseY - WNDMinimap->getY() - 20 - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny) * TRIANGLE_HEIGHT * scaleNum;
+                        displayRect.setOrigin(
+                          (mouse - WNDMinimap->getRect().getOrigin() - Position(6, 20)
+                           - Position(global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny))
+                          * Position(TRIANGLE_WIDTH, TRIANGLE_HEIGHT) * scaleNum);
                         MapObj->setDisplayRect(displayRect);
                     }
                 }
@@ -3159,7 +3159,7 @@ void callback::MinimapMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDMinimap != nullptr)
+            if(WNDMinimap)
             {
                 WNDMinimap->setWaste();
                 WNDMinimap = nullptr;
@@ -3171,7 +3171,7 @@ void callback::MinimapMenu(int Param)
 
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT
-            if(WNDMinimap != nullptr)
+            if(WNDMinimap)
             {
                 WNDMinimap->setWaste();
                 WNDMinimap = nullptr;
@@ -3196,7 +3196,7 @@ void callback::debugger(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(Debugger != nullptr)
+            if(Debugger)
                 break;
             Debugger = new CDebug(debugger, DEBUGGER_QUIT);
             break;
@@ -3207,7 +3207,7 @@ void callback::debugger(int Param)
             break;
 
         default:
-            if(Debugger != nullptr)
+            if(Debugger)
                 Debugger->sendParam(Param);
             break;
     }
@@ -3236,7 +3236,7 @@ void callback::viewer(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            if(WNDViewer != nullptr)
+            if(WNDViewer)
                 break;
             WNDViewer = new CWindow(viewer, WINDOWQUIT, 0, 0, 250, 140, "Viewer", WINDOW_GREEN1,
                                     WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE);
@@ -3262,12 +3262,12 @@ void callback::viewer(int Param)
                 WNDViewer->delStaticPicture(PicInWndIndex);
             PicInWndIndex = WNDViewer->addStaticPicture(5, 30, index);
 
-            if(PicInfosText != nullptr)
+            if(PicInfosText)
             {
                 if(WNDViewer->delText(PicInfosText))
                     PicInfosText = nullptr;
             }
-            if(PicInfosText == nullptr)
+            if(!PicInfosText)
             {
                 sprintf(PicInfos, "index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w, global::bmpArray[index].h,
                         global::bmpArray[index].nx, global::bmpArray[index].ny);
@@ -3308,7 +3308,7 @@ void callback::viewer(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDViewer != nullptr)
+            if(WNDViewer)
             {
                 WNDViewer->setWaste();
                 WNDViewer = nullptr;
@@ -3414,12 +3414,12 @@ void callback::submenu1(int Param)
             testTextfield_testWindow = nullptr;
             testSelectBox = nullptr;
             global::s2->UnregisterCallback(submenu1);
-            if(testWindow != nullptr)
+            if(testWindow)
             {
                 testWindow->setWaste();
                 testWindow = nullptr;
             }
-            if(testWindow2 != nullptr)
+            if(testWindow2)
             {
                 testWindow2->setWaste();
                 testWindow2 = nullptr;
@@ -3429,7 +3429,7 @@ void callback::submenu1(int Param)
 
         case GREATMOON:
             SubMenu->addText("Title!", 300, 10, 14);
-            sprintf(puffer, "Window X: %d Window Y: %d", global::s2->GameResolutionX, global::s2->GameResolutionY);
+            sprintf(puffer, "Window X: %d Window Y: %d", global::s2->GameResolution.x, global::s2->GameResolution.y);
             SubMenu->addText(puffer, 10, 10, 14);
             break;
 
@@ -3445,7 +3445,7 @@ void callback::submenu1(int Param)
             break;
 
         case CREATEWINDOW:
-            if(testWindow == nullptr)
+            if(!testWindow)
             {
                 testWindow = new CWindow(submenu1, TESTWINDOWQUITMESSAGE, 5, 5, 350, 240, "Window", WINDOW_GREEN1,
                                          WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
@@ -3465,7 +3465,7 @@ void callback::submenu1(int Param)
                     return;
                 }
             }
-            if(testWindow2 == nullptr)
+            if(!testWindow2)
             {
                 testWindow2 = new CWindow(submenu1, TESTWINDOW2QUITMESSAGE, 200, 5, 350, 240, "Another Window", WINDOW_GREEN1,
                                           WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
@@ -3483,12 +3483,12 @@ void callback::submenu1(int Param)
             break;
 
         case GREATMOONENTRY:
-            if(greatMoonText == nullptr)
+            if(!greatMoonText)
                 greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
             break;
 
         case GREATMOONLEAVE:
-            if(greatMoonText != nullptr)
+            if(greatMoonText)
             {
                 SubMenu->delText(greatMoonText);
                 greatMoonText = nullptr;
@@ -3496,7 +3496,7 @@ void callback::submenu1(int Param)
             break;
 
         case PICOBJECT:
-            if(greatMoon != nullptr)
+            if(greatMoon)
             {
                 SubMenu->delButton(greatMoon);
                 greatMoon = nullptr;
@@ -3504,12 +3504,12 @@ void callback::submenu1(int Param)
             break;
 
         case PICOBJECTENTRY:
-            if(greatMoonText == nullptr)
+            if(!greatMoonText)
                 greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
             break;
 
         case PICOBJECTLEAVE:
-            if(greatMoonText != nullptr)
+            if(greatMoonText)
             {
                 SubMenu->delText(greatMoonText);
                 greatMoonText = nullptr;
@@ -3517,7 +3517,7 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWPICTURE:
-            if(testWindowText == nullptr)
+            if(!testWindowText)
                 testWindowText = testWindow->addText("Clicked on castle", 10, 200, 11);
             else
             {
@@ -3527,7 +3527,7 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWPICTUREENTRY:
-            if(testWindowText2 != nullptr)
+            if(testWindowText2)
             {
                 testWindow->delText(testWindowText2);
                 testWindowText2 = nullptr;
@@ -3536,7 +3536,7 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWPICTURELEAVE:
-            if(testWindowText2 != nullptr)
+            if(testWindowText2)
             {
                 testWindow->delText(testWindowText2);
                 testWindowText2 = nullptr;
@@ -3557,18 +3557,18 @@ void callback::submenu1(int Param)
         case CALL_FROM_GAMELOOP:
             if(counter % 10 == 0)
             {
-                if(counterText != nullptr)
+                if(counterText)
                 {
                     if(SubMenu->delText(counterText))
                         counterText = nullptr;
                 }
-                if(counterText == nullptr)
+                if(!counterText)
                 {
                     sprintf(puffer, "counter: %d", counter);
                     counterText = SubMenu->addText(puffer, 100, 20, 9);
                 }
 
-                if(TextFrom_testTextfield != nullptr)
+                if(TextFrom_testTextfield)
                 {
                     SubMenu->delText(TextFrom_testTextfield);
                     TextFrom_testTextfield = nullptr;
