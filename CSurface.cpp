@@ -362,51 +362,61 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     }
 }
 
-int CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Rect& borderRect)
+enum class BorderPreference
 {
+    None,
+    LeftTop,
+    RightBottom
+};
+BorderPreference CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Rect& borderRect)
+{
+    // we have to decide which border to blit, "left or right" or "top or bottom"
+
     DescIdx<TerrainDesc> idxTop = map.s2IdToTerrain[s2Id1];
     DescIdx<TerrainDesc> idxBottom = map.s2IdToTerrain[s2Id2];
     if(idxTop == idxBottom)
-        return 0;
+        return BorderPreference::None;
     const TerrainDesc& t1 = global::worldDesc.get(idxTop);
     const TerrainDesc& t2 = global::worldDesc.get(idxBottom);
     if(t1.edgePriority > t2.edgePriority)
     {
         if(!t1.edgeType)
-            return 0;
+            return BorderPreference::None;
         borderRect = rect2SDL_Rect(global::worldDesc.get(t1.edgeType).posInTexture);
-        return 1;
+        return BorderPreference::LeftTop;
     } else if(t1.edgePriority < t2.edgePriority)
     {
         if(!t2.edgeType)
-            return 0;
+            return BorderPreference::None;
         borderRect = rect2SDL_Rect(global::worldDesc.get(t2.edgeType).posInTexture);
-        return -1;
+        return BorderPreference::RightBottom;
     }
-    return 0;
+    return BorderPreference::None;
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, Uint8 type,
-                            const MapNode& node1, const MapNode& node2, const MapNode& node3)
+template<typename T>
+constexpr bool isInRange(T val, T min, T max)
 {
-    Point32 p1(node1.x, node1.y);
-    Point32 p2(node2.x, node2.y);
-    Point32 p3(node3.x, node3.y);
-    // prevent drawing triangles that are not shown
-    if(((p1.x < displayRect.left && p2.x < displayRect.left && p3.x < displayRect.left)
-        || (p1.x > displayRect.right && p2.x > displayRect.right && p3.x > displayRect.right))
-       || ((p1.y < displayRect.top && p2.y < displayRect.top && p3.y < displayRect.top)
-           || (p1.y > displayRect.bottom && p2.y > displayRect.bottom && p3.y > displayRect.bottom)))
+    return val >= min && val <= max;
+}
+
+/// Return true if triangle is drawn
+bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap, Point32& p1, Point32& p2, Point32& p3)
+{
+    if((!isInRange(p1.x, displayRect.left, displayRect.right) && !isInRange(p2.x, displayRect.left, displayRect.right)
+        && !isInRange(p3.x, displayRect.left, displayRect.right))
+       || (!isInRange(p1.y, displayRect.top, displayRect.bottom) && !isInRange(p2.y, displayRect.top, displayRect.bottom)
+           && !isInRange(p3.y, displayRect.top, displayRect.bottom)))
     {
         bool triangle_shown = false;
 
         if(displayRect.left <= 0)
         {
-            int outside_x = displayRect.left;
-            int outside_w = -displayRect.left;
-            if((((p1.x - myMap.width_pixel) >= (outside_x)) && ((p1.x - myMap.width_pixel) <= (outside_x + outside_w)))
-               || (((p2.x - myMap.width_pixel) >= (outside_x)) && ((p2.x - myMap.width_pixel) <= (outside_x + outside_w)))
-               || (((p3.x - myMap.width_pixel) >= (outside_x)) && ((p3.x - myMap.width_pixel) <= (outside_x + outside_w))))
+            int outside_left = displayRect.left;
+            int outside_right = 0;
+            if(isInRange(p1.x - myMap.width_pixel, outside_left, outside_right)
+               || isInRange(p2.x - myMap.width_pixel, outside_left, outside_right)
+               || isInRange(p3.x - myMap.width_pixel, outside_left, outside_right))
             {
                 p1.x -= myMap.width_pixel;
                 p2.x -= myMap.width_pixel;
@@ -415,24 +425,24 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             }
         } else if(displayRect.left < TRIANGLE_WIDTH)
         {
-            int outside_x = displayRect.left;
-            int outside_w = TRIANGLE_WIDTH;
-            if((((p1.x - myMap.width_pixel) >= (outside_x)) && ((p1.x - myMap.width_pixel) <= (outside_x + outside_w)))
-               || (((p2.x - myMap.width_pixel) >= (outside_x)) && ((p2.x - myMap.width_pixel) <= (outside_x + outside_w)))
-               || (((p3.x - myMap.width_pixel) >= (outside_x)) && ((p3.x - myMap.width_pixel) <= (outside_x + outside_w))))
+            int outside_left = displayRect.left;
+            int outside_right = displayRect.left + TRIANGLE_WIDTH;
+            if(isInRange(p1.x - myMap.width_pixel, outside_left, outside_right)
+               || isInRange(p2.x - myMap.width_pixel, outside_left, outside_right)
+               || isInRange(p3.x - myMap.width_pixel, outside_left, outside_right))
             {
                 p1.x -= myMap.width_pixel;
                 p2.x -= myMap.width_pixel;
                 p3.x -= myMap.width_pixel;
                 triangle_shown = true;
             }
-        } else if(displayRect.right > (myMap.width_pixel))
+        } else if(displayRect.right > myMap.width_pixel)
         {
-            int outside_x = myMap.width_pixel;
-            int outside_w = displayRect.right - myMap.width_pixel;
-            if((((p1.x + myMap.width_pixel) >= (outside_x)) && ((p1.x + myMap.width_pixel) <= (outside_x + outside_w)))
-               || (((p2.x + myMap.width_pixel) >= (outside_x)) && ((p2.x + myMap.width_pixel) <= (outside_x + outside_w)))
-               || (((p3.x + myMap.width_pixel) >= (outside_x)) && ((p3.x + myMap.width_pixel) <= (outside_x + outside_w))))
+            int outside_left = myMap.width_pixel;
+            int outside_right = displayRect.right;
+            if(isInRange(p1.x + myMap.width_pixel, outside_left, outside_right)
+               || isInRange(p2.x + myMap.width_pixel, outside_left, outside_right)
+               || isInRange(p3.x + myMap.width_pixel, outside_left, outside_right))
             {
                 p1.x += myMap.width_pixel;
                 p2.x += myMap.width_pixel;
@@ -443,24 +453,24 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
         if(displayRect.top < 0)
         {
-            int outside_y = displayRect.top;
-            int outside_h = -displayRect.top;
-            if((((p1.y - myMap.height_pixel) >= (outside_y)) && ((p1.y - myMap.height_pixel) <= (outside_y + outside_h)))
-               || (((p2.y - myMap.height_pixel) >= (outside_y)) && ((p2.y - myMap.height_pixel) <= (outside_y + outside_h)))
-               || (((p3.y - myMap.height_pixel) >= (outside_y)) && ((p3.y - myMap.height_pixel) <= (outside_y + outside_h))))
+            int outside_top = displayRect.top;
+            int outside_bottom = 0;
+            if(isInRange(p1.y - myMap.height_pixel, outside_top, outside_bottom)
+               || isInRange(p2.y - myMap.height_pixel, outside_top, outside_bottom)
+               || isInRange(p3.y - myMap.height_pixel, outside_top, outside_bottom))
             {
                 p1.y -= myMap.height_pixel;
                 p2.y -= myMap.height_pixel;
                 p3.y -= myMap.height_pixel;
                 triangle_shown = true;
             }
-        } else if(displayRect.bottom > (myMap.height_pixel))
+        } else if(displayRect.bottom > myMap.height_pixel)
         {
-            int outside_y = myMap.height_pixel;
-            int outside_h = displayRect.bottom - myMap.height_pixel;
-            if((((p1.y + myMap.height_pixel) >= (outside_y)) && ((p1.y + myMap.height_pixel) <= (outside_y + outside_h)))
-               || (((p2.y + myMap.height_pixel) >= (outside_y)) && ((p2.y + myMap.height_pixel) <= (outside_y + outside_h)))
-               || (((p3.y + myMap.height_pixel) >= (outside_y)) && ((p3.y + myMap.height_pixel) <= (outside_y + outside_h))))
+            int outside_top = myMap.height_pixel;
+            int outside_bottom = displayRect.bottom;
+            if(isInRange(p1.y + myMap.height_pixel, outside_top, outside_bottom)
+               || isInRange(p2.y + myMap.height_pixel, outside_top, outside_bottom)
+               || isInRange(p3.y + myMap.height_pixel, outside_top, outside_bottom))
             {
                 p1.y += myMap.height_pixel;
                 p2.y += myMap.height_pixel;
@@ -472,9 +482,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // now test if triangle has negative y-coords cause it's raised over the upper map edge
         if(p1.y < 0 || p2.y < 0 || p3.y < 0)
         {
-            if((((p1.y + myMap.height_pixel) >= displayRect.top) && ((p1.y + myMap.height_pixel) <= displayRect.bottom))
-               || (((p2.y + myMap.height_pixel) >= displayRect.top) && ((p2.y + myMap.height_pixel) <= displayRect.bottom))
-               || (((p3.y + myMap.height_pixel) >= displayRect.top) && ((p3.y + myMap.height_pixel) <= displayRect.bottom)))
+            if(isInRange(p1.y + myMap.height_pixel, displayRect.top, displayRect.bottom)
+               || isInRange(p2.y + myMap.height_pixel, displayRect.top, displayRect.bottom)
+               || isInRange(p3.y + myMap.height_pixel, displayRect.top, displayRect.bottom))
             {
                 p1.y += myMap.height_pixel;
                 p2.y += myMap.height_pixel;
@@ -486,9 +496,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // now test if triangle has bigger y-coords as myMap.height_pixel cause it's reduced under the lower map edge
         if(p1.y > myMap.height_pixel || p2.y > myMap.height_pixel || p3.y > myMap.height_pixel)
         {
-            if((((p1.y - myMap.height_pixel) >= displayRect.top) && ((p1.y - myMap.height_pixel) <= displayRect.bottom))
-               || (((p2.y - myMap.height_pixel) >= displayRect.top) && ((p2.y - myMap.height_pixel) <= displayRect.bottom))
-               || (((p3.y - myMap.height_pixel) >= displayRect.top) && ((p3.y - myMap.height_pixel) <= displayRect.bottom)))
+            if(isInRange(p1.y - myMap.height_pixel, displayRect.top, displayRect.bottom)
+               || isInRange(p2.y - myMap.height_pixel, displayRect.top, displayRect.bottom)
+               || isInRange(p3.y - myMap.height_pixel, displayRect.top, displayRect.bottom))
             {
                 p1.y -= myMap.height_pixel;
                 p2.y -= myMap.height_pixel;
@@ -498,8 +508,23 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         }
 
         if(!triangle_shown)
-            return;
+            return false;
     }
+    p1 -= displayRect.getOrigin();
+    p2 -= displayRect.getOrigin();
+    p3 -= displayRect.getOrigin();
+    return true;
+}
+
+void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, Uint8 type,
+                            const MapNode& node1, const MapNode& node2, const MapNode& node3)
+{
+    Point32 p1(node1.x, node1.y);
+    Point32 p2(node2.x, node2.y);
+    Point32 p3(node3.x, node3.y);
+    // prevent drawing triangles that are not shown
+    if(!GetAdjustedPoints(displayRect, myMap, p1, p2, p3))
+        return;
 
     // find out the texture for the triangle
     // upperX2, ..... are for special use in winterland.
@@ -564,10 +589,6 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     if(texture_raw >= 0x40)
         // it's a harbour
         texture_raw -= 0x40;
-
-    const Point16 shiftedP1(p1 - Point32(displayRect.left, displayRect.top));
-    const Point16 shiftedP2(p2 - Point32(displayRect.left, displayRect.top));
-    const Point16 shiftedP3(p3 - Point32(displayRect.left, displayRect.top));
 
     if(drawTextures)
     {
@@ -850,33 +871,30 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // draw the triangle
         // do not shade water and lava
         if(texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
-            sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset, upperX,
-                               upperY, leftX, leftY, rightX, rightY);
+            sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
         else
         {
             // draw special winterland textures with moving water (ice floe textures)
             if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
             {
-                sge_TexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y, Surf_Tileset,
-                                   upperX2, upperY2, leftX2, leftY2, rightX2, rightY2);
+                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX2, upperY2, leftX2, leftY2, rightX2,
+                                   rightY2);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x,
-                                                            shiftedP3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY,
-                                                            node1.shading << 8, node2.shading << 8, node3.shading << 8, gouData[type],
-                                                            colorkeys, keycount);
+                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY,
+                                                            leftX, leftY, rightX, rightY, node1.shading << 8, node2.shading << 8,
+                                                            node3.shading << 8, gouData[type], colorkeys, keycount);
                 else
-                    sge_FadedTexturedTrigonColorKeys(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                                     Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, node1.i, node2.i, node3.i,
-                                                     colorkeys, keycount);
+                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX,
+                                                     leftY, rightX, rightY, node1.i, node2.i, node3.i, colorkeys, keycount);
             } else
             {
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                                   Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, node1.shading << 8,
-                                                   node2.shading << 8, node3.shading << 8, gouData[type]);
+                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX, leftY,
+                                                   rightX, rightY, node1.shading << 8, node2.shading << 8, node3.shading << 8,
+                                                   gouData[type]);
                 else
-                    sge_FadedTexturedTrigon(display, shiftedP1.x, shiftedP1.y, shiftedP2.x, shiftedP2.y, shiftedP3.x, shiftedP3.y,
-                                            Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY, node1.i, node2.i, node3.i);
+                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX,
+                                            rightY, node1.i, node2.i, node3.i);
             }
         }
         return;
@@ -886,25 +904,25 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     /// PRIORITY FROM HIGH TO LOW: SNOW, MINING_MEADOW, STEPPE, STEPPE_MEADOW2, MINING, MEADOW, FLOWER, STEPPE_MEADOW1, SWAMP, WATER, LAVA
     if(global::s2->getMapObj()->getRenderBorders())
     {
-        // we have to decide which border to blit, "left or right" or "top or bottom", therefore we are using an int: 0 = nothing,
-        // 1=left/top, -1=right/bottom
-        int borderSide;
-        SDL_Rect BorderRect;
-        MapNode tempP;
         // RSU-Triangle
         if(p1.y < p2.y)
         {
             // decide which border to blit (top/bottom) - therefore get the usd-texture from left to compare
             Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
-            tempP = myMap.getVertex(col, node1.VertexY);
+            MapNode tempP = myMap.getVertex(col, node1.VertexY);
 
-            borderSide = CalcBorders(myMap, tempP.usdTexture, node1.rsuTexture, BorderRect);
-            if(borderSide != 0)
+            SDL_Rect BorderRect;
+            auto borderSide = CalcBorders(myMap, tempP.usdTexture, node1.rsuTexture, BorderRect);
+            if(borderSide != BorderPreference::None)
             {
-                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.left, tempP.y - displayRect.top);
-                Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
-                Point16 tmpP1 = (borderSide > 0) ? shiftedP1 : shiftedP1 + Point16(1, 0);
-                Point16 tmpP2 = (borderSide > 0) ? shiftedP2 : shiftedP2 + Point16(1, 0);
+                Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p3 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                Point16 tipPt{(p1 + p2 + thirdPt) / 3};
+                Point16 tmpP1{p1}, tmpP2{p2};
+                if(borderSide == BorderPreference::LeftTop)
+                {
+                    tmpP1 += Point16(1, 0);
+                    tmpP2 += Point16(1, 0);
+                }
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.shading << 8,
@@ -914,20 +932,25 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             }
         }
         // USD-Triangle
-        else
+        else if(false)
         {
-            borderSide = CalcBorders(myMap, node2.rsuTexture, node2.usdTexture, BorderRect);
+            SDL_Rect BorderRect;
+            auto borderSide = CalcBorders(myMap, node2.rsuTexture, node2.usdTexture, BorderRect);
 
-            if(borderSide != 0)
+            if(borderSide != BorderPreference::None)
             {
                 Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
-                tempP = myMap.getVertex(col, node1.VertexY);
+                MapNode tempP = myMap.getVertex(col, node1.VertexY);
 
-                Point16 thirdPt = (borderSide > 0) ? shiftedP3 : Point16(tempP.x - displayRect.left, tempP.y - displayRect.top);
-                Point16 tipPt = (shiftedP1 + shiftedP2 + thirdPt) / Sint16(3);
+                Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p3 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
 
-                Point16 tmpP1 = (borderSide < 0) ? shiftedP1 : shiftedP1 - Point16(1, 0);
-                Point16 tmpP2 = (borderSide < 0) ? shiftedP2 : shiftedP2 - Point16(1, 0);
+                Point16 tipPt{(p1 + p2 + thirdPt) / 3};
+                Point16 tmpP1{p1}, tmpP2{p2};
+                if(borderSide == BorderPreference::RightBottom)
+                {
+                    tmpP1 -= Point16(1, 0);
+                    tmpP2 -= Point16(1, 0);
+                }
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.shading << 8,
@@ -939,18 +962,19 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
             Uint16 row = (node2.VertexY - 1 < 0 ? myMap.height - 1 : node2.VertexY - 1);
             Uint16 col = (node2.VertexY % 2 == 0 ? node2.VertexX : (node2.VertexX + 1 > myMap.width - 1 ? 0 : node2.VertexX + 1));
-            tempP = myMap.getVertex(col, row);
+            MapNode tempP = myMap.getVertex(col, row);
 
             borderSide = CalcBorders(myMap, tempP.rsuTexture, node2.usdTexture, BorderRect);
-            if(borderSide != 0)
+            if(borderSide != BorderPreference::None)
             {
-                Point16 thirdPt = (borderSide > 0) ? shiftedP1 : Point16(tempP.x - displayRect.left, tempP.y - displayRect.top);
-                Point16 tipPt = (shiftedP2 + shiftedP3 + thirdPt) / Sint16(3);
+                Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p1 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                Point16 tipPt{(p2 + p3 + thirdPt) / 3};
+
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, node2.shading << 8,
+                    DrawPreCalcFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, node2.shading << 8,
                                                    node3.shading << 8, gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, shiftedP2, shiftedP3, tipPt, Surf_Tileset, BorderRect, node2.i, node3.i);
+                    DrawFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, node2.i, node3.i);
             }
         }
     }
