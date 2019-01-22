@@ -1536,7 +1536,7 @@ void CMap::modifyVertex()
         {
             if(Vertices[i].active)
             {
-                h_sum += map->getVertex(Vertices[i].x, Vertices[i].y).h;
+                h_sum += map->getVertex(Vertices[i]).h;
                 h_count++;
             }
         }
@@ -1801,7 +1801,7 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
     // test the whole section
     for(int i = 0; i < 6; i++)
     {
-        MapNode& vertex = map->getVertex(tempVertices[i].x, tempVertices[i].y);
+        MapNode& vertex = map->getVertex(tempVertices[i]);
         for(int j = height - vertex.h; j >= 0x04; --j)
             modifyHeightRaise(tempVertices[i].x, tempVertices[i].y);
 
@@ -1810,7 +1810,7 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
     }
 
     // test vertex lower right
-    MapNode& vertex = map->getVertex(tempVertices[6].x, tempVertices[6].y);
+    MapNode& vertex = map->getVertex(tempVertices[6]);
     for(int j = height - vertex.h; j >= 0x04; --j)
         modifyHeightRaise(tempVertices[6].x, tempVertices[6].y);
 
@@ -1822,7 +1822,7 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
     // test the whole section
     for(int i = 7; i < 19; i++)
     {
-        MapNode& vertex = map->getVertex(tempVertices[i].x, tempVertices[i].y);
+        MapNode& vertex = map->getVertex(tempVertices[i]);
         for(int j = height - vertex.h; j >= 0x03; --j)
             modifyHeightRaise(tempVertices[i].x, tempVertices[i].y);
 
@@ -2128,7 +2128,10 @@ void CMap::modifyBuild(int x, int y)
 
     Uint8 building;
     MapNode& curVertex = map->getVertex(x, y);
-    Uint8 height = curVertex.h, temp;
+    const Uint8 height = curVertex.h;
+    std::array<const MapNode*, 7> mapVertices;
+    for(unsigned i = 0; i < mapVertices.size(); i++)
+        mapVertices[i] = &map->getVertex(tempVertices[i]);
 
     // calculate the building using the height of the vertices
     // this building is a mine
@@ -2137,8 +2140,8 @@ void CMap::modifyBuild(int x, int y)
     {
         building = 0x05;
         // test vertex lower right
-        temp = map->getVertex(tempVertices[6].x, tempVertices[6].y).h;
-        if(temp - height >= 0x04)
+        const auto tmpHeight = mapVertices[6]->h;
+        if(tmpHeight - height >= 0x04)
             building = 0x01;
     }
     // not a mine
@@ -2148,14 +2151,14 @@ void CMap::modifyBuild(int x, int y)
         // test the whole section
         for(int i = 0; i < 6; i++)
         {
-            temp = map->getVertex(tempVertices[i].x, tempVertices[i].y).h;
-            if(height - temp >= 0x04 || temp - height >= 0x04)
+            auto tmpHeight = mapVertices[i]->h;
+            if(height - tmpHeight >= 0x04 || tmpHeight - height >= 0x04)
                 building = 0x01;
         }
 
         // test vertex lower right
-        temp = map->getVertex(tempVertices[6].x, tempVertices[6].y).h;
-        if(height - temp >= 0x04 || temp - height >= 0x02)
+        auto tmpHeight = mapVertices[6]->h;
+        if(height - tmpHeight >= 0x04 || tmpHeight - height >= 0x02)
             building = 0x01;
 
         // now test the second section around the vertex
@@ -2164,8 +2167,8 @@ void CMap::modifyBuild(int x, int y)
             // test the whole section
             for(int i = 7; i < 19; i++)
             {
-                temp = map->getVertex(tempVertices[i].x, tempVertices[i].y).h;
-                if(height - temp >= 0x03 || temp - height >= 0x03)
+                tmpHeight = map->getVertex(tempVertices[i]).h;
+                if(height - tmpHeight >= 0x03 || tmpHeight - height >= 0x03)
                     building = 0x02;
             }
         }
@@ -2176,7 +2179,7 @@ void CMap::modifyBuild(int x, int y)
     {
         for(int i = 1; i < 7; i++)
         {
-            MapNode& vertexI = map->getVertex(tempVertices[i].x, tempVertices[i].y);
+            const MapNode& vertexI = *mapVertices[i];
             if(vertexI.objectInfo == 0xC4    // tree
                || vertexI.objectInfo == 0xC5 // tree
                || vertexI.objectInfo == 0xC6 // tree
@@ -2212,10 +2215,6 @@ void CMap::modifyBuild(int x, int y)
             building = 0x00;
         }
     }
-
-    std::array<const MapNode*, 7> mapVertices;
-    for(auto& mapVertice : mapVertices)
-        mapVertice = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
 
     // test if there is snow or lava at the vertex or around the vertex and touching the vertex (first section)
     if(building > 0x00)
@@ -2317,7 +2316,7 @@ void CMap::modifyBuild(int x, int y)
     {
         for(int i = 1; i < 7; i++)
         {
-            if(map->getVertex(tempVertices[i].x, tempVertices[i].y).objectInfo == 0x80)
+            if(map->getVertex(tempVertices[i]).objectInfo == 0x80)
                 building = 0x00;
         }
     }
@@ -2327,7 +2326,7 @@ void CMap::modifyBuild(int x, int y)
     {
         for(int i = 7; i < 19; i++)
         {
-            if(map->getVertex(tempVertices[i].x, tempVertices[i].y).objectInfo == 0x80)
+            if(map->getVertex(tempVertices[i]).objectInfo == 0x80)
             {
                 if(i == 15 || i == 17 || i == 18)
                     building = 0x01;
@@ -2357,8 +2356,8 @@ void CMap::modifyResource(int x, int y)
     calculateVerticesAround(tempVertices, x, y);
     MapNode& curVertex = map->getVertex(x, y);
     std::array<const MapNode*, 7> mapVertices;
-    for(auto& mapVertice : mapVertices)
-        mapVertice = &map->getVertex(tempVertices[0].x, tempVertices[0].y);
+    for(unsigned i = 0; i < mapVertices.size(); i++)
+        mapVertices[i] = &map->getVertex(tempVertices[i]);
 
     // SPECIAL CASE: test if we should set water only
     // test if vertex is surrounded by meadow and meadow-like textures
@@ -2427,16 +2426,16 @@ void CMap::modifyResource(int x, int y)
                 || mapVertices[4]->rsuTexture != TRIANGLE_TEXTURE_WATER || mapVertices[4]->usdTexture != TRIANGLE_TEXTURE_WATER
                 || mapVertices[5]->rsuTexture != TRIANGLE_TEXTURE_WATER || mapVertices[5]->usdTexture != TRIANGLE_TEXTURE_WATER
                 || mapVertices[6]->rsuTexture != TRIANGLE_TEXTURE_WATER || mapVertices[6]->usdTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[7].x, tempVertices[7].y).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[7].x, tempVertices[7].y).usdTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[8].x, tempVertices[8].y).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[8].x, tempVertices[8].y).usdTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[9].x, tempVertices[9].y).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[10].x, tempVertices[10].y).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[10].x, tempVertices[10].y).usdTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[11].x, tempVertices[11].y).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[12].x, tempVertices[12].y).usdTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[14].x, tempVertices[14].y).usdTexture != TRIANGLE_TEXTURE_WATER))
+                || map->getVertex(tempVertices[7]).rsuTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[7]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[8]).rsuTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[8]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[9]).rsuTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[10]).rsuTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[10]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[11]).rsuTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[12]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || map->getVertex(tempVertices[14]).usdTexture != TRIANGLE_TEXTURE_WATER))
     {
         curVertex.resource = 0x87;
     }
