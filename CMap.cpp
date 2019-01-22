@@ -81,7 +81,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
     loadMapPics();
 
     CSurface::get_nodeVectors(*map);
-#ifdef _EDITORMODE
+
     // for safety recalculate build and shadow data and test if fishes and water is correct
     for(int i = 0; i < map->height; i++)
     {
@@ -92,7 +92,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
             modifyResource(j, i);
         }
     }
-#endif
+
     needSurface = true;
     active = true;
     VertexX_ = 10;
@@ -521,7 +521,6 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
 {
     if(button.state == SDL_PRESSED)
     {
-#ifdef _EDITORMODE
         // find out if user clicked on one of the game menu pictures
         // we start with lower menubar
         if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 236)
@@ -659,25 +658,11 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
                 saveCurrentVertices = true;
             }
         }
-#else
-        // find out if user clicked on one of the game menu pictures
-        if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 74)
-           && button.x <= (displayRect.getSize().x / 2 - 37) && button.y >= (displayRect.getSize().y - 37)
-           && button.y <= (displayRect.getSize().y - 4))
-        {
-            // the first picture was clicked
-            callback::GameMenu(INITIALIZING_CALL);
-        }
-#endif
     } else if(button.state == SDL_RELEASED)
     {
-#ifdef _EDITORMODE
         // stop touching vertex data
         if(button.button == SDL_BUTTON_LEFT)
             modify = false;
-#else
-
-#endif
     }
 }
 
@@ -915,7 +900,6 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
                 moveMap(offset);
             }
             break;
-#ifdef _EDITORMODE
             case SDLK_F1: // help menu
                 callback::EditorHelpMenu(INITIALIZING_CALL);
                 break;
@@ -975,7 +959,6 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 
                 callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                 break;
-#endif
             case SDLK_p:
                 if(BitsPerPixel == 8)
                     setBitsPerPixel(32);
@@ -1152,8 +1135,7 @@ void CMap::render()
     if(!map->vertex.empty())
         CSurface::DrawTriangleField(Surf_Map, displayRect, *map);
 
-        // draw pictures to cursor position
-#ifdef _EDITORMODE
+    // draw pictures to cursor position
     int symbol_index, symbol_index2 = -1;
     switch(mode)
     {
@@ -1207,10 +1189,6 @@ void CMap::render()
         CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
     }
 
-#else
-    CSurface::Draw(Surf_Map, global::bmpArray[CIRCLE_FLAT_GREY].surface, MouseBlitX - 10, MouseBlitY - 10);
-#endif
-
     // draw the frame
     if(displayRect.getSize() == Extent(640, 480))
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0);
@@ -1262,7 +1240,6 @@ void CMap::render()
                    displayRect.getSize().y - global::bmpArray[MENUBAR].h);
 
     // draw pictures to lower menubar
-#ifdef _EDITORMODE
     // backgrounds
     CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, displayRect.getSize().x / 2 - 236, displayRect.getSize().y - 36,
                    0, 0, 37, 32);
@@ -1299,11 +1276,7 @@ void CMap::render()
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, displayRect.getSize().x / 2 + 131, displayRect.getSize().y - 37);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_NEWWORLD].surface, displayRect.getSize().x / 2 + 166, displayRect.getSize().y - 37);
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, displayRect.getSize().x / 2 + 207, displayRect.getSize().y - 35);
-#else
 
-#endif
-
-#ifdef _EDITORMODE
     // right menubar
     // do we need a surface?
     if(!Surf_RightMenubar)
@@ -1364,8 +1337,6 @@ void CMap::render()
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.getSize().x - 37, displayRect.getSize().y / 2 + 200);
     sprintf(textBuffer, "Save");
     CFont::writeText(Surf_Map, textBuffer, displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 231);
-
-#endif
 }
 
 void CMap::drawMinimap(SDL_Surface* Window)
@@ -1502,7 +1473,6 @@ void CMap::drawMinimap(SDL_Surface* Window)
         }
     }
 
-#ifdef _EDITORMODE
     // draw the player flags
     char playerNumber[10];
     for(int i = 0; i < MAXPLAYERS; i++)
@@ -1519,7 +1489,6 @@ void CMap::drawMinimap(SDL_Surface* Window)
             CFont::writeText(Window, playerNumber, 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y, 9, FONT_MINTGREEN);
         }
     }
-#endif
 
     // draw the arrow --> 6px is width of left window frame and 20px is the height of the upper window frame
     CSurface::Draw(
@@ -2352,13 +2321,6 @@ void CMap::modifyBuild(int x, int y)
                 building = 0x00;
         }
     }
-#ifndef _EDITORMODE
-    if(building > 0x00)
-    {
-        if(mapVertices[0]->objectInfo == 0x80)
-            building = 0x00;
-    }
-#endif
 
     // test for headquarters around (second section)
     if(building > 0x01)

@@ -12,8 +12,6 @@ struct TerrainDesc;
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
 // in admin mode, there are some key combos to open debugger, resource viewer and so on
 //#define _ADMINMODE
-// in editor mode there is the possibility to load, edit and save created maps
-//#define _EDITORMODE
 
 // callback parameters
 enum
@@ -749,9 +747,8 @@ enum
     WINDOW_BUTTON_RESIZE_MARKED,
     WINDOW_BUTTON_CLOSE_MARKED,
     WINDOW_BUTTON_MINIMIZE_MARKED,
-// END: /DATA/RESOURCE.IDX (AND /DATA/RESOURCE.DAT) OR /DATA/EDITRES.IDX (AND /DATA/EDITRES.DAT)
+    // END: /DATA/RESOURCE.IDX (AND /DATA/RESOURCE.DAT) OR /DATA/EDITRES.IDX (AND /DATA/EDITRES.DAT)
 
-#ifdef _EDITORMODE
     // BEGIN: /DATA/IO/EDITIO.IDX (AND /DATA/IO/EDITIO.DAT)
     BUTTON_GREY_BRIGHT,
     BUTTON_GREY_DARK,
@@ -920,31 +917,7 @@ enum
     PICTURE_SMALL_DEER,
     PICTURE_SMALL_DUCK,
     PICTURE_SMALL_SHEEP,
-// END: /DATA/EDITBOB.LST
-#else
-    // BEGIN: /DATA/IO/IO.IDX (AND /DATA/IO/IO.DAT)
-    BUTTON_GREY_BRIGHT,
-    BUTTON_GREY_DARK,
-    BUTTON_RED1_BRIGHT,
-    BUTTON_RED1_DARK,
-    BUTTON_GREEN1_BRIGHT,
-    BUTTON_GREEN1_DARK,
-    BUTTON_GREEN2_BRIGHT,
-    BUTTON_GREEN2_DARK,
-    BUTTON_RED2_BRIGHT,
-    BUTTON_RED2_DARK,
-    BUTTON_STONE_BRIGHT,
-    BUTTON_STONE_DARK,
-    BUTTON_GREY_BACKGROUND,
-    BUTTON_RED1_BACKGROUND,
-    BUTTON_GREEN1_BACKGROUND,
-    BUTTON_GREEN2_BACKGROUND,
-    BUTTON_RED2_BACKGROUND,
-    BUTTON_STONE_BACKGROUND,
-    // some bobtype 14 pictures missing here
-    AVATAR_OCTAVIANUS_SMALL = 688 + 2070,
-// END: /DATA/IO/IO.IDX (AND /DATA/IO/IO.DAT)
-#endif
+    // END: /DATA/EDITBOB.LST
 
     // BEGIN: /GFX/TEXTURES/TEX5.LBM
     TILESET_GREENLAND_8BPP,
@@ -1072,12 +1045,8 @@ enum
     MAPPIC_SHRUB7,
     MAPPIC_SNOWMAN,
     MAPPIC_DOOR,
-// some pictures missing here
-#ifdef _EDITORMODE
+    // some pictures missing here
     MAPPIC_LAST_ENTRY = 1432 + 2070
-#else
-    MAPPIC_LAST_ENTRY = 1523 + 2070
-#endif
     // END: /DATA/MAP00.LST
 };
 

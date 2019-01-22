@@ -1061,10 +1061,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 break;
             // headquarter
             case 0x80: // node2.objectType is the number of the player beginning with 0x00
-//%7 cause in the original game there are only 7 players and 7 different flags
-#ifdef _EDITORMODE
+                       //%7 cause in the original game there are only 7 players and 7 different flags
                 objIdx = FLAG_BLUE_DARK + P2.objectType % 7;
-#endif
                 break;
 
             default: break;
@@ -1074,7 +1072,6 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                  (int)(p2.y - displayRect.top - global::bmpArray[objIdx].ny));
     }
 
-#ifdef _EDITORMODE
     // blit resources
     if(!isRSU)
     {
@@ -1113,7 +1110,6 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                  (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].ny));
         }
     }
-#endif
 
     // blit buildings
     if(global::s2->getMapObj()->getRenderBuildHelp())

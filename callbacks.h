@@ -17,7 +17,6 @@ void ShowStatus(int Param);
 void mainmenu(int Param);
 void submenuOptions(int Param);
 void MinimapMenu(int Param);
-#ifdef _EDITORMODE
 void EditorHelpMenu(int Param);
 void EditorMainMenu(int Param);
 void EditorLoadMenu(int Param);
@@ -31,9 +30,6 @@ void EditorAnimalMenu(int Param);
 void EditorPlayerMenu(int Param);
 void EditorCreateMenu(int Param);
 void EditorCursorMenu(int Param);
-#else
-void GameMenu(int Param);
-#endif
 
 #ifdef _ADMINMODE
 void debugger(int Param);

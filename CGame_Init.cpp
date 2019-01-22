@@ -175,7 +175,6 @@ bool CGame::Init()
         }
     }
 
-#ifdef _EDITORMODE
     // load only the palette at this time from editres.idx
     std::cout << "\nLoading palette from file: /DATA/EDITRES.IDX...";
     if(!CFile::open_file(global::gameDataFilePath + "/DATA/EDITRES.IDX", IDX, true))
@@ -216,42 +215,6 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-#else
-    // load only the palette at this time from resource.idx
-    std::cout << "\nLoading palette from file: /DATA/RESOURCE.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/RESOURCE.IDX", IDX, true))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set the right palette
-    CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: /DATA/RESOURCE.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/RESOURCE.IDX", IDX))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set back palette
-    CFile::set_palActual(CFile::get_palArray());
-    // load only the palette at this time from io.idx
-    std::cout << "\nLoading palette from file: /DATA/IO/IO.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/IO/IO.IDX", IDX, true))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set the right palette
-    CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: /DATA/IO/IO.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/IO/IO.IDX", IDX))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set back palette
-    CFile::set_palActual(CFile::get_palArray());
-#endif
 
     // texture tilesets
     paths.clear();

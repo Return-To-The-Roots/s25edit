@@ -614,8 +614,7 @@ void callback::submenuOptions(int Param)
     }
 }
 
-#ifdef _EDITORMODE
-// now the editor callbacks will follow (editor mode)
+// now the editor callbacks will follow
 
 void callback::EditorHelpMenu(int Param)
 {
@@ -3035,59 +3034,6 @@ void callback::EditorCreateMenu(int Param)
         default: break;
     }
 }
-
-#else
-// now the 4 game callbacks from the menubar will follow
-
-void callback::GameMenu(int Param)
-{
-    static CWindow* WNDBackToMainMenu = nullptr;
-
-    enum
-    {
-        BACKTOMAIN = 1,
-        WINDOWQUIT
-    };
-
-    switch(Param)
-    {
-        case INITIALIZING_CALL:
-            if(WNDBackToMainMenu)
-                break;
-            WNDBackToMainMenu =
-              new CWindow(GameMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 125, global::s2->GameResolution.y / 2 - 60, 250, 140,
-                          "Back to the main menu?", WINDOW_GREEN1, WINDOW_CLOSE);
-            if(global::s2->RegisterWindow(WNDBackToMainMenu))
-            {
-                WNDBackToMainMenu->addButton(GameMenu, BACKTOMAIN, 20, 20, 200, 80, BUTTON_RED2, "Yes");
-            } else
-            {
-                delete WNDBackToMainMenu;
-                WNDBackToMainMenu = nullptr;
-                return;
-            }
-            break;
-
-        case BACKTOMAIN:
-            if(global::s2->getMapObj() != nullptr)
-                global::s2->delMapObj();
-            WNDBackToMainMenu->setWaste();
-            WNDBackToMainMenu = nullptr;
-            mainmenu(INITIALIZING_CALL);
-            break;
-
-        case WINDOWQUIT:
-            if(WNDBackToMainMenu)
-            {
-                WNDBackToMainMenu->setWaste();
-                WNDBackToMainMenu = nullptr;
-            }
-            break;
-
-        default: break;
-    }
-}
-#endif
 
 void callback::MinimapMenu(int Param)
 {
