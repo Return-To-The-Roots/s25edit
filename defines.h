@@ -1,7 +1,6 @@
 ﻿#ifndef _DEFINES_H
 #define _DEFINES_H
 
-#include "commonDefines.h"
 #include "Point.h"
 #include "Rect.h"
 #include "gameData/DescIdx.h"

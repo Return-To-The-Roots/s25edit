@@ -16,6 +16,8 @@
 #include <boost/filesystem/path.hpp>
 #include <algorithm>
 
+namespace bfs = boost::filesystem;
+
 void callback::PleaseWait(int Param)
 {
     // NOTE: This "Please wait"-window is shown until the PleaseWait-callback is called with 'WINDOW_QUIT_MESSAGE'.
