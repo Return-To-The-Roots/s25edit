@@ -813,7 +813,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // RSU-Triangle
         if(isRSU)
         {
-            // decide which border to blit (top/bottom) - therefore get the usd-texture from left to compare
+            // left upper / right lower edge - therefore get the usd-texture from left to compare
             Uint16 col = (P1.VertexX - 1 < 0 ? myMap.width - 1 : P1.VertexX - 1);
             MapNode tempP = myMap.getVertex(col, P1.VertexY);
 
@@ -821,14 +821,27 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             auto borderSide = CalcBorders(myMap, tempP.usdTexture, P1.rsuTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
-                Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p3 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
-                Point16 tipPt{(p1 + p2 + thirdPt) / 3};
                 Point16 tmpP1{p1}, tmpP2{p2};
+                Point32 thirdPt;
                 if(borderSide == BorderPreference::LeftTop)
+                    thirdPt = p3;
+                else
                 {
                     tmpP1 += Point16(1, 0);
                     tmpP2 += Point16(1, 0);
+                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                    // Shift it close to p1
+                    auto diff = thirdPt - p1;
+                    if(diff.x < -myMap.width_pixel / 2)
+                        thirdPt.x += myMap.width_pixel;
+                    else if(diff.x > myMap.width_pixel / 2)
+                        thirdPt.x -= myMap.width_pixel;
+                    if(diff.y < -myMap.height_pixel / 2)
+                        thirdPt.y += myMap.height_pixel;
+                    else if(diff.y > myMap.height_pixel / 2)
+                        thirdPt.y -= myMap.height_pixel;
                 }
+                Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
@@ -838,9 +851,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             }
         }
         // USD-Triangle
-        else if(false)
+        else
         {
             SDL_Rect BorderRect;
+            // left lower / right upper
             auto borderSide = CalcBorders(myMap, P2.rsuTexture, P2.usdTexture, BorderRect);
 
             if(borderSide != BorderPreference::None)
@@ -848,15 +862,29 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 Uint16 col = (P1.VertexX - 1 < 0 ? myMap.width - 1 : P1.VertexX - 1);
                 MapNode tempP = myMap.getVertex(col, P1.VertexY);
 
-                Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p3 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
-
-                Point16 tipPt{(p1 + p2 + thirdPt) / 3};
                 Point16 tmpP1{p1}, tmpP2{p2};
-                if(borderSide == BorderPreference::RightBottom)
+                Point32 thirdPt;
+                if(borderSide == BorderPreference::LeftTop)
                 {
+                    thirdPt = p3;
                     tmpP1 -= Point16(1, 0);
                     tmpP2 -= Point16(1, 0);
+                } else
+                {
+                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                    // Shift it close to p1
+                    auto diff = thirdPt - p1;
+                    if(diff.x < -myMap.width_pixel / 2)
+                        thirdPt.x += myMap.width_pixel;
+                    else if(diff.x > myMap.width_pixel / 2)
+                        thirdPt.x -= myMap.width_pixel;
+                    if(diff.y < -myMap.height_pixel / 2)
+                        thirdPt.y += myMap.height_pixel;
+                    else if(diff.y > myMap.height_pixel / 2)
+                        thirdPt.y -= myMap.height_pixel;
                 }
+
+                Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
@@ -865,7 +893,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                     DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
 
-            // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
+            // top / bottom - therefore get the rsu-texture one line above to compare
             Uint16 row = (P2.VertexY - 1 < 0 ? myMap.height - 1 : P2.VertexY - 1);
             Uint16 col = (P2.VertexY % 2 == 0 ? P2.VertexX : (P2.VertexX + 1 > myMap.width - 1 ? 0 : P2.VertexX + 1));
             MapNode tempP = myMap.getVertex(col, row);
@@ -873,7 +901,23 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             borderSide = CalcBorders(myMap, tempP.rsuTexture, P2.usdTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
-                Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p1 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                Point32 thirdPt;
+                if(borderSide == BorderPreference::LeftTop)
+                    thirdPt = p1;
+                else
+                {
+                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                    // Shift it close to p2
+                    auto diff = thirdPt - p2;
+                    if(diff.x < -myMap.width_pixel / 2)
+                        thirdPt.x += myMap.width_pixel;
+                    else if(diff.x > myMap.width_pixel / 2)
+                        thirdPt.x -= myMap.width_pixel;
+                    if(diff.y < -myMap.height_pixel / 2)
+                        thirdPt.y += myMap.height_pixel;
+                    else if(diff.y > myMap.height_pixel / 2)
+                        thirdPt.y -= myMap.height_pixel;
+                }
                 Point16 tipPt{(p2 + p3 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
