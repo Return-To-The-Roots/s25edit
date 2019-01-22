@@ -2965,7 +2965,7 @@ void callback::EditorCreateMenu(int Param)
             EditorPlayerMenu(MAP_QUIT);
 
             MapObj->destructMap();
-            MapObj->constructMap("", width, height, LandscapeType, texture, border, border_texture);
+            MapObj->constructMap("", width, height, MapType(LandscapeType), TriangleTerrainType(texture), border, border_texture);
 
             // we need to check which of these windows was active before
             /*

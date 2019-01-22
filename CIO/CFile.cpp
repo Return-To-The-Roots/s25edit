@@ -546,7 +546,9 @@ bobMAP* CFile::open_wld()
     CHECK_READ(libendian::read(myMap->name, 20, fp));
     CHECK_READ(libendian::le_read_us(&myMap->width_old, fp));
     CHECK_READ(libendian::le_read_us(&myMap->height_old, fp));
-    CHECK_READ(libendian::read(&myMap->type, 1, fp));
+    uint8_t mapType;
+    CHECK_READ(libendian::read(&mapType, 1, fp));
+    myMap->type = MapType(mapType);
     CHECK_READ(libendian::read(&myMap->player, 1, fp));
     CHECK_READ(libendian::read(myMap->author, 20, fp));
     for(unsigned short& i : myMap->HQx)
@@ -807,7 +809,8 @@ bool CFile::save_wld(void* data)
     // old height
     libendian::le_write_us(myMap->height_old, fp);
     // type
-    libendian::write(&myMap->type, 1, fp);
+    auto mapType = uint8_t(myMap->type);
+    libendian::write(&mapType, 1, fp);
     // players
     libendian::write(&myMap->player, 1, fp);
     // author

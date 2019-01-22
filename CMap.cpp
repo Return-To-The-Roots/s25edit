@@ -61,7 +61,8 @@ CMap::~CMap()
     destructMap();
 }
 
-void CMap::constructMap(const std::string& filename, int width, int height, int type, int texture, int border, int border_texture)
+void CMap::constructMap(const std::string& filename, int width, int height, MapType type, TriangleTerrainType texture, int border,
+                        int border_texture)
 {
     map = nullptr;
     Surf_Map = nullptr;
@@ -211,7 +212,7 @@ void CMap::destructMap()
     delete map;
 }
 
-bobMAP* CMap::generateMap(int width, int height, int type, int texture, int border, int border_texture)
+bobMAP* CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture)
 {
     bobMAP* myMap = new bobMAP();
 
@@ -899,7 +900,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             callback::EditorAnimalMenu(MAP_QUIT);
             callback::EditorPlayerMenu(MAP_QUIT);
 
-            map->type = 0;
+            map->type = MAP_GREENLAND;
             unloadMapPics();
             loadMapPics();
 
@@ -920,7 +921,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             callback::EditorAnimalMenu(MAP_QUIT);
             callback::EditorPlayerMenu(MAP_QUIT);
 
-            map->type = 1;
+            map->type = MAP_WASTELAND;
             unloadMapPics();
             loadMapPics();
 
@@ -941,7 +942,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             callback::EditorAnimalMenu(MAP_QUIT);
             callback::EditorPlayerMenu(MAP_QUIT);
 
-            map->type = 2;
+            map->type = MAP_WINTERLAND;
             unloadMapPics();
             loadMapPics();
 

@@ -81,10 +81,10 @@ private:
 public:
     CMap(const std::string& filename);
     ~CMap();
-    void constructMap(const std::string& filename, int width = 32, int height = 32, int type = 0, int texture = TRIANGLE_TEXTURE_MEADOW1,
-                      int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
+    void constructMap(const std::string& filename, int width = 32, int height = 32, MapType type = MAP_GREENLAND,
+                      TriangleTerrainType texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
     void destructMap();
-    bobMAP* generateMap(int width, int height, int type, int texture, int border, int border_texture);
+    bobMAP* generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture);
     void loadMapPics();
     void unloadMapPics();
 

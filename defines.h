@@ -143,6 +143,13 @@ struct MapNode
 using DisplayRectangle = RectBase<Sint32>;
 typedef Point<Sint16> Point16;
 typedef Point<Sint32> Point32;
+// map types
+enum MapType
+{
+    MAP_GREENLAND = 0x00,
+    MAP_WASTELAND = 0x01,
+    MAP_WINTERLAND = 0x02
+};
 // map strutcture
 struct bobMAP
 {
@@ -153,7 +160,7 @@ struct bobMAP
     Uint16 width;
     Uint16 width_old;
     Uint16 width_pixel;
-    Uint8 type;
+    MapType type;
     Uint8 player;
     // these are the original values
     Uint16 HQx[7];
@@ -170,10 +177,6 @@ struct bobMAP
     /// Updates x,y,z positions (e.g. after height change)
     void updateVertexCoords();
 };
-// map types
-#define MAP_GREENLAND 0x00
-#define MAP_WASTELAND 0x01
-#define MAP_WINTERLAND 0x02
 // structure to save vertex coordinates
 struct cursorPoint : public Point32
 {
@@ -1220,37 +1223,40 @@ enum
 //#define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
 //#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be greater than 5
 
-#define TRIANGLE_TEXTURE_STEPPE_MEADOW1 0x00
-#define TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR 0x40
-#define TRIANGLE_TEXTURE_MINING1 0x01
-#define TRIANGLE_TEXTURE_SNOW 0x02
-#define TRIANGLE_TEXTURE_SWAMP 0x03
-#define TRIANGLE_TEXTURE_STEPPE 0x04
-#define TRIANGLE_TEXTURE_WATER 0x05
-#define TRIANGLE_TEXTURE_WATER_ 0x06
-#define TRIANGLE_TEXTURE_STEPPE_ 0x07
-#define TRIANGLE_TEXTURE_MEADOW1 0x08
-#define TRIANGLE_TEXTURE_MEADOW1_HARBOUR 0x48
-#define TRIANGLE_TEXTURE_MEADOW2 0x09
-#define TRIANGLE_TEXTURE_MEADOW2_HARBOUR 0x49
-#define TRIANGLE_TEXTURE_MEADOW3 0x0A
-#define TRIANGLE_TEXTURE_MEADOW3_HARBOUR 0x4A
-#define TRIANGLE_TEXTURE_MINING2 0x0B
-#define TRIANGLE_TEXTURE_MINING3 0x0C
-#define TRIANGLE_TEXTURE_MINING4 0x0D
-#define TRIANGLE_TEXTURE_STEPPE_MEADOW2 0x0E
-#define TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR 0x4E
-#define TRIANGLE_TEXTURE_FLOWER 0x0F
-#define TRIANGLE_TEXTURE_FLOWER_HARBOUR 0x4F
-#define TRIANGLE_TEXTURE_LAVA 0x10
-#define TRIANGLE_TEXTURE_COLOR 0x11
-#define TRIANGLE_TEXTURE_MINING_MEADOW 0x12
-#define TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR 0x52
-#define TRIANGLE_TEXTURE_WATER__ 0x13
-#define TRIANGLE_TEXTURE_STEPPE__ 0x80
-#define TRIANGLE_TEXTURE_STEPPE___ 0x84
-#define TRIANGLE_TEXTURE_MEADOW_MIXED 0xBF // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
-#define TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR \
-    0xFF // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
+enum TriangleTerrainType
+{
+    TRIANGLE_TEXTURE_STEPPE_MEADOW1 = 0x00,
+    TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR = 0x40,
+    TRIANGLE_TEXTURE_MINING1 = 0x01,
+    TRIANGLE_TEXTURE_SNOW = 0x02,
+    TRIANGLE_TEXTURE_SWAMP = 0x03,
+    TRIANGLE_TEXTURE_STEPPE = 0x04,
+    TRIANGLE_TEXTURE_WATER = 0x05,
+    TRIANGLE_TEXTURE_WATER_ = 0x06,
+    TRIANGLE_TEXTURE_STEPPE_ = 0x07,
+    TRIANGLE_TEXTURE_MEADOW1 = 0x08,
+    TRIANGLE_TEXTURE_MEADOW1_HARBOUR = 0x48,
+    TRIANGLE_TEXTURE_MEADOW2 = 0x09,
+    TRIANGLE_TEXTURE_MEADOW2_HARBOUR = 0x49,
+    TRIANGLE_TEXTURE_MEADOW3 = 0x0A,
+    TRIANGLE_TEXTURE_MEADOW3_HARBOUR = 0x4A,
+    TRIANGLE_TEXTURE_MINING2 = 0x0B,
+    TRIANGLE_TEXTURE_MINING3 = 0x0C,
+    TRIANGLE_TEXTURE_MINING4 = 0x0D,
+    TRIANGLE_TEXTURE_STEPPE_MEADOW2 = 0x0E,
+    TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR = 0x4E,
+    TRIANGLE_TEXTURE_FLOWER = 0x0F,
+    TRIANGLE_TEXTURE_FLOWER_HARBOUR = 0x4F,
+    TRIANGLE_TEXTURE_LAVA = 0x10,
+    TRIANGLE_TEXTURE_COLOR = 0x11,
+    TRIANGLE_TEXTURE_MINING_MEADOW = 0x12,
+    TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR = 0x52,
+    TRIANGLE_TEXTURE_WATER__ = 0x13,
+    TRIANGLE_TEXTURE_STEPPE__ = 0x80,
+    TRIANGLE_TEXTURE_STEPPE___ = 0x84,
+    TRIANGLE_TEXTURE_MEADOW_MIXED = 0xBF, // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
+    TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR =
+      0xFF, // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
+};
 
 #endif

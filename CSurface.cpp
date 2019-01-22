@@ -186,7 +186,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
 {
     Uint16 width = myMap.width;
     Uint16 height = myMap.height;
-    Uint8 type = myMap.type;
+    auto type = myMap.type;
     MapNode tempP1, tempP2, tempP3;
 
     // min size to avoid underflows
@@ -516,21 +516,203 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
     return true;
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, Uint8 type,
-                            const MapNode& node1, const MapNode& node2, const MapNode& node3)
+void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move, Point16& upper,
+                                       Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2)
 {
-    Point32 p1(node1.x, node1.y);
-    Point32 p2(node2.x, node2.y);
-    Point32 p3(node3.x, node3.y);
+    const auto animOffset = Point16(-texture_move, texture_move);
+    switch(texture)
+    {
+            // in case of USD-Triangle "upper.x" and "upper.y" means "lowerX" and "lowerY"
+        case TRIANGLE_TEXTURE_STEPPE_MEADOW1:
+            upper = Point16(17, 96);
+            left = Point16(0, 126);
+            right = Point16(35, 126);
+            break;
+        case TRIANGLE_TEXTURE_MINING1:
+            upper = Point16(17, 48);
+            left = Point16(0, 78);
+            right = Point16(35, 78);
+            break;
+        case TRIANGLE_TEXTURE_SNOW:
+            if(isRSU)
+            {
+                upper = Point16(17, 0);
+                left = Point16(0, 30);
+                right = Point16(35, 30);
+            } else
+            {
+                upper = Point16(17, 28);
+                left = Point16(0, 0);
+                right = Point16(37, 0);
+            }
+            if(mapType == MAP_WINTERLAND)
+            {
+                if(isRSU)
+                {
+                    upper2 = Point16(231, 61) + animOffset;
+                    left2 = Point16(207, 62) + animOffset;
+                    right2 = Point16(223, 78) + animOffset;
+                } else
+                {
+                    upper2 = Point16(224, 79) + animOffset;
+                    left2 = Point16(232, 62) + animOffset;
+                    right2 = Point16(245, 76) + animOffset;
+                }
+            }
+            break;
+        case TRIANGLE_TEXTURE_SWAMP:
+            upper = Point16(113, 0);
+            left = Point16(96, 30);
+            right = Point16(131, 30);
+            if(mapType == MAP_WINTERLAND)
+            {
+                if(isRSU)
+                {
+                    upper2 = Point16(231, 61) + animOffset;
+                    left2 = Point16(207, 62) + animOffset;
+                    right2 = Point16(223, 78) + animOffset;
+                } else
+                {
+                    upper2 = Point16(224, 79) + animOffset;
+                    left2 = Point16(232, 62) + animOffset;
+                    right2 = Point16(245, 76) + animOffset;
+                }
+            }
+            break;
+        case TRIANGLE_TEXTURE_STEPPE:
+            upper = Point16(65, 0);
+            left = Point16(48, 30);
+            right = Point16(83, 30);
+            break;
+        case TRIANGLE_TEXTURE_STEPPE_:
+            upper = Point16(65, 0);
+            left = Point16(48, 30);
+            right = Point16(83, 30);
+            break;
+        case TRIANGLE_TEXTURE_STEPPE__:
+            upper = Point16(65, 0);
+            left = Point16(48, 30);
+            right = Point16(83, 30);
+            break;
+        case TRIANGLE_TEXTURE_STEPPE___:
+            upper = Point16(65, 0);
+            left = Point16(48, 30);
+            right = Point16(83, 30);
+            break;
+        case TRIANGLE_TEXTURE_WATER:
+            if(isRSU)
+            {
+                upper = Point16(231, 61) + animOffset;
+                left = Point16(207, 62) + animOffset;
+                right = Point16(223, 78) + animOffset;
+            } else
+            {
+                upper = Point16(224, 79) + animOffset;
+                left = Point16(232, 62) + animOffset;
+                right = Point16(245, 76) + animOffset;
+            }
+            break;
+        case TRIANGLE_TEXTURE_WATER_:
+            if(isRSU)
+            {
+                upper = Point16(231, 61) + animOffset;
+                left = Point16(207, 62) + animOffset;
+                right = Point16(223, 78) + animOffset;
+            } else
+            {
+                upper = Point16(224, 79) + animOffset;
+                left = Point16(232, 62) + animOffset;
+                right = Point16(245, 76) + animOffset;
+            }
+            break;
+        case TRIANGLE_TEXTURE_WATER__:
+            if(isRSU)
+            {
+                upper = Point16(231, 61) + animOffset;
+                left = Point16(207, 62) + animOffset;
+                right = Point16(223, 78) + animOffset;
+            } else
+            {
+                upper = Point16(224, 79) + animOffset;
+                left = Point16(232, 62) + animOffset;
+                right = Point16(245, 76) + animOffset;
+            }
+            break;
+        case TRIANGLE_TEXTURE_MEADOW1:
+            upper = Point16(65, 96);
+            left = Point16(48, 126);
+            right = Point16(83, 126);
+            break;
+        case TRIANGLE_TEXTURE_MEADOW2:
+            upper = Point16(113, 96);
+            left = Point16(96, 126);
+            right = Point16(131, 126);
+            break;
+        case TRIANGLE_TEXTURE_MEADOW3:
+            upper = Point16(161, 96);
+            left = Point16(144, 126);
+            right = Point16(179, 126);
+            break;
+        case TRIANGLE_TEXTURE_MINING2:
+            upper = Point16(65, 48);
+            left = Point16(48, 78);
+            right = Point16(83, 78);
+            break;
+        case TRIANGLE_TEXTURE_MINING3:
+            upper = Point16(113, 48);
+            left = Point16(96, 78);
+            right = Point16(131, 78);
+            break;
+        case TRIANGLE_TEXTURE_MINING4:
+            upper = Point16(161, 48);
+            left = Point16(144, 78);
+            right = Point16(179, 78);
+            break;
+        case TRIANGLE_TEXTURE_STEPPE_MEADOW2:
+            upper = Point16(17, 144);
+            left = Point16(0, 174);
+            right = Point16(35, 174);
+            break;
+        case TRIANGLE_TEXTURE_FLOWER:
+            upper = Point16(161, 0);
+            left = Point16(144, 30);
+            right = Point16(179, 30);
+            break;
+        case TRIANGLE_TEXTURE_LAVA:
+            if(isRSU)
+            {
+                upper = Point16(231, 117) + animOffset;
+                left = Point16(207, 118) + animOffset;
+                right = Point16(223, 134) + animOffset;
+            } else
+            {
+                upper = Point16(224, 135) + animOffset;
+                left = Point16(232, 118) + animOffset;
+                right = Point16(245, 132) + animOffset;
+            }
+            break;
+        case TRIANGLE_TEXTURE_MINING_MEADOW:
+            upper = Point16(65, 144);
+            left = Point16(48, 174);
+            right = Point16(83, 174);
+            break;
+        default: // TRIANGLE_TEXTURE_FLOWER
+            upper = Point16(161, 0);
+            left = Point16(144, 30);
+            right = Point16(179, 30);
+            break;
+    }
+}
+
+void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, MapType type, const MapNode& P1,
+                            const MapNode& P2, const MapNode& P3)
+{
+    Point32 p1(P1.x, P1.y);
+    Point32 p2(P2.x, P2.y);
+    Point32 p3(P3.x, P3.y);
     // prevent drawing triangles that are not shown
     if(!GetAdjustedPoints(displayRect, myMap, p1, p2, p3))
         return;
-
-    // find out the texture for the triangle
-    // upperX2, ..... are for special use in winterland.
-    unsigned char upperX, upperY, leftX, leftY, rightX, rightY, upperX2 = 0, upperY2 = 0, leftX2 = 0, leftY2 = 0, rightX2 = 0, rightY2 = 0;
-    Uint8 texture, texture_raw;
-    SDL_Surface* Surf_Tileset;
 
     // for moving water, lava, objects and so on
     // This is very tricky: there are ice floes in the winterland and the water under this floes is moving.
@@ -560,6 +742,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             texture_move = 0;
     }
 
+    SDL_Surface* Surf_Tileset;
     switch(type)
     {
         case MAP_GREENLAND:
@@ -581,320 +764,43 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             break;
     }
 
-    if(p1.y < p2.y)
-        texture = node1.rsuTexture;
-    else
-        texture = node2.usdTexture;
-    texture_raw = texture;
-    if(texture_raw >= 0x40)
-        // it's a harbour
-        texture_raw -= 0x40;
+    bool const isRSU = p1.y < p2.y;
 
     if(drawTextures)
     {
-        switch(texture_raw)
-        {
-            // in case of USD-Triangle "upperX" and "upperY" means "lowerX" and "lowerY"
-            case TRIANGLE_TEXTURE_STEPPE_MEADOW1:
-                upperX = 17;
-                upperY = 96;
-                leftX = 0;
-                leftY = 126;
-                rightX = 35;
-                rightY = 126;
-                break;
-            case TRIANGLE_TEXTURE_MINING1:
-                upperX = 17;
-                upperY = 48;
-                leftX = 0;
-                leftY = 78;
-                rightX = 35;
-                rightY = 78;
-                break;
-            case TRIANGLE_TEXTURE_SNOW:
-                if(p1.y < p2.y)
-                {
-                    upperX = 17;
-                    upperY = 0;
-                    leftX = 0;
-                    leftY = 30;
-                    rightX = 35;
-                    rightY = 30;
-                } else
-                {
-                    upperX = 17;
-                    upperY = 28;
-                    leftX = 0;
-                    leftY = 0;
-                    rightX = 37;
-                    rightY = 0;
-                }
-                if(type == MAP_WINTERLAND)
-                {
-                    if(p1.y < p2.y)
-                    {
-                        upperX2 = 231 - texture_move;
-                        upperY2 = 61 + texture_move;
-                        leftX2 = 207 - texture_move;
-                        leftY2 = 62 + texture_move;
-                        rightX2 = 223 - texture_move;
-                        rightY2 = 78 + texture_move;
-                    } else
-                    {
-                        upperX2 = 224 - texture_move;
-                        upperY2 = 79 + texture_move;
-                        leftX2 = 232 - texture_move;
-                        leftY2 = 62 + texture_move;
-                        rightX2 = 245 - texture_move;
-                        rightY2 = 76 + texture_move;
-                    }
-                }
-                break;
-            case TRIANGLE_TEXTURE_SWAMP:
-                upperX = 113;
-                upperY = 0;
-                leftX = 96;
-                leftY = 30;
-                rightX = 131;
-                rightY = 30;
-                if(type == MAP_WINTERLAND)
-                {
-                    if(p1.y < p2.y)
-                    {
-                        upperX2 = 231 - texture_move;
-                        upperY2 = 61 + texture_move;
-                        leftX2 = 207 - texture_move;
-                        leftY2 = 62 + texture_move;
-                        rightX2 = 223 - texture_move;
-                        rightY2 = 78 + texture_move;
-                    } else
-                    {
-                        upperX2 = 224 - texture_move;
-                        upperY2 = 79 + texture_move;
-                        leftX2 = 232 - texture_move;
-                        leftY2 = 62 + texture_move;
-                        rightX2 = 245 - texture_move;
-                        rightY2 = 76 + texture_move;
-                    }
-                }
-                break;
-            case TRIANGLE_TEXTURE_STEPPE:
-                upperX = 65;
-                upperY = 0;
-                leftX = 48;
-                leftY = 30;
-                rightX = 83;
-                rightY = 30;
-                break;
-            case TRIANGLE_TEXTURE_STEPPE_:
-                upperX = 65;
-                upperY = 0;
-                leftX = 48;
-                leftY = 30;
-                rightX = 83;
-                rightY = 30;
-                break;
-            case TRIANGLE_TEXTURE_STEPPE__:
-                upperX = 65;
-                upperY = 0;
-                leftX = 48;
-                leftY = 30;
-                rightX = 83;
-                rightY = 30;
-                break;
-            case TRIANGLE_TEXTURE_STEPPE___:
-                upperX = 65;
-                upperY = 0;
-                leftX = 48;
-                leftY = 30;
-                rightX = 83;
-                rightY = 30;
-                break;
-            case TRIANGLE_TEXTURE_WATER:
-                if(p1.y < p2.y)
-                {
-                    upperX = 231 - texture_move;
-                    upperY = 61 + texture_move;
-                    leftX = 207 - texture_move;
-                    leftY = 62 + texture_move;
-                    rightX = 223 - texture_move;
-                    rightY = 78 + texture_move;
-                } else
-                {
-                    upperX = 224 - texture_move;
-                    upperY = 79 + texture_move;
-                    leftX = 232 - texture_move;
-                    leftY = 62 + texture_move;
-                    rightX = 245 - texture_move;
-                    rightY = 76 + texture_move;
-                }
-                break;
-            case TRIANGLE_TEXTURE_WATER_:
-                if(p1.y < p2.y)
-                {
-                    upperX = 231 - texture_move;
-                    upperY = 61 + texture_move;
-                    leftX = 207 - texture_move;
-                    leftY = 62 + texture_move;
-                    rightX = 223 - texture_move;
-                    rightY = 78 + texture_move;
-                } else
-                {
-                    upperX = 224 - texture_move;
-                    upperY = 79 + texture_move;
-                    leftX = 232 - texture_move;
-                    leftY = 62 + texture_move;
-                    rightX = 245 - texture_move;
-                    rightY = 76 + texture_move;
-                }
-                break;
-            case TRIANGLE_TEXTURE_WATER__:
-                if(p1.y < p2.y)
-                {
-                    upperX = 231 - texture_move;
-                    upperY = 61 + texture_move;
-                    leftX = 207 - texture_move;
-                    leftY = 62 + texture_move;
-                    rightX = 223 - texture_move;
-                    rightY = 78 + texture_move;
-                } else
-                {
-                    upperX = 224 - texture_move;
-                    upperY = 79 + texture_move;
-                    leftX = 232 - texture_move;
-                    leftY = 62 + texture_move;
-                    rightX = 245 - texture_move;
-                    rightY = 76 + texture_move;
-                }
-                break;
-            case TRIANGLE_TEXTURE_MEADOW1:
-                upperX = 65;
-                upperY = 96;
-                leftX = 48;
-                leftY = 126;
-                rightX = 83;
-                rightY = 126;
-                break;
-            case TRIANGLE_TEXTURE_MEADOW2:
-                upperX = 113;
-                upperY = 96;
-                leftX = 96;
-                leftY = 126;
-                rightX = 131;
-                rightY = 126;
-                break;
-            case TRIANGLE_TEXTURE_MEADOW3:
-                upperX = 161;
-                upperY = 96;
-                leftX = 144;
-                leftY = 126;
-                rightX = 179;
-                rightY = 126;
-                break;
-            case TRIANGLE_TEXTURE_MINING2:
-                upperX = 65;
-                upperY = 48;
-                leftX = 48;
-                leftY = 78;
-                rightX = 83;
-                rightY = 78;
-                break;
-            case TRIANGLE_TEXTURE_MINING3:
-                upperX = 113;
-                upperY = 48;
-                leftX = 96;
-                leftY = 78;
-                rightX = 131;
-                rightY = 78;
-                break;
-            case TRIANGLE_TEXTURE_MINING4:
-                upperX = 161;
-                upperY = 48;
-                leftX = 144;
-                leftY = 78;
-                rightX = 179;
-                rightY = 78;
-                break;
-            case TRIANGLE_TEXTURE_STEPPE_MEADOW2:
-                upperX = 17;
-                upperY = 144;
-                leftX = 0;
-                leftY = 174;
-                rightX = 35;
-                rightY = 174;
-                break;
-            case TRIANGLE_TEXTURE_FLOWER:
-                upperX = 161;
-                upperY = 0;
-                leftX = 144;
-                leftY = 30;
-                rightX = 179;
-                rightY = 30;
-                break;
-            case TRIANGLE_TEXTURE_LAVA:
-                if(p1.y < p2.y)
-                {
-                    upperX = 231 - texture_move;
-                    upperY = 117 + texture_move;
-                    leftX = 207 - texture_move;
-                    leftY = 118 + texture_move;
-                    rightX = 223 - texture_move;
-                    rightY = 134 + texture_move;
-                } else
-                {
-                    upperX = 224 - texture_move;
-                    upperY = 135 + texture_move;
-                    leftX = 232 - texture_move;
-                    leftY = 118 + texture_move;
-                    rightX = 245 - texture_move;
-                    rightY = 132 + texture_move;
-                }
-                break;
-            case TRIANGLE_TEXTURE_MINING_MEADOW:
-                upperX = 65;
-                upperY = 144;
-                leftX = 48;
-                leftY = 174;
-                rightX = 83;
-                rightY = 174;
-                break;
-            default: // TRIANGLE_TEXTURE_FLOWER
-                upperX = 161;
-                upperY = 0;
-                leftX = 144;
-                leftY = 30;
-                rightX = 179;
-                rightY = 30;
-                break;
-        }
+        // upper2, ..... are for special use in winterland.
+        Point16 upper, left, right, upper2, left2, right2;
+        auto const texture = TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
+        GetTerrainTextureCoords(type, texture, isRSU, texture_move, upper, left, right, upper2, left2, right2);
 
         // draw the triangle
         // do not shade water and lava
         if(texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
-            sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX, rightY);
+            sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x, left.y, right.x,
+                               right.y);
         else
         {
             // draw special winterland textures with moving water (ice floe textures)
             if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
             {
-                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX2, upperY2, leftX2, leftY2, rightX2,
-                                   rightY2);
+                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y, left2.x, left2.y,
+                                   right2.x, right2.y);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY,
-                                                            leftX, leftY, rightX, rightY, node1.shading << 8, node2.shading << 8,
-                                                            node3.shading << 8, gouData[type], colorkeys, keycount);
+                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
+                                                            left.x, left.y, right.x, right.y, P1.shading << 8, P2.shading << 8,
+                                                            P3.shading << 8, gouData[type], colorkeys, keycount);
                 else
-                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX,
-                                                     leftY, rightX, rightY, node1.i, node2.i, node3.i, colorkeys, keycount);
+                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
+                                                     left.y, right.x, right.y, P1.i, P2.i, P3.i, colorkeys, keycount);
             } else
             {
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX, leftY,
-                                                   rightX, rightY, node1.shading << 8, node2.shading << 8, node3.shading << 8,
+                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
+                                                   left.y, right.x, right.y, P1.shading << 8, P2.shading << 8, P3.shading << 8,
                                                    gouData[type]);
                 else
-                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upperX, upperY, leftX, leftY, rightX,
-                                            rightY, node1.i, node2.i, node3.i);
+                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x, left.y,
+                                            right.x, right.y, P1.i, P2.i, P3.i);
             }
         }
         return;
@@ -905,14 +811,14 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     if(global::s2->getMapObj()->getRenderBorders())
     {
         // RSU-Triangle
-        if(p1.y < p2.y)
+        if(isRSU)
         {
             // decide which border to blit (top/bottom) - therefore get the usd-texture from left to compare
-            Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
-            MapNode tempP = myMap.getVertex(col, node1.VertexY);
+            Uint16 col = (P1.VertexX - 1 < 0 ? myMap.width - 1 : P1.VertexX - 1);
+            MapNode tempP = myMap.getVertex(col, P1.VertexY);
 
             SDL_Rect BorderRect;
-            auto borderSide = CalcBorders(myMap, tempP.usdTexture, node1.rsuTexture, BorderRect);
+            auto borderSide = CalcBorders(myMap, tempP.usdTexture, P1.rsuTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
                 Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p3 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
@@ -925,22 +831,22 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 }
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.shading << 8,
-                                                   node2.shading << 8, gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
+                                                   gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.i, node2.i);
+                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
         }
         // USD-Triangle
         else if(false)
         {
             SDL_Rect BorderRect;
-            auto borderSide = CalcBorders(myMap, node2.rsuTexture, node2.usdTexture, BorderRect);
+            auto borderSide = CalcBorders(myMap, P2.rsuTexture, P2.usdTexture, BorderRect);
 
             if(borderSide != BorderPreference::None)
             {
-                Uint16 col = (node1.VertexX - 1 < 0 ? myMap.width - 1 : node1.VertexX - 1);
-                MapNode tempP = myMap.getVertex(col, node1.VertexY);
+                Uint16 col = (P1.VertexX - 1 < 0 ? myMap.width - 1 : P1.VertexX - 1);
+                MapNode tempP = myMap.getVertex(col, P1.VertexY);
 
                 Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p3 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
 
@@ -953,28 +859,28 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 }
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.shading << 8,
-                                                   node2.shading << 8, gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
+                                                   gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, node1.i, node2.i);
+                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
 
             // decide which border to blit (top/bottom) - therefore get the rsu-texture one line above to compare
-            Uint16 row = (node2.VertexY - 1 < 0 ? myMap.height - 1 : node2.VertexY - 1);
-            Uint16 col = (node2.VertexY % 2 == 0 ? node2.VertexX : (node2.VertexX + 1 > myMap.width - 1 ? 0 : node2.VertexX + 1));
+            Uint16 row = (P2.VertexY - 1 < 0 ? myMap.height - 1 : P2.VertexY - 1);
+            Uint16 col = (P2.VertexY % 2 == 0 ? P2.VertexX : (P2.VertexX + 1 > myMap.width - 1 ? 0 : P2.VertexX + 1));
             MapNode tempP = myMap.getVertex(col, row);
 
-            borderSide = CalcBorders(myMap, tempP.rsuTexture, node2.usdTexture, BorderRect);
+            borderSide = CalcBorders(myMap, tempP.rsuTexture, P2.usdTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
                 Point32 thirdPt = (borderSide == BorderPreference::LeftTop) ? p1 : Point32(tempP.x, tempP.y) - displayRect.getOrigin();
                 Point16 tipPt{(p2 + p3 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, node2.shading << 8,
-                                                   node3.shading << 8, gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, P2.shading << 8,
+                                                   P3.shading << 8, gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, node2.i, node3.i);
+                    DrawFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, P2.i, P3.i);
             }
         }
     }
@@ -982,82 +888,82 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     // blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT node1 ON RIGHTSIDEUP-TRIANGLES
 
     // blit objects
-    if(p2.y < p1.y)
+    if(!isRSU)
     {
         int objIdx = 0;
-        switch(node2.objectInfo)
+        switch(P2.objectInfo)
         {
             // tree
             case 0xC4:
-                if(node2.objectType >= 0x30 && node2.objectType <= 0x37)
+                if(P2.objectType >= 0x30 && P2.objectType <= 0x37)
                 {
-                    if(node2.objectType + roundCount > 0x37)
-                        objIdx = MAPPIC_TREE_PINE + (node2.objectType - 0x30) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0x37)
+                        objIdx = MAPPIC_TREE_PINE + (P2.objectType - 0x30) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PINE + (node2.objectType - 0x30) + roundCount;
+                        objIdx = MAPPIC_TREE_PINE + (P2.objectType - 0x30) + roundCount;
 
-                } else if(node2.objectType >= 0x70 && node2.objectType <= 0x77)
+                } else if(P2.objectType >= 0x70 && P2.objectType <= 0x77)
                 {
-                    if(node2.objectType + roundCount > 0x77)
-                        objIdx = MAPPIC_TREE_BIRCH + (node2.objectType - 0x70) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0x77)
+                        objIdx = MAPPIC_TREE_BIRCH + (P2.objectType - 0x70) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_BIRCH + (node2.objectType - 0x70) + roundCount;
-                } else if(node2.objectType >= 0xB0 && node2.objectType <= 0xB7)
+                        objIdx = MAPPIC_TREE_BIRCH + (P2.objectType - 0x70) + roundCount;
+                } else if(P2.objectType >= 0xB0 && P2.objectType <= 0xB7)
                 {
-                    if(node2.objectType + roundCount > 0xB7)
-                        objIdx = MAPPIC_TREE_OAK + (node2.objectType - 0xB0) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0xB7)
+                        objIdx = MAPPIC_TREE_OAK + (P2.objectType - 0xB0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_OAK + (node2.objectType - 0xB0) + roundCount;
-                } else if(node2.objectType >= 0xF0 && node2.objectType <= 0xF7)
+                        objIdx = MAPPIC_TREE_OAK + (P2.objectType - 0xB0) + roundCount;
+                } else if(P2.objectType >= 0xF0 && P2.objectType <= 0xF7)
                 {
-                    if(node2.objectType + roundCount > 0xF7)
-                        objIdx = MAPPIC_TREE_PALM1 + (node2.objectType - 0xF0) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0xF7)
+                        objIdx = MAPPIC_TREE_PALM1 + (P2.objectType - 0xF0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PALM1 + (node2.objectType - 0xF0) + roundCount;
+                        objIdx = MAPPIC_TREE_PALM1 + (P2.objectType - 0xF0) + roundCount;
                 }
                 break;
             // tree
             case 0xC5:
-                if(node2.objectType >= 0x30 && node2.objectType <= 0x37)
+                if(P2.objectType >= 0x30 && P2.objectType <= 0x37)
                 {
-                    if(node2.objectType + roundCount > 0x37)
-                        objIdx = MAPPIC_TREE_PALM2 + (node2.objectType - 0x30) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0x37)
+                        objIdx = MAPPIC_TREE_PALM2 + (P2.objectType - 0x30) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PALM2 + (node2.objectType - 0x30) + roundCount;
+                        objIdx = MAPPIC_TREE_PALM2 + (P2.objectType - 0x30) + roundCount;
 
-                } else if(node2.objectType >= 0x70 && node2.objectType <= 0x77)
+                } else if(P2.objectType >= 0x70 && P2.objectType <= 0x77)
                 {
-                    if(node2.objectType + roundCount > 0x77)
-                        objIdx = MAPPIC_TREE_PINEAPPLE + (node2.objectType - 0x70) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0x77)
+                        objIdx = MAPPIC_TREE_PINEAPPLE + (P2.objectType - 0x70) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_PINEAPPLE + (node2.objectType - 0x70) + roundCount;
-                } else if(node2.objectType >= 0xB0 && node2.objectType <= 0xB7)
+                        objIdx = MAPPIC_TREE_PINEAPPLE + (P2.objectType - 0x70) + roundCount;
+                } else if(P2.objectType >= 0xB0 && P2.objectType <= 0xB7)
                 {
-                    if(node2.objectType + roundCount > 0xB7)
-                        objIdx = MAPPIC_TREE_CYPRESS + (node2.objectType - 0xB0) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0xB7)
+                        objIdx = MAPPIC_TREE_CYPRESS + (P2.objectType - 0xB0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_CYPRESS + (node2.objectType - 0xB0) + roundCount;
-                } else if(node2.objectType >= 0xF0 && node2.objectType <= 0xF7)
+                        objIdx = MAPPIC_TREE_CYPRESS + (P2.objectType - 0xB0) + roundCount;
+                } else if(P2.objectType >= 0xF0 && P2.objectType <= 0xF7)
                 {
-                    if(node2.objectType + roundCount > 0xF7)
-                        objIdx = MAPPIC_TREE_CHERRY + (node2.objectType - 0xF0) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0xF7)
+                        objIdx = MAPPIC_TREE_CHERRY + (P2.objectType - 0xF0) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_CHERRY + (node2.objectType - 0xF0) + roundCount;
+                        objIdx = MAPPIC_TREE_CHERRY + (P2.objectType - 0xF0) + roundCount;
                 }
                 break;
             // tree
             case 0xC6:
-                if(node2.objectType >= 0x30 && node2.objectType <= 0x37)
+                if(P2.objectType >= 0x30 && P2.objectType <= 0x37)
                 {
-                    if(node2.objectType + roundCount > 0x37)
-                        objIdx = MAPPIC_TREE_FIR + (node2.objectType - 0x30) + (roundCount - 7);
+                    if(P2.objectType + roundCount > 0x37)
+                        objIdx = MAPPIC_TREE_FIR + (P2.objectType - 0x30) + (roundCount - 7);
                     else
-                        objIdx = MAPPIC_TREE_FIR + (node2.objectType - 0x30) + roundCount;
+                        objIdx = MAPPIC_TREE_FIR + (P2.objectType - 0x30) + roundCount;
                 }
                 break;
             // landscape
             case 0xC8:
-                switch(node2.objectType)
+                switch(P2.objectType)
                 {
                     case 0x00: objIdx = MAPPIC_MUSHROOM1; break;
                     case 0x01: objIdx = MAPPIC_MUSHROOM2; break;
@@ -1103,17 +1009,17 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 break;
             // stone
             case 0xCC:
-                objIdx = MAPPIC_GRANITE_1_1 + (node2.objectType - 0x01);
+                objIdx = MAPPIC_GRANITE_1_1 + (P2.objectType - 0x01);
                 break;
             // stone
             case 0xCD:
-                objIdx = MAPPIC_GRANITE_2_1 + (node2.objectType - 0x01);
+                objIdx = MAPPIC_GRANITE_2_1 + (P2.objectType - 0x01);
                 break;
             // headquarter
             case 0x80: // node2.objectType is the number of the player beginning with 0x00
 //%7 cause in the original game there are only 7 players and 7 different flags
 #ifdef _EDITORMODE
-                objIdx = FLAG_BLUE_DARK + node2.objectType % 7;
+                objIdx = FLAG_BLUE_DARK + P2.objectType % 7;
 #endif
                 break;
 
@@ -1126,41 +1032,41 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
 #ifdef _EDITORMODE
     // blit resources
-    if(p2.y < p1.y)
+    if(!isRSU)
     {
-        if(node2.resource >= 0x41 && node2.resource <= 0x47)
+        if(P2.resource >= 0x41 && P2.resource <= 0x47)
         {
-            for(char i = 0x41; i <= node2.resource; i++)
+            for(char i = 0x41; i <= P2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface,
                      (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
                      (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
-        } else if(node2.resource >= 0x49 && node2.resource <= 0x4F)
+        } else if(P2.resource >= 0x49 && P2.resource <= 0x4F)
         {
-            for(char i = 0x49; i <= node2.resource; i++)
+            for(char i = 0x49; i <= P2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface,
                      (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
                      (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
         }
-        if(node2.resource >= 0x51 && node2.resource <= 0x57)
+        if(P2.resource >= 0x51 && P2.resource <= 0x57)
         {
-            for(char i = 0x51; i <= node2.resource; i++)
+            for(char i = 0x51; i <= P2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface,
                      (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
                      (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
         }
-        if(node2.resource >= 0x59 && node2.resource <= 0x5F)
+        if(P2.resource >= 0x59 && P2.resource <= 0x5F)
         {
-            for(char i = 0x59; i <= node2.resource; i++)
+            for(char i = 0x59; i <= P2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface,
                      (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
                      (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
         }
         // blit animals
-        if(node2.animal > 0x00 && node2.animal <= 0x06)
+        if(P2.animal > 0x00 && P2.animal <= 0x06)
         {
-            Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].surface,
-                 (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].nx),
-                 (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_SMALL_BEAR + node2.animal].ny));
+            Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].surface,
+                 (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].nx),
+                 (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].ny));
         }
     }
 #endif
@@ -1168,9 +1074,9 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     // blit buildings
     if(global::s2->getMapObj()->getRenderBuildHelp())
     {
-        if(p2.y < p1.y)
+        if(!isRSU)
         {
-            switch(node2.build % 8)
+            switch(P2.build % 8)
             {
                 case 0x01:
                     Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_FLAG].nx),
@@ -1187,10 +1093,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                          (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
-                    if(node2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                       || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-                       || node2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || node2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                       || node2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                    if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
                              (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
                              (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
