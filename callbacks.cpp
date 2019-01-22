@@ -674,9 +674,9 @@ void callback::EditorHelpMenu(int Param)
                                          "PageDown\n");
                 SelectBoxHelp->setOption("(can't decrease below this)\n");
                 SelectBoxHelp->setOption("Undo............................................................................................."
-                                         "...................Q\n");
-                SelectBoxHelp->setOption("Undo............................................................................................."
-                                         "...................W\n");
+                                         ".......................Q\n");
+                SelectBoxHelp->setOption("Redo............................................................................................."
+                                         ".................SHIFT+Q\n");
                 SelectBoxHelp->setOption("(just actions made with the cursor)\n");
                 SelectBoxHelp->setOption(
                   "Build help on/off.............................................................................................Space\n");
@@ -686,9 +686,9 @@ void callback::EditorHelpMenu(int Param)
                 SelectBoxHelp->setOption(" so a castle can be build)\n");
                 SelectBoxHelp->setOption(
                   "Harbour-Mode................................................................................................H\n");
-                SelectBoxHelp->setOption("(changes the surrounding terrian,\n");
+                SelectBoxHelp->setOption("(changes the surrounding terrain,\n");
                 SelectBoxHelp->setOption(" so that a harbour can be build)\n");
-                SelectBoxHelp->setOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland..................G/W/O\n");
+                SelectBoxHelp->setOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland).................G/W/O\n");
                 SelectBoxHelp->setOption(
                   "New/Original shadows (experimental)..........................................................P\n");
                 SelectBoxHelp->setOption(

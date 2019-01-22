@@ -731,271 +731,295 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     if(key.type == SDL_KEYDOWN)
     {
-        if(key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_HEIGHT_RAISE)
-            mode = EDITOR_MODE_HEIGHT_REDUCE;
-        else if(key.keysym.sym == SDLK_LALT && mode == EDITOR_MODE_HEIGHT_RAISE)
-            mode = EDITOR_MODE_HEIGHT_PLANE;
-        else if(key.keysym.sym == SDLK_INSERT && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
+        switch(key.keysym.sym)
         {
-            if(MaxRaiseHeight > 0x00)
-                MaxRaiseHeight--;
-        } else if(key.keysym.sym == SDLK_HOME && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
-        {
-            MaxRaiseHeight = 0x3C;
-        } else if(key.keysym.sym == SDLK_PAGEUP && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
-        {
-            if(MaxRaiseHeight < 0x3C)
-                MaxRaiseHeight++;
-        } else if(key.keysym.sym == SDLK_DELETE && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
-        {
-            if(MinReduceHeight > 0x00)
-                MinReduceHeight--;
-        } else if(key.keysym.sym == SDLK_END && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
-        {
-            MinReduceHeight = 0x00;
-        } else if(key.keysym.sym == SDLK_PAGEDOWN && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE))
-        {
-            if(MinReduceHeight < 0x3C)
-                MinReduceHeight++;
-        } else if(key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RESOURCE_RAISE)
-            mode = EDITOR_MODE_RESOURCE_REDUCE;
-        else if(key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_FLAG)
-            mode = EDITOR_MODE_FLAG_DELETE;
-        else if(key.keysym.sym == SDLK_LCTRL)
-        {
-            lastMode = mode;
-            mode = EDITOR_MODE_CUT;
-        } else if(key.keysym.sym == SDLK_b && mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
-        {
-            lastMode = mode;
-            lastChangeSection = ChangeSection_;
-            ChangeSection_ = 0;
-            setupVerticesActivity();
-            mode = EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE;
-        } else if(key.keysym.sym == SDLK_h && mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
-        {
-            lastMode = mode;
-            lastChangeSection = ChangeSection_;
-            ChangeSection_ = 0;
-            setupVerticesActivity();
-            mode = EDITOR_MODE_TEXTURE_MAKE_HARBOUR;
-        } else if(key.keysym.sym == SDLK_r)
-        {
-            callback::PleaseWait(INITIALIZING_CALL);
-
-            rotateMap();
-            rotateMap();
-
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-        } else if(key.keysym.sym == SDLK_x)
-        {
-            callback::PleaseWait(INITIALIZING_CALL);
-
-            MirrorMapOnXAxis();
-
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-        } else if(key.keysym.sym == SDLK_y)
-        {
-            callback::PleaseWait(INITIALIZING_CALL);
-
-            MirrorMapOnYAxis();
-
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-        } else if(key.keysym.sym == SDLK_KP_PLUS)
-        {
-            if(ChangeSection_ < MAX_CHANGE_SECTION)
-            {
-                ChangeSection_++;
+            case SDLK_LSHIFT:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE)
+                    mode = EDITOR_MODE_HEIGHT_REDUCE;
+                else if(mode == EDITOR_MODE_RESOURCE_RAISE)
+                    mode = EDITOR_MODE_RESOURCE_REDUCE;
+                else if(mode == EDITOR_MODE_FLAG)
+                    mode = EDITOR_MODE_FLAG_DELETE;
+                break;
+            case SDLK_LALT:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE)
+                    mode = EDITOR_MODE_HEIGHT_PLANE;
+                break;
+            case SDLK_INSERT:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
+                {
+                    if(MaxRaiseHeight > 0x00)
+                        MaxRaiseHeight--;
+                }
+                break;
+            case SDLK_HOME:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
+                {
+                    MaxRaiseHeight = 0x3C;
+                }
+                break;
+            case SDLK_PAGEUP:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
+                {
+                    if(MaxRaiseHeight < 0x3C)
+                        MaxRaiseHeight++;
+                }
+                break;
+            case SDLK_DELETE:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
+                {
+                    if(MinReduceHeight > 0x00)
+                        MinReduceHeight--;
+                }
+                break;
+            case SDLK_END:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
+                {
+                    MinReduceHeight = 0x00;
+                }
+                break;
+            case SDLK_PAGEDOWN:
+                if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
+                {
+                    if(MinReduceHeight < 0x3C)
+                        MinReduceHeight++;
+                }
+                break;
+            case SDLK_LCTRL:
+                lastMode = mode;
+                mode = EDITOR_MODE_CUT;
+                break;
+            case SDLK_b:
+                if(mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
+                {
+                    lastMode = mode;
+                    lastChangeSection = ChangeSection_;
+                    ChangeSection_ = 0;
+                    setupVerticesActivity();
+                    mode = EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE;
+                }
+                break;
+            case SDLK_h:
+                if(mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
+                {
+                    lastMode = mode;
+                    lastChangeSection = ChangeSection_;
+                    ChangeSection_ = 0;
+                    setupVerticesActivity();
+                    mode = EDITOR_MODE_TEXTURE_MAKE_HARBOUR;
+                }
+                break;
+            case SDLK_r:
+                callback::PleaseWait(INITIALIZING_CALL);
+                rotateMap();
+                rotateMap();
+                callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                break;
+            case SDLK_x:
+                callback::PleaseWait(INITIALIZING_CALL);
+                MirrorMapOnXAxis();
+                callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                break;
+            case SDLK_y:
+                callback::PleaseWait(INITIALIZING_CALL);
+                MirrorMapOnYAxis();
+                callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                break;
+            case SDLK_KP_PLUS:
+                if(ChangeSection_ < MAX_CHANGE_SECTION)
+                {
+                    ChangeSection_++;
+                    setupVerticesActivity();
+                }
+                break;
+            case SDLK_KP_MINUS:
+                if(ChangeSection_ > 0)
+                {
+                    ChangeSection_--;
+                    setupVerticesActivity();
+                }
+                break;
+            case SDLK_1:
+            case SDLK_KP1:
+                ChangeSection_ = 0;
                 setupVerticesActivity();
-            }
-        } else if(key.keysym.sym == SDLK_KP_MINUS)
-        {
-            if(ChangeSection_ > 0)
-            {
-                ChangeSection_--;
+                break;
+            case SDLK_2:
+            case SDLK_KP2:
+                ChangeSection_ = 1;
                 setupVerticesActivity();
-            }
-        } else if(key.keysym.sym == SDLK_1 || key.keysym.sym == SDLK_KP1)
-        {
-            ChangeSection_ = 0;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_2 || key.keysym.sym == SDLK_KP2)
-        {
-            ChangeSection_ = 1;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_3 || key.keysym.sym == SDLK_KP3)
-        {
-            ChangeSection_ = 2;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_4 || key.keysym.sym == SDLK_KP4)
-        {
-            ChangeSection_ = 3;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_5 || key.keysym.sym == SDLK_KP5)
-        {
-            ChangeSection_ = 4;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_6 || key.keysym.sym == SDLK_KP6)
-        {
-            ChangeSection_ = 5;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_7 || key.keysym.sym == SDLK_KP7)
-        {
-            ChangeSection_ = 6;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_8 || key.keysym.sym == SDLK_KP8)
-        {
-            ChangeSection_ = 7;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_9 || key.keysym.sym == SDLK_KP9)
-        {
-            ChangeSection_ = 8;
-            setupVerticesActivity();
-        } else if(key.keysym.sym == SDLK_SPACE)
-        {
-            RenderBuildHelp = !RenderBuildHelp;
-        } else if(key.keysym.sym == SDLK_F11)
-        {
-            RenderBorders = !RenderBorders;
-        } else if(key.keysym.sym == SDLK_q)
-        {
-            if(!saveCurrentVertices && !undoBuffer.empty())
+                break;
+            case SDLK_3:
+            case SDLK_KP3:
+                ChangeSection_ = 2;
+                setupVerticesActivity();
+                break;
+            case SDLK_4:
+            case SDLK_KP4:
+                ChangeSection_ = 3;
+                setupVerticesActivity();
+                break;
+            case SDLK_5:
+            case SDLK_KP5:
+                ChangeSection_ = 4;
+                setupVerticesActivity();
+                break;
+            case SDLK_6:
+            case SDLK_KP6:
+                ChangeSection_ = 5;
+                setupVerticesActivity();
+                break;
+            case SDLK_7:
+            case SDLK_KP7:
+                ChangeSection_ = 6;
+                setupVerticesActivity();
+                break;
+            case SDLK_8:
+            case SDLK_KP8:
+                ChangeSection_ = 7;
+                setupVerticesActivity();
+                break;
+            case SDLK_9:
+            case SDLK_KP9:
+                ChangeSection_ = 8;
+                setupVerticesActivity();
+                break;
+            case SDLK_SPACE: RenderBuildHelp = !RenderBuildHelp; break;
+            case SDLK_F11: RenderBorders = !RenderBorders; break;
+            case SDLK_q:
+                if(!saveCurrentVertices)
+                {
+                    if(SDL_GetModState() & (KMOD_LSHIFT | KMOD_RSHIFT))
+                    {
+                        if(!redoBuffer.empty())
+                        {
+                            undoBuffer.push_back(saveVertex(redoBuffer.back().pos, *map));
+                            restoreVertex(redoBuffer.back(), *map);
+                            redoBuffer.pop_back();
+                        }
+                    } else if(!undoBuffer.empty())
+                    {
+                        redoBuffer.push_back(saveVertex(undoBuffer.back().pos, *map));
+                        restoreVertex(undoBuffer.back(), *map);
+                        undoBuffer.pop_back();
+                    }
+                }
+                break;
+            case SDLK_UP:
+            case SDLK_DOWN:
+            case SDLK_LEFT:
+            case SDLK_RIGHT:
             {
-                redoBuffer.push_back(saveVertex(undoBuffer.back().pos, *map));
-                restoreVertex(undoBuffer.back(), *map);
-                undoBuffer.pop_back();
+                Position offset{key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0),
+                                key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0)};
+                moveMap(offset);
             }
-        } else if(key.keysym.sym == SDLK_w)
-        {
-            if(!saveCurrentVertices && !redoBuffer.empty())
-            {
-                undoBuffer.push_back(saveVertex(redoBuffer.back().pos, *map));
-                restoreVertex(redoBuffer.back(), *map);
-                redoBuffer.pop_back();
-            }
-        } else if(key.keysym.sym == SDLK_UP || key.keysym.sym == SDLK_DOWN || key.keysym.sym == SDLK_LEFT || key.keysym.sym == SDLK_RIGHT)
-        {
-            Position offset{key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0),
-                            key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0)};
-            moveMap(offset);
-        }
+            break;
 #ifdef _EDITORMODE
-        // help menu
-        else if(key.keysym.sym == SDLK_F1)
-        {
-            callback::EditorHelpMenu(INITIALIZING_CALL);
-        }
-        // convert map to greenland
-        else if(key.keysym.sym == SDLK_g)
-        {
-            callback::PleaseWait(INITIALIZING_CALL);
+            case SDLK_F1: // help menu
+                callback::EditorHelpMenu(INITIALIZING_CALL);
+                break;
+            case SDLK_g: // convert map to greenland
+                callback::PleaseWait(INITIALIZING_CALL);
 
-            // we have to close the windows and initialize them again to prevent failures
-            callback::EditorCursorMenu(MAP_QUIT);
-            callback::EditorTextureMenu(MAP_QUIT);
-            callback::EditorTreeMenu(MAP_QUIT);
-            callback::EditorLandscapeMenu(MAP_QUIT);
-            callback::MinimapMenu(MAP_QUIT);
-            callback::EditorResourceMenu(MAP_QUIT);
-            callback::EditorAnimalMenu(MAP_QUIT);
-            callback::EditorPlayerMenu(MAP_QUIT);
+                // we have to close the windows and initialize them again to prevent failures
+                callback::EditorCursorMenu(MAP_QUIT);
+                callback::EditorTextureMenu(MAP_QUIT);
+                callback::EditorTreeMenu(MAP_QUIT);
+                callback::EditorLandscapeMenu(MAP_QUIT);
+                callback::MinimapMenu(MAP_QUIT);
+                callback::EditorResourceMenu(MAP_QUIT);
+                callback::EditorAnimalMenu(MAP_QUIT);
+                callback::EditorPlayerMenu(MAP_QUIT);
 
-            map->type = MAP_GREENLAND;
-            unloadMapPics();
-            loadMapPics();
+                map->type = MAP_GREENLAND;
+                unloadMapPics();
+                loadMapPics();
 
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-        }
-        // convert map to wasteland
-        else if(key.keysym.sym == SDLK_o)
-        {
-            callback::PleaseWait(INITIALIZING_CALL);
+                callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                break;
+            case SDLK_o: // convert map to wasteland
+                callback::PleaseWait(INITIALIZING_CALL);
 
-            // we have to close the windows and initialize them again to prevent failures
-            callback::EditorCursorMenu(MAP_QUIT);
-            callback::EditorTextureMenu(MAP_QUIT);
-            callback::EditorTreeMenu(MAP_QUIT);
-            callback::EditorLandscapeMenu(MAP_QUIT);
-            callback::MinimapMenu(MAP_QUIT);
-            callback::EditorResourceMenu(MAP_QUIT);
-            callback::EditorAnimalMenu(MAP_QUIT);
-            callback::EditorPlayerMenu(MAP_QUIT);
+                // we have to close the windows and initialize them again to prevent failures
+                callback::EditorCursorMenu(MAP_QUIT);
+                callback::EditorTextureMenu(MAP_QUIT);
+                callback::EditorTreeMenu(MAP_QUIT);
+                callback::EditorLandscapeMenu(MAP_QUIT);
+                callback::MinimapMenu(MAP_QUIT);
+                callback::EditorResourceMenu(MAP_QUIT);
+                callback::EditorAnimalMenu(MAP_QUIT);
+                callback::EditorPlayerMenu(MAP_QUIT);
 
-            map->type = MAP_WASTELAND;
-            unloadMapPics();
-            loadMapPics();
+                map->type = MAP_WASTELAND;
+                unloadMapPics();
+                loadMapPics();
 
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-        }
-        // convert map to winterland
-        else if(key.keysym.sym == SDLK_w)
-        {
-            callback::PleaseWait(INITIALIZING_CALL);
+                break;
+            case SDLK_w: // convert map to winterland
+                callback::PleaseWait(INITIALIZING_CALL);
 
-            // we have to close the windows and initialize them again to prevent failures
-            callback::EditorCursorMenu(MAP_QUIT);
-            callback::EditorTextureMenu(MAP_QUIT);
-            callback::EditorTreeMenu(MAP_QUIT);
-            callback::EditorLandscapeMenu(MAP_QUIT);
-            callback::MinimapMenu(MAP_QUIT);
-            callback::EditorResourceMenu(MAP_QUIT);
-            callback::EditorAnimalMenu(MAP_QUIT);
-            callback::EditorPlayerMenu(MAP_QUIT);
+                // we have to close the windows and initialize them again to prevent failures
+                callback::EditorCursorMenu(MAP_QUIT);
+                callback::EditorTextureMenu(MAP_QUIT);
+                callback::EditorTreeMenu(MAP_QUIT);
+                callback::EditorLandscapeMenu(MAP_QUIT);
+                callback::MinimapMenu(MAP_QUIT);
+                callback::EditorResourceMenu(MAP_QUIT);
+                callback::EditorAnimalMenu(MAP_QUIT);
+                callback::EditorPlayerMenu(MAP_QUIT);
 
-            map->type = MAP_WINTERLAND;
-            unloadMapPics();
-            loadMapPics();
+                map->type = MAP_WINTERLAND;
+                unloadMapPics();
+                loadMapPics();
 
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-        }
+                callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+                break;
 #endif
-        else if(key.keysym.sym == SDLK_p)
-        {
-            if(BitsPerPixel == 8)
-                setBitsPerPixel(32);
-            else
-                setBitsPerPixel(8);
-        }
-        // lock horizontal movement
-        else if(key.keysym.sym == SDLK_F9)
-        {
-            HorizontalMovementLocked = !HorizontalMovementLocked;
-        }
-        // lock vertical movement
-        else if(key.keysym.sym == SDLK_F10)
-        {
-            VerticalMovementLocked = !VerticalMovementLocked;
+            case SDLK_p:
+                if(BitsPerPixel == 8)
+                    setBitsPerPixel(32);
+                else
+                    setBitsPerPixel(8);
+                break;
+            case SDLK_F9: // lock horizontal movement
+                HorizontalMovementLocked = !HorizontalMovementLocked;
+
+                break;
+            case SDLK_F10: // lock vertical movement
+                           // VerticalMovementLocked = !VerticalMovementLocked;
+            default: break;
         }
     } else if(key.type == SDL_KEYUP)
     {
-        // user probably released EDITOR_MODE_HEIGHT_REDUCE
-        if(key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_HEIGHT_REDUCE)
-            mode = EDITOR_MODE_HEIGHT_RAISE;
-        // user probably released EDITOR_MODE_HEIGHT_PLANE
-        else if(key.keysym.sym == SDLK_LALT && mode == EDITOR_MODE_HEIGHT_PLANE)
-            mode = EDITOR_MODE_HEIGHT_RAISE;
-        // user probably released EDITOR_MODE_RESOURCE_REDUCE
-        else if(key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_RESOURCE_REDUCE)
-            mode = EDITOR_MODE_RESOURCE_RAISE;
-        // user probably released EDITOR_MODE_FLAG_DELETE
-        else if(key.keysym.sym == SDLK_LSHIFT && mode == EDITOR_MODE_FLAG_DELETE)
-            mode = EDITOR_MODE_FLAG;
-        // user probably released EDITOR_MODE_CUT
-        else if(key.keysym.sym == SDLK_LCTRL)
-            mode = lastMode;
-        // user probably released EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE
-        else if(key.keysym.sym == SDLK_b)
+        switch(key.keysym.sym)
         {
-            mode = lastMode;
-            ChangeSection_ = lastChangeSection;
-            setupVerticesActivity();
-        }
-        // user probably released EDITOR_MODE_TEXTURE_MAKE_HARBOUR
-        else if(key.keysym.sym == SDLK_h)
-        {
-            mode = lastMode;
-            ChangeSection_ = lastChangeSection;
-            setupVerticesActivity();
+            case SDLK_LSHIFT: // user probably released EDITOR_MODE_HEIGHT_REDUCE
+                if(mode == EDITOR_MODE_HEIGHT_REDUCE)
+                    mode = EDITOR_MODE_HEIGHT_RAISE;
+                else if(mode == EDITOR_MODE_RESOURCE_REDUCE)
+                    mode = EDITOR_MODE_RESOURCE_RAISE;
+                else if(mode == EDITOR_MODE_FLAG_DELETE)
+                    mode = EDITOR_MODE_FLAG;
+                break;
+            case SDLK_LALT: // user probably released EDITOR_MODE_HEIGHT_PLANE
+                if(mode == EDITOR_MODE_HEIGHT_PLANE)
+                    mode = EDITOR_MODE_HEIGHT_RAISE;
+                break;
+            case SDLK_LCTRL: // user probably released EDITOR_MODE_CUT
+                mode = lastMode;
+                break;
+            case SDLK_b: // user probably released EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE
+                mode = lastMode;
+                ChangeSection_ = lastChangeSection;
+                setupVerticesActivity();
+                break;
+            case SDLK_h: // user probably released EDITOR_MODE_TEXTURE_MAKE_HARBOUR
+                mode = lastMode;
+                ChangeSection_ = lastChangeSection;
+                setupVerticesActivity();
+                break;
+            default: break;
         }
     }
 }
