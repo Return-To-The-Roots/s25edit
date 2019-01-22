@@ -1068,8 +1068,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             default: break;
         }
         if(objIdx != 0)
-            Draw(display, global::bmpArray[objIdx].surface, (int)(p2.x - displayRect.left - global::bmpArray[objIdx].nx),
-                 (int)(p2.y - displayRect.top - global::bmpArray[objIdx].ny));
+            Draw(display, global::bmpArray[objIdx].surface, (int)(p2.x - global::bmpArray[objIdx].nx),
+                 (int)(p2.y - global::bmpArray[objIdx].ny));
     }
 
     // blit resources
@@ -1078,36 +1078,33 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         if(P2.resource >= 0x41 && P2.resource <= 0x47)
         {
             for(char i = 0x41; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface,
-                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
-                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface, (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
+                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
         } else if(P2.resource >= 0x49 && P2.resource <= 0x4F)
         {
             for(char i = 0x49; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface,
-                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
-                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface, (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
+                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
         }
         if(P2.resource >= 0x51 && P2.resource <= 0x57)
         {
             for(char i = 0x51; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface,
-                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
-                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface, (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
+                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
         }
         if(P2.resource >= 0x59 && P2.resource <= 0x5F)
         {
             for(char i = 0x59; i <= P2.resource; i++)
                 Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface,
-                     (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
-                     (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
+                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
+                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
         }
         // blit animals
         if(P2.animal > 0x00 && P2.animal <= 0x06)
         {
             Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].surface,
-                 (int)(p2.x - displayRect.left - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].nx),
-                 (int)(p2.y - displayRect.top - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].ny));
+                 (int)(p2.x - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].nx),
+                 (int)(p2.y - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].ny));
         }
     }
 
@@ -1119,18 +1116,16 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             switch(P2.build % 8)
             {
                 case 0x01:
-                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_FLAG].nx),
-                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_FLAG].ny));
+                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - global::bmpArray[MAPPIC_FLAG].nx),
+                         (int)(p2.y - global::bmpArray[MAPPIC_FLAG].ny));
                     break;
                 case 0x02:
-                    Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface,
-                         (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
-                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
+                    Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface, (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
+                         (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
                     break;
                 case 0x03:
-                    Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface,
-                         (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
-                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
+                    Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface, (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
+                         (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
                     if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
@@ -1138,16 +1133,15 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                        || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
                        || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
-                             (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
-                             (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
+                             (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
+                             (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
                     else
-                        Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface,
-                             (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
-                             (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
+                        Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface, (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
+                             (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
                     break;
                 case 0x05:
-                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(p2.x - displayRect.left - global::bmpArray[MAPPIC_MINE].nx),
-                         (int)(p2.y - displayRect.top - global::bmpArray[MAPPIC_MINE].ny));
+                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(p2.x - global::bmpArray[MAPPIC_MINE].nx),
+                         (int)(p2.y - global::bmpArray[MAPPIC_MINE].ny));
                     break;
                 default: break;
             }
