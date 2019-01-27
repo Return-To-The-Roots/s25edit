@@ -47,7 +47,7 @@ public:
     int getRows() { return rows; };
     void setX(int x) { this->x_ = x; }
     void setY(int y) { this->y_ = y; }
-    void setText(const char* text);
+    void setText(const std::string& text);
     void setActive() { active = true; }
     void setInactive() { active = false; }
     bool isActive() { return active; }

@@ -215,11 +215,11 @@ bool CFont::writeText()
                 if(pixel_ctr_w_tmp > pixel_ctr_w)
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 pixel_ctr_w_tmp = 0;
-                chiffre++;
+                ++chiffre;
             } else
             {
                 pixel_ctr_w_tmp += global::bmpArray[chiffre_index].w;
-                chiffre++;
+                ++chiffre;
             }
 
             // if this was the last chiffre setup width, create surface and go in normal mode to write text to the surface
@@ -248,7 +248,7 @@ bool CFont::writeText()
         {
             pos_y += row_separator + fontsize_;
             pos_x = 0;
-            chiffre++;
+            ++chiffre;
             continue;
         }
 
@@ -271,7 +271,7 @@ bool CFont::writeText()
             pos_x += global::bmpArray[chiffre_index].w;
 
         // go to next chiffre
-        chiffre++;
+        ++chiffre;
     }
     return true;
 }
@@ -445,7 +445,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
             else if((align == ALIGN_RIGHT) && (Surf_Dest->w - 1 - pixel_ctr_w <= 0))
                 pos_x = 0;
 
-            chiffre++;
+            ++chiffre;
 
             // if this was the last chiffre go in normal mode and write the text to the specified position
             if(*chiffre == '\0')
@@ -481,7 +481,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
             pos_x += global::bmpArray[chiffre_index].w;
 
         // go to next chiffre
-        chiffre++;
+        ++chiffre;
     }
 
     return true;

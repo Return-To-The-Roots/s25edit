@@ -73,6 +73,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
 
     if(!filename.empty())
         map = (bobMAP*)CFile::open_file(filename, WLD);
+    filename_ = filename;
 
     if(!map)
         map = generateMap(width, height, type, texture, border, border_texture);

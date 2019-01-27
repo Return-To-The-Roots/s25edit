@@ -61,12 +61,12 @@ public:
             const char* title = nullptr, int color = WINDOW_GREEN1, Uint8 flags = 0);
     ~CWindow();
     // Access
-    int getX() { return x_; };
-    int getY() { return y_; };
-    int getW() { return w_; };
-    int getH() { return h_; };
+    int getX() const { return x_; };
+    int getY() const { return y_; };
+    int getW() const { return w_; };
+    int getH() const { return h_; };
     Rect getRect() const { return Rect(x_, y_, w_, h_); }
-    int getPriority() { return priority; }
+    int getPriority() const { return priority; }
     void setPriority(int priority) { this->priority = priority; }
     void setTitle(const char* title);
     void setMouseData(SDL_MouseMotionEvent motion);
@@ -84,12 +84,12 @@ public:
         needRender = true;
     }
     void setInactive();
-    bool isActive() { return active; }
+    bool isActive() const { return active; }
     void setWaste() { waste = true; }
-    bool isWaste() { return waste; }
-    bool isMoving() { return moving; }
-    bool isResizing() { return resizing; }
-    bool isMarked() { return marked; }
+    bool isWaste() const { return waste; }
+    bool isMoving() const { return moving; }
+    bool isResizing() const { return resizing; }
+    bool isMarked() const { return marked; }
     void setDirty() { needRender = true; }
     // we can not trust this information, cause if minimized is false, it is possible, that we still have the old minimized surface
     // bool isMinimized() { return minimized; };

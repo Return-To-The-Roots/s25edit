@@ -5,6 +5,7 @@
 #include <boost/endian/conversion.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 
 //-V:fseek:303
@@ -533,7 +534,7 @@ bool CFile::open_gou()
 
 bobMAP* CFile::open_wld()
 {
-    bobMAP* myMap = new bobMAP();
+    auto myMap = std::make_unique<bobMAP>();
 
     // initialize myMap->name and myMap->author (both 20 chars) to prevent filling with random memory content
     for(int i = 0; i < 20; i++)
@@ -704,7 +705,7 @@ bobMAP* CFile::open_wld()
             CHECK_READ(libendian::read(&myMap->getVertex(i, j).unknown5, 1, fp));
     }
 
-    return myMap;
+    return myMap.release();
 }
 
 bobMAP* CFile::open_swd()

@@ -925,7 +925,8 @@ void callback::EditorSaveMenu(int Param)
 
                 WNDSave->addText("Filename", 100, 2, 9);
                 TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
-                TXTF_Filename->setText("MyMap");
+                auto const filePath = MapObj->getFilename().empty() ? "MyMap" : MapObj->getFilename();
+                TXTF_Filename->setText(bfs::path(filePath).stem().string());
                 WNDSave->addText("Mapname", 98, 38, 9);
                 TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
                 TXTF_Mapname->setText(MapObj->getMapname());
@@ -970,6 +971,7 @@ void callback::EditorSaveMenu(int Param)
 
             MapObj->setMapname(TXTF_Mapname->getText());
             MapObj->setAuthor(TXTF_Author->getText());
+            MapObj->setFilename(TXTF_Filename->getText());
             bfs::path filepath = bfs::path(global::userMapsPath) / TXTF_Filename->getText();
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");

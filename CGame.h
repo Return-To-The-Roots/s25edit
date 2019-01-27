@@ -2,6 +2,7 @@
 #define _CGAME_H
 
 #include "includes.h"
+#include <array>
 
 class CWindow;
 class CMap;
@@ -42,11 +43,11 @@ private:
     } Cursor;
 
     // Object for Menu Screens
-    CMenu* Menus[MAXMENUS];
+    std::array<CMenu*, MAXMENUS> Menus;
     // Object for Windows
-    CWindow* Windows[MAXWINDOWS];
+    std::array<CWindow*, MAXWINDOWS> Windows;
     // Object for Callbacks
-    void (*Callbacks[MAXCALLBACKS])(int);
+    std::array<void (*)(int), MAXCALLBACKS> Callbacks;
     // Object for the Map
     CMap* MapObj;
 

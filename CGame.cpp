@@ -120,10 +120,10 @@ bool CGame::RegisterWindow(CWindow* Window)
     int highestPriority = 0;
 
     // first find the highest priority
-    for(auto& Window : Windows)
+    for(const auto* curWnd : Windows)
     {
-        if(Window && Window->getPriority() > highestPriority)
-            highestPriority = Window->getPriority();
+        if(curWnd && curWnd->getPriority() > highestPriority)
+            highestPriority = curWnd->getPriority();
     }
 
     if(!Window)
@@ -155,7 +155,7 @@ bool CGame::UnregisterWindow(CWindow* Window)
         {
             for(int j = i - 1; j >= 0; j--)
             {
-                if(Windows[j] != nullptr)
+                if(Windows[j])
                 {
                     Windows[j]->setActive();
                     break;

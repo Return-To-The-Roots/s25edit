@@ -88,12 +88,12 @@ void CTextfield::setColor(int color)
     needRender = true;
 }
 
-void CTextfield::setText(const char* text)
+void CTextfield::setText(const std::string& text)
 {
     char* txtPtr = &this->text_[0];
     int col_ctr = 1, row_ctr = 1;
 
-    while(*text != '\0')
+    for(char c : text)
     {
         if(txtPtr >= &this->text_.back() - 2)
             break;
@@ -110,7 +110,7 @@ void CTextfield::setText(const char* text)
             col_ctr = 1;
         }
 
-        *txtPtr++ = *text++;
+        *txtPtr++ = c;
         col_ctr++;
     }
     *txtPtr = '\0';

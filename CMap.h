@@ -21,6 +21,7 @@ class CMap
     friend class CSurface;
 
 private:
+    std::string filename_;
     SDL_Surface* Surf_Map;
     SDL_Surface* Surf_RightMenubar;
     bobMAP* map;
@@ -121,10 +122,12 @@ public:
     void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
     Uint16* getPlayerHQx() { return PlayerHQx; }
     Uint16* getPlayerHQy() { return PlayerHQy; }
+    const std::string& getFilename() const { return filename_; }
+    void setFilename(std::string filename) { filename_ = std::move(filename); }
     const char* getMapname() { return map->name; }
-    void setMapname(const char* name) { strcpy(map->name, name); }
+    void setMapname(const std::string& name) { strcpy(map->name, name.substr(0, std::extent<decltype(map->name)>::value).c_str()); }
     const char* getAuthor() { return map->author; }
-    void setAuthor(const char* author) { strcpy(map->author, author); }
+    void setAuthor(const std::string& author) { strcpy(map->author, author.substr(0, std::extent<decltype(map->author)>::value).c_str()); }
 
     void drawMinimap(SDL_Surface* Window);
     void render();
