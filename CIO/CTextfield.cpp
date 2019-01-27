@@ -26,7 +26,7 @@ CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsiz
     needRender = true;
     rendered = false;
     this->button_style = button_style;
-    textObj = new CFont((const char*)nullptr, x, y, fontsize, text_color);
+    textObj = new CFont("", x, y, fontsize, text_color);
 }
 
 CTextfield::~CTextfield()
