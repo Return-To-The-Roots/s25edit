@@ -222,7 +222,7 @@ void WaitForEnter()
     if(waited)
         return;
     waited = true;
-    std::cout << "\n\nPress ENTER to close this window . . ." << std::endl;
+    std::cout << "\n\nPress ENTER *twice* to close this window . . ." << std::endl;
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
