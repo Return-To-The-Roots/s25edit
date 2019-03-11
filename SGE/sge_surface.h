@@ -89,8 +89,8 @@ DECLSPEC void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color);
 #endif
 
 #ifndef sge_C_ONLY
-DECLSPEC void _PutPixel(SDL_Surface* screen, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_PutPixel(SDL_Surface* screen, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void _PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B);
 DECLSPEC void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
 DECLSPEC void sge_PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
 DECLSPEC void sge_ClearSurface(SDL_Surface* Surface, Uint8 R, Uint8 G, Uint8 B);

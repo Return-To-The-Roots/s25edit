@@ -176,7 +176,7 @@ private:
     //          X=14    X=5     X=6     X=15
     //              X=16    X=17    X=18
     template<size_t T_size>
-    void calculateVerticesAround(std::array<Point32, T_size>& Vertices, int VertexX, int VertexY);
+    void calculateVerticesAround(std::array<Point32, T_size>& newVertices, int x, int y);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
     int correctMouseBlitX(int VertexX, int VertexY);
@@ -189,10 +189,10 @@ private:
     void modifyShading(int VertexX, int VertexY);
     void modifyTexture(int VertexX, int VertexY, bool rsu, bool usd);
     void modifyTextureMakeHarbour(int VertexX, int VertexY);
-    void modifyObject(int VertexX, int VertexY);
+    void modifyObject(int x, int y);
     void modifyAnimal(int VertexX, int VertexY);
-    void modifyBuild(int VertexX, int VertexY);
-    void modifyResource(int VertexX, int VertexY);
+    void modifyBuild(int x, int y);
+    void modifyResource(int x, int y);
     void modifyPlayer(int VertexX, int VertexY);
     void rotateMap();
     void MirrorMapOnXAxis();

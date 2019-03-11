@@ -206,7 +206,7 @@ public:
             return false;
     }
 
-    void set_bmFont(sge_bmpFont* bm_font);
+    void set_bmFont(sge_bmpFont* font);
 
     // Should a cursor be drawn?
     void show_cursor(bool mode)

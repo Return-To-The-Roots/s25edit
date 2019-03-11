@@ -57,7 +57,7 @@ private:
 
 public:
     // Constructor - Destructor
-    CWindow(void callback_(int), int callbackQuitMessage, Uint16 x = 0, Uint16 y = 0, Uint16 w = 200, Uint16 h = 200,
+    CWindow(void callback(int), int callbackQuitMessage, Uint16 x = 0, Uint16 y = 0, Uint16 w = 200, Uint16 h = 200,
             const char* title = nullptr, int color = WINDOW_GREEN1, Uint8 flags = 0);
     ~CWindow();
     // Access
@@ -98,12 +98,12 @@ public:
     bool hasActiveInputElement();
     void setColor(int color);
     // Methods
-    CButton* addButton(void callback_(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 width = 20, Uint16 height = 20,
+    CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 w = 20, Uint16 h = 20,
                        int color = BUTTON_GREY, const char* text = nullptr, int picture = -1);
     bool delButton(CButton* ButtonToDelete);
     CFont* addText(const char* string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
     bool delText(CFont* TextToDelete);
-    CPicture* addPicture(void callback_(int), int clickedParam, Uint16 x, Uint16 y, int picture);
+    CPicture* addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture);
     bool delPicture(CPicture* PictureToDelete);
     int addStaticPicture(int x, int y, int picture);
     bool delStaticPicture(int ArrayIndex);
