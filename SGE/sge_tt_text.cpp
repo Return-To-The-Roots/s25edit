@@ -543,28 +543,29 @@ FT_Error Load_Glyph(sge_TTFont* font, Uint16 ch, glyph* cached, int want)
                 int soffset = i * src->pitch;
                 int doffset = i * dst->pitch;
                 /*if ( mono ) {
-					unsigned char *srcp = src->buffer + soffset;
-					unsigned char *dstp = dst->buffer + doffset;
-					int j;
-					for ( j = 0; j < src->width; j += 8 ) {
-						unsigned char ch = *srcp++;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-						ch <<= 1;
-						*dstp++ = (ch&0x80) >> 7;
-					}
-				} else */ if(!FT_IS_SCALABLE(face))
+                    unsigned char *srcp = src->buffer + soffset;
+                    unsigned char *dstp = dst->buffer + doffset;
+                    int j;
+                    for ( j = 0; j < src->width; j += 8 ) {
+                        unsigned char ch = *srcp++;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                        ch <<= 1;
+                        *dstp++ = (ch&0x80) >> 7;
+                    }
+                } else */
+                if(!FT_IS_SCALABLE(face))
                 {
                     /* This special case wouldn't
                      * be here if the FT_Render_Glyph()
@@ -1491,11 +1492,7 @@ SDL_Rect sge_tt_textoutf(SDL_Surface* Surface, sge_TTFont* font, Sint16 x, Sint1
 
     va_list ap;
 
-#ifdef __WIN32__
-    va_start((va_list*)ap, format); // Stupid win32 crosscompiler
-#else
     va_start(ap, format);
-#endif
 
     vsprintf(buf, format, ap);
     va_end(ap);

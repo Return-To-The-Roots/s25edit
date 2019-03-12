@@ -366,11 +366,7 @@ void sge_TextEditor::change_textf(const char* text, ...)
 
     va_list ap;
 
-    //#ifdef __WIN32__
-    // va_start((va_list*)ap, text); //Stupid win32 crosscompiler
-    //#else
     va_start(ap, text);
-    //#endif
 
     vsprintf(buf, text, ap);
     va_end(ap);

@@ -43,7 +43,7 @@ DECLSPEC Uint8 sge_getLock();
 DECLSPEC void sge_UpdateRect(SDL_Surface* screen, Sint16 x, Sint16 y, Uint16 w, Uint16 h);
 DECLSPEC SDL_Surface* sge_CreateAlphaSurface(Uint32 flags, int width, int height);
 DECLSPEC Uint32 sge_MapAlpha(Uint8 R, Uint8 G, Uint8 B, Uint8 A);
-DECLSPEC void sge_SetError(const char* format, ...);
+DECLSPEC __attribute__((format(printf, 1, 2))) void sge_SetError(const char* format, ...);
 
 DECLSPEC void _PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color);
 DECLSPEC void _PutPixel8(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color);

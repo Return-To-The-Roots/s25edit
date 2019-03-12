@@ -112,7 +112,7 @@ public:
     void change_text(const std::string& s);
     // void change_utext(const std::basic_string<Uint16> s);
     void change_uctext(Uint16* text);
-    void change_textf(const char* text, ...); // printf c-style... urk
+    __attribute__((format(printf, 2, 3))) void change_textf(const char* text, ...); // printf c-style... urk
 
     // Set max chars (default: limited only by memory)
     void max_chars(unsigned int c) { mChars = c; }
