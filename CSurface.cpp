@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 
+namespace {
 SDL_Rect rect2SDL_Rect(const Rect& rect)
 {
     Point<Sint16> origin(rect.getOrigin());
@@ -39,6 +40,7 @@ void DrawFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, Point16 
     sge_FadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom, I1,
                                      I2, I2, &source->format->colorkey, 1);
 }
+} // namespace
 
 bool CSurface::drawTextures = false;
 bool CSurface::useOpenGL = false;
@@ -362,6 +364,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     }
 }
 
+namespace {
 enum class BorderPreference
 {
     None,
@@ -515,6 +518,7 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
     p3 -= displayRect.getOrigin();
     return true;
 }
+} // namespace
 
 void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move, Point16& upper,
                                        Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2)

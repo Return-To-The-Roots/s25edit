@@ -214,6 +214,7 @@ void CGame::delMapObj()
     MapObj = nullptr;
 }
 
+namespace {
 void WaitForEnter()
 {
 #ifndef NDEBUG
@@ -246,6 +247,7 @@ bool checkWriteable(const bfs::path& folder)
     bfs::remove(testFileName);
     return true;
 }
+} // namespace
 
 #undef main
 int main(int /*argc*/, char* /*argv*/ [])

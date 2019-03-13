@@ -833,22 +833,6 @@ Uint8 sge_TTF_GetFontStyle(sge_TTFont* font)
 }
 #endif /* _SGE_NOTTF */
 
-//==================================================================================
-// Convert the Latin-1 text to UNICODE
-//==================================================================================
-Uint16* ASCII_to_UNICODE(Uint16* unicode, const char* text, int len)
-{
-    int i;
-
-    for(i = 0; i < len; ++i)
-    {
-        unicode[i] = ((const unsigned char*)text)[i];
-    }
-    unicode[i] = 0;
-
-    return unicode;
-}
-
 Uint16* sge_Latin1_Uni(const char* text)
 {
     Uint16* unicode_text;
@@ -871,10 +855,28 @@ Uint16* sge_Latin1_Uni(const char* text)
     return (unicode_text);
 }
 
+#ifndef _SGE_NOTTF
+
+//==================================================================================
+// Convert the Latin-1 text to UNICODE
+//==================================================================================
+static Uint16* ASCII_to_UNICODE(Uint16* unicode, const char* text, int len)
+{
+    int i;
+
+    for(i = 0; i < len; ++i)
+    {
+        unicode[i] = ((const unsigned char*)text)[i];
+    }
+    unicode[i] = 0;
+
+    return unicode;
+}
+
 //==================================================================================
 // Convert the UTF-8 text to UNICODE
 //==================================================================================
-Uint16* UTF8_to_UNICODE(Uint16* unicode, const char* utf8, int len)
+static Uint16* UTF8_to_UNICODE(Uint16* unicode, const char* utf8, int len)
 {
     int i, j;
     Uint16 ch;
@@ -905,7 +907,7 @@ Uint16* UTF8_to_UNICODE(Uint16* unicode, const char* utf8, int len)
     return unicode;
 }
 
-Uint16* sge_UTF8_Uni(const char* text)
+static Uint16* sge_UTF8_Uni(const char* text)
 {
     Uint16* unicode_text;
     int unicode_len;
@@ -922,7 +924,6 @@ Uint16* sge_UTF8_Uni(const char* text)
     return UTF8_to_UNICODE(unicode_text, text, unicode_len);
 }
 
-#ifndef _SGE_NOTTF
 //==================================================================================
 // Get the width of the text with the given font
 //==================================================================================

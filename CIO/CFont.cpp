@@ -70,6 +70,7 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
     }
 }
 
+namespace {
 unsigned getIndexForChar(uint8_t c)
 {
     // subtract 32 shows that we start by spacebar as 'zero-position'
@@ -174,7 +175,7 @@ unsigned getIndexForChar(uint8_t c)
     else
         return 60;
 }
-
+} // namespace
 bool CFont::writeText()
 {
     if(string_.empty())

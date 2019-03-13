@@ -36,8 +36,8 @@ SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, flo
 // Helper function to sge_transform()
 // Returns the bounding box
 //==================================================================================
-void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xscale, float yscale, Uint16 px, Uint16 py, Uint16 qx, Uint16 qy,
-               Sint16* xmin, Sint16* ymin, Sint16* xmax, Sint16* ymax)
+static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xscale, float yscale, Uint16 px, Uint16 py, Uint16 qx,
+                      Uint16 qy, Sint16* xmin, Sint16* ymin, Sint16* xmax, Sint16* ymax)
 {
     Sint16 x, y, rx, ry;
 
@@ -318,8 +318,8 @@ void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xscale, fl
 // We get better performance if AA and normal rendering is seperated into two functions (better optimization).
 // sge_transform() is used as a wrapper.
 
-SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py, Uint16 qx,
-                           Uint16 qy, Uint8 flags)
+static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py,
+                                  Uint16 qx, Uint16 qy, Uint8 flags)
 {
     Sint32 dy, sx, sy;
     Sint16 x, y, rx, ry;
@@ -425,8 +425,8 @@ SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angle, floa
     return r;
 }
 
-SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py, Uint16 qx,
-                         Uint16 qy, Uint8 flags)
+static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py,
+                                Uint16 qx, Uint16 qy, Uint8 flags)
 {
     Sint32 dy, sx, sy;
     Sint16 x, y, rx, ry;

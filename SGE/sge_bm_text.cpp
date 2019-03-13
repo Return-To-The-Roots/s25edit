@@ -204,7 +204,7 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
 //==================================================================================
 // Loads the font into a new struct
 //==================================================================================
-sge_bmpFont* sge_BF_OpenFont(char* file, Uint8 flags)
+sge_bmpFont* sge_BF_OpenFont(const char* file, Uint8 flags)
 {
     sge_bmpFont* font;
     SDL_Surface* Temp;

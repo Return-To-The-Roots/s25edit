@@ -667,6 +667,7 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
     }
 }
 
+namespace {
 SavedVertex saveVertex(Position pt, const bobMAP& map)
 {
     SavedVertex res;
@@ -712,6 +713,7 @@ void restoreVertex(const SavedVertex& vertex, bobMAP& map)
         }
     }
 }
+} // namespace
 
 void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 {

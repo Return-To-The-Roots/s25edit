@@ -21,6 +21,7 @@
 
 #include "sge_blib.h"
 #include "sge_primitives.h"
+#include "sge_primitives_int.h"
 #include "sge_surface.h"
 #include <boost/numeric/conversion/cast.hpp>
 #include <SDL.h>
@@ -37,16 +38,6 @@ using boost::numeric_cast;
 extern Uint8 _sge_update;
 extern Uint8 _sge_lock;
 extern Uint8 _sge_alpha_hack;
-
-/* We need some internal functions */
-extern void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
-extern void _LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 Color, Uint8 alpha);
-extern void _HLine(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint32 Color);
-extern void _HLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint32 Color, Uint8 alpha);
-extern void callback_alpha_hack(SDL_Surface* surf, Sint16 x, Sint16 y, Uint32 color);
-extern void _AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color, Uint8 alpha);
-extern void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                           Uint8 b2, Uint8 alpha);
 
 /* Macro to inline RGB mapping */
 static constexpr Uint32 MapRGB(const SDL_PixelFormat& format, Uint8 r, Uint8 g, Uint8 b)
@@ -85,7 +76,7 @@ static constexpr Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Si
 //==================================================================================
 // Draws a horisontal line, fading the colors
 //==================================================================================
-void _FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2, Uint8 b2)
+static void _FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2, Uint8 b2)
 {
     Sint16 x;
     Uint8 t;
@@ -227,7 +218,8 @@ void sge_FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, 
 //==================================================================================
 // Draws a horisontal, textured line
 //==================================================================================
-void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2)
+static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
+                          Sint16 sy2)
 {
     Sint16 x;
 
@@ -446,8 +438,8 @@ void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surfac
 //==================================================================================
 // Draws a horisontal, gouraud shaded and textured line
 //==================================================================================
-void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
-                        Sint16 sy2, Sint32 i1, Sint32 i2)
+static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
+                               Sint16 sy2, Sint32 i1, Sint32 i2)
 {
     Sint16 x;
     Sint32 i;
@@ -694,8 +686,8 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
 //==================================================================================
 // Draws a horisontal, gouraud shaded and textured line respecting the color key
 //==================================================================================
-void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
-                                Sint16 sy2, Sint32 i1, Sint32 i2)
+static void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
+                                       Sint16 sx2, Sint16 sy2, Sint32 i1, Sint32 i2)
 {
     Sint16 x;
     Sint32 i;
@@ -929,8 +921,8 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
 //==================================================================================
 // Draws a horisontal, textured line with precalculated gouraud shading
 //==================================================================================
-void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
-                               Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256])
+static void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
+                                      Sint16 sx2, Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256])
 {
     Sint16 x;
     Uint16 i;
@@ -1166,8 +1158,8 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
 //==================================================================================
 // Draws a horisontal, textured line with precalculated gouraud shading (and respecting the colorkey)
 //==================================================================================
-void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
-                                       Sint16 sx2, Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256])
+static void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1,
+                                              Sint16 sy1, Sint16 sx2, Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256])
 {
     Sint16 x;
     Uint16 i;
@@ -1407,9 +1399,9 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
 //==================================================================================
 // Draws a horisontal, textured line with precalculated gouraud shading (respecting colorkeys)
 //==================================================================================
-void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
-                                        Sint16 sx2, Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256], Uint32 keys[],
-                                        int keycount)
+static void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1,
+                                               Sint16 sy1, Sint16 sx2, Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256],
+                                               Uint32 keys[], int keycount)
 {
     Sint16 x;
     Uint16 i;
@@ -1654,8 +1646,8 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2,
 //==================================================================================
 // Draws a horisontal, gouraud shaded and textured line (respecting colorkeys)
 //==================================================================================
-void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
-                                 Sint16 sy2, Sint32 i1, Sint32 i2, Uint32 keys[], int keycount)
+static void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
+                                        Sint16 sx2, Sint16 sy2, Sint32 i1, Sint32 i2, Uint32 keys[], int keycount)
 {
     Sint16 x;
     Sint32 i;
@@ -3913,7 +3905,7 @@ struct pline_p
 };
 
 /* Radix sort */
-pline* rsort(pline* inlist)
+static pline* rsort(pline* inlist)
 {
     if(!inlist)
         return nullptr;
@@ -3966,7 +3958,7 @@ pline* rsort(pline* inlist)
 }
 
 /* Calculate the scanline for y */
-pline* get_scanline(pline_p* plist, Uint16 n, Sint32 y)
+static pline* get_scanline(pline_p* plist, Uint16 n, Sint32 y)
 {
     pline* p = nullptr;
     pline* list = nullptr;

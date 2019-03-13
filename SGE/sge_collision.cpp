@@ -143,7 +143,7 @@ int sge_bbcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2,
 //==================================================================================
 // Checks bounding boxes for collision: 0-no collision 1-collision
 //==================================================================================
-int _sge_bbcheck(Sint16 x1, Sint16 y1, Uint16 w1, Uint16 h1, Sint16 x2, Sint16 y2, Uint16 w2, Uint16 h2)
+static int _sge_bbcheck(Sint16 x1, Sint16 y1, Uint16 w1, Uint16 h1, Sint16 x2, Sint16 y2, Uint16 w2, Uint16 h2)
 {
     if(x1 < x2)
     {

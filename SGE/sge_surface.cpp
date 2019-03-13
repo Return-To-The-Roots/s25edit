@@ -974,7 +974,7 @@ struct seg
  * A 4-connected neighbor is a pixel above, below, left, or right of a pixel.
  */
 // First a generic (slow) version and then 8/16/32 bpp versions
-void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
+static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 {
     Sint16 l, x1, x2, dy;
     Uint32 oc;                   /* old pixel color */

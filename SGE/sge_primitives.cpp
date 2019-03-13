@@ -21,6 +21,7 @@
  */
 
 #include "sge_primitives.h"
+#include "sge_primitives_int.h"
 #include "sge_surface.h"
 #include <SDL.h>
 #include <math.h>
@@ -146,7 +147,7 @@ void sge_HLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint8 
 //==================================================================================
 // Internal draw vertical line
 //==================================================================================
-void _VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Color)
+static void _VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Color)
 {
     if(y1 > y2)
     {
@@ -218,7 +219,7 @@ void sge_VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint8 R, Ui
 //==================================================================================
 // Internal draw vertical line (alpha - no update)
 //==================================================================================
-void _VLineAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Color, Uint8 alpha)
+static void _VLineAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Color, Uint8 alpha)
 {
     Uint8 update = _sge_update;
     Uint8 lock = _sge_lock;
@@ -319,7 +320,7 @@ void sge_DoLine(SDL_Surface* Surface, Sint16 X1, Sint16 Y1, Sint16 X2, Sint16 Y2
 #define CLIP_REJECT(a, b) ((a) & (b))
 #define CLIP_ACCEPT(a, b) (!((a) | (b)))
 
-int clipEncode(Sint16 x, Sint16 y, Sint16 left, Sint16 top, Sint16 right, Sint16 bottom)
+static int clipEncode(Sint16 x, Sint16 y, Sint16 left, Sint16 top, Sint16 right, Sint16 bottom)
 {
     int code = 0;
 
@@ -336,7 +337,7 @@ int clipEncode(Sint16 x, Sint16 y, Sint16 left, Sint16 top, Sint16 right, Sint16
     return code;
 }
 
-int clipLine(SDL_Surface* dst, Sint16* x1, Sint16* y1, Sint16* x2, Sint16* y2)
+static int clipLine(SDL_Surface* dst, Sint16* x1, Sint16* y1, Sint16* x2, Sint16* y2)
 {
     int code1, code2;
     bool draw = false;
