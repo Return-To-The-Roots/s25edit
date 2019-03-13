@@ -284,7 +284,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
     // the index for the chiffre-picture in the global::bmpArray
     unsigned int chiffre_index = 0;
     // pointer to the chiffres
-    unsigned char* chiffre = (unsigned char*)string;
+    auto* chiffre = (const unsigned char*)string;
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     int pos_x = x;
     int pos_y = y;
@@ -450,7 +450,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const char* string, int x, int y, 
             // if this was the last chiffre go in normal mode and write the text to the specified position
             if(*chiffre == '\0')
             {
-                chiffre = (unsigned char*)string;
+                chiffre = (const unsigned char*)string;
 
                 if(align == ALIGN_MIDDLE)
                     pos_x = x - (unsigned int)(pixel_ctr_w / 2);

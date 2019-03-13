@@ -142,8 +142,8 @@ public:
 
     inline Sint16 get_xpos() const { return current_pos.x; }
     inline Sint16 get_ypos() const { return current_pos.y; }
-    inline Sint16 get_w() const { return current_pos.w; }
-    inline Sint16 get_h() const { return current_pos.h; }
+    inline Uint16 get_w() const { return current_pos.w; }
+    inline Uint16 get_h() const { return current_pos.h; }
 };
 
 //==================================================================================

@@ -22,7 +22,11 @@
 #include "sge_blib.h"
 #include "sge_primitives.h"
 #include "sge_surface.h"
+#include <boost/numeric/conversion/cast.hpp>
 #include <SDL.h>
+#include <type_traits>
+
+using boost::numeric_cast;
 
 #define SWAP(x, y, temp) \
     temp = x;            \
@@ -45,9 +49,39 @@ extern void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Si
                            Uint8 b2, Uint8 alpha);
 
 /* Macro to inline RGB mapping */
-#define MapRGB(format, r, g, b) \
-    ((r) >> format->Rloss) << format->Rshift | ((g) >> format->Gloss) << format->Gshift | ((b) >> format->Bloss) << format->Bshift
+static constexpr Uint32 MapRGB(const SDL_PixelFormat& format, Uint8 r, Uint8 g, Uint8 b)
+{
+    return ((Uint32)r >> format.Rloss) << format.Rshift | ((Uint32)g >> format.Gloss) << format.Gshift
+           | ((Uint32)b >> format.Bloss) << format.Bshift | format.Amask;
+}
 
+static constexpr Uint32 MapRGBFixPoint(const SDL_PixelFormat& format, Sint32 R, Sint32 G, Sint32 B)
+{
+    return MapRGB(format, static_cast<Uint8>(R >> 16), static_cast<Uint8>(G >> 16), static_cast<Uint8>(B >> 16));
+}
+
+/*static constexpr Uint8 GetR(const SDL_PixelFormat& format, Uint32 value)
+{
+    return (value & format.Rmask) >> format.Rshift;
+}
+static constexpr Uint8 GetG(const SDL_PixelFormat& format, Uint32 value)
+{
+    return (value & format.Gmask) >> format.Gshift;
+}
+static constexpr Uint8 GetB(const SDL_PixelFormat& format, Uint32 value)
+{
+    return (value & format.Bmask) >> format.Bshift;
+}*/
+static constexpr Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 factor)
+{
+    const auto r = ((static_cast<Uint8>((value & format.Rmask) >> format.Rshift) * factor) >> 16);
+    const auto g = ((static_cast<Uint8>((value & format.Gmask) >> format.Gshift) * factor) >> 16);
+    const auto b = ((static_cast<Uint8>((value & format.Bmask) >> format.Bshift) * factor) >> 16);
+    const auto r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
+    const auto g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
+    const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
+    return MapRGB(format, r8, g8, b8);
+}
 //==================================================================================
 // Draws a horisontal line, fading the colors
 //==================================================================================
@@ -119,7 +153,7 @@ void _FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, Uin
             {
                 pixel = row + x;
 
-                *pixel = MapRGB(dest->format, R >> 16, G >> 16, B >> 16);
+                *pixel = MapRGBFixPoint(*dest->format, R, G, B);
 
                 R += rstep;
                 G += gstep;
@@ -161,7 +195,7 @@ void _FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, Uin
             {
                 pixel = row + x;
 
-                *pixel = MapRGB(dest->format, R >> 16, G >> 16, B >> 16);
+                *pixel = MapRGBFixPoint(*dest->format, R, G, B);
 
                 R += rstep;
                 G += gstep;
@@ -187,10 +221,7 @@ void sge_FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, 
     {
         return;
     }
-    if(x1 > x2)
-        sge_UpdateRect(dest, x1, y, x1 - x2 + 1, 1);
-    else
-        sge_UpdateRect(dest, x1, y, x2 - x1 + 1, 1);
+    sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
 //==================================================================================
@@ -358,7 +389,7 @@ void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surfac
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -401,7 +432,7 @@ void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surfac
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -530,7 +561,7 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / sizeof(Uint32);
+                Uint32* row = (Uint32*)dest->pixels + (Uint32)y * dest->pitch / sizeof(Uint32);
 
                 Uint16 pitch = source->pitch / sizeof(Uint32);
 
@@ -560,14 +591,7 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
                     */
 
                     Uint32 pixel_value = *((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16));
-                    Sint16 r = (((pixel_value & srcFormat.Rmask) >> srcFormat.Rshift) * I) >> 16;
-                    Sint16 g = (((pixel_value & srcFormat.Gmask) >> srcFormat.Gshift) * I) >> 16;
-                    Sint16 b = (((pixel_value & srcFormat.Bmask) >> srcFormat.Bshift) * I) >> 16;
-                    Uint8 r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                    Uint8 g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                    Uint8 b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                    //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                    *pixel = ((r8 << dstFormat.Rshift) + (g8 << dstFormat.Gshift) + (b8 << dstFormat.Bshift));
+                    *pixel = ScaleRGB(dstFormat, pixel_value, I);
 
                     I += istep;
 
@@ -613,7 +637,7 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), &srcFormat, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -656,7 +680,7 @@ void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_S
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), &srcFormat, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -760,7 +784,7 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
                 Uint8 *pixel, *srcpixel;
-                Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
+                Uint8* row = (Uint8*)dest->pixels + (Uint32)y * dest->pitch;
 
                 Uint8 rshift8 = dstFormat.Rshift / 8;
                 Uint8 gshift8 = dstFormat.Gshift / 8;
@@ -789,10 +813,6 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
 
                 Uint16 pitch = source->pitch / 4;
 
-                Uint8 r8, g8, b8;
-                Sint16 r, g, b;
-                // Uint32 r1,g1,b1;
-
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x;
@@ -805,14 +825,7 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
                     pixel_value = *((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16));
                     if(pixel_value != source->format->colorkey)
                     {
-                        r = ((((pixel_value & dstFormat.Rmask) >> dstFormat.Rshift) * I) >> 16);
-                        g = ((((pixel_value & dstFormat.Gmask) >> dstFormat.Gshift) * I) >> 16);
-                        b = ((((pixel_value & dstFormat.Bmask) >> dstFormat.Bshift) * I) >> 16);
-                        r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                        g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                        b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                        //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                        *pixel = ((r8 << dstFormat.Rshift) + (g8 << dstFormat.Gshift) + (b8 << dstFormat.Bshift));
+                        *pixel = ScaleRGB(dstFormat, pixel_value, I);
                     }
 
                     I += istep;
@@ -859,7 +872,7 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -902,7 +915,7 @@ void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1039,8 +1052,6 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
 
                 Uint16 pitch = source->pitch / 4;
 
-                Uint8 r8, g8, b8;
-                Sint16 r, g, b;
                 // Uint32 r1,g1,b1;
 
                 for(x = x1; x <= x2; x++)
@@ -1051,17 +1062,8 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
                     // r1=r*I;
                     // g1=g*I;
                     // b1=b*I;
-                    r = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Rmask) >> dstFormat.Rshift) * I)
-                         >> 16);
-                    g = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Gmask) >> dstFormat.Gshift) * I)
-                         >> 16);
-                    b = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Bmask) >> dstFormat.Bshift) * I)
-                         >> 16);
-                    r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                    g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                    b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                    //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                    *pixel = ((r8 << dstFormat.Rshift) + (g8 << dstFormat.Gshift) + (b8 << dstFormat.Bshift));
+                    const auto pixel_value = *((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16));
+                    *pixel = ScaleRGB(dstFormat, pixel_value, I);
 
                     I += istep;
 
@@ -1107,7 +1109,7 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1150,7 +1152,7 @@ void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1293,10 +1295,6 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
 
                 Uint16 pitch = source->pitch / 4;
 
-                Uint8 r8, g8, b8;
-                Sint16 r, g, b;
-                // Uint32 r1,g1,b1;
-
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x;
@@ -1305,17 +1303,8 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
                     // r1=r*I;
                     // g1=g*I;
                     // b1=b*I;
-                    r = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Rmask) >> dstFormat.Rshift) * I)
-                         >> 16);
-                    g = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Gmask) >> dstFormat.Gshift) * I)
-                         >> 16);
-                    b = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Bmask) >> dstFormat.Bshift) * I)
-                         >> 16);
-                    r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                    g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                    b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                    //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                    *pixel = ((r8 << dstFormat.Rshift) + (g8 << dstFormat.Gshift) + (b8 << dstFormat.Bshift));
+                    const auto pixel_value = *((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16));
+                    *pixel = ScaleRGB(dstFormat, pixel_value, I);
 
                     I += istep;
 
@@ -1361,7 +1350,7 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1404,7 +1393,7 @@ void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1557,29 +1546,12 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2,
 
                 Uint16 pitch = source->pitch / 4;
 
-                Uint8 r8, g8, b8;
-                Sint16 r, g, b;
-                // Uint32 r1,g1,b1;
-
                 for(x = x1; x <= x2; x++)
                 {
                     pixel = row + x;
 
-                    // SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), source->format, &r, &g, &b);
-                    // r1=r*I;
-                    // g1=g*I;
-                    // b1=b*I;
-                    r = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Rmask) >> dstFormat.Rshift) * I)
-                         >> 16);
-                    g = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Gmask) >> dstFormat.Gshift) * I)
-                         >> 16);
-                    b = ((((*((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16)) & dstFormat.Bmask) >> dstFormat.Bshift) * I)
-                         >> 16);
-                    r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                    g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                    b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                    //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                    *pixel = ((r8 << dstFormat.Rshift) + (g8 << dstFormat.Gshift) + (b8 << dstFormat.Bshift));
+                    const auto pixel_value = *((Uint32*)source->pixels + (srcy >> 16) * pitch + (srcx >> 16));
+                    *pixel = ScaleRGB(dstFormat, pixel_value, I);
 
                     I += istep;
 
@@ -1625,7 +1597,7 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2,
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1668,7 +1640,7 @@ void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2,
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1802,10 +1774,6 @@ void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16
 
                 Uint16 pitch = source->pitch / 4;
 
-                Uint8 r8, g8, b8;
-                Sint16 r, g, b;
-                // Uint32 r1,g1,b1;
-
                 for(x = x1; x <= x2; x++)
                 {
                     isColorKey = false;
@@ -1825,18 +1793,7 @@ void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16
 
                     if(!isColorKey)
                     {
-                        // SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), source->format, &r, &g, &b);
-                        // r1=r*I;
-                        // g1=g*I;
-                        // b1=b*I;
-                        r = ((((pixel_value & dstFormat.Rmask) >> dstFormat.Rshift) * I) >> 16);
-                        g = ((((pixel_value & dstFormat.Gmask) >> dstFormat.Gshift) * I) >> 16);
-                        b = ((((pixel_value & dstFormat.Bmask) >> dstFormat.Bshift) * I) >> 16);
-                        r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                        g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                        b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                        //*pixel = SDL_MapRGB( dest->format, r1>>16, g1>>16, b1>>16 );
-                        *pixel = ((r8 << dstFormat.Rshift) + (g8 << dstFormat.Gshift) + (b8 << dstFormat.Bshift));
+                        *pixel = ScaleRGB(dstFormat, pixel_value, I);
                     }
 
                     I += istep;
@@ -1883,7 +1840,7 @@ void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1926,7 +1883,7 @@ void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16
                     pixel = row + x;
 
                     SDL_GetRGB(sge_GetPixel(source, srcx >> 16, srcy >> 16), source->format, &r, &g, &b);
-                    *pixel = MapRGB(dest->format, r, g, b);
+                    *pixel = MapRGB(*dest->format, r, g, b);
 
                     srcx += xstep;
                     srcy += ystep;
@@ -1958,10 +1915,7 @@ void sge_TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Sur
     {
         return;
     }
-    if(x1 > x2)
-        sge_UpdateRect(dest, x1, y, x1 - x2 + 1, 1);
-    else
-        sge_UpdateRect(dest, x1, y, x2 - x1 + 1, 1);
+    sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
 void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
@@ -1985,10 +1939,7 @@ void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SD
     {
         return;
     }
-    if(x1 > x2)
-        sge_UpdateRect(dest, x1, y, x1 - x2 + 1, 1);
-    else
-        sge_UpdateRect(dest, x1, y, x2 - x1 + 1, 1);
+    sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
 //==================================================================================
@@ -2022,7 +1973,7 @@ void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, S
     xmin = (xmin < x3) ? xmin : x3;
     ymin = (ymin < y3) ? ymin : y3;
 
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
+    sge_UpdateRect(dest, xmin, ymin, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(ymax - ymin + 1));
 }
 
 void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B)
@@ -2061,7 +2012,7 @@ void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
     xmin = (xmin < x3) ? xmin : x3;
     ymin = (ymin < y3) ? ymin : y3;
 
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
+    sge_UpdateRect(dest, xmin, ymin, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(ymax - ymin + 1));
 }
 
 void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B,
@@ -2214,7 +2165,7 @@ void sge_FilledTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     xmax = (xmax > x3) ? xmax : x3;
     xmin = (xmin < x3) ? xmin : x3;
 
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y3 - y1 + 1);
+    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 void sge_FilledTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B)
@@ -2307,7 +2258,7 @@ void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
     xmax = (xmax > x3) ? xmax : x3;
     xmin = (xmin < x3) ? xmin : x3;
 
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y3 - y1 + 1);
+    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B,
@@ -2618,7 +2569,7 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     xmax = (xmax > x3) ? xmax : x3;
     xmin = (xmin < x3) ? xmin : x3;
 
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y3 - y1 + 1);
+    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 //==================================================================================
@@ -2797,7 +2748,7 @@ void sge_FadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2,
     xmax = (xmax > x3) ? xmax : x3;
     xmin = (xmin < x3) ? xmin : x3;
 
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y3 - y1 + 1);
+    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 //==================================================================================
@@ -2983,7 +2934,7 @@ void sge_PreCalcFadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sin
     xmax = (xmax > x3) ? xmax : x3;
     xmin = (xmin < x3) ? xmin : x3;
 
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y3 - y1 + 1);
+    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 //==================================================================================
@@ -3940,13 +3891,13 @@ class pline
 {
 public:
     virtual ~pline() = default;
+    pline* next;
+
     Sint16 x1, x2, y1, y2;
 
     Sint32 fx, fm;
 
     Sint16 x;
-
-    pline* next;
 
     virtual void update()
     {

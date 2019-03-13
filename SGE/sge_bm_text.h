@@ -36,8 +36,8 @@
 typedef struct
 {
     SDL_Surface* FontSurface;
-    Sint16 CharWidth;
-    Sint16 CharHeight;
+    Uint16 CharWidth;
+    Uint16 CharHeight;
     Sint16* CharPos;
     Sint16 yoffs;
     Uint32 bcolor;
@@ -48,23 +48,24 @@ typedef struct
 extern "C" {
 #endif
 DECLSPEC sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags);
-DECLSPEC sge_bmpFont* sge_BF_OpenFont(char* file, Uint8 flags);
+DECLSPEC sge_bmpFont* sge_BF_OpenFont(const char* file, Uint8 flags);
 DECLSPEC void sge_BF_CloseFont(sge_bmpFont* font);
 DECLSPEC void sge_BF_SetColor(sge_bmpFont* font, Uint8 R, Uint8 G, Uint8 B);
 DECLSPEC void sge_BF_SetAlpha(sge_bmpFont* font, Uint8 alpha);
 DECLSPEC Sint16 sge_BF_GetHeight(sge_bmpFont* font);
 DECLSPEC Sint16 sge_BF_GetWidth(sge_bmpFont* font);
-DECLSPEC SDL_Rect sge_BF_TextSize(sge_bmpFont* font, char* string);
+DECLSPEC SDL_Rect sge_BF_TextSize(sge_bmpFont* font, const char* string);
 
-DECLSPEC SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, Sint16 x, Sint16 y);
+DECLSPEC SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, const char* string, Sint16 x, Sint16 y);
 DECLSPEC __attribute__((format(printf, 5, 6))) SDL_Rect sge_BF_textoutf(SDL_Surface* surface, sge_bmpFont* font, Sint16 x, Sint16 y,
-                                                                        char* format, ...);
+                                                                        const char* format, ...);
 
-DECLSPEC int sge_BF_input(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y);
-DECLSPEC int sge_BF_inputAlpha(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y,
+DECLSPEC int sge_BF_input(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y);
+DECLSPEC int sge_BF_inputAlpha(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y,
                                int Alpha);
-DECLSPEC int sge_BF_input_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y);
-DECLSPEC int sge_BF_inputAlpha_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, int len, Sint16 x,
+DECLSPEC int sge_BF_input_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, unsigned len, Sint16 x,
+                              Sint16 y);
+DECLSPEC int sge_BF_inputAlpha_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, unsigned len, Sint16 x,
                                    Sint16 y, int Alpha);
 #ifdef _SGE_C
 }

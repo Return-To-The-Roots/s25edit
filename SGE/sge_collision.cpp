@@ -39,7 +39,6 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     sge_cdata* cdata;
     Uint8* map;
     Sint16 x, y;
-    Sint32 offs;
     int i;
 
     cdata = new(nothrow) sge_cdata;
@@ -50,7 +49,7 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     }
     cdata->w = img->w;
     cdata->h = img->h;
-    offs = (img->w * img->h) / 8;
+    const Uint32 offs = (Uint32)(img->w * img->h) / 8;
     cdata->map = new(nothrow) Uint8[offs + 2];
     if(!cdata->map)
     {
@@ -87,10 +86,10 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
 //==================================================================================
 int sge_bbcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2, Sint16 y2)
 {
-    Sint16 w1 = cd1->w;
-    Sint16 h1 = cd1->h;
-    Sint16 w2 = cd2->w;
-    Sint16 h2 = cd2->h;
+    const Uint16 w1 = cd1->w;
+    const Uint16 h1 = cd1->h;
+    const Uint16 w2 = cd2->w;
+    const Uint16 h2 = cd2->h;
 
     if(x1 < x2)
     {
@@ -144,7 +143,7 @@ int sge_bbcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2,
 //==================================================================================
 // Checks bounding boxes for collision: 0-no collision 1-collision
 //==================================================================================
-int _sge_bbcheck(Sint16 x1, Sint16 y1, Sint16 w1, Sint16 h1, Sint16 x2, Sint16 y2, Sint16 w2, Sint16 h2)
+int _sge_bbcheck(Sint16 x1, Sint16 y1, Uint16 w1, Uint16 h1, Sint16 x2, Sint16 y2, Uint16 w2, Uint16 h2)
 {
     if(x1 < x2)
     {
@@ -232,10 +231,10 @@ int _sge_cmcheck(sge_cdata* cd1, Sint16 x1, Sint16 y1, sge_cdata* cd2, Sint16 x2
     if(!cd1->map || !cd2->map)
         return 0;
 
-    Sint16 w1 = cd1->w;
-    Sint16 h1 = cd1->h;
-    Sint16 w2 = cd2->w;
-    Sint16 h2 = cd2->h;
+    const Uint16 w1 = cd1->w;
+    const Uint16 h1 = cd1->h;
+    const Uint16 w2 = cd2->w;
+    const Uint16 h2 = cd2->h;
 
     // masks
 

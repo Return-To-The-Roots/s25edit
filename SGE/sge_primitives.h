@@ -50,25 +50,25 @@ DECLSPEC void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x
 DECLSPEC void sge_FilledRect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
 DECLSPEC void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color, Uint8 alpha);
 
-DECLSPEC void sge_DoEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint32 color,
+DECLSPEC void sge_DoEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color,
                             void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color));
-DECLSPEC void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint32 color);
-DECLSPEC void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint32 color, Uint8 alpha);
-DECLSPEC void sge_FilledEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint32 color);
-DECLSPEC void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint32 color, Uint8 alpha);
-DECLSPEC void sge_AAEllipseAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 rx, Sint16 ry, Uint32 color, Uint8 alpha);
-DECLSPEC void sge_AAEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 rx, Sint16 ry, Uint32 color);
-DECLSPEC void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 rx, Sint16 ry, Uint32 color);
+DECLSPEC void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color);
+DECLSPEC void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color, Uint8 alpha);
+DECLSPEC void sge_FilledEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color);
+DECLSPEC void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color, Uint8 alpha);
+DECLSPEC void sge_AAEllipseAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint32 color, Uint8 alpha);
+DECLSPEC void sge_AAEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint32 color);
+DECLSPEC void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint32 color);
 
-DECLSPEC void sge_DoCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint32 color,
+DECLSPEC void sge_DoCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color,
                            void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color));
-DECLSPEC void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint32 color);
-DECLSPEC void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint32 color, Uint8 alpha);
-DECLSPEC void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint32 color);
-DECLSPEC void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint32 color, Uint8 alpha);
-DECLSPEC void sge_AACircleAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Uint32 color, Uint8 alpha);
-DECLSPEC void sge_AACircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Uint32 color);
-DECLSPEC void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Uint32 color);
+DECLSPEC void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color);
+DECLSPEC void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color, Uint8 alpha);
+DECLSPEC void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color);
+DECLSPEC void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color, Uint8 alpha);
+DECLSPEC void sge_AACircleAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint32 color, Uint8 alpha);
+DECLSPEC void sge_AACircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint32 color);
+DECLSPEC void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint32 color);
 
 DECLSPEC void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
                          int level, Uint32 color);
@@ -97,25 +97,25 @@ DECLSPEC void sge_Rect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Si
 DECLSPEC void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
 DECLSPEC void sge_FilledRect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B);
 DECLSPEC void sge_FilledRectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
-DECLSPEC void sge_DoEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B,
+DECLSPEC void sge_DoEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B,
                             void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color));
-DECLSPEC void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
-DECLSPEC void sge_FilledEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B,
+DECLSPEC void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
+DECLSPEC void sge_FilledEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B,
                                      Uint8 alpha);
-DECLSPEC void sge_AAEllipseAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
-DECLSPEC void sge_AAEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 rx, Sint16 ry, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_DoCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint8 R, Uint8 G, Uint8 B,
+DECLSPEC void sge_AAEllipseAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
+DECLSPEC void sge_AAEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_DoCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, Uint8 G, Uint8 B,
                            void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color));
-DECLSPEC void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
-DECLSPEC void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Sint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
-DECLSPEC void sge_AACircleAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
-DECLSPEC void sge_AACircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Sint16 r, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
+DECLSPEC void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
+DECLSPEC void sge_AACircleAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
+DECLSPEC void sge_AACircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint8 R, Uint8 G, Uint8 B);
+DECLSPEC void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint8 R, Uint8 G, Uint8 B);
 DECLSPEC void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
                          int level, Uint8 R, Uint8 G, Uint8 B);
 DECLSPEC void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,

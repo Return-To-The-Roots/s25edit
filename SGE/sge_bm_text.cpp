@@ -229,7 +229,7 @@ sge_bmpFont* sge_BF_OpenFont(char* file, Uint8 flags)
 // Draws string to surface with the selected font
 // Returns pos. and size of the drawn text
 //==================================================================================
-SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, Sint16 x, Sint16 y)
+SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, const char* string, Sint16 x, Sint16 y)
 {
     SDL_Rect ret;
     ret.x = 0;
@@ -283,7 +283,7 @@ SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, S
 
     ret.x = x;
     ret.y = y;
-    ret.w = xdest - x + font->CharWidth;
+    ret.w = static_cast<Uint16>(xdest - x) + font->CharWidth;
     ret.h = font->CharHeight;
 
     if(surface)
@@ -295,7 +295,7 @@ SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, char* string, S
 //==================================================================================
 // Returns the size (w and h) of the string (if rendered with font)
 //==================================================================================
-SDL_Rect sge_BF_TextSize(sge_bmpFont* font, char* string)
+SDL_Rect sge_BF_TextSize(sge_bmpFont* font, const char* string)
 {
     return sge_BF_textout(nullptr, font, string, 0, 0);
 }
@@ -305,7 +305,7 @@ SDL_Rect sge_BF_TextSize(sge_bmpFont* font, char* string)
 // Returns pos. and size of the drawn text
 // * just like printf(char *format, ...) *
 //==================================================================================
-SDL_Rect sge_BF_textoutf(SDL_Surface* surface, sge_bmpFont* font, Sint16 x, Sint16 y, char* format, ...)
+SDL_Rect sge_BF_textoutf(SDL_Surface* surface, sge_bmpFont* font, Sint16 x, Sint16 y, const char* format, ...)
 {
     char buf[256];
 
@@ -464,7 +464,8 @@ void sge_BF_SetAlpha(sge_bmpFont* font, Uint8 alpha)
 //==================================================================================
 // BitmapText input
 //==================================================================================
-int sge_BF_inputAlpha(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y, int Alpha)
+int sge_BF_inputAlpha(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y,
+                      int Alpha)
 {
     if(pos == 0 && len > 0)
         string[0] = '\0';
@@ -481,7 +482,7 @@ int sge_BF_inputAlpha(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint
     return ret;
 }
 
-int sge_BF_inputAlpha_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y,
+int sge_BF_inputAlpha_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y,
                           int Alpha)
 {
     sge_TextSurface text(screen, "", x, y);
@@ -505,12 +506,12 @@ int sge_BF_inputAlpha_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string
     return ret;
 }
 
-int sge_BF_input(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y)
+int sge_BF_input(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y)
 {
     return sge_BF_inputAlpha(screen, font, string, flags, pos, len, x, y, SDL_ALPHA_OPAQUE);
 }
 
-int sge_BF_input_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, int len, Sint16 x, Sint16 y)
+int sge_BF_input_UNI(SDL_Surface* screen, sge_bmpFont* font, Uint16* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y)
 {
     return sge_BF_inputAlpha_UNI(screen, font, string, flags, pos, len, x, y, SDL_ALPHA_OPAQUE);
 }

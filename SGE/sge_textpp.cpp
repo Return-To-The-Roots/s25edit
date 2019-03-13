@@ -422,7 +422,7 @@ bool sge_text::update_textSurface(bool force)
                 SDL_FreeSurface(text_surface);
 
             string text = get_string(sCursor);
-            SDL_Rect size = sge_BF_TextSize(bm_font, (char*)(text.c_str()));
+            SDL_Rect size = sge_BF_TextSize(bm_font, text.c_str());
 
             text_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, size.w, size.h, bm_font->FontSurface->format->BitsPerPixel,
                                                 bm_font->FontSurface->format->Rmask, bm_font->FontSurface->format->Gmask,
@@ -455,7 +455,7 @@ bool sge_text::update_textSurface(bool force)
                 sge_ClearSurface(text_surface, bcol);
             }
 
-            sge_BF_textout(text_surface, bm_font, (char*)(text.c_str()), 0, 0);
+            sge_BF_textout(text_surface, bm_font, text.c_str(), 0, 0);
 
             SDL_SetColorKey(text_surface, SDL_SRCCOLORKEY, bcol);
 
@@ -534,7 +534,7 @@ SDL_Rect sge_text::render_text(SDL_Surface* surface, Sint16 x, Sint16 y)
         if(alpha_level != SDL_ALPHA_OPAQUE && !bm_font->FontSurface->format->Amask)
             SDL_SetAlpha(bm_font->FontSurface, SDL_SRCALPHA, alpha_level);
 
-        return sge_BF_textout(surface, bm_font, (char*)(text.c_str()), x, y);
+        return sge_BF_textout(surface, bm_font, text.c_str(), x, y);
     } else
     {
         SDL_Rect ret;
@@ -552,7 +552,7 @@ void sge_TextSurface::set_textSurface(SDL_Surface* new_surf)
     {
         if(bm_font->CharPos && bm_font->FontSurface->format->Amask)
         {
-            SDL_Rect size = sge_BF_TextSize(bm_font, (char*)(get_string(sCursor).c_str()));
+            SDL_Rect size = sge_BF_TextSize(bm_font, get_string(sCursor).c_str());
             current_pos.w = size.w;
             current_pos.h = size.h;
 
@@ -597,7 +597,7 @@ void sge_TextSsprite::set_textSurface(SDL_Surface* new_surf)
     {
         if(bm_font->CharPos && bm_font->FontSurface->format->Amask)
         {
-            SDL_Rect size = sge_BF_TextSize(bm_font, (char*)(get_string(sCursor).c_str()));
+            SDL_Rect size = sge_BF_TextSize(bm_font, get_string(sCursor).c_str());
             current_pos.w = size.w;
             current_pos.h = size.h;
 
@@ -650,7 +650,7 @@ void sge_TextSprite::set_textSurface(SDL_Surface* new_surf)
     {
         if(bm_font->CharPos && bm_font->FontSurface->format->Amask)
         {
-            SDL_Rect size = sge_BF_TextSize(bm_font, (char*)(get_string(sCursor).c_str()));
+            SDL_Rect size = sge_BF_TextSize(bm_font, get_string(sCursor).c_str());
             current_pos.w = size.w;
             current_pos.h = size.h;
 

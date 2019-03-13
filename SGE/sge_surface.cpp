@@ -120,6 +120,11 @@ void sge_UpdateRect(SDL_Surface* screen, Sint16 x, Sint16 y, Uint16 w, Uint16 h)
     SDL_UpdateRect(screen, x, y, a, b);
 }
 
+void sge_UpdateRect(SDL_Surface* screen, const SDL_Rect& area)
+{
+    sge_UpdateRect(screen, area.x, area.y, area.w, area.h);
+}
+
 //==================================================================================
 // Creates a 32bit (8/8/8/8) alpha surface
 // Map colors with sge_MapAlpha() and then use the Uint32 color versions of

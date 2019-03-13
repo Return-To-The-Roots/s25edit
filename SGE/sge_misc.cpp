@@ -82,7 +82,7 @@ Uint32 sge_Delay(Uint32 ticks)
 
     while(time_left > 0)
     {
-        time_left = ticks - (SDL_GetTicks() - start);
+        time_left = (Sint32)(ticks - (SDL_GetTicks() - start));
     }
 
     return SDL_GetTicks() - start;
