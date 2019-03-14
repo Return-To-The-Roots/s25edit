@@ -1786,216 +1786,6 @@ void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx,
 }
 
 //==================================================================================
-// Draws an anti-aliased ellipse (alpha)
-// Some of this code is taken from "TwinLib" (http://www.twinlib.org) written by
-// Nicolas Roard (nicolas@roard.com)
-//==================================================================================
-void sge_AAEllipseAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint32 color, Uint8 alpha)
-{
-    /* Sanity check */
-    if(rx < 1)
-        rx = 1;
-    if(ry < 1)
-        ry = 1;
-
-    int a2 = rx * rx;
-    int b2 = ry * ry;
-
-    int ds = 2 * a2;
-    int dt = 2 * b2;
-
-    int dxt = int(a2 / sqrt(a2 + b2));
-
-    int t = 0;
-    int s = -2 * a2 * ry;
-    int d = 0;
-
-    Sint16 x = xc;
-    Sint16 y = yc - ry;
-
-    Sint16 xs, ys, dyt;
-    float cp, is, ip, imax = 1.0;
-
-    Uint8 s_alpha, p_alpha;
-    float alpha_pp = float(alpha) / 255;
-
-    /* Lock surface */
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
-        if(SDL_LockSurface(surface) < 0)
-            return;
-
-    /* "End points" */
-    _PutPixelAlpha(surface, x, y, color, alpha);
-    _PutPixelAlpha(surface, 2 * xc - x, y, color, alpha);
-
-    _PutPixelAlpha(surface, x, 2 * yc - y, color, alpha);
-    _PutPixelAlpha(surface, 2 * xc - x, 2 * yc - y, color, alpha);
-
-    int i;
-
-    for(i = 1; i <= dxt; i++)
-    {
-        x--;
-        d += t - b2;
-
-        if(d >= 0)
-            ys = y - 1;
-        else if((d - s - a2) > 0)
-        {
-            if((2 * d - s - a2) >= 0)
-                ys = y + 1;
-            else
-            {
-                ys = y;
-                y++;
-                d -= s + a2;
-                s += ds;
-            }
-        } else
-        {
-            y++;
-            ys = y + 1;
-            d -= s + a2;
-            s += ds;
-        }
-
-        t -= dt;
-
-        /* Calculate alpha */
-        cp = float(abs(d)) / abs(s);
-        is = float(cp * imax + 0.1);
-        ip = float(imax - is + 0.2);
-
-        /* Overflow check */
-        if(is > 1.0)
-            is = 1.0;
-        if(ip > 1.0)
-            ip = 1.0;
-
-        /* Calculate alpha level */
-        s_alpha = Uint8(is * 255);
-        p_alpha = Uint8(ip * 255);
-        if(alpha != 255)
-        {
-            s_alpha = Uint8(s_alpha * alpha_pp);
-            p_alpha = Uint8(p_alpha * alpha_pp);
-        }
-
-        /* Upper half */
-        _PutPixelAlpha(surface, x, y, color, p_alpha);
-        _PutPixelAlpha(surface, 2 * xc - x, y, color, p_alpha);
-
-        _PutPixelAlpha(surface, x, ys, color, s_alpha);
-        _PutPixelAlpha(surface, 2 * xc - x, ys, color, s_alpha);
-
-        /* Lower half */
-        _PutPixelAlpha(surface, x, 2 * yc - y, color, p_alpha);
-        _PutPixelAlpha(surface, 2 * xc - x, 2 * yc - y, color, p_alpha);
-
-        _PutPixelAlpha(surface, x, 2 * yc - ys, color, s_alpha);
-        _PutPixelAlpha(surface, 2 * xc - x, 2 * yc - ys, color, s_alpha);
-    }
-
-    dyt = abs(y - yc);
-
-    for(i = 1; i <= dyt; i++)
-    {
-        y++;
-        d -= s + a2;
-
-        if(d <= 0)
-            xs = x + 1;
-        else if((d + t - b2) < 0)
-        {
-            if((2 * d + t - b2) <= 0)
-                xs = x - 1;
-            else
-            {
-                xs = x;
-                x--;
-                d += t - b2;
-                t -= dt;
-            }
-        } else
-        {
-            x--;
-            xs = x - 1;
-            d += t - b2;
-            t -= dt;
-        }
-
-        s += ds;
-
-        /* Calculate alpha */
-        cp = float(abs(d)) / abs(t);
-        is = float(cp * imax + 0.1);
-        ip = float(imax - is + 0.2);
-
-        /* Overflow check */
-        if(is > 1.0)
-            is = 1.0;
-        if(ip > 1.0)
-            ip = 1.0;
-
-        /* Calculate alpha level */
-        s_alpha = Uint8(is * 255);
-        p_alpha = Uint8(ip * 255);
-        if(alpha != 255)
-        {
-            s_alpha = Uint8(s_alpha * alpha_pp);
-            p_alpha = Uint8(p_alpha * alpha_pp);
-        }
-
-        /* Upper half */
-        _PutPixelAlpha(surface, x, y, color, p_alpha);
-        _PutPixelAlpha(surface, 2 * xc - x, y, color, p_alpha);
-
-        _PutPixelAlpha(surface, xs, y, color, s_alpha);
-        _PutPixelAlpha(surface, 2 * xc - xs, y, color, s_alpha);
-
-        /* Lower half*/
-        _PutPixelAlpha(surface, x, 2 * yc - y, color, p_alpha);
-        _PutPixelAlpha(surface, 2 * xc - x, 2 * yc - y, color, p_alpha);
-
-        _PutPixelAlpha(surface, xs, 2 * yc - y, color, s_alpha);
-        _PutPixelAlpha(surface, 2 * xc - xs, 2 * yc - y, color, s_alpha);
-    }
-
-    /* unlock surface */
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
-    {
-        SDL_UnlockSurface(surface);
-    }
-
-    /* Update surface if needed */
-    sge_UpdateRect(surface, xc - rx, yc - ry, 2 * rx + 1, 2 * ry + 1);
-}
-
-//==================================================================================
-// Draws an anti-aliased ellipse (alpha - RGB)
-//==================================================================================
-void sge_AAEllipseAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, rx, ry, SDL_MapRGB(surface->format, R, G, B), alpha);
-}
-
-//==================================================================================
-// Draws an anti-aliased ellipse
-//==================================================================================
-void sge_AAEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint32 color)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, rx, ry, color, 255);
-}
-
-//==================================================================================
-// Draws an anti-aliased ellipse (RGB)
-//==================================================================================
-void sge_AAEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, rx, ry, SDL_MapRGB(surface->format, R, G, B), 255);
-}
-
-//==================================================================================
 // Draws a filled anti-aliased ellipse
 // This is just a quick hack...
 //==================================================================================
@@ -2416,38 +2206,6 @@ void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, U
 }
 
 //==================================================================================
-// Draws an anti-aliased circle (alpha)
-//==================================================================================
-void sge_AACircleAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint32 color, Uint8 alpha)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, r, r, color, alpha);
-}
-
-//==================================================================================
-// Draws an anti-aliased circle (alpha - RGB)
-//==================================================================================
-void sge_AACircleAlpha(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, r, r, SDL_MapRGB(surface->format, R, G, B), alpha);
-}
-
-//==================================================================================
-// Draws an anti-aliased circle
-//==================================================================================
-void sge_AACircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint32 color)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, r, r, color, 255);
-}
-
-//==================================================================================
-// Draws an anti-aliased circle (RGB)
-//==================================================================================
-void sge_AACircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint8 R, Uint8 G, Uint8 B)
-{
-    sge_AAEllipseAlpha(surface, xc, yc, r, r, SDL_MapRGB(surface->format, R, G, B), 255);
-}
-
-//==================================================================================
 // Draws a filled anti-aliased circle
 //==================================================================================
 void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Uint32 color)
@@ -2478,8 +2236,6 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     float dx, d2x, d3x;                                                                                            \
     float dy, d2y, d3y;                                                                                            \
     float a, b, c;                                                                                                 \
-    int i;                                                                                                         \
-    int n = 1;                                                                                                     \
     Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;                                                             \
                                                                                                                    \
     /* compute number of iterations */                                                                             \
@@ -2487,8 +2243,7 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
         level = 1;                                                                                                 \
     if(level >= 15)                                                                                                \
         level = 15;                                                                                                \
-    while(level-- > 0)                                                                                             \
-        n *= 2;                                                                                                    \
+    const int n = 1 << level;                                                                                      \
     delta = float(1.0 / float(n));                                                                                 \
                                                                                                                    \
     /* compute finite differences */                                                                               \
@@ -2517,7 +2272,7 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     }                                                                                                              \
                                                                                                                    \
     /* iterate */                                                                                                  \
-    for(i = 0; i < n; i++)                                                                                         \
+    for(int i = 0; i < n; i++)                                                                                     \
     {                                                                                                              \
         x += dx;                                                                                                   \
         dx += d2x;                                                                                                 \

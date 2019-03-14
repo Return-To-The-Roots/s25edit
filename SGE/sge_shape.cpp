@@ -597,7 +597,7 @@ void sge_ssprite::skip_frame(int skips)
         }
     } else if(skips < 0)
     {
-        for(int i = 0; i < -skips; i++)
+        for(int i = 0; i > skips; i--)
         {
             if(current_fi == fi_start)
             {
