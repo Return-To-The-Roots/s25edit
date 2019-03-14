@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 
 project(s25edit)
 
+find_package(Boost 1.64 REQUIRED)
+
 add_subdirectory(SGE)
 
 option(RTTR_EDITOR_EDITORMODE "In editor mode it is possible to load, edit and save created maps" ON)
