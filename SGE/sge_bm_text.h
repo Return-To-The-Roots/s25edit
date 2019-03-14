@@ -57,8 +57,8 @@ DECLSPEC Sint16 sge_BF_GetWidth(sge_bmpFont* font);
 DECLSPEC SDL_Rect sge_BF_TextSize(sge_bmpFont* font, const char* string);
 
 DECLSPEC SDL_Rect sge_BF_textout(SDL_Surface* surface, sge_bmpFont* font, const char* string, Sint16 x, Sint16 y);
-DECLSPEC __attribute__((format(printf, 5, 6))) SDL_Rect sge_BF_textoutf(SDL_Surface* surface, sge_bmpFont* font, Sint16 x, Sint16 y,
-                                                                        const char* format, ...);
+DECLSPEC SGE_ATTRIBUTE_FORMAT(5, 6) SDL_Rect
+  sge_BF_textoutf(SDL_Surface* surface, sge_bmpFont* font, Sint16 x, Sint16 y, const char* format, ...);
 
 DECLSPEC int sge_BF_input(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y);
 DECLSPEC int sge_BF_inputAlpha(SDL_Surface* screen, sge_bmpFont* font, char* string, Uint8 flags, int pos, unsigned len, Sint16 x, Sint16 y,

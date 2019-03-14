@@ -129,13 +129,17 @@ constexpr auto absDiff(T a, T b)
 #else
 #define DECLSPEC __declspec(export)
 #endif
-#else
-#ifdef WIN32
+#elif defined(WIN32)
 #define DECLSPEC __declspec(dllexport)
 #else
 #define DECLSPEC
 #endif
 #endif
+
+#ifdef __GNUC__
+#define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx) __attribute__((format(printf, fmtStringIdx, firstArgIdx)))
+#else
+#define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx)
 #endif
 
 #endif /* sge_internal_H */
