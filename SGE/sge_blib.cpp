@@ -51,19 +51,7 @@ static constexpr Uint32 MapRGBFixPoint(const SDL_PixelFormat& format, Sint32 R, 
     return MapRGB(format, static_cast<Uint8>(R >> 16), static_cast<Uint8>(G >> 16), static_cast<Uint8>(B >> 16));
 }
 
-/*static constexpr Uint8 GetR(const SDL_PixelFormat& format, Uint32 value)
-{
-    return (value & format.Rmask) >> format.Rshift;
-}
-static constexpr Uint8 GetG(const SDL_PixelFormat& format, Uint32 value)
-{
-    return (value & format.Gmask) >> format.Gshift;
-}
-static constexpr Uint8 GetB(const SDL_PixelFormat& format, Uint32 value)
-{
-    return (value & format.Bmask) >> format.Bshift;
-}*/
-static constexpr Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 factor)
+static Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 factor)
 {
     const auto r = ((static_cast<Uint8>((value & format.Rmask) >> format.Rshift) * factor) >> 16);
     const auto g = ((static_cast<Uint8>((value & format.Gmask) >> format.Gshift) * factor) >> 16);
