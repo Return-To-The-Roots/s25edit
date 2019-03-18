@@ -42,7 +42,7 @@ CGame::CGame()
     MapObj = nullptr;
 }
 
-CGame::~CGame() {}
+CGame::~CGame() = default;
 
 int CGame::Execute()
 {
