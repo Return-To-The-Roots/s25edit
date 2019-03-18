@@ -336,8 +336,8 @@ void sge_TextEditor::change_text(const std::string& s)
 {
     clear_text();
 
-    for(unsigned int i = 0; i < s.size(); i++)
-        insert(char(s[i]));
+    for(char i : s)
+        insert(char(i));
 }
 
 /*
