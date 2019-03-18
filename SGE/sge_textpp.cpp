@@ -21,8 +21,8 @@
 #include "sge_textpp.h"
 #include "sge_surface.h"
 #include <SDL.h>
-#include <stdarg.h>
-#include <stdlib.h>
+#include <cstdarg>
+#include <cstdlib>
 
 #ifndef _SGE_NO_CLASSES
 

@@ -19,9 +19,9 @@
 #include "sge_shape.h"
 #include "sge_surface.h"
 #include <SDL.h>
+#include <cstdio>
+#include <cstring>
 #include <new>
-#include <stdio.h>
-#include <string.h>
 
 using namespace std;
 

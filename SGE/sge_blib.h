@@ -80,12 +80,14 @@ DECLSPEC void sge_PreCalcFadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 
                                            Sint16 sy3, Sint16 sx4, Sint16 sy4, Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256]);
 
 DECLSPEC int sge_FilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint32 color);
-DECLSPEC int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint32 color, Uint8 alpha);
-DECLSPEC int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint32 color);
+DECLSPEC int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, Uint32 color, Uint8 alpha);
+DECLSPEC int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, Uint32 color);
 
 DECLSPEC int sge_FadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8* R, Uint8* G, Uint8* B);
-DECLSPEC int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8* R, Uint8* G, Uint8* B, Uint8 alpha);
-DECLSPEC int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8* R, Uint8* G, Uint8* B);
+DECLSPEC int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, const Uint8* R, const Uint8* G,
+                                   const Uint8* B, Uint8 alpha);
+DECLSPEC int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, const Uint8* R, const Uint8* G,
+                                const Uint8* B);
 #ifdef _SGE_C
 }
 #endif

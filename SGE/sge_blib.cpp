@@ -1389,7 +1389,7 @@ static void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint
 //==================================================================================
 static void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1,
                                                Sint16 sy1, Sint16 sx2, Sint16 sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256],
-                                               Uint32 keys[], int keycount)
+                                               const Uint32 keys[], int keycount)
 {
     Sint16 x;
     Uint16 i;
@@ -1635,7 +1635,7 @@ static void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sin
 // Draws a horisontal, gouraud shaded and textured line (respecting colorkeys)
 //==================================================================================
 static void _FadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
-                                        Sint16 sx2, Sint16 sy2, Sint32 i1, Sint32 i2, Uint32 keys[], int keycount)
+                                        Sint16 sx2, Sint16 sy2, Sint32 i1, Sint32 i2, const Uint32 keys[], int keycount)
 {
     Sint16 x;
     Sint32 i;
@@ -3990,7 +3990,7 @@ inline void remove_dup(pline* li, Sint16 y)
 // Draws a n-points filled polygon
 //==================================================================================
 
-int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint32 color, Uint8 alpha)
+int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, Uint32 color, Uint8 alpha)
 {
     if(n < 3)
         return -1;
@@ -4161,7 +4161,7 @@ int sge_FilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8 r
 // Draws a n-points (AA) filled polygon
 //==================================================================================
 
-int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint32 color)
+int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, Uint32 color)
 {
     if(n < 3)
         return -1;
@@ -4326,7 +4326,7 @@ public:
 
     Uint8 r, g, b;
 
-    virtual void update() override
+    void update() override
     {
         x = Sint16(fx >> 16);
         fx += fm;
@@ -4341,7 +4341,8 @@ public:
     }
 };
 
-int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8* R, Uint8* G, Uint8* B, Uint8 alpha)
+int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, const Uint8* R, const Uint8* G, const Uint8* B,
+                          Uint8 alpha)
 {
     if(n < 3)
         return -1;
@@ -4542,7 +4543,7 @@ int sge_FadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8* R
 //==================================================================================
 // Draws a n-points (AA) gourand shaded polygon
 //==================================================================================
-int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8* R, Uint8* G, Uint8* B)
+int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, const Uint8* R, const Uint8* G, const Uint8* B)
 {
     if(n < 3)
         return -1;

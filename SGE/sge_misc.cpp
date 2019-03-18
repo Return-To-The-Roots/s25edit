@@ -17,10 +17,10 @@
 
 #include "sge_misc.h"
 #include <SDL.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 
 Uint32 delay_res = 10;
 

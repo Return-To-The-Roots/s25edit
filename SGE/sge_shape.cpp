@@ -20,8 +20,8 @@
 #include "sge_primitives.h"
 #include "sge_surface.h"
 #include <SDL.h>
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #ifndef _SGE_NO_CLASSES
 

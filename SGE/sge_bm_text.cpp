@@ -26,10 +26,10 @@
 #include "sge_textpp.h"
 #include "sge_tt_text.h"
 #include <SDL.h>
-#include <math.h>
+#include <cmath>
+#include <cstdarg>
+#include <cstring>
 #include <new>
-#include <stdarg.h>
-#include <string.h>
 
 #ifdef _SGE_HAVE_IMG
 #include <SDL_image.h>

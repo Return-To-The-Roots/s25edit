@@ -29,10 +29,10 @@
 #include "sge_textpp.h"
 #include <SDL.h>
 #include <SDL_endian.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
 
 #ifndef _SGE_NOTTF
 #include <freetype/freetype.h>
