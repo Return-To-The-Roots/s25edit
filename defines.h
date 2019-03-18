@@ -138,8 +138,8 @@ struct MapNode
 };
 // structure for display, cause SDL_Rect's datatypes are too small
 using DisplayRectangle = RectBase<Sint32>;
-typedef Point<Sint16> Point16;
-typedef Point<Sint32> Point32;
+using Point16 = Point<Sint16>;
+using Point32 = Point<Sint32>;
 // map types
 enum MapType
 {

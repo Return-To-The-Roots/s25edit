@@ -32,7 +32,7 @@
 #ifndef _SGE_NOTTF
 
 /* the truetype font structure */
-typedef struct _sge_TTFont sge_TTFont;
+using sge_TTFont = struct _sge_TTFont;
 
 /* Font style */
 #define SGE_TTF_NORMAL SGE_FLAG0

@@ -49,8 +49,8 @@ protected:
     std::list<sge_shape*> shapes;   // The list of shapes to draw on screen
     std::list<sge_shape*> shapes_p; // The list of permanent shapes to draw on screen
 
-    typedef std::list<SDL_Rect>::const_iterator RI;   // List iterator (for rects)
-    typedef std::list<sge_shape*>::const_iterator SI; // List iterator (for shapes)
+    using RI = std::list<SDL_Rect>::const_iterator;   // List iterator (for rects)
+    using SI = std::list<sge_shape*>::const_iterator; // List iterator (for shapes)
 
     bool HW, DB, FS; // video memory, double-buffered or/and fullscreen?
 
@@ -241,7 +241,7 @@ protected:
     // Linked list with the frames
     // Obs! 'surface' always points to the current frame image
     std::list<sge_frame*> frames;
-    typedef std::list<sge_frame*>::const_iterator FI; // List iterator (for frames)
+    using FI = std::list<sge_frame*>::const_iterator; // List iterator (for frames)
 
     FI current_fi;
     FI fi_start; // first frame in the playing sequence loop

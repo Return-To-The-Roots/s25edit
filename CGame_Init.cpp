@@ -28,7 +28,7 @@ bool CGame::ReCreateWindow()
             return false;
     }
 
-    SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", 0);
+    SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", nullptr);
     SetAppIcon();
     return true;
 }
