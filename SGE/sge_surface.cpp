@@ -904,7 +904,7 @@ void sge_AlphaFader(Uint8 sR, Uint8 sG, Uint8 sB, Uint8 sA, Uint8 dR, Uint8 dG, 
 //==================================================================================
 void sge_SetupRainbowPalette(SDL_Surface* Surface, Uint32* ctab, int intensity, int start, int stop)
 {
-    int slice = (int)((stop - start) / 6);
+    auto slice = (int)((stop - start) / 6);
 
     /* Red-Yellow */
     sge_Fader(Surface, 255, intensity, intensity, 255, 255, intensity, ctab, start, slice);

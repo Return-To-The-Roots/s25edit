@@ -433,7 +433,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
     x = y = 0;
 
     Sint16 pixx = surface->format->BytesPerPixel;
-    Sint16 pixy = (Sint16)surface->pitch;
+    auto pixy = (Sint16)surface->pitch;
     Uint8* pixel = (Uint8*)surface->pixels + y1 * pixy + x1 * pixx;
 
     pixx *= sdx;
@@ -1803,7 +1803,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
     int ds = 2 * a2;
     int dt = 2 * b2;
 
-    int dxt = int(a2 / sqrt(a2 + b2));
+    auto dxt = int(a2 / sqrt(a2 + b2));
 
     int t = 0;
     int s = -2 * a2 * ry;
@@ -1982,7 +1982,7 @@ void sge_DoCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 col
                   void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color))
 {
     Sint16 cx = 0;
-    Sint16 cy = (Sint16)r;
+    auto cy = (Sint16)r;
     Sint16 df = 1 - (Sint16)r;
     Sint16 d_e = 3;
     Sint16 d_se = -2 * r + 5;
@@ -2088,7 +2088,7 @@ void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R
 void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color)
 {
     Sint16 cx = 0;
-    Sint16 cy = (Sint16)r;
+    auto cy = (Sint16)r;
     bool draw = true;
     Sint16 df = 1 - (Sint16)r;
     Sint16 d_e = 3;
@@ -2145,7 +2145,7 @@ void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 
 void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color, Uint8 alpha)
 {
     Sint16 cx = 0;
-    Sint16 cy = (Sint16)r;
+    auto cy = (Sint16)r;
     bool draw = true;
     Sint16 df = 1 - (Sint16)r;
     Sint16 d_e = 3;
@@ -2230,7 +2230,7 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     /*  Note: I don't think there is any great performance win in translating this to fixed-point integer math, */ \
     /*  most of the time is spent in the line drawing routine.                                                  */ \
     /*                                                                                                          */ \
-    float x = float(x1), y = float(y1);                                                                            \
+    auto x = float(x1), y = float(y1);                                                                             \
     float xp = x, yp = y;                                                                                          \
     float delta;                                                                                                   \
     float dx, d2x, d3x;                                                                                            \

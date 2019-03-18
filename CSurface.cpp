@@ -1261,7 +1261,7 @@ vector CSurface::get_nodeVector(const vector& v1, const vector& v2, const vector
 vector CSurface::get_normVector(const vector& v)
 {
     vector normal;
-    float length = static_cast<float>(sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2)));
+    auto length = static_cast<float>(sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2)));
     // in case vector length equals 0 (should not happen)
     if(std::abs(length) < 1e-20f)
     {

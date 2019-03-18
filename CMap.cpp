@@ -215,7 +215,7 @@ void CMap::destructMap()
 
 bobMAP* CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture)
 {
-    bobMAP* myMap = new bobMAP();
+    auto* myMap = new bobMAP();
 
     strcpy(myMap->name, "Ohne Namen");
     myMap->width = width;

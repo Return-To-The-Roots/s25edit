@@ -782,7 +782,7 @@ bool CFile::save_wld(void* data)
 {
     char zero = 0; // to fill bytes
     char temp = 0; // to fill bytes
-    bobMAP* myMap = (bobMAP*)data;
+    auto* myMap = (bobMAP*)data;
     char map_version[11] = "WORLD_V1.0";
     char map_data_header[16];
 

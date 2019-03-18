@@ -565,7 +565,7 @@ void sge_ssprite::add_frame(SDL_Surface* img)
 void sge_ssprite::add_frame(SDL_Surface* img, sge_cdata* cdata)
 {
     // Create a new frame
-    sge_frame* frame = new sge_frame; // User has to catch bad_alloc himself
+    auto* frame = new sge_frame; // User has to catch bad_alloc himself
     frame->img = img;
     frame->cdata = cdata;
     frames.push_back(frame);

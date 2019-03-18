@@ -70,7 +70,7 @@ Uint32 sge_DelayRes()
 Uint32 sge_Delay(Uint32 ticks)
 {
     Uint32 start = SDL_GetTicks();
-    Sint32 time_left = (Sint32)ticks;
+    auto time_left = (Sint32)ticks;
     Uint32 tmp;
 
     if(ticks >= delay_res)

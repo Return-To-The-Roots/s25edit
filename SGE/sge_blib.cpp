@@ -2093,9 +2093,9 @@ void sge_FilledTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Lines step values */
     Sint32 m1 = 0;
@@ -2180,9 +2180,9 @@ void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
         SWAP(x1, x2, y);
     }
 
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     Sint32 m1 = 0;
     Sint32 m2 = Sint32((x3 - x1) << 16) / Sint32(y3 - y1);
@@ -2299,22 +2299,22 @@ void sge_FadedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Starting colors (rgb) for the three lines */
-    Sint32 r1 = Sint32(col1.r << 16);
+    auto r1 = Sint32(col1.r << 16);
     Sint32 r2 = r1;
-    Sint32 r3 = Sint32(col2.r << 16);
+    auto r3 = Sint32(col2.r << 16);
 
-    Sint32 g1 = Sint32(col1.g << 16);
+    auto g1 = Sint32(col1.g << 16);
     Sint32 g2 = g1;
-    Sint32 g3 = Sint32(col2.g << 16);
+    auto g3 = Sint32(col2.g << 16);
 
-    Sint32 b1 = Sint32(col1.b << 16);
+    auto b1 = Sint32(col1.b << 16);
     Sint32 b2 = b1;
-    Sint32 b3 = Sint32(col2.b << 16);
+    auto b3 = Sint32(col2.b << 16);
 
     /* Lines step values */
     Sint32 m1 = 0;
@@ -2451,9 +2451,9 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Lines step values */
     Sint32 m1 = 0;
@@ -2461,13 +2461,13 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     Sint32 m3 = 0;
 
     /* Starting texture coords for the three lines */
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
 
     /* Texture coords stepping value */
     Sint32 xstep1 = 0;
@@ -2600,9 +2600,9 @@ void sge_FadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2,
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Starting colors (rgb) for the three lines */
     Sint32 i1 = i_orig1;
@@ -2620,13 +2620,13 @@ void sge_FadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2,
     Sint32 istep3 = 0;
 
     /* Starting texture coords for the three lines */
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
 
     /* Texture coords stepping value */
     Sint32 xstep1 = 0;
@@ -2780,9 +2780,9 @@ void sge_PreCalcFadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sin
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Starting colors (rgb) for the three lines */
     Uint16 i1 = i_orig1;
@@ -2800,13 +2800,13 @@ void sge_PreCalcFadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sin
     Sint16 istep3 = 0;
 
     /* Starting texture coords for the three lines */
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
 
     /* Texture coords stepping value */
     Sint32 xstep1 = 0;
@@ -2966,9 +2966,9 @@ void sge_FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y1, S
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Starting colors (rgb) for the three lines */
     Sint32 i1 = i_orig1;
@@ -2986,13 +2986,13 @@ void sge_FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y1, S
     Sint32 istep3 = 0;
 
     /* Starting texture coords for the three lines */
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
 
     /* Texture coords stepping value */
     Sint32 xstep1 = 0;
@@ -3148,9 +3148,9 @@ void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint1
      */
 
     /* Starting coords for the three lines */
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
+    auto xc = Sint32(x2 << 16);
 
     /* Starting colors (rgb) for the three lines */
     Uint16 i1 = i_orig1;
@@ -3168,13 +3168,13 @@ void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint1
     Sint16 istep3 = 0;
 
     /* Starting texture coords for the three lines */
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
 
     /* Texture coords stepping value */
     Sint32 xstep1 = 0;
@@ -3340,25 +3340,25 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
      * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
      */
 
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
-    Sint32 xd = Sint32(x3 << 16);
+    auto xc = Sint32(x2 << 16);
+    auto xd = Sint32(x3 << 16);
 
     Sint32 m1 = 0;
     Sint32 m2 = Sint32((x3 - x1) << 16) / Sint32(y3 - y1);
     Sint32 m3 = Sint32((x4 - x2) << 16) / Sint32(y4 - y2);
     Sint32 m4 = 0;
 
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
-    Sint32 srcx4 = Sint32(sx3 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
+    auto srcx4 = Sint32(sx3 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
-    Sint32 srcy4 = Sint32(sy3 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
+    auto srcy4 = Sint32(sy3 << 16);
 
     Sint32 xstep1 = 0;
     Sint32 xstep2 = Sint32((sx3 - sx1) << 16) / Sint32(y3 - y1);
@@ -3522,10 +3522,10 @@ void sge_FadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
      * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
      */
 
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
-    Sint32 xd = Sint32(x3 << 16);
+    auto xc = Sint32(x2 << 16);
+    auto xd = Sint32(x3 << 16);
 
     /* Starting colors (rgb) for the three lines */
     Sint32 i1 = i_orig1;
@@ -3544,15 +3544,15 @@ void sge_FadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
     Sint32 istep3 = 0;
     Sint32 istep4 = (i_orig4 - i2) / Sint32(y4 - y2);
 
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
-    Sint32 srcx4 = Sint32(sx3 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
+    auto srcx4 = Sint32(sx3 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
-    Sint32 srcy4 = Sint32(sy3 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
+    auto srcy4 = Sint32(sy3 << 16);
 
     Sint32 xstep1 = 0;
     Sint32 xstep2 = Sint32((sx3 - sx1) << 16) / Sint32(y3 - y1);
@@ -3724,10 +3724,10 @@ void sge_PreCalcFadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint1
      * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
      */
 
-    Sint32 xa = Sint32(x1 << 16);
+    auto xa = Sint32(x1 << 16);
     Sint32 xb = xa;
-    Sint32 xc = Sint32(x2 << 16);
-    Sint32 xd = Sint32(x3 << 16);
+    auto xc = Sint32(x2 << 16);
+    auto xd = Sint32(x3 << 16);
 
     /* Starting colors (rgb) for the three lines */
     Uint16 i1 = i_orig1;
@@ -3746,15 +3746,15 @@ void sge_PreCalcFadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint1
     Sint16 istep3 = 0;
     Sint16 istep4 = (i_orig4 - i2) / (y4 - y2);
 
-    Sint32 srcx1 = Sint32(sx1 << 16);
+    auto srcx1 = Sint32(sx1 << 16);
     Sint32 srcx2 = srcx1;
-    Sint32 srcx3 = Sint32(sx2 << 16);
-    Sint32 srcx4 = Sint32(sx3 << 16);
+    auto srcx3 = Sint32(sx2 << 16);
+    auto srcx4 = Sint32(sx3 << 16);
 
-    Sint32 srcy1 = Sint32(sy1 << 16);
+    auto srcy1 = Sint32(sy1 << 16);
     Sint32 srcy2 = srcy1;
-    Sint32 srcy3 = Sint32(sy2 << 16);
-    Sint32 srcy4 = Sint32(sy3 << 16);
+    auto srcy3 = Sint32(sy2 << 16);
+    auto srcy4 = Sint32(sy3 << 16);
 
     Sint32 xstep1 = 0;
     Sint32 xstep2 = Sint32((sx3 - sx1) << 16) / Sint32(y3 - y1);
@@ -3999,8 +3999,8 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Ui
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
-    pline* line = new pline[n];
-    pline_p* plist = new pline_p[n];
+    auto* line = new pline[n];
+    auto* plist = new pline_p[n];
 
     Sint16 y1, y2, x1, x2, tmp, sy;
     Sint16 ymin = y[1], ymax = y[1];
@@ -4170,8 +4170,8 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint3
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
-    pline* line = new pline[n];
-    pline_p* plist = new pline_p[n];
+    auto* line = new pline[n];
+    auto* plist = new pline_p[n];
 
     Sint16 y1, y2, x1, x2, tmp, sy;
     Sint16 ymin = y[1], ymax = y[1];
@@ -4350,8 +4350,8 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uin
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
-    fpline* line = new fpline[n];
-    pline_p* plist = new pline_p[n];
+    auto* line = new fpline[n];
+    auto* plist = new pline_p[n];
 
     Sint16 y1, y2, x1, x2, tmp, sy;
     Sint16 ymin = y[1], ymax = y[1];
@@ -4551,8 +4551,8 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8*
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
-    fpline* line = new fpline[n];
-    pline_p* plist = new pline_p[n];
+    auto* line = new fpline[n];
+    auto* plist = new pline_p[n];
 
     Sint16 y1, y2, x1, x2, tmp, sy;
     Sint16 ymin = y[1], ymax = y[1];

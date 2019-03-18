@@ -33,7 +33,7 @@ using namespace std;
 //==================================================================================
 sge_TextEditor::node* sge_TextEditor::new_node(node* p, node* n, Uint16 c)
 {
-    node* tmp = new node;
+    auto* tmp = new node;
 
     tmp->prev = p;
     tmp->next = n;

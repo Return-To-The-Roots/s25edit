@@ -51,10 +51,10 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
 
     // We don't really need fixed-point here
     // but why not?
-    Sint32 const istx = Sint32((sin(theta) * xscale) * 8192.0); /* Inverse transform */
-    Sint32 const ictx = Sint32((cos(theta) * xscale) * 8192.2);
-    Sint32 const isty = Sint32((sin(theta) * yscale) * 8192.0);
-    Sint32 const icty = Sint32((cos(theta) * yscale) * 8192.2);
+    auto const istx = Sint32((sin(theta) * xscale) * 8192.0); /* Inverse transform */
+    auto const ictx = Sint32((cos(theta) * xscale) * 8192.2);
+    auto const isty = Sint32((sin(theta) * yscale) * 8192.0);
+    auto const icty = Sint32((cos(theta) * yscale) * 8192.2);
 
     // Calculate the four corner points
     for(int i = 0; i < 4; i++)
@@ -326,14 +326,14 @@ static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angl
     SDL_Rect r;
     r.x = r.y = r.w = r.h = 0;
 
-    float theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
+    auto theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
 
     // Here we use 18.13 fixed point integer math
     // Sint32 should have 31 usable bits and one for sign
     // 2^13 = 8192
 
     // Check scales
-    Sint32 maxint = Sint32(pow(2, sizeof(Sint32) * 8 - 1 - 13)); // 2^(31-13)
+    auto maxint = Sint32(pow(2, sizeof(Sint32) * 8 - 1 - 13)); // 2^(31-13)
 
     if(xscale == 0 || yscale == 0)
         return r;
@@ -349,12 +349,12 @@ static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angl
         yscale = float(-8192.0 / maxint);
 
     // Fixed-point equivalents
-    Sint32 const stx = Sint32((sin(theta) / xscale) * 8192.0);
-    Sint32 const ctx = Sint32((cos(theta) / xscale) * 8192.0);
-    Sint32 const sty = Sint32((sin(theta) / yscale) * 8192.0);
-    Sint32 const cty = Sint32((cos(theta) / yscale) * 8192.0);
-    Sint32 const mx = Sint32(px * 8192.0);
-    Sint32 const my = Sint32(py * 8192.0);
+    auto const stx = Sint32((sin(theta) / xscale) * 8192.0);
+    auto const ctx = Sint32((cos(theta) / xscale) * 8192.0);
+    auto const sty = Sint32((sin(theta) / yscale) * 8192.0);
+    auto const cty = Sint32((cos(theta) / yscale) * 8192.0);
+    auto const mx = Sint32(px * 8192.0);
+    auto const my = Sint32(py * 8192.0);
 
     // Compute a bounding rectangle
     Sint16 xmin = 0, xmax = dst->w, ymin = 0, ymax = dst->h;
@@ -433,14 +433,14 @@ static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle,
     SDL_Rect r;
     r.x = r.y = r.w = r.h = 0;
 
-    float theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
+    auto theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
 
     // Here we use 18.13 fixed point integer math
     // Sint32 should have 31 usable bits and one for sign
     // 2^13 = 8192
 
     // Check scales
-    Sint32 maxint = Sint32(pow(2, sizeof(Sint32) * 8 - 1 - 13)); // 2^(31-13)
+    auto maxint = Sint32(pow(2, sizeof(Sint32) * 8 - 1 - 13)); // 2^(31-13)
 
     if(xscale == 0 || yscale == 0)
         return r;
@@ -456,12 +456,12 @@ static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle,
         yscale = float(-8192.0 / maxint);
 
     // Fixed-point equivalents
-    Sint32 const stx = Sint32((sin(theta) / xscale) * 8192.0);
-    Sint32 const ctx = Sint32((cos(theta) / xscale) * 8192.0);
-    Sint32 const sty = Sint32((sin(theta) / yscale) * 8192.0);
-    Sint32 const cty = Sint32((cos(theta) / yscale) * 8192.0);
-    Sint32 const mx = Sint32(px * 8192.0);
-    Sint32 const my = Sint32(py * 8192.0);
+    auto const stx = Sint32((sin(theta) / xscale) * 8192.0);
+    auto const ctx = Sint32((cos(theta) / xscale) * 8192.0);
+    auto const sty = Sint32((sin(theta) / yscale) * 8192.0);
+    auto const cty = Sint32((cos(theta) / yscale) * 8192.0);
+    auto const mx = Sint32(px * 8192.0);
+    auto const my = Sint32(py * 8192.0);
 
     // Compute a bounding rectangle
     Sint16 xmin = 0, xmax = dst->w, ymin = 0, ymax = dst->h;
@@ -552,7 +552,7 @@ SDL_Rect sge_transform(SDL_Surface* src, SDL_Surface* dst, float angle, float xs
 //==================================================================================
 SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, float xscale, float yscale, Uint8 flags)
 {
-    float theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
+    auto theta = float(angle * M_PI / 180.0); /* Convert to radians.  */
 
     // Compute a bounding rectangle
     Sint16 xmin = 0, xmax = 0, ymin = 0, ymax = 0;
@@ -678,7 +678,7 @@ SDL_Surface* sge_rotate_scaled_surface(SDL_Surface* src, int angle, double scale
     SDL_Surface* dest;
 
     /* Create the destination surface*/
-    int max = int(sqrt((src->h * src->h / 2 + src->w * src->w / 2) * scale + 1));
+    auto max = int(sqrt((src->h * src->h / 2 + src->w * src->w / 2) * scale + 1));
     dest = SDL_AllocSurface(SDL_SWSURFACE, max, max, src->format->BitsPerPixel, src->format->Rmask, src->format->Gmask, src->format->Bmask,
                             src->format->Amask);
     if(!dest)
