@@ -183,10 +183,7 @@ sge_surface::sge_surface(SDL_Surface* dest, SDL_Surface* src, Sint16 x, Sint16 y
     warp_border = false;
 }
 
-sge_surface::~sge_surface()
-{
-    // Nothing for now...
-}
+sge_surface::~sge_surface() = default;
 
 bool sge_surface::check_warp()
 {

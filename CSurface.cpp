@@ -21,8 +21,8 @@ SDL_Rect rect2SDL_Rect(const Rect& rect)
     return result;
 }
 
-void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, Point16 p3, SDL_Surface* source, const SDL_Rect& rect,
-                                    Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256])
+void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3, SDL_Surface* source,
+                                    const SDL_Rect& rect, Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256])
 {
     Sint16 right = rect.x + rect.w - 1;
     Sint16 middle = rect.x + rect.w / Sint16(2);
@@ -31,8 +31,8 @@ void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, P
                                             I1, I2, I2, PreCalcPalettes, &source->format->colorkey, 1);
 }
 
-void DrawFadedTexturedTrigon(SDL_Surface* dest, Point16 p1, Point16 p2, Point16 p3, SDL_Surface* source, const SDL_Rect& rect, Sint32 I1,
-                             Sint32 I2)
+void DrawFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3, SDL_Surface* source,
+                             const SDL_Rect& rect, Sint32 I1, Sint32 I2)
 {
     Sint16 right = rect.x + rect.w - 1;
     Sint16 middle = rect.x + rect.w / Sint16(2);
