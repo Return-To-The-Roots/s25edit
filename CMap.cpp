@@ -217,14 +217,14 @@ bobMAP* CMap::generateMap(int width, int height, MapType type, TriangleTerrainTy
 {
     auto* myMap = new bobMAP();
 
-    strcpy(myMap->name, "Ohne Namen");
+    setMapname("Ohne Namen");
     myMap->width = width;
     myMap->width_old = width;
     myMap->height = height;
     myMap->height_old = height;
     myMap->type = type;
     myMap->player = 0;
-    strcpy(myMap->author, "Niemand");
+    setAuthor("Niemand");
     for(int i = 0; i < 7; i++)
     {
         myMap->HQx[i] = 0xFFFF;
@@ -306,26 +306,9 @@ void CMap::rotateMap()
 
     // permute player positions
     // at first the internal array
-    Uint16 tmpHQ[MAXPLAYERS];
-    for(int i = 0; i < MAXPLAYERS; i++)
-    {
-        tmpHQ[i] = PlayerHQy[i];
-    }
-    for(int i = 0; i < MAXPLAYERS; i++)
-    {
-        PlayerHQy[i] = PlayerHQx[i];
-        PlayerHQx[i] = tmpHQ[i];
-    }
+    swap(PlayerHQx, PlayerHQy);
     // and now the map array
-    for(int i = 0; i < 7; i++)
-    {
-        tmpHQ[i] = map->HQy[i];
-    }
-    for(int i = 0; i < 7; i++)
-    {
-        map->HQy[i] = map->HQx[i];
-        map->HQx[i] = tmpHQ[i];
-    }
+    swap(map->HQx, map->HQy);
 
     // recalculate some values
     map->initVertexCoords();
@@ -1106,7 +1089,7 @@ int CMap::correctMouseBlitY(int VertexX, int VertexY)
 
 void CMap::render()
 {
-    char textBuffer[100];
+    std::array<char, 100> textBuffer;
 
     // check if gameresolution has been changed
     if(displayRect.getSize() != global::s2->GameResolution)
@@ -1124,7 +1107,7 @@ void CMap::render()
            == nullptr)
             return;
         if(BitsPerPixel == 8)
-            SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors, 0, 256);
+            SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors.data(), 0, global::palArray[PAL_xBBM].colors.size());
         needSurface = false;
     }
     // else
@@ -1172,24 +1155,24 @@ void CMap::render()
     }
 
     // text for x and y of vertex (shown in upper left corner)
-    sprintf(textBuffer, "%d    %d", VertexX_, VertexY_);
-    CFont::writeText(Surf_Map, textBuffer, 20, 20);
+    sprintf(textBuffer.data(), "%d    %d", VertexX_, VertexY_);
+    CFont::writeText(Surf_Map, textBuffer.data(), 20, 20);
     // text for MinReduceHeight and MaxRaiseHeight
-    sprintf(textBuffer, "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
-    CFont::writeText(Surf_Map, textBuffer, 100, 20);
+    sprintf(textBuffer.data(), "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
+    CFont::writeText(Surf_Map, textBuffer.data(), 100, 20);
     // text for MovementLocked
     if(HorizontalMovementLocked && VerticalMovementLocked)
     {
-        sprintf(textBuffer, "Movement locked (F9 or F10 to unlock)");
-        CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
+        sprintf(textBuffer.data(), "Movement locked (F9 or F10 to unlock)");
+        CFont::writeText(Surf_Map, textBuffer.data(), 20, 40, 14, FONT_ORANGE);
     } else if(HorizontalMovementLocked)
     {
-        sprintf(textBuffer, "Horizontal movement locked (F9 to unlock)");
-        CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
+        sprintf(textBuffer.data(), "Horizontal movement locked (F9 to unlock)");
+        CFont::writeText(Surf_Map, textBuffer.data(), 20, 40, 14, FONT_ORANGE);
     } else if(VerticalMovementLocked)
     {
-        sprintf(textBuffer, "Vertikal movement locked (F10 to unlock)");
-        CFont::writeText(Surf_Map, textBuffer, 20, 40, 14, FONT_ORANGE);
+        sprintf(textBuffer.data(), "Vertikal movement locked (F10 to unlock)");
+        CFont::writeText(Surf_Map, textBuffer.data(), 20, 40, 14, FONT_ORANGE);
     }
 
     // draw the frame
@@ -1289,7 +1272,8 @@ void CMap::render()
               SDL_CreateRGBSurface(SDL_SWSURFACE, global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, 8, 0, 0, 0, 0))
            != nullptr)
         {
-            SDL_SetPalette(Surf_RightMenubar, SDL_LOGPAL, global::palArray[PAL_RESOURCE].colors, 0, 256);
+            SDL_SetPalette(Surf_RightMenubar, SDL_LOGPAL, global::palArray[PAL_RESOURCE].colors.data(), 0,
+                           global::palArray[PAL_RESOURCE].colors.size());
             SDL_SetColorKey(Surf_RightMenubar, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
             CSurface::Draw(Surf_RightMenubar, global::bmpArray[MENUBAR].surface, 0, 0, 270);
         }
@@ -1334,12 +1318,10 @@ void CMap::render()
                    displayRect.getSize().y / 2 - 220);
     // bugkill picture for quickload with text
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.getSize().x - 37, displayRect.getSize().y / 2 + 162);
-    sprintf(textBuffer, "Load");
-    CFont::writeText(Surf_Map, textBuffer, displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 193);
+    CFont::writeText(Surf_Map, "Load", displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 193);
     // bugkill picture for quicksave with text
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, displayRect.getSize().x - 37, displayRect.getSize().y / 2 + 200);
-    sprintf(textBuffer, "Save");
-    CFont::writeText(Surf_Map, textBuffer, displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 231);
+    CFont::writeText(Surf_Map, "Save", displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 231);
 }
 
 void CMap::drawMinimap(SDL_Surface* Window)
@@ -1477,7 +1459,7 @@ void CMap::drawMinimap(SDL_Surface* Window)
     }
 
     // draw the player flags
-    char playerNumber[10];
+    std::array<char, 10> playerNumber;
     for(int i = 0; i < MAXPLAYERS; i++)
     {
         if(PlayerHQx[i] != 0xFFFF && PlayerHQy[i] != 0xFFFF)
@@ -1488,8 +1470,8 @@ void CMap::drawMinimap(SDL_Surface* Window)
                            6 + PlayerHQx[i] / num_x - global::bmpArray[FLAG_BLUE_DARK + i % 7].nx,
                            20 + PlayerHQy[i] / num_y - global::bmpArray[FLAG_BLUE_DARK + i % 7].ny);
             // write player number
-            sprintf(playerNumber, "%d", i + 1);
-            CFont::writeText(Window, playerNumber, 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y, 9, FONT_MINTGREEN);
+            sprintf(playerNumber.data(), "%d", i + 1);
+            CFont::writeText(Window, playerNumber.data(), 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y, 9, FONT_MINTGREEN);
         }
     }
 

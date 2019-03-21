@@ -80,7 +80,7 @@ struct _sge_TTFont
 
     /* For now, support Latin-1 character set caching */
     glyph* current;
-    glyph cache[256];
+    std::array<glyph, 256> cache;
     glyph scratch;
 
     /* We are responsible for closing the font stream */
@@ -1489,7 +1489,7 @@ SDL_Rect sge_tt_textout_UTF8(SDL_Surface* Surface, sge_TTFont* font, const char*
 SDL_Rect sge_tt_textoutf(SDL_Surface* Surface, sge_TTFont* font, Sint16 x, Sint16 y, Uint8 fR, Uint8 fG, Uint8 fB, Uint8 bR, Uint8 bG,
                          Uint8 bB, int Alpha, char* format, ...)
 {
-    char buf[256];
+    std::array<char, 256> buf;
 
     va_list ap;
 

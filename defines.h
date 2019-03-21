@@ -4,6 +4,7 @@
 #include "Point.h"
 #include "Rect.h"
 #include "gameData/DescIdx.h"
+#include <array>
 #include <vector>
 
 struct TerrainDesc;
@@ -70,7 +71,7 @@ struct bobBMP
 // Structure for Bobtype 5 (Palette)
 struct bobPAL
 {
-    SDL_Color colors[256];
+    std::array<SDL_Color, 256> colors;
 };
 
 // Structure for Bobtype 7 (Shadow-Bitmaps)
@@ -150,7 +151,7 @@ enum MapType
 // map strutcture
 struct bobMAP
 {
-    char name[20];
+    std::array<char, 20> name;
     Uint16 height;
     Uint16 height_old;
     Uint16 height_pixel;
@@ -160,11 +161,11 @@ struct bobMAP
     MapType type;
     Uint8 player;
     // these are the original values
-    Uint16 HQx[7];
-    Uint16 HQy[7];
-    char author[20];
+    std::array<Uint16, 7> HQx;
+    std::array<Uint16, 7> HQy;
+    std::array<char, 20> author;
     // 250 items from the big map header
-    MapHeaderItem header[250];
+    std::array<MapHeaderItem, 250> header;
     std::vector<MapNode> vertex;
     MapNode& getVertex(unsigned x, unsigned y) { return vertex[y * width + x]; }
     MapNode& getVertex(Point32 pos) { return vertex[pos.y * width + pos.x]; }

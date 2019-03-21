@@ -22,6 +22,7 @@
 
 #include "sge_surface.h"
 #include <SDL.h>
+#include <array>
 #include <cmath>
 #include <cstdarg>
 #include <cstring>
@@ -157,16 +158,16 @@ Uint32 sge_MapAlpha(Uint8 R, Uint8 G, Uint8 B, Uint8 A)
 //==================================================================================
 void sge_SetError(const char* format, ...)
 {
-    char buf[256];
+    std::array<char, 256> buf;
 
     va_list ap;
 
     va_start(ap, format);
 
-    vsprintf(buf, format, ap);
+    vsprintf(buf.data(), format, ap);
     va_end(ap);
 
-    SDL_SetError(buf);
+    SDL_SetError(buf.data());
 }
 
 /**********************************************************************************/
@@ -842,7 +843,7 @@ void sge_Fader(SDL_Surface* Surface, Uint8 sR, Uint8 sG, Uint8 sB, Uint8 dR, Uin
     // (sR,sG,sB) and (dR,dG,dB) are two points in space (the RGB cube).
 
     /* The vector for the straight line */
-    int v[3];
+    std::array<int, 3> v;
     v[0] = dR - sR;
     v[1] = dG - sG;
     v[2] = dB - sB;
@@ -874,7 +875,7 @@ void sge_AlphaFader(Uint8 sR, Uint8 sG, Uint8 sB, Uint8 sA, Uint8 dR, Uint8 dG, 
     // (sR,sG,sB,sA) and (dR,dG,dB,dA) are two points in hyperspace (the RGBA hypercube).
 
     /* The vector for the straight line */
-    int v[4];
+    std::array<int, 4> v;
     v[0] = dR - sR;
     v[1] = dG - sG;
     v[2] = dB - sB;
@@ -949,7 +950,7 @@ struct seg
 //-V:PUSH:782
 #define PUSH(Y, XL, XR, DY)                                                                      \
     {                                                                                            \
-        if(sp < stack + MAX && Y + (DY) >= sge_clip_ymin(dst) && Y + (DY) <= sge_clip_ymax(dst)) \
+        if(sp < stack.end() && Y + (DY) >= sge_clip_ymin(dst) && Y + (DY) <= sge_clip_ymax(dst)) \
         {                                                                                        \
             sp->y = Y;                                                                           \
             sp->xl = XL;                                                                         \
@@ -977,8 +978,9 @@ struct seg
 static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 {
     Sint16 l, x1, x2, dy;
-    Uint32 oc;                   /* old pixel color */
-    seg stack[MAX], *sp = stack; /* stack of filled segments */
+    Uint32 oc; /* old pixel color */
+    std::array<seg, MAX> stack;
+    auto sp = stack.begin(); /* stack of filled segments */
 
     if(x < sge_clip_xmin(dst) || x > sge_clip_xmax(dst) || y < sge_clip_ymin(dst) || y > sge_clip_ymax(dst))
         return;
@@ -991,7 +993,7 @@ static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
     PUSH(y, x, x, 1);      /* needed in some cases */
     PUSH(y + 1, x, x, -1); /* seed segment (popped 1st) */
 
-    while(sp > stack)
+    while(sp > stack.begin())
     {
         /* pop segment off stack and fill a neighboring scan line */
         POP(y, x1, x2, dy);
@@ -1047,8 +1049,9 @@ static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
                                                                                                                  \
     {                                                                                                            \
         Sint16 l, x1, x2, dy;                                                                                    \
-        Uint32 oc;                   /* old pixel color */                                                       \
-        seg stack[MAX], *sp = stack; /* stack of filled segments */                                              \
+        Uint32 oc; /* old pixel color */                                                                         \
+        std::array<seg, MAX> stack;                                                                              \
+        auto sp = stack.begin(); /* stack of filled segments */                                                  \
         Uint16 pitch = dst->pitch / dst->format->BytesPerPixel;                                                  \
         UintXX* row = (UintXX*)dst->pixels + y * pitch;                                                          \
         UintXX* pixel = row + x;                                                                                 \
@@ -1064,7 +1067,7 @@ static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
         PUSH(y, x, x, 1);      /* needed in some cases */                                                        \
         PUSH(y + 1, x, x, -1); /* seed segment (popped 1st) */                                                   \
                                                                                                                  \
-        while(sp > stack)                                                                                        \
+        while(sp > stack.begin())                                                                                \
         {                                                                                                        \
             /* pop segment off stack and fill a neighboring scan line */                                         \
             POP(y, x1, x2, dy);                                                                                  \

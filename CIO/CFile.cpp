@@ -334,7 +334,7 @@ bool CFile::open_lbm(const std::string& filename)
     // a convertion is needed
 
     // identifier for the kind of data follows (FORM, BMHD, CMAP, BODY)
-    char chunk_identifier[5];
+    std::array<char, 5> chunk_identifier;
 
     // length of data block
     Uint32 length;
@@ -345,7 +345,7 @@ bool CFile::open_lbm(const std::string& filename)
     // compression type
     Sint8 ctype;
     // array for palette colors
-    SDL_Color colors[256];
+    std::array<SDL_Color, 256> colors;
     // color value for read pixel
     Uint8 color_value;
 
@@ -355,10 +355,10 @@ bool CFile::open_lbm(const std::string& filename)
     /* READ FIRST CHUNK "BMHD" */
 
     // chunk-identifier (4 Bytes)
-    CHECK_READ(libendian::read(chunk_identifier, 4, fp));
+    CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
     chunk_identifier[4] = '\0';
     // should be "BMHD" at this time
-    if(strcmp(chunk_identifier, "BMHD") != 0)
+    if(strcmp(chunk_identifier.data(), "BMHD") != 0)
         return false;
     // length of data block
     CHECK_READ(libendian::be_read_ui(&length, fp));
@@ -382,9 +382,9 @@ bool CFile::open_lbm(const std::string& filename)
     // search for the "CMAP" and skip other chunk-types
     while(!feof(fp))
     {
-        CHECK_READ(libendian::read(chunk_identifier, 4, fp));
+        CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
 
-        if(strcmp(chunk_identifier, "CMAP") == 0)
+        if(strcmp(chunk_identifier.data(), "CMAP") == 0)
             break;
         else
         {
@@ -416,9 +416,9 @@ bool CFile::open_lbm(const std::string& filename)
     // search for the "BODY" and skip other chunk-types
     while(!feof(fp))
     {
-        CHECK_READ(libendian::read(chunk_identifier, 4, fp));
+        CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
 
-        if(strcmp(chunk_identifier, "BODY") == 0)
+        if(strcmp(chunk_identifier.data(), "BODY") == 0)
             break;
         else
         {
@@ -437,7 +437,7 @@ bool CFile::open_lbm(const std::string& filename)
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if(!(bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)))
         return false;
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, colors, 0, 256);
+    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, colors.data(), 0, colors.size());
 
     if(compression_flag == 0)
     {
@@ -535,23 +535,18 @@ bool CFile::open_gou()
 bobMAP* CFile::open_wld()
 {
     auto myMap = std::make_unique<bobMAP>();
-
-    // initialize myMap->name and myMap->author (both 20 chars) to prevent filling with random memory content
-    for(int i = 0; i < 20; i++)
-    {
-        myMap->name[i] = '\0';
-        myMap->author[i] = '\0';
-    }
+    myMap->name.fill('\0');
+    myMap->author.fill('\0');
 
     fseek(fp, 10, SEEK_SET);
-    CHECK_READ(libendian::read(myMap->name, 20, fp));
+    CHECK_READ(libendian::read(myMap->name, fp));
     CHECK_READ(libendian::le_read_us(&myMap->width_old, fp));
     CHECK_READ(libendian::le_read_us(&myMap->height_old, fp));
     uint8_t mapType;
     CHECK_READ(libendian::read(&mapType, 1, fp));
     myMap->type = MapType(mapType);
     CHECK_READ(libendian::read(&myMap->player, 1, fp));
-    CHECK_READ(libendian::read(myMap->author, 20, fp));
+    CHECK_READ(libendian::read(myMap->author, fp));
     for(unsigned short& i : myMap->HQx)
         CHECK_READ(libendian::le_read_us(&i, fp));
     for(unsigned short& i : myMap->HQy)
@@ -784,7 +779,7 @@ bool CFile::save_wld(void* data)
     char temp = 0; // to fill bytes
     auto* myMap = (bobMAP*)data;
     char map_version[11] = "WORLD_V1.0";
-    char map_data_header[16];
+    std::array<char, 16> map_data_header;
 
     // prepare map data header
     map_data_header[0] = 0x10;
@@ -793,18 +788,18 @@ bool CFile::save_wld(void* data)
     map_data_header[3] = 0x00;
     map_data_header[4] = 0x00;
     map_data_header[5] = 0x00;
-    *((Uint16*)(map_data_header + 6)) = boost::endian::native_to_little(myMap->width);
-    *((Uint16*)(map_data_header + 8)) = boost::endian::native_to_little(myMap->height);
+    *((Uint16*)(&map_data_header[6])) = boost::endian::native_to_little(myMap->width);
+    *((Uint16*)(&map_data_header[8])) = boost::endian::native_to_little(myMap->height);
     map_data_header[10] = 0x01;
     map_data_header[11] = 0x00;
-    *((Uint32*)(map_data_header + 12)) = boost::endian::native_to_little(myMap->width * myMap->height);
+    *((Uint32*)(&map_data_header[12])) = boost::endian::native_to_little(myMap->width * myMap->height);
 
     // begin writing data to file
     // first of all the map header
     // WORLD_V1.0
     libendian::write(map_version, 10, fp);
     // name
-    libendian::write(myMap->name, 20, fp);
+    libendian::write(myMap->name, fp);
     // old width
     libendian::le_write_us(myMap->width_old, fp);
     // old height
@@ -815,7 +810,7 @@ bool CFile::save_wld(void* data)
     // players
     libendian::write(&myMap->player, 1, fp);
     // author
-    libendian::write(myMap->author, 20, fp);
+    libendian::write(myMap->author, fp);
     // headquarters x
     for(unsigned short i : myMap->HQx)
         libendian::le_write_us(i, fp);
@@ -849,7 +844,7 @@ bool CFile::save_wld(void* data)
     // now begin writing the real map data
 
     // altitude information
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -861,7 +856,7 @@ bool CFile::save_wld(void* data)
     }
 
     // texture information for RightSideUp-Triangles
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -870,7 +865,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to texture information for UpSideDown-Triangles
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -879,7 +874,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to road data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -888,7 +883,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to object type data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -897,7 +892,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to object info data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -906,7 +901,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to animal data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -915,7 +910,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to unknown1 data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -924,7 +919,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to build data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -933,7 +928,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to unknown2 data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -942,7 +937,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to unknown3 data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -951,7 +946,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to resource data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -960,7 +955,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to shading data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -969,7 +964,7 @@ bool CFile::save_wld(void* data)
     }
 
     // go to unknown5 data
-    libendian::write(map_data_header, sizeof(map_data_header), fp);
+    libendian::write(map_data_header, fp);
 
     for(int j = 0; j < myMap->height; j++)
     {
@@ -1050,7 +1045,7 @@ bool CFile::read_bob02()
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
+    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
     SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
     // SDL_SetAlpha(bmpArray->surface, SDL_SRCALPHA, 128);
 
@@ -1221,7 +1216,7 @@ bool CFile::read_bob04(int player_color)
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
 
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
+    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
     SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
     // main loop for reading picture lines
@@ -1359,7 +1354,7 @@ bool CFile::read_bob07()
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((shadowArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
-    SDL_SetPalette(shadowArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
+    SDL_SetPalette(shadowArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
     // SDL_SetAlpha(shadowArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
@@ -1468,7 +1463,7 @@ bool CFile::read_bob14()
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors, 0, 256);
+    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
 
     // set fp to back to the first offset of data block
     fseek(fp, data_start, SEEK_SET);

@@ -19,13 +19,14 @@
 #include "sge_shape.h"
 #include "sge_surface.h"
 #include <SDL.h>
+#include <array>
 #include <cstdio>
 #include <cstring>
 #include <new>
 
 using namespace std;
 
-Uint8 sge_mask[8] = {SGE_FLAG1, SGE_FLAG2, SGE_FLAG3, SGE_FLAG4, SGE_FLAG5, SGE_FLAG6, SGE_FLAG7, SGE_FLAG8};
+std::array<Uint8, 8> sge_mask = {SGE_FLAG1, SGE_FLAG2, SGE_FLAG3, SGE_FLAG4, SGE_FLAG5, SGE_FLAG6, SGE_FLAG7, SGE_FLAG8};
 SDL_Rect _ua;
 Sint16 _cx = 0, _cy = 0;
 

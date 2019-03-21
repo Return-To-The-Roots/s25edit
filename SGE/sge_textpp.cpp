@@ -21,6 +21,7 @@
 #include "sge_textpp.h"
 #include "sge_surface.h"
 #include <SDL.h>
+#include <array>
 #include <cstdarg>
 #include <cstdlib>
 
@@ -362,16 +363,16 @@ void sge_TextEditor::change_uctext(Uint16* text)
 
 void sge_TextEditor::change_textf(const char* text, ...)
 {
-    char buf[256];
+    std::array<char, 256> buf;
 
     va_list ap;
 
     va_start(ap, text);
 
-    vsprintf(buf, text, ap);
+    vsprintf(buf.data(), text, ap);
     va_end(ap);
 
-    change_text(buf);
+    change_text(buf.data());
 }
 
 //==================================================================================
@@ -436,7 +437,7 @@ bool sge_text::update_textSurface(bool force)
             if(bm_font->FontSurface->format->palette)
             {
                 // Set the palette
-                SDL_Color c[2];
+                std::array<SDL_Color, 2> c;
                 c[0].r = bm_font->FontSurface->format->palette->colors[1].r + 100; /* Whatever */
                 c[0].g = bm_font->FontSurface->format->palette->colors[1].g + 100;
                 c[0].b = bm_font->FontSurface->format->palette->colors[1].b + 100;
@@ -444,7 +445,7 @@ bool sge_text::update_textSurface(bool force)
                 c[1].r = bm_font->FontSurface->format->palette->colors[1].r;
                 c[1].g = bm_font->FontSurface->format->palette->colors[1].g;
                 c[1].b = bm_font->FontSurface->format->palette->colors[1].b;
-                SDL_SetColors(text_surface, c, 0, 2);
+                SDL_SetColors(text_surface, c.data(), 0, c.size());
                 bcol = 0;
             } else
             {

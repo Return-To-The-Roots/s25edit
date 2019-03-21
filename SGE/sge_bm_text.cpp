@@ -26,6 +26,7 @@
 #include "sge_textpp.h"
 #include "sge_tt_text.h"
 #include <SDL.h>
+#include <array>
 #include <cmath>
 #include <cstdarg>
 #include <cstring>
@@ -78,14 +79,14 @@ sge_bmpFont* sge_BF_CreateFont(SDL_Surface* surface, Uint8 flags)
             }
 
             // Set the palette
-            SDL_Color c[2];
+            std::array<SDL_Color, 2> c;
             c[0].r = 0;
             c[1].r = 255;
             c[0].g = 0;
             c[1].g = 255;
             c[0].b = 0;
             c[1].b = 255;
-            SDL_SetColors(tmp, c, 0, 2);
+            SDL_SetColors(tmp, c.data(), 0, c.size());
 
             if(SDL_MUSTLOCK(font->FontSurface) && _sge_lock)
                 if(SDL_LockSurface(font->FontSurface) < 0)
@@ -307,16 +308,16 @@ SDL_Rect sge_BF_TextSize(sge_bmpFont* font, const char* string)
 //==================================================================================
 SDL_Rect sge_BF_textoutf(SDL_Surface* surface, sge_bmpFont* font, Sint16 x, Sint16 y, const char* format, ...)
 {
-    char buf[256];
+    std::array<char, 256> buf;
 
     va_list ap;
 
     va_start(ap, format);
 
-    vsprintf(buf, format, ap);
+    vsprintf(buf.data(), format, ap);
     va_end(ap);
 
-    return sge_BF_textout(surface, font, buf, x, y);
+    return sge_BF_textout(surface, font, buf.data(), x, y);
 }
 
 //==================================================================================
@@ -442,14 +443,14 @@ void sge_BF_SetColor(sge_bmpFont* font, Uint8 R, Uint8 G, Uint8 B)
         }
     } else
     { // Fast palette version
-        SDL_Color c[2];
+        std::array<SDL_Color, 2> c;
         c[0].r = 0;
         c[1].r = R;
         c[0].g = 0;
         c[1].g = G;
         c[0].b = 0;
         c[1].b = B;
-        SDL_SetColors(font->FontSurface, c, 0, 2);
+        SDL_SetColors(font->FontSurface, c.data(), 0, c.size());
     }
 }
 

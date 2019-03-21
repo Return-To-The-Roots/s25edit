@@ -19,6 +19,7 @@
 #include "sge_blib.h"
 #include "sge_surface.h"
 #include <SDL.h>
+#include <array>
 #include <cmath>
 #include <cstdio>
 
@@ -46,8 +47,8 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
     Sint16 sxmax = sge_clip_xmax(src);
     Sint16 symin = sge_clip_ymin(src);
     Sint16 symax = sge_clip_ymax(src);
-    Sint16 sx[] = {sxmin, sxmax, sxmin, sxmax};
-    Sint16 sy[] = {symin, symax, symax, symin};
+    std::array<Sint16,4> sx = {sxmin, sxmax, sxmin, sxmax};
+    std::array<Sint16, 4> sy = {symin, symax, symax, symin};
 
     // We don't really need fixed-point here
     // but why not?
@@ -617,7 +618,7 @@ SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, flo
     double asinv = a * sinv * xscale, bsinv = b * sinv * yscale;
 
     /* Do the maths */
-    Sint16 xt[4], yt[4];
+    std::array<Sint16, 4> xt, yt;
 
     xt[0] = Sint16((-acosv + bsinv) + qx);
     yt[0] = Sint16((-asinv - bcosv) + qy);

@@ -70,8 +70,8 @@ private:
     // array to store all vertices (editor mode) --> after constructing class CMap this will have 'VertexCounter' elements
     std::vector<cursorPoint> Vertices;
     // these are the new (internal) values for player positions (otherwise we had to walk through the objectXXXX-Blocks step by step)
-    Uint16 PlayerHQx[MAXPLAYERS];
-    Uint16 PlayerHQy[MAXPLAYERS];
+    std::array<Uint16, MAXPLAYERS> PlayerHQx;
+    std::array<Uint16, MAXPLAYERS> PlayerHQy;
     // maximum value of height (user can modify this)
     Uint8 MaxRaiseHeight;
     Uint8 MinReduceHeight;
@@ -120,14 +120,14 @@ public:
     }
     DisplayRectangle getDisplayRect() { return displayRect; }
     void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
-    Uint16* getPlayerHQx() { return PlayerHQx; }
-    Uint16* getPlayerHQy() { return PlayerHQy; }
+    auto& getPlayerHQx() { return PlayerHQx; }
+    auto& getPlayerHQy() { return PlayerHQy; }
     const std::string& getFilename() const { return filename_; }
     void setFilename(std::string filename) { filename_ = std::move(filename); }
-    const char* getMapname() { return map->name; }
-    void setMapname(const std::string& name) { strcpy(map->name, name.substr(0, std::extent<decltype(map->name)>::value).c_str()); }
-    const char* getAuthor() { return map->author; }
-    void setAuthor(const std::string& author) { strcpy(map->author, author.substr(0, std::extent<decltype(map->author)>::value).c_str()); }
+    const char* getMapname() { return map->name.data(); }
+    void setMapname(const std::string& name) { strcpy(map->name.data(), name.substr(0, map->name.size()).c_str()); }
+    const char* getAuthor() { return map->author.data(); }
+    void setAuthor(const std::string& author) { strcpy(map->author.data(), author.substr(0, map->author.size()).c_str()); }
 
     void drawMinimap(SDL_Surface* Window);
     void render();

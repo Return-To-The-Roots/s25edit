@@ -3899,9 +3899,9 @@ static pline* rsort(pline* inlist)
         return nullptr;
 
     // 16 radix-buckets
-    pline* bucket[16] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-    pline* bi[16]; // bucket itterator (points to last element in bucket)
+    std::array<pline*, 16> bucket = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                                     nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    std::array<pline*, 16> bi; // bucket itterator (points to last element in bucket)
 
     pline* plist = inlist;
 

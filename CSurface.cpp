@@ -724,8 +724,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     // i texture the triangle with normal water and then draw the floe over it. To Extract the floe
     // from it's surrounded water, i use this color keys below. These are the color values for the water texture.
     // I wrote a special SGE-Function that uses these color keys and ignores them in the Surf_Tileset.
-    static Uint32 colorkeys[5] = {14191, 14195, 13167, 13159, 11119};
-    static int keycount = 5;
+    static std::array<Uint32, 5> colorkeys = {14191, 14195, 13167, 13159, 11119};
     static int texture_move = 0;
     static int roundCount = 0;
     static Uint32 roundTimeObjects = SDL_GetTicks();
@@ -792,10 +791,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
                     sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
                                                             left.x, left.y, right.x, right.y, P1.shading << 8, P2.shading << 8,
-                                                            P3.shading << 8, gouData[type], colorkeys, keycount);
+                                                            P3.shading << 8, gouData[type], colorkeys.data(), colorkeys.size());
                 else
                     sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
-                                                     left.y, right.x, right.y, P1.i, P2.i, P3.i, colorkeys, keycount);
+                                                     left.y, right.x, right.y, P1.i, P2.i, P3.i, colorkeys.data(), colorkeys.size());
             } else
             {
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)

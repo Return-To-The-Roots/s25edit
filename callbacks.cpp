@@ -193,7 +193,7 @@ void callback::submenuOptions(int Param)
     static CFont* TextResolution = nullptr;
     static CButton* ButtonFullscreen = nullptr;
     static CButton* ButtonOpenGL = nullptr;
-    char puffer[80];
+    std::array<char, 80> puffer;
     static CSelectBox* SelectBoxRes = nullptr;
 
     enum
@@ -266,9 +266,9 @@ void callback::submenuOptions(int Param)
             // add screen resolution
             if(TextResolution)
                 SubMenu->delText(TextResolution);
-            sprintf(puffer, "Game Resolution: %d*%d / %s", global::s2->GameResolution.x, global::s2->GameResolution.y,
+            sprintf(puffer.data(), "Game Resolution: %d*%d / %s", global::s2->GameResolution.x, global::s2->GameResolution.y,
                     (global::s2->fullscreen ? "Fullscreen" : "Window"));
-            TextResolution = SubMenu->addText(puffer, (int)(global::s2->GameResolution.x / 2 - 110), 50, 11);
+            TextResolution = SubMenu->addText(puffer.data(), (int)(global::s2->GameResolution.x / 2 - 110), 50, 11);
             if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 190, 200, 20,
@@ -1979,7 +1979,7 @@ void callback::EditorPlayerMenu(int Param)
     static CMap* MapObj = nullptr;
     static int PlayerNumber = 0x00;
     static CFont* PlayerNumberText = nullptr;
-    char puffer[30];
+    std::array<char, 30> puffer;
     static DisplayRectangle tempRect;
     static Uint16* PlayerHQx = nullptr;
     static Uint16* PlayerHQy = nullptr;
@@ -2004,15 +2004,15 @@ void callback::EditorPlayerMenu(int Param)
             {
                 MapObj = global::s2->getMapObj();
                 tempRect = MapObj->getDisplayRect();
-                PlayerHQx = MapObj->getPlayerHQx();
-                PlayerHQy = MapObj->getPlayerHQy();
+                PlayerHQx = MapObj->getPlayerHQx().data();
+                PlayerHQy = MapObj->getPlayerHQy().data();
 
                 MapObj->setMode(EDITOR_MODE_FLAG);
                 MapObj->setModeContent(PlayerNumber);
 
                 WNDPlayer->addButton(EditorPlayerMenu, PLAYER_REDUCE, 0, 0, 20, 20, BUTTON_GREY, "-");
-                sprintf(puffer, "%d", PlayerNumber + 1);
-                PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
+                sprintf(puffer.data(), "%d", PlayerNumber + 1);
+                PlayerNumberText = WNDPlayer->addText(puffer.data(), 26, 4, 14, FONT_ORANGE);
                 WNDPlayer->addButton(EditorPlayerMenu, PLAYER_RAISE, 40, 0, 20, 20, BUTTON_GREY, "+");
                 WNDPlayer->addButton(EditorPlayerMenu, GOTO_PLAYER, 0, 20, 60, 20, BUTTON_GREY, "Go to");
             } else
@@ -2029,8 +2029,8 @@ void callback::EditorPlayerMenu(int Param)
                 PlayerNumber--;
                 MapObj->setModeContent(PlayerNumber);
                 WNDPlayer->delText(PlayerNumberText);
-                sprintf(puffer, "%d", PlayerNumber + 1);
-                PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
+                sprintf(puffer.data(), "%d", PlayerNumber + 1);
+                PlayerNumberText = WNDPlayer->addText(puffer.data(), 26, 4, 14, FONT_ORANGE);
             }
             break;
 
@@ -2040,8 +2040,8 @@ void callback::EditorPlayerMenu(int Param)
                 PlayerNumber++;
                 MapObj->setModeContent(PlayerNumber);
                 WNDPlayer->delText(PlayerNumberText);
-                sprintf(puffer, "%d", PlayerNumber + 1);
-                PlayerNumberText = WNDPlayer->addText(puffer, 26, 4, 14, FONT_ORANGE);
+                sprintf(puffer.data(), "%d", PlayerNumber + 1);
+                PlayerNumberText = WNDPlayer->addText(puffer.data(), 26, 4, 14, FONT_ORANGE);
             }
             break;
 
@@ -2306,7 +2306,7 @@ void callback::EditorCreateMenu(int Param)
     static CFont* TextBorder = nullptr;
     static int border = 0;
     static int border_texture = TRIANGLE_TEXTURE_SNOW;
-    static char puffer[5];
+    static std::array<char, 5> puffer;
     int PosX = global::s2->GameResolution.x / 2 - 125, PosY = global::s2->GameResolution.y / 2 - 175;
 
     enum
@@ -2349,9 +2349,9 @@ void callback::EditorCreateMenu(int Param)
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_128, 0, 15, 35, 20, BUTTON_GREY, "128<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_16, 35, 15, 35, 20, BUTTON_GREY, "16<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_2, 70, 15, 25, 20, BUTTON_GREY, "2<-");
-                sprintf(puffer, "%d", width);
-                TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
-                TextWidth->setText(puffer);
+                sprintf(puffer.data(), "%d", width);
+                TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
+                TextWidth->setText(puffer.data());
                 WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_2, 143, 15, 25, 20, BUTTON_GREY, "->2");
                 WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_16, 168, 15, 35, 20, BUTTON_GREY, "->16");
                 WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_128, 203, 15, 35, 20, BUTTON_GREY, "->128");
@@ -2360,9 +2360,9 @@ void callback::EditorCreateMenu(int Param)
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_128, 0, 49, 35, 20, BUTTON_GREY, "128<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_16, 35, 49, 35, 20, BUTTON_GREY, "16<-");
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_2, 70, 49, 25, 20, BUTTON_GREY, "2<-");
-                sprintf(puffer, "%d", height);
-                TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
-                TextHeight->setText(puffer);
+                sprintf(puffer.data(), "%d", height);
+                TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
+                TextHeight->setText(puffer.data());
                 WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_2, 143, 49, 25, 20, BUTTON_GREY, "->2");
                 WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_16, 168, 49, 35, 20, BUTTON_GREY, "->16");
                 WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_128, 203, 49, 35, 20, BUTTON_GREY, "->128");
@@ -2379,8 +2379,8 @@ void callback::EditorCreateMenu(int Param)
 
                 WNDCreate->addText("Border size", 103, 175, 9, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, REDUCE_BORDER, 45, 186, 35, 20, BUTTON_GREY, "-");
-                sprintf(puffer, "%d", border);
-                TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
+                sprintf(puffer.data(), "%d", border);
+                TextBorder = WNDCreate->addText(puffer.data(), 112, 188, 14, FONT_YELLOW);
                 WNDCreate->addButton(EditorCreateMenu, RAISE_BORDER, 158, 186, 35, 20, BUTTON_GREY, "+");
 
                 WNDCreate->addText("Border area", 65, 215, 9, FONT_YELLOW);
@@ -2405,8 +2405,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 width = 32;
             WNDCreate->delText(TextWidth);
-            sprintf(puffer, "%d", width);
-            TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", width);
+            TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
             break;
         case REDUCE_WIDTH_16:
             if(width - 16 >= 32)
@@ -2414,8 +2414,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 width = 32;
             WNDCreate->delText(TextWidth);
-            sprintf(puffer, "%d", width);
-            TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", width);
+            TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
             break;
         case REDUCE_WIDTH_2:
             if(width - 2 >= 32)
@@ -2423,8 +2423,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 width = 32;
             WNDCreate->delText(TextWidth);
-            sprintf(puffer, "%d", width);
-            TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", width);
+            TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
             break;
         case RAISE_WIDTH_2:
             if(width + 2 <= MAXMAPWIDTH)
@@ -2432,8 +2432,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 width = MAXMAPWIDTH;
             WNDCreate->delText(TextWidth);
-            sprintf(puffer, "%d", width);
-            TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", width);
+            TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
             break;
         case RAISE_WIDTH_16:
             if(width + 16 <= MAXMAPWIDTH)
@@ -2441,8 +2441,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 width = MAXMAPWIDTH;
             WNDCreate->delText(TextWidth);
-            sprintf(puffer, "%d", width);
-            TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", width);
+            TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
             break;
         case RAISE_WIDTH_128:
             if(width + 128 <= MAXMAPWIDTH)
@@ -2450,8 +2450,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 width = MAXMAPWIDTH;
             WNDCreate->delText(TextWidth);
-            sprintf(puffer, "%d", width);
-            TextWidth = WNDCreate->addText(puffer, 105, 17, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", width);
+            TextWidth = WNDCreate->addText(puffer.data(), 105, 17, 14, FONT_YELLOW);
             break;
         case REDUCE_HEIGHT_128:
             if(height - 128 >= 32)
@@ -2459,8 +2459,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = 32;
             WNDCreate->delText(TextHeight);
-            sprintf(puffer, "%d", height);
-            TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", height);
+            TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
             break;
         case REDUCE_HEIGHT_16:
             if(height - 16 >= 32)
@@ -2468,8 +2468,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = 32;
             WNDCreate->delText(TextHeight);
-            sprintf(puffer, "%d", height);
-            TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", height);
+            TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
             break;
         case REDUCE_HEIGHT_2:
             if(height - 2 >= 32)
@@ -2477,8 +2477,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = 32;
             WNDCreate->delText(TextHeight);
-            sprintf(puffer, "%d", height);
-            TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", height);
+            TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
             break;
         case RAISE_HEIGHT_2:
             if(height + 2 <= MAXMAPHEIGHT)
@@ -2486,8 +2486,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = MAXMAPHEIGHT;
             WNDCreate->delText(TextHeight);
-            sprintf(puffer, "%d", height);
-            TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", height);
+            TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
             break;
         case RAISE_HEIGHT_16:
             if(height + 16 <= MAXMAPHEIGHT)
@@ -2495,8 +2495,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = MAXMAPHEIGHT;
             WNDCreate->delText(TextHeight);
-            sprintf(puffer, "%d", height);
-            TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", height);
+            TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
             break;
         case RAISE_HEIGHT_128:
             if(height + 128 <= MAXMAPHEIGHT)
@@ -2504,8 +2504,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = MAXMAPHEIGHT;
             WNDCreate->delText(TextHeight);
-            sprintf(puffer, "%d", height);
-            TextHeight = WNDCreate->addText(puffer, 105, 51, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", height);
+            TextHeight = WNDCreate->addText(puffer.data(), 105, 51, 14, FONT_YELLOW);
             break;
 
         case CHANGE_LANDSCAPE:
@@ -2736,8 +2736,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 border = 0;
             WNDCreate->delText(TextBorder);
-            sprintf(puffer, "%d", border);
-            TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", border);
+            TextBorder = WNDCreate->addText(puffer.data(), 112, 188, 14, FONT_YELLOW);
             break;
         case RAISE_BORDER:
             if(border + 1 <= 12)
@@ -2745,8 +2745,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 border = 12;
             WNDCreate->delText(TextBorder);
-            sprintf(puffer, "%d", border);
-            TextBorder = WNDCreate->addText(puffer, 112, 188, 14, FONT_YELLOW);
+            sprintf(puffer.data(), "%d", border);
+            TextBorder = WNDCreate->addText(puffer.data(), 112, 188, 14, FONT_YELLOW);
             break;
 
         case BORDER_TEXTURE_PREVIOUS:
@@ -3171,7 +3171,7 @@ void callback::viewer(int Param)
     static CWindow* WNDViewer = nullptr;
     static int index = 0;
     static int PicInWndIndex = -1;
-    static char PicInfos[50];
+    static std::array<char, 50> PicInfos;
     static CFont* PicInfosText = nullptr;
 
     enum
@@ -3294,7 +3294,7 @@ void callback::submenu1(int Param)
     static CSelectBox* testSelectBox = nullptr;
 
     static int picIndex = -1;
-    char puffer[80];
+    std::array<char, 80> puffer;
 
     // if this is the first time the function is called
     if(Param == INITIALIZING_CALL)
