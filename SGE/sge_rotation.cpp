@@ -23,11 +23,6 @@
 #include <cmath>
 #include <cstdio>
 
-#define SWAP(x, y, temp) \
-    temp = x;            \
-    x = y;               \
-    y = temp
-
 extern Uint8 _sge_update; // Declared in sge_draw.cpp
 extern Uint8 _sge_lock;
 
@@ -47,7 +42,7 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
     Sint16 sxmax = sge_clip_xmax(src);
     Sint16 symin = sge_clip_ymin(src);
     Sint16 symax = sge_clip_ymax(src);
-    std::array<Sint16,4> sx = {sxmin, sxmax, sxmin, sxmax};
+    std::array<Sint16, 4> sx = {sxmin, sxmax, sxmin, sxmax};
     std::array<Sint16, 4> sy = {symin, symax, symax, symin};
 
     // We don't really need fixed-point here
@@ -122,9 +117,10 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
 **==================================================================================*/
 // First we need some macros to handle different bpp
 // I'm sorry about this...
-#define TRANSFORM(UintXX, DIV)                                                   \
-    Sint32 const src_pitch = src->pitch / DIV;                                   \
-    Sint32 const dst_pitch = dst->pitch / DIV;                                   \
+#define TRANSFORM(UintXX_T, DIV)                                                 \
+    using UintXX = UintXX_T;                                                     \
+    Sint32 const src_pitch = src->pitch / (DIV);                                 \
+    Sint32 const dst_pitch = dst->pitch / (DIV);                                 \
     UintXX const* src_row = (UintXX*)src->pixels;                                \
     UintXX* dst_row;                                                             \
                                                                                  \
@@ -179,9 +175,10 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
     }
 
 // Interpolated transform
-#define TRANSFORM_AA(UintXX, DIV)                                                                                          \
-    Sint32 const src_pitch = src->pitch / DIV;                                                                             \
-    Sint32 const dst_pitch = dst->pitch / DIV;                                                                             \
+#define TRANSFORM_AA(UintXX_T, DIV)                                                                                        \
+    using UintXX = UintXX_T;                                                                                               \
+    Sint32 const src_pitch = src->pitch / (DIV);                                                                           \
+    Sint32 const dst_pitch = dst->pitch / (DIV);                                                                           \
     UintXX const* src_row = (UintXX*)src->pixels;                                                                          \
     UintXX* dst_row;                                                                                                       \
     UintXX c1, c2, c3, c4;                                                                                                 \

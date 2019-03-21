@@ -948,25 +948,25 @@ struct seg
 #define MAX 1000 /* max depth of stack */
 
 //-V:PUSH:782
-#define PUSH(Y, XL, XR, DY)                                                                      \
-    {                                                                                            \
-        if(sp < stack.end() && Y + (DY) >= sge_clip_ymin(dst) && Y + (DY) <= sge_clip_ymax(dst)) \
-        {                                                                                        \
-            sp->y = Y;                                                                           \
-            sp->xl = XL;                                                                         \
-            sp->xr = XR;                                                                         \
-            sp->dy = DY;                                                                         \
-            sp++;                                                                                \
-        }                                                                                        \
+#define PUSH(Y, XL, XR, DY)                                                                          \
+    {                                                                                                \
+        if(sp < stack.end() && (Y) + (DY) >= sge_clip_ymin(dst) && (Y) + (DY) <= sge_clip_ymax(dst)) \
+        {                                                                                            \
+            sp->y = Y;                                                                               \
+            sp->xl = XL;                                                                             \
+            sp->xr = XR;                                                                             \
+            sp->dy = DY;                                                                             \
+            sp++;                                                                                    \
+        }                                                                                            \
     }
 
-#define POP(Y, XL, XR, DY)  \
-    {                       \
-        sp--;               \
-        DY = sp->dy;        \
-        Y = sp->y + sp->dy; \
-        XL = sp->xl;        \
-        XR = sp->xr;        \
+#define POP(Y, XL, XR, DY)    \
+    {                         \
+        sp--;                 \
+        (DY) = sp->dy;        \
+        (Y) = sp->y + sp->dy; \
+        (XL) = sp->xl;        \
+        (XR) = sp->xr;        \
     }
 
 /*
@@ -1043,74 +1043,70 @@ static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
     }
 }
 
-//-V:DO_FILL:782
-/* Macro for 8/16/32 bpp */
-#define DO_FILL(UintXX, label)                                                                                   \
-                                                                                                                 \
-    {                                                                                                            \
-        Sint16 l, x1, x2, dy;                                                                                    \
-        Uint32 oc; /* old pixel color */                                                                         \
-        std::array<seg, MAX> stack;                                                                              \
-        auto sp = stack.begin(); /* stack of filled segments */                                                  \
-        Uint16 pitch = dst->pitch / dst->format->BytesPerPixel;                                                  \
-        UintXX* row = (UintXX*)dst->pixels + y * pitch;                                                          \
-        UintXX* pixel = row + x;                                                                                 \
-                                                                                                                 \
-        if(x < sge_clip_xmin(dst) || x > sge_clip_xmax(dst) || y < sge_clip_ymin(dst) || y > sge_clip_ymax(dst)) \
-            return;                                                                                              \
-                                                                                                                 \
-        oc = *pixel; /* read color at seed point */                                                              \
-                                                                                                                 \
-        if(oc == color)                                                                                          \
-            return;                                                                                              \
-                                                                                                                 \
-        PUSH(y, x, x, 1);      /* needed in some cases */                                                        \
-        PUSH(y + 1, x, x, -1); /* seed segment (popped 1st) */                                                   \
-                                                                                                                 \
-        while(sp > stack.begin())                                                                                \
-        {                                                                                                        \
-            /* pop segment off stack and fill a neighboring scan line */                                         \
-            POP(y, x1, x2, dy);                                                                                  \
-            row = (UintXX*)dst->pixels + y * pitch;                                                              \
-            pixel = row + x1;                                                                                    \
-                                                                                                                 \
-            /*                                                                */                                 \
-            /* segment of scan line y-dy for x1<=x<=x2 was previously filled, */                                 \
-            /* now explore adjacent pixels in scan line y                     */                                 \
-            /*                                                                */                                 \
-            for(x = x1; x >= sge_clip_xmin(dst) && *pixel == oc; x--, pixel--)                                   \
-                *pixel = color;                                                                                  \
-                                                                                                                 \
-            if(x >= x1)                                                                                          \
-                goto label;                                                                                      \
-                                                                                                                 \
-            l = x + 1;                                                                                           \
-            if(l < x1)                                                                                           \
-                PUSH(y, l, x1 - 1, -dy); /* leak on left? */                                                     \
-                                                                                                                 \
-            x = x1 + 1;                                                                                          \
-            pixel = row + x;                                                                                     \
-                                                                                                                 \
-            do                                                                                                   \
-            {                                                                                                    \
-                for(; x <= sge_clip_xmax(dst) && *pixel == oc; x++, pixel++)                                     \
-                    *pixel = color;                                                                              \
-                                                                                                                 \
-                PUSH(y, l, x - 1, dy);                                                                           \
-                                                                                                                 \
-                if(x > x2 + 1)                                                                                   \
-                    PUSH(y, x2 + 1, x - 1, -dy); /* leak on right? */                                            \
-                                                                                                                 \
-            label:                                                                                               \
-                pixel++;                                                                                         \
-                                                                                                                 \
-                for(x++; x <= x2 && *pixel != oc; pixel++)                                                       \
-                    x++;                                                                                         \
-                                                                                                                 \
-                l = x;                                                                                           \
-            } while(x <= x2);                                                                                    \
-        }                                                                                                        \
+template<typename T>
+void DO_FILL(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
+{
+    Sint16 l, x1, x2, dy;
+    Uint32 oc; /* old pixel color */
+    std::array<seg, MAX> stack;
+    auto sp = stack.begin(); /* stack of filled segments */
+    Uint16 pitch = dst->pitch / dst->format->BytesPerPixel;
+    auto* row = (T*)dst->pixels + y * pitch;
+    auto* pixel = row + x;
+
+    if(x < sge_clip_xmin(dst) || x > sge_clip_xmax(dst) || y < sge_clip_ymin(dst) || y > sge_clip_ymax(dst))
+        return;
+
+    oc = *pixel; /* read color at seed point */
+
+    if(oc == color)
+        return;
+
+    PUSH(y, x, x, 1);      /* needed in some cases */
+    PUSH(y + 1, x, x, -1); /* seed segment (popped 1st) */
+
+    while(sp > stack.begin())
+    { /* pop segment off stack and fill a neighboring scan line */
+        POP(y, x1, x2, dy);
+        row = (T*)dst->pixels + y * pitch;
+        pixel = row + x1;
+        /*                                                                */
+        /* segment of scan line y-dy for x1<=x<=x2 was previously filled, */
+        /* now explore adjacent pixels in scan line y                     */
+        /*                                                                */
+        for(x = x1; x >= sge_clip_xmin(dst) && *pixel == oc; x--, pixel--)
+            *pixel = color;
+
+        if(x >= x1)
+            goto label;
+
+        l = x + 1;
+        if(l < x1)
+            PUSH(y, l, x1 - 1, -dy); /* leak on left? */
+
+        x = x1 + 1;
+        pixel = row + x;
+
+        do
+        {
+            for(; x <= sge_clip_xmax(dst) && *pixel == oc; x++, pixel++)
+                *pixel = color;
+
+            PUSH(y, l, x - 1, dy);
+
+            if(x > x2 + 1)
+                PUSH(y, x2 + 1, x - 1, -dy); /* leak on right? */
+
+        label:
+            pixel++;
+
+            for(x++; x <= x2 && *pixel != oc; pixel++)
+                x++;
+
+            l = x;
+        } while(x <= x2);
     }
+}
 
 // Wrapper function
 void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
@@ -1121,13 +1117,13 @@ void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 
     switch(dst->format->BytesPerPixel)
     {
-        case 1: /* Assuming 8-bpp */ DO_FILL(Uint8, skip8) break;
+        case 1: /* Assuming 8-bpp */ DO_FILL<Uint8>(dst, x, y, color); break;
 
-        case 2: /* Probably 15-bpp or 16-bpp */ DO_FILL(Uint16, skip16) break;
+        case 2: /* Probably 15-bpp or 16-bpp */ DO_FILL<Uint16>(dst, x, y, color); break;
 
         case 3: /* Slow 24-bpp mode, usually not used */ _FloodFillX(dst, x, y, color); break;
 
-        case 4: /* Probably 32-bpp */ DO_FILL(Uint32, skip32) break;
+        case 4: /* Probably 32-bpp */ DO_FILL<Uint32>(dst, x, y, color); break;
     }
 
     if(SDL_MUSTLOCK(dst) && _sge_lock)

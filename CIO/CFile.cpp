@@ -22,7 +22,7 @@ bool CFile::loadPAL = false;
 #define STRINGIZE2(x) #x
 #define LINE_STRING STRINGIZE(__LINE__)
 #define CHECK_READ(readCmd) \
-    if(!readCmd)            \
+    if(!(readCmd))          \
     throw std::runtime_error("Read failed at line " LINE_STRING)
 
 void CFile::init()

@@ -33,10 +33,13 @@
 extern Uint8 _sge_update;
 extern Uint8 _sge_lock;
 
-#define SWAP(x, y, temp) \
-    temp = x;            \
-    x = y;               \
-    y = temp
+template<typename T>
+static void swap(T& x, T& y)
+{
+    T tmp = x;
+    x = y;
+    y = tmp;
+}
 
 /**********************************************************************************/
 /**                             Line functions                                   **/
@@ -617,7 +620,7 @@ void _AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
 {
     Uint32 erracc = 0, erradj;
     Uint32 erracctmp, wgt;
-    Sint16 tmp, y0p1, x0pxdir;
+    Sint16 y0p1, x0pxdir;
     Uint8 a;
 
     /* Keep on working with 32bit numbers */
@@ -629,8 +632,8 @@ void _AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
     /* Reorder points if required */
     if(yy0 > yy1)
     {
-        SWAP(yy0, yy1, tmp);
-        SWAP(xx0, xx1, tmp);
+        swap(yy0, yy1);
+        swap(xx0, xx1);
     }
 
     /* Calculate distance */
@@ -912,8 +915,7 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 {
     Uint32 erracc = 0, erradj;
     Uint32 erracctmp, wgt;
-    Sint16 tmp, y0p1, x0pxdir;
-    Uint8 a;
+    Sint16 y0p1, x0pxdir;
 
     /* Keep on working with 32bit numbers */
     Sint32 xx0 = x1;
@@ -924,12 +926,12 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
     /* Reorder points if required */
     if(yy0 > yy1)
     {
-        SWAP(yy0, yy1, tmp);
-        SWAP(xx0, xx1, tmp);
+        swap(yy0, yy1);
+        swap(xx0, xx1);
 
-        SWAP(r1, r2, a);
-        SWAP(g1, g2, a);
-        SWAP(b1, b2, a);
+        swap(r1, r2);
+        swap(g1, g2);
+        swap(b1, b2);
     }
 
     /* Calculate distance */
@@ -1002,7 +1004,7 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
             the paired pixel. */
             wgt = (erracc >> intshift) & 255;
 
-            a = Uint8(255 - wgt);
+            auto a = Uint8(255 - wgt);
             if(alpha != 255)
                 a = Uint8(a * alpha_pp);
 
@@ -1048,7 +1050,7 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
             the paired pixel. */
             wgt = (erracc >> intshift) & 255;
 
-            a = Uint8(255 - wgt);
+            auto a = Uint8(255 - wgt);
             if(alpha != 255)
                 a = Uint8(a * alpha_pp);
 

@@ -30,9 +30,9 @@
 using boost::numeric_cast;
 
 #define SWAP(x, y, temp) \
-    temp = x;            \
-    x = y;               \
-    y = temp
+    (temp) = x;          \
+    (x) = y;             \
+    (y) = temp
 
 /* Globals used for sge_Update/sge_Lock (defined in sge_surface) */
 extern Uint8 _sge_update;
