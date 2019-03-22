@@ -26,14 +26,14 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
     //    this->h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
     // else
     this->h_ = h;
-    canMove = (flags & WINDOW_MOVE) ? true : false;
-    canClose = (flags & WINDOW_CLOSE) ? true : false;
+    canMove = (flags & WINDOW_MOVE) != 0;
+    canClose = (flags & WINDOW_CLOSE) != 0;
     canClose_marked = false;
     canClose_clicked = false;
-    canMinimize = (flags & WINDOW_MINIMIZE) ? true : false;
+    canMinimize = (flags & WINDOW_MINIMIZE) != 0;
     canMinimize_marked = false;
     canMinimize_clicked = false;
-    canResize = (flags & WINDOW_RESIZE) ? true : false;
+    canResize = (flags & WINDOW_RESIZE) != 0;
     canResize_marked = false;
     canResize_clicked = false;
     minimized = false;

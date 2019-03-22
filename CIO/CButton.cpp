@@ -106,7 +106,7 @@ void CButton::setMouseData(const SDL_MouseMotionEvent& motion)
     } else
     {
         // button was marked before and mouse cursor is on the button now, so do the callback
-        if(motionLeaveParam >= 0 && callback_ && marked == true)
+        if(motionLeaveParam >= 0 && callback_ && marked)
             callback_(motionLeaveParam);
         marked = false;
     }

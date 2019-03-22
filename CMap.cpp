@@ -2739,13 +2739,13 @@ void CMap::setupVerticesActivity()
                 {
                     // check if cursor vertices should change randomly
                     if(VertexActivityRandom)
-                        Vertices[index].active = (rand() % 2 == 1 ? true : false);
+                        Vertices[index].active = (rand() % 2 == 1);
                     else
                         Vertices[index].active = true;
 
                     // decide which triangle-textures will be filled at this vertex (necessary for border)
-                    Vertices[index].fill_rsu = (VertexFillRSU ? true : (VertexFillRandom ? (rand() % 2 == 1 ? true : false) : false));
-                    Vertices[index].fill_usd = (VertexFillUSD ? true : (VertexFillRandom ? (rand() % 2 == 1 ? true : false) : false));
+                    Vertices[index].fill_rsu = (VertexFillRSU ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
+                    Vertices[index].fill_usd = (VertexFillUSD ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
 
                     // if we have a ChangeSection greater than zero
                     if(ChangeSection_)
@@ -2817,13 +2817,13 @@ void CMap::setupVerticesActivity()
                 {
                     // check if cursor vertices should change randomly
                     if(VertexActivityRandom)
-                        Vertices[index].active = (rand() % 2 == 1 ? true : false);
+                        Vertices[index].active = (rand() % 2 == 1);
                     else
                         Vertices[index].active = true;
 
                     // decide which triangle-textures will be filled at this vertex (necessary for border)
-                    Vertices[index].fill_rsu = (VertexFillRSU ? true : (VertexFillRandom ? (rand() % 2 == 1 ? true : false) : false));
-                    Vertices[index].fill_usd = (VertexFillUSD ? true : (VertexFillRandom ? (rand() % 2 == 1 ? true : false) : false));
+                    Vertices[index].fill_rsu = (VertexFillRSU ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
+                    Vertices[index].fill_usd = (VertexFillUSD ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
 
                     // if we have a ChangeSection greater than zero
                     if(ChangeSection_)

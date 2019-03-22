@@ -143,37 +143,37 @@ bool CFile::open_lst()
         switch(bobtype)
         {
             case BOBTYPE01:
-                if(read_bob01() == false)
+                if(!read_bob01())
                     return false;
                 break;
 
             case BOBTYPE02:
-                if(read_bob02() == false)
+                if(!read_bob02())
                     return false;
                 break;
 
             case BOBTYPE03:
-                if(read_bob03() == false)
+                if(!read_bob03())
                     return false;
                 break;
 
             case BOBTYPE04:
-                if(read_bob04(PLAYER_BLUE) == false)
+                if(!read_bob04(PLAYER_BLUE))
                     return false;
                 break;
 
             case BOBTYPE05:
-                if(read_bob05() == false)
+                if(!read_bob05())
                     return false;
                 break;
 
             case BOBTYPE07:
-                if(read_bob07() == false)
+                if(!read_bob07())
                     return false;
                 break;
 
             case BOBTYPE14:
-                if(read_bob14() == false)
+                if(!read_bob14())
                     return false;
                 break;
 
@@ -260,37 +260,37 @@ bool CFile::open_idx(const std::string& filename)
         switch(bobtype)
         {
             case BOBTYPE01:
-                if(read_bob01() == false)
+                if(!read_bob01())
                     return false;
                 break;
 
             case BOBTYPE02:
-                if(read_bob02() == false)
+                if(!read_bob02())
                     return false;
                 break;
 
             case BOBTYPE03:
-                if(read_bob03() == false)
+                if(!read_bob03())
                     return false;
                 break;
 
             case BOBTYPE04:
-                if(read_bob04() == false)
+                if(!read_bob04())
                     return false;
                 break;
 
             case BOBTYPE05:
-                if(read_bob05() == false)
+                if(!read_bob05())
                     return false;
                 break;
 
             case BOBTYPE07:
-                if(read_bob07() == false)
+                if(!read_bob07())
                     return false;
                 break;
 
             case BOBTYPE14:
-                if(read_bob14() == false)
+                if(!read_bob14())
                     return false;
                 break;
 
@@ -1155,7 +1155,7 @@ bool CFile::read_bob03()
                 default: player_color = PLAYER_YELLOW; break;
             }
             fseek(fp, offset, SEEK_SET);
-            if(read_bob04(player_color) == false)
+            if(!read_bob04(player_color))
                 return false;
         }
     }

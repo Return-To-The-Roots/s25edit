@@ -85,7 +85,7 @@ void CGame::Render()
     }
 
     // render mouse cursor
-    if(Cursor.clicked == true)
+    if(Cursor.clicked)
     {
         if(Cursor.button.right)
             CSurface::Draw(Surf_Display, global::bmpArray[CROSS].surface, Cursor.x, Cursor.y);

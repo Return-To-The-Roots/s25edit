@@ -46,7 +46,7 @@ CGame::~CGame() = default;
 
 int CGame::Execute()
 {
-    if(Init() == false)
+    if(!Init())
         return -1;
 
     SDL_Event Event;

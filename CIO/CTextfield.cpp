@@ -247,13 +247,7 @@ bool CTextfield::render()
         {
             lastTime = currentTime;
 
-            if(blinking_chiffre)
-            {
-                blinking_chiffre = false;
-            } else
-            {
-                blinking_chiffre = true;
-            }
+            blinking_chiffre = !blinking_chiffre;
         }
         needRender = true;
     }

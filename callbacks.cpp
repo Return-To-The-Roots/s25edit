@@ -342,10 +342,7 @@ void callback::submenuOptions(int Param)
             break;
 
         case OPENGL:
-            if(CSurface::useOpenGL)
-                CSurface::useOpenGL = false;
-            else
-                CSurface::useOpenGL = true;
+            CSurface::useOpenGL = !CSurface::useOpenGL;
 
             submenuOptions(GRAPHICS_CHANGE);
             break;

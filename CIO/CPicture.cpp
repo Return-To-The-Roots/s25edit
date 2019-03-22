@@ -42,7 +42,7 @@ void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
     } else
     {
         // picture was marked before and mouse cursor is on the picture now, so do the callback
-        if(motionLeaveParam >= 0 && callback && marked == true)
+        if(motionLeaveParam >= 0 && callback && marked)
             callback(motionLeaveParam);
         marked = false;
     }
