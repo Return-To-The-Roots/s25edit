@@ -125,9 +125,21 @@ public:
     const std::string& getFilename() const { return filename_; }
     void setFilename(std::string filename) { filename_ = std::move(filename); }
     const char* getMapname() { return map->name.data(); }
-    void setMapname(const std::string& name) { strcpy(map->name.data(), name.substr(0, map->name.size()).c_str()); }
+    void setMapname(std::string name)
+    {
+        if(name.size() > map->name.size())
+            name.resize(map->name.size());
+        map->name.fill(0);
+        std::copy(name.begin(), name.end(), map->name.begin());
+    }
     const char* getAuthor() { return map->author.data(); }
-    void setAuthor(const std::string& author) { strcpy(map->author.data(), author.substr(0, map->author.size()).c_str()); }
+    void setAuthor(std::string author)
+    {
+        if(author.size() > map->author.size())
+            author.resize(map->author.size());
+        map->author.fill(0);
+        std::copy(author.begin(), author.end(), map->author.begin());
+    }
 
     void drawMinimap(SDL_Surface* Window);
     void render();

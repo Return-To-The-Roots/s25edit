@@ -47,10 +47,10 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
 
     // We don't really need fixed-point here
     // but why not?
-    auto const istx = Sint32((sin(theta) * xscale) * 8192.0); /* Inverse transform */
-    auto const ictx = Sint32((cos(theta) * xscale) * 8192.2);
-    auto const isty = Sint32((sin(theta) * yscale) * 8192.0);
-    auto const icty = Sint32((cos(theta) * yscale) * 8192.2);
+    auto const istx = Sint32((std::sin(theta) * xscale) * 8192.0); /* Inverse transform */
+    auto const ictx = Sint32((std::cos(theta) * xscale) * 8192.2);
+    auto const isty = Sint32((std::sin(theta) * yscale) * 8192.0);
+    auto const icty = Sint32((std::cos(theta) * yscale) * 8192.2);
 
     // Calculate the four corner points
     for(int i = 0; i < 4; i++)
