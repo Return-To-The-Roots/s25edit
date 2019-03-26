@@ -85,25 +85,40 @@ constexpr auto absDiff(T a, T b)
  *  Macro to get clipping
  */
 #if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) >= SDL_VERSIONNUM(1, 1, 5)
-#define sge_clip_xmin(pnt) pnt->clip_rect.x
-#define sge_clip_xmax(pnt) (pnt->clip_rect.x + pnt->clip_rect.w - 1)
-#define sge_clip_ymin(pnt) pnt->clip_rect.y
-#define sge_clip_ymax(pnt) (pnt->clip_rect.y + pnt->clip_rect.h - 1)
+inline auto sge_clip_xmin(const SDL_Surface* pnt)
+{
+    return pnt->clip_rect.x;
+}
+inline auto sge_clip_xmax(const SDL_Surface* pnt)
+{
+    return (pnt->clip_rect.x + pnt->clip_rect.w - 1);
+}
+inline auto sge_clip_ymin(const SDL_Surface* pnt)
+{
+    return pnt->clip_rect.y;
+}
+inline auto sge_clip_ymax(const SDL_Surface* pnt)
+{
+    return (pnt->clip_rect.y + pnt->clip_rect.h - 1);
+}
 #else
-#define sge_clip_xmin(pnt) pnt->clip_minx
-#define sge_clip_xmax(pnt) pnt->clip_maxx
-#define sge_clip_ymin(pnt) pnt->clip_miny
-#define sge_clip_ymax(pnt) pnt->clip_maxy
+inline auto sge_clip_xmin(const SDL_Surface* pnt)
+{
+    pnt->clip_minx;
+}
+inline auto sge_clip_xmax(const SDL_Surface* pnt)
+{
+    pnt->clip_maxx;
+}
+inline auto sge_clip_ymin(const SDL_Surface* pnt)
+{
+    pnt->clip_miny;
+}
+inline auto sge_clip_ymax(const SDL_Surface* pnt)
+{
+    pnt->clip_maxy;
+}
 #endif
-
-/*
- *  Macro to get the smallest bounding box from two (SDL_Rect) rectangles
- */
-#define sge_RectUnion(dst_rect, rect1, rect2)                                                                               \
-    dst_rect.x = (rect1.x < rect2.x) ? rect1.x : rect2.x;                                                                   \
-    dst_rect.y = (rect1.y < rect2.y) ? rect1.y : rect2.y;                                                                   \
-    dst_rect.w = (rect1.x + rect1.w > rect2.x + rect2.w) ? rect1.x + rect1.w - dst_rect.x : rect2.x + rect2.w - dst_rect.x; \
-    dst_rect.h = (rect1.y + rect1.h > rect2.y + rect2.h) ? rect1.y + rect1.h - dst_rect.y : rect2.y + rect2.h - dst_rect.y;
 
 /*
  *  We need to use alpha sometimes but older versions of SDL doesn't have

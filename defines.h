@@ -4,6 +4,7 @@
 #include "Point.h"
 #include "Rect.h"
 #include "gameData/DescIdx.h"
+#include <SDL.h>
 #include <array>
 #include <vector>
 
