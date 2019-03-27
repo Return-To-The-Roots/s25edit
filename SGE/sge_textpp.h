@@ -29,7 +29,7 @@
 #include "sge_bm_text.h"
 #include "sge_shape.h"
 #include "sge_tt_text.h"
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 //==================================================================================
