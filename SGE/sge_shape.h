@@ -88,8 +88,8 @@ protected:
     SDL_Surface* dest; // The surface to perform operations on
 
 public:
-    virtual ~sge_shape() {}  // Destructor
-    virtual void draw() = 0; // Draws the shape - prev_pos = last_pos; last_pos = the new position of shape
+    virtual ~sge_shape() = default; // Destructor
+    virtual void draw() = 0;        // Draws the shape - prev_pos = last_pos; last_pos = the new position of shape
 
     // Updates the screen (last_pos+prev_pos)
     // If sge_screen is used this member will use it (the_screen) instead of doing it directly!
