@@ -22,11 +22,11 @@
 #include <SDL.h>
 
 /* The collision struct */
-typedef struct
+struct sge_cdata
 {
     Uint8* map;
     Uint16 w, h;
-} sge_cdata;
+};
 
 #ifdef _SGE_C
 extern "C" {

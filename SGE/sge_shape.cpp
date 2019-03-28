@@ -136,18 +136,18 @@ void sge_screen::update()
     SI i;
 
     // Draw shapes in list
-    for(i = shapes.begin(); i != shapes.end(); ++i)
+    for(auto* shape : shapes)
     {
-        (*i)->draw();
-        (*i)->UpdateRects(); // Adds rectangles with add_rect() automaticly
+        shape->draw();
+        shape->UpdateRects(); // Adds rectangles with add_rect() automaticly
     }
     shapes.clear();
 
     // Draw permanent shapes in list
-    for(i = shapes_p.begin(); i != shapes_p.end(); ++i)
+    for(auto* shape : shapes_p)
     {
-        (*i)->draw();
-        (*i)->UpdateRects(); // Adds rectangles with add_rect() automaticly
+        shape->draw();
+        shape->UpdateRects(); // Adds rectangles with add_rect() automaticly
     }
 
     // Updates the list of rectangles on screen
@@ -514,8 +514,8 @@ sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata
 sge_ssprite::~sge_ssprite()
 {
     // Empty the list
-    for(FI i = frames.begin(); i != frames.end(); ++i)
-        delete *i;
+    for(auto* frame : frames)
+        delete frame;
 
     frames.clear();
 }

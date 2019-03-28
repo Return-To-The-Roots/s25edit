@@ -33,7 +33,7 @@
 #define SGE_INOKR SGE_FLAG3
 
 /* the bitmap font structure */
-typedef struct
+struct sge_bmpFont
 {
     SDL_Surface* FontSurface;
     Uint16 CharWidth;
@@ -42,7 +42,7 @@ typedef struct
     Sint16 yoffs;
     Uint32 bcolor;
     Sint16 Chars;
-} sge_bmpFont;
+};
 
 #ifdef _SGE_C
 extern "C" {

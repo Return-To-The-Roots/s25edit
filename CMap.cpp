@@ -1526,11 +1526,14 @@ void CMap::modifyVertex()
             }
         }
 
-        h_avg = h_sum / h_count;
+        if(h_count > 0)
+        {
+            h_avg = h_sum / h_count;
 
-        for(int i = 0; i < VertexCounter; i++)
-            if(Vertices[i].active)
-                modifyHeightPlane(Vertices[i].x, Vertices[i].y, h_avg);
+            for(int i = 0; i < VertexCounter; i++)
+                if(Vertices[i].active)
+                    modifyHeightPlane(Vertices[i].x, Vertices[i].y, h_avg);
+        }
     } else if(mode == EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE)
     {
         modifyHeightMakeBigHouse(VertexX_, VertexY_);
