@@ -535,18 +535,21 @@ bool CFile::open_gou()
 bobMAP* CFile::open_wld()
 {
     auto myMap = std::make_unique<bobMAP>();
-    myMap->name.fill('\0');
-    myMap->author.fill('\0');
+    std::array<char, 20> tmpNameAuthor;
 
     fseek(fp, 10, SEEK_SET);
-    CHECK_READ(libendian::read(myMap->name, fp));
+    tmpNameAuthor.fill('\0');
+    CHECK_READ(libendian::read(tmpNameAuthor, fp));
+    myMap->setName(tmpNameAuthor.data());
     CHECK_READ(libendian::le_read_us(&myMap->width_old, fp));
     CHECK_READ(libendian::le_read_us(&myMap->height_old, fp));
     uint8_t mapType;
     CHECK_READ(libendian::read(&mapType, 1, fp));
     myMap->type = MapType(mapType);
     CHECK_READ(libendian::read(&myMap->player, 1, fp));
-    CHECK_READ(libendian::read(myMap->author, fp));
+    tmpNameAuthor.fill('\0');
+    CHECK_READ(libendian::read(tmpNameAuthor, fp));
+    myMap->setAuthor(tmpNameAuthor.data());
     for(unsigned short& i : myMap->HQx)
         CHECK_READ(libendian::le_read_us(&i, fp));
     for(unsigned short& i : myMap->HQy)
@@ -798,8 +801,16 @@ bool CFile::save_wld(void* data)
     // first of all the map header
     // WORLD_V1.0
     libendian::write(map_version, 10, fp);
+    auto makeNameArray = [](const std::string& name) {
+        std::array<char, 20> ar;
+        auto size = std::min(name.size(), ar.size());
+        ar.fill(0);
+        std::copy_n(name.begin(), size, ar.begin());
+        return ar;
+    };
+
     // name
-    libendian::write(myMap->name, fp);
+    libendian::write(makeNameArray(myMap->getName()), fp);
     // old width
     libendian::le_write_us(myMap->width_old, fp);
     // old height
@@ -810,7 +821,7 @@ bool CFile::save_wld(void* data)
     // players
     libendian::write(&myMap->player, 1, fp);
     // author
-    libendian::write(myMap->author, fp);
+    libendian::write(makeNameArray(myMap->getAuthor()), fp);
     // headquarters x
     for(unsigned short i : myMap->HQx)
         libendian::le_write_us(i, fp);

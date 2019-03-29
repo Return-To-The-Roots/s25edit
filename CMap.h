@@ -124,22 +124,10 @@ public:
     auto& getPlayerHQy() { return PlayerHQy; }
     const std::string& getFilename() const { return filename_; }
     void setFilename(std::string filename) { filename_ = std::move(filename); }
-    const char* getMapname() { return map->name.data(); }
-    void setMapname(std::string name)
-    {
-        if(name.size() > map->name.size())
-            name.resize(map->name.size());
-        map->name.fill(0);
-        std::copy(name.begin(), name.end(), map->name.begin());
-    }
-    const char* getAuthor() { return map->author.data(); }
-    void setAuthor(std::string author)
-    {
-        if(author.size() > map->author.size())
-            author.resize(map->author.size());
-        map->author.fill(0);
-        std::copy(author.begin(), author.end(), map->author.begin());
-    }
+    std::string getMapname() const { return map->getName(); }
+    void setMapname(const std::string& name) { map->setName(name); }
+    std::string getAuthor() const { return map->getAuthor(); }
+    void setAuthor(const std::string& author) { map->setAuthor(author); }
 
     void drawMinimap(SDL_Surface* Window);
     void render();

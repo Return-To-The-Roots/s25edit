@@ -66,7 +66,7 @@ public:
         textColor_ = color;
         needRender = true;
     }
-    const char* getText() { return &text_[0]; }
+    std::string getText() const { return &text_.front(); }
 };
 
 #endif

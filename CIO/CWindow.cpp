@@ -7,10 +7,12 @@
 #include "CPicture.h"
 #include "CSelectBox.h"
 #include "CTextfield.h"
+#include <cassert>
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y, Uint16 w, Uint16 h, const char* title, int color,
                  Uint8 flags)
 {
+    assert(callback);
     marked = true;
     clicked = false;
     this->x_ = x;
@@ -253,7 +255,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
         {
             canClose_clicked = false;
             // if mouse button is released ON the close button (marked = true), then send the quit message to the callback
-            if(canClose_marked && callback_)
+            if(canClose_marked)
             {
                 callback_(callbackQuitMessage);
                 return;
@@ -374,7 +376,7 @@ bool CWindow::delButton(CButton* ButtonToDelete)
     return false;
 }
 
-CFont* CWindow::addText(const char* string, int x, int y, int fontsize, int color)
+CFont* CWindow::addText(std::string string, int x, int y, int fontsize, int color)
 {
     // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
     int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
@@ -384,7 +386,7 @@ CFont* CWindow::addText(const char* string, int x, int y, int fontsize, int colo
     {
         if(!text)
         {
-            text = new CFont(string, x_abs, y_abs, fontsize, color);
+            text = new CFont(std::move(string), x_abs, y_abs, fontsize, color);
             needRender = true;
             return text;
         }

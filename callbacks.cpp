@@ -12,6 +12,7 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
+#include "helpers/format.hpp"
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <algorithm>
@@ -112,10 +113,12 @@ void callback::ShowStatus(int Param)
             }
             break;
         case SHOW_SUCCESS:
+            assert(txt);
             txt->setText("Operation finished successfully");
             txt->setColor(FONT_GREEN);
             break;
         case SHOW_FAILURE:
+            assert(txt);
             txt->setText("Operation failed! :(");
             txt->setColor(FONT_RED_BRIGHT);
             break;
@@ -165,12 +168,14 @@ void callback::mainmenu(int Param)
         case CALL_FROM_GAMELOOP: break;
 
         case ENDGAME:
+            assert(MainMenu);
             MainMenu->setWaste();
             MainMenu = nullptr;
             global::s2->Running = false;
             break;
 
         case STARTEDITOR:
+            assert(MainMenu);
             PleaseWait(INITIALIZING_CALL);
             global::s2->setMapObj(new CMap(""));
             MainMenu->setWaste();
@@ -179,6 +184,7 @@ void callback::mainmenu(int Param)
             break;
 
         case OPTIONS:
+            assert(MainMenu);
             MainMenu->setWaste();
             MainMenu = nullptr;
             submenuOptions(INITIALIZING_CALL);
@@ -323,6 +329,7 @@ void callback::submenuOptions(int Param)
             break;
 
         case MAINMENU:
+            assert(SubMenu);
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;
@@ -348,6 +355,7 @@ void callback::submenuOptions(int Param)
             break;
 
         case GRAPHICS_CHANGE:
+            assert(SubMenu);
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;
@@ -1084,6 +1092,12 @@ void callback::EditorTextureMenu(int Param)
         PICMEADOW_MIXED
     };
 
+    if(Param != INITIALIZING_CALL)
+    {
+        assert(MapObj);
+        assert(map);
+    }
+
     switch(Param)
     {
         case INITIALIZING_CALL:
@@ -1383,6 +1397,9 @@ void callback::EditorTreeMenu(int Param)
         PICPALM_MIXED
     };
 
+    if(Param != INITIALIZING_CALL)
+        assert(WNDTree && MapObj && map);
+
     switch(Param)
     {
         case INITIALIZING_CALL:
@@ -1578,6 +1595,9 @@ void callback::EditorResourceMenu(int Param)
         PICGRANITE
     };
 
+    if(Param != INITIALIZING_CALL)
+        assert(WNDResource && MapObj);
+
     switch(Param)
     {
         case INITIALIZING_CALL:
@@ -1685,6 +1705,9 @@ void callback::EditorLandscapeMenu(int Param)
         PICSTALAGMITE,
         PICFLOWERS
     };
+
+    if(Param != INITIALIZING_CALL)
+        assert(WNDLandscape && MapObj && map);
 
     switch(Param)
     {
@@ -1878,6 +1901,9 @@ void callback::EditorAnimalMenu(int Param)
         PICSHEEP
     };
 
+    if(Param != INITIALIZING_CALL)
+        assert(WNDAnimal && MapObj);
+
     switch(Param)
     {
         case INITIALIZING_CALL:
@@ -1989,6 +2015,9 @@ void callback::EditorPlayerMenu(int Param)
         GOTO_PLAYER,
         WINDOWQUIT
     };
+
+    if(Param != INITIALIZING_CALL)
+        assert(WNDPlayer && MapObj);
 
     switch(Param)
     {
@@ -2116,6 +2145,9 @@ void callback::EditorCursorMenu(int Param)
         CURSORMODE,
         CURSORRANDOM
     };
+
+    if(Param != INITIALIZING_CALL)
+        assert(WNDCursor && MapObj);
 
     switch(Param)
     {
@@ -2330,6 +2362,12 @@ void callback::EditorCreateMenu(int Param)
         CREATE_WORLD,
         WINDOWQUIT
     };
+
+    if(Param != INITIALIZING_CALL)
+    {
+        assert(WNDCreate);
+        assert(MapObj);
+    }
 
     switch(Param)
     {
@@ -3051,6 +3089,9 @@ void callback::MinimapMenu(int Param)
         WINDOWQUIT
     };
 
+    if(Param != INITIALIZING_CALL)
+        assert(WNDMinimap && MapObj);
+
     switch(Param)
     {
         case INITIALIZING_CALL:
@@ -3168,7 +3209,6 @@ void callback::viewer(int Param)
     static CWindow* WNDViewer = nullptr;
     static int index = 0;
     static int PicInWndIndex = -1;
-    static std::array<char, 50> PicInfos;
     static CFont* PicInfosText = nullptr;
 
     enum
@@ -3181,6 +3221,10 @@ void callback::viewer(int Param)
         FORWARD_100,
         WINDOWQUIT
     };
+    if(Param != INITIALIZING_CALL)
+    {
+        assert(WNDViewer);
+    }
 
     switch(Param)
     {
@@ -3218,9 +3262,9 @@ void callback::viewer(int Param)
             }
             if(!PicInfosText)
             {
-                sprintf(PicInfos, "index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w, global::bmpArray[index].h,
-                        global::bmpArray[index].nx, global::bmpArray[index].ny);
-                PicInfosText = WNDViewer->addText(PicInfos, 220, 3, 14, FONT_RED);
+                const auto infos = helpers::format("index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w,
+                                                   global::bmpArray[index].h, global::bmpArray[index].nx, global::bmpArray[index].ny);
+                PicInfosText = WNDViewer->addText(infos, 220, 3, 14, FONT_RED);
             }
 
             break;
@@ -3291,7 +3335,6 @@ void callback::submenu1(int Param)
     static CSelectBox* testSelectBox = nullptr;
 
     static int picIndex = -1;
-    std::array<char, 80> puffer;
 
     // if this is the first time the function is called
     if(Param == INITIALIZING_CALL)
@@ -3319,6 +3362,11 @@ void callback::submenu1(int Param)
         SELECTBOX_OPTION3
     };
 
+    if(Param != INITIALIZING_CALL)
+    {
+        assert(SubMenu);
+    }
+
     switch(Param)
     {
         case INITIALIZING_CALL:
@@ -3340,8 +3388,7 @@ void callback::submenu1(int Param)
             picObject = SubMenu->addPicture(submenu1, PICOBJECT, 200, 30, MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
             // text block with \n
-            sprintf(puffer, "\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile");
-            SubMenu->addText(puffer, 400, 200, 14);
+            SubMenu->addText("\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile", 400, 200, 14);
             testTextfield = SubMenu->addTextfield(400, 300, 10, 3);
             testSelectBox = SubMenu->addSelectBox(500, 500, 300, 200);
             testSelectBox->setOption("Erste Option", submenu1, SELECTBOX_OPTION1);
@@ -3378,8 +3425,8 @@ void callback::submenu1(int Param)
 
         case GREATMOON:
             SubMenu->addText("Title!", 300, 10, 14);
-            sprintf(puffer, "Window X: %d Window Y: %d", global::s2->GameResolution.x, global::s2->GameResolution.y);
-            SubMenu->addText(puffer, 10, 10, 14);
+            SubMenu->addText(helpers::format("Window X: %d Window Y: %d", global::s2->GameResolution.x, global::s2->GameResolution.y), 10,
+                             10, 14);
             break;
 
         case SMALLMOON:
@@ -3466,6 +3513,7 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWPICTURE:
+            assert(testWindow);
             if(!testWindowText)
                 testWindowText = testWindow->addText("Clicked on castle", 10, 200, 11);
             else
@@ -3476,6 +3524,7 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWPICTUREENTRY:
+            assert(testWindow);
             if(testWindowText2)
             {
                 testWindow->delText(testWindowText2);
@@ -3485,6 +3534,7 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWPICTURELEAVE:
+            assert(testWindow);
             if(testWindowText2)
             {
                 testWindow->delText(testWindowText2);
@@ -3494,11 +3544,13 @@ void callback::submenu1(int Param)
             break;
 
         case TESTWINDOWQUITMESSAGE:
+            assert(testWindow);
             testWindow->setWaste();
             testWindow = nullptr;
             break;
 
         case TESTWINDOW2QUITMESSAGE:
+            assert(testWindow2);
             testWindow2->setWaste();
             testWindow2 = nullptr;
             break;
@@ -3513,8 +3565,7 @@ void callback::submenu1(int Param)
                 }
                 if(!counterText)
                 {
-                    sprintf(puffer, "counter: %d", counter);
-                    counterText = SubMenu->addText(puffer, 100, 20, 9);
+                    counterText = SubMenu->addText(helpers::format("counter: %d", counter), 100, 20, 9);
                 }
 
                 if(TextFrom_testTextfield)
@@ -3522,8 +3573,7 @@ void callback::submenu1(int Param)
                     SubMenu->delText(TextFrom_testTextfield);
                     TextFrom_testTextfield = nullptr;
                 }
-                sprintf(puffer, "Der Text im Textfeld lautet: %s", testTextfield->getText());
-                TextFrom_testTextfield = SubMenu->addText(puffer, 200, 400, 14);
+                TextFrom_testTextfield = SubMenu->addText("Der Text im Textfeld lautet: " + testTextfield->getText(), 200, 400, 14);
             }
             counter++;
             break;

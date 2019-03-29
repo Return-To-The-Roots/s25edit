@@ -147,7 +147,7 @@ bool CMenu::delButton(CButton* ButtonToDelete)
     return false;
 }
 
-CFont* CMenu::addText(const char* string, int x, int y, int fontsize, int color)
+CFont* CMenu::addText(std::string string, int x, int y, int fontsize, int color)
 {
     if(x >= Surf_Menu->w || y >= Surf_Menu->h)
         return nullptr;
@@ -156,7 +156,7 @@ CFont* CMenu::addText(const char* string, int x, int y, int fontsize, int color)
     {
         if(!text)
         {
-            text = new CFont(string, x, y, fontsize, color);
+            text = new CFont(std::move(string), x, y, fontsize, color);
             needRender = true;
             return text;
         }

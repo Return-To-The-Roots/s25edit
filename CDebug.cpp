@@ -4,6 +4,7 @@
 #include "CIO/CWindow.h"
 #include "CMap.h"
 #include "globals.h"
+#include "helpers/format.hpp"
 
 #ifdef _ADMINMODE
 
@@ -108,22 +109,19 @@ void CDebug::sendParam(int Param)
 void CDebug::actualizeData()
 {
     // some puffers to write texts with sprintf()
-    std::array<char, 100> puffer1;
     if(!FrameCounterText)
         FrameCounterText = dbgWnd->addText("", 0, 10, fontsize);
     // write new FrameCounterText and draw it
-    sprintf(puffer1, "Actual Frame:    %lu", global::s2->FrameCounter);
-    FrameCounterText->setText(puffer1);
+    FrameCounterText->setText("Actual Frame: " + std::to_string(global::s2->FrameCounter));
 
     // Frames per Second
     static Uint32 tmpFrameCtr = 0, tmpTickCtr = SDL_GetTicks();
     if(tmpFrameCtr == 10)
     {
         // write new FramesPerSecText and draw it
-        sprintf(puffer1, "Frames per Sec: %.2f", tmpFrameCtr / (((float)SDL_GetTicks() - tmpTickCtr) / 1000));
         if(!FramesPerSecText)
             FramesPerSecText = dbgWnd->addText("", 0, 20, fontsize);
-        FramesPerSecText->setText(puffer1);
+        FramesPerSecText->setText(helpers::format("Frames per Sec: %.2f", tmpFrameCtr / (((float)SDL_GetTicks() - tmpTickCtr) / 1000)));
         // set new values
         tmpFrameCtr = 0;
         tmpTickCtr = SDL_GetTicks();
@@ -134,46 +132,41 @@ void CDebug::actualizeData()
     if(!msWaitText)
         msWaitText = dbgWnd->addText("", 0, 35, fontsize);
     // write new msWaitText and draw it
-    sprintf(puffer1, "Wait: %ums", global::s2->msWait);
-    msWaitText->setText(puffer1);
+    msWaitText->setText("Wait: " + std::to_string(global::s2->msWait));
 
     // del MouseText before drawing new
     if(!MouseText)
         MouseText = dbgWnd->addText("", 0, 50, fontsize);
     // write new MouseText and draw it
-    sprintf(puffer1, "Mouse: x=%d y=%d %s", global::s2->Cursor.x, global::s2->Cursor.y,
-            (global::s2->Cursor.clicked ?
-               (global::s2->Cursor.button.left ? "LMB clicked" : (global::s2->Cursor.button.right ? "RMB clicked" : "clicked")) :
-               "unclicked"));
-    MouseText->setText(puffer1);
+    const char* clickedStr =
+      global::s2->Cursor.clicked ?
+        (global::s2->Cursor.button.left ? "LMB clicked" : (global::s2->Cursor.button.right ? "RMB clicked" : "clicked")) :
+        "unclicked";
+    MouseText->setText(helpers::format("Mouse: x=%d y=%d %s", global::s2->Cursor.x, global::s2->Cursor.y, clickedStr));
 
     // del RegisteredMenusText before drawing new
     if(!RegisteredMenusText)
         RegisteredMenusText = dbgWnd->addText("", 0, 60, fontsize);
     // write new RegisteredMenusText and draw it
-    sprintf(puffer1, "Registered Menus: %d (max. %d)", global::s2->RegisteredMenus, MAXMENUS);
-    RegisteredMenusText->setText(puffer1);
+    RegisteredMenusText->setText(helpers::format("Registered Menus: %d (max. %d)", global::s2->RegisteredMenus, MAXMENUS));
 
     // del RegisteredWindowsText before drawing new
     if(!RegisteredWindowsText)
         RegisteredWindowsText = dbgWnd->addText("", 0, 70, fontsize);
     // write new RegisteredWindowsText and draw it
-    sprintf(puffer1, "Registered Windows: %d (max. %d)", global::s2->RegisteredWindows, MAXWINDOWS);
-    RegisteredWindowsText->setText(puffer1);
+    RegisteredWindowsText->setText(helpers::format("Registered Windows: %d (max. %d)", global::s2->RegisteredWindows, MAXWINDOWS));
 
     // del RegisteredCallbacksText before drawing new
     if(!RegisteredCallbacksText)
         RegisteredCallbacksText = dbgWnd->addText("", 0, 80, fontsize);
     // write new RegisteredCallbacksText and draw it
-    sprintf(puffer1, "Registered Callbacks: %d (max. %d)", global::s2->RegisteredCallbacks, MAXCALLBACKS);
-    RegisteredCallbacksText->setText(puffer1);
+    RegisteredCallbacksText->setText(helpers::format("Registered Callbacks: %d (max. %d)", global::s2->RegisteredCallbacks, MAXCALLBACKS));
 
     if(!DisplayRectText)
         DisplayRectText = dbgWnd->addText("", 0, 90, fontsize);
     auto const displayRect = MapObj->getDisplayRect();
-    sprintf(puffer1, "DisplayRect: (%d,%d)->(%d,%d)\n= size(%d, %d)", displayRect.left, displayRect.top, displayRect.right,
-            displayRect.bottom, displayRect.getSize().x, displayRect.getSize().y);
-    DisplayRectText->setText(puffer1);
+    DisplayRectText->setText(helpers::format("DisplayRect: (%d,%d)->(%d,%d)\n= size(%d, %d)", displayRect.left, displayRect.top,
+                                             displayRect.right, displayRect.bottom, displayRect.getSize().x, displayRect.getSize().y));
 
     // we will now write the map data if a map is active
     MapObj = global::s2->MapObj;
@@ -184,107 +177,86 @@ void CDebug::actualizeData()
 
         if(!MapNameText)
             MapNameText = dbgWnd->addText("", 260, 10, fontsize);
-        sprintf(puffer1, "Map Name: %s", map->name);
-        MapNameText->setText(puffer1);
+        MapNameText->setText("Map Name: " + map->getName());
         if(!MapSizeText)
             MapSizeText = dbgWnd->addText("", 260, 20, fontsize);
-        sprintf(puffer1, "Width: %d  Height: %d", map->width, map->height);
-        MapSizeText->setText(puffer1);
+        MapSizeText->setText(helpers::format("Width: %d  Height: %d", map->width, map->height));
         if(!MapAuthorText)
             MapAuthorText = dbgWnd->addText("", 260, 30, fontsize);
-        sprintf(puffer1, "Author: %s", map->author);
-        MapAuthorText->setText(puffer1);
+        MapAuthorText->setText("Author: " + map->getAuthor());
         if(!MapTypeText)
             MapTypeText = dbgWnd->addText("", 260, 40, fontsize);
-        sprintf(puffer1, "Type: %d (%s)", map->type,
-                (map->type == MAP_GREENLAND ?
-                   "Greenland" :
-                   (map->type == MAP_WASTELAND ? "Wasteland" : (map->type == MAP_WINTERLAND ? "Winterland" : "Unknown"))));
-        MapTypeText->setText(puffer1);
+        const char* ltStr = map->type == MAP_GREENLAND ?
+                              "Greenland" :
+                              (map->type == MAP_WASTELAND ? "Wasteland" : (map->type == MAP_WINTERLAND ? "Winterland" : "Unknown"));
+        MapTypeText->setText(helpers::format("Type: %d (%s)", map->type, ltStr));
         if(!MapPlayerText)
             MapPlayerText = dbgWnd->addText("", 260, 50, fontsize);
-        sprintf(puffer1, "Player: %d", map->player);
-        MapPlayerText->setText(puffer1);
+        MapPlayerText->setText(helpers::format("Player: %d", map->player));
         if(!VertexText)
             VertexText = dbgWnd->addText("", 260, 60, fontsize);
-        sprintf(puffer1, "Vertex: %d, %d", MapObj->VertexX_, MapObj->VertexY_);
-        VertexText->setText(puffer1);
+        VertexText->setText(helpers::format("Vertex: %d, %d", MapObj->VertexX_, MapObj->VertexY_));
         if(!VertexDataText)
             VertexDataText = dbgWnd->addText("", 260, 70, fontsize);
-        sprintf(puffer1, "Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y, vertex.z, ((float)vertex.i) / pow(2, 16),
-                vertex.h);
-        VertexDataText->setText(puffer1);
+        VertexDataText->setText(helpers::format("Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y, vertex.z,
+                                                ((float)vertex.i) / pow(2, 16), vertex.h));
         if(!VertexVectorText)
             VertexVectorText = dbgWnd->addText("", 260, 80, fontsize);
-        sprintf(puffer1, "Vertex Vector: (%.2f, %.2f, %.2f)", vertex.normVector.x, vertex.normVector.y, vertex.normVector.z);
-        VertexVectorText->setText(puffer1);
+        VertexVectorText->setText(
+          helpers::format("Vertex Vector: (%.2f, %.2f, %.2f)", vertex.normVector.x, vertex.normVector.y, vertex.normVector.z));
         if(!FlatVectorText)
             FlatVectorText = dbgWnd->addText("", 260, 90, fontsize);
-        sprintf(puffer1, "Flat Vector: (%.2f, %.2f, %.2f)", vertex.flatVector.x, vertex.flatVector.y, vertex.flatVector.z);
-        FlatVectorText->setText(puffer1);
+        FlatVectorText->setText(
+          helpers::format("Flat Vector: (%.2f, %.2f, %.2f)", vertex.flatVector.x, vertex.flatVector.y, vertex.flatVector.z));
         if(!rsuTextureText)
             rsuTextureText = dbgWnd->addText("", 260, 100, fontsize);
-        sprintf(puffer1, "RSU-Texture: %#04x", vertex.rsuTexture);
-        rsuTextureText->setText(puffer1);
+        rsuTextureText->setText(helpers::format("RSU-Texture: %#04x", vertex.rsuTexture));
         if(!usdTextureText)
             usdTextureText = dbgWnd->addText("", 260, 110, fontsize);
-        sprintf(puffer1, "USD-Texture: %#04x", vertex.usdTexture);
-        usdTextureText->setText(puffer1);
+        usdTextureText->setText(helpers::format("USD-Texture: %#04x", vertex.usdTexture));
         if(!roadText)
             roadText = dbgWnd->addText("", 260, 120, fontsize);
-        sprintf(puffer1, "road: %#04x", vertex.road);
-        roadText->setText(puffer1);
+        roadText->setText(helpers::format("road: %#04x", vertex.road));
         if(!objectTypeText)
             objectTypeText = dbgWnd->addText("", 260, 130, fontsize);
-        sprintf(puffer1, "objectType: %#04x", vertex.objectType);
-        objectTypeText->setText(puffer1);
+        objectTypeText->setText(helpers::format("objectType: %#04x", vertex.objectType));
         if(!objectInfoText)
             objectInfoText = dbgWnd->addText("", 260, 140, fontsize);
-        sprintf(puffer1, "objectInfo: %#04x", vertex.objectInfo);
-        objectInfoText->setText(puffer1);
+        objectInfoText->setText(helpers::format("objectInfo: %#04x", vertex.objectInfo));
         if(!animalText)
             animalText = dbgWnd->addText("", 260, 150, fontsize);
-        sprintf(puffer1, "animal: %#04x", vertex.animal);
-        animalText->setText(puffer1);
+        animalText->setText(helpers::format("animal: %#04x", vertex.animal));
         if(!unknown1Text)
             unknown1Text = dbgWnd->addText("", 260, 160, fontsize);
-        sprintf(puffer1, "unknown1: %#04x", vertex.unknown1);
-        unknown1Text->setText(puffer1);
+        unknown1Text->setText(helpers::format("unknown1: %#04x", vertex.unknown1));
         if(!buildText)
             buildText = dbgWnd->addText("", 260, 170, fontsize);
-        sprintf(puffer1, "build: %#04x", vertex.build);
-        buildText->setText(puffer1);
+        buildText->setText(helpers::format("build: %#04x", vertex.build));
         if(!unknown2Text)
             unknown2Text = dbgWnd->addText("", 260, 180, fontsize);
-        sprintf(puffer1, "unknown2: %#04x", vertex.unknown2);
-        unknown2Text->setText(puffer1);
+        unknown2Text->setText(helpers::format("unknown2: %#04x", vertex.unknown2));
         if(!unknown3Text)
             unknown3Text = dbgWnd->addText("", 260, 190, fontsize);
-        sprintf(puffer1, "unknown3: %#04x", vertex.unknown3);
-        unknown3Text->setText(puffer1);
+        unknown3Text->setText(helpers::format("unknown3: %#04x", vertex.unknown3));
         if(!resourceText)
             resourceText = dbgWnd->addText("", 260, 200, fontsize);
-        sprintf(puffer1, "resource: %#04x", vertex.resource);
-        resourceText->setText(puffer1);
+        resourceText->setText(helpers::format("resource: %#04x", vertex.resource));
         if(!shadingText)
             shadingText = dbgWnd->addText("", 260, 210, fontsize);
-        sprintf(puffer1, "shading: %#04x", vertex.shading);
-        shadingText->setText(puffer1);
+        shadingText->setText(helpers::format("shading: %#04x", vertex.shading));
         if(!unknown5Text)
             unknown5Text = dbgWnd->addText("", 260, 220, fontsize);
-        sprintf(puffer1, "unknown5: %#04x", vertex.unknown5);
-        unknown5Text->setText(puffer1);
+        unknown5Text->setText(helpers::format("unknown5: %#04x", vertex.unknown5));
         if(!editorModeText)
             editorModeText = dbgWnd->addText("", 260, 230, fontsize);
-        sprintf(puffer1, "Editor --> Mode: %d Content: %#04x Content2: %#04x", MapObj->mode, MapObj->modeContent, MapObj->modeContent2);
-        editorModeText->setText(puffer1);
+        editorModeText->setText(
+          helpers::format("Editor --> Mode: %d Content: %#04x Content2: %#04x", MapObj->mode, MapObj->modeContent, MapObj->modeContent2));
     } else
     {
         if(!MapNameText)
             dbgWnd->addText("", 260, 10, fontsize);
         // write new MapNameText and draw it
-        sprintf(puffer1, "No Map loaded!");
-        MapNameText->setText(puffer1);
+        MapNameText->setText("No Map loaded!");
         if(MapSizeText)
         {
             dbgWnd->delText(MapSizeText);

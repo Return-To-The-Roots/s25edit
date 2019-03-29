@@ -3,13 +3,26 @@
 #include "CIO/CFile.h"
 #include "CIO/CFont.h"
 #include "CSurface.h"
-#include "boost/static_assert.hpp"
 #include "callbacks.h"
 #include "globals.h"
 #include "gameData/LandscapeDesc.h"
 #include "gameData/TerrainDesc.h"
+#include <algorithm>
 #include <iostream>
 #include <string>
+
+void bobMAP::setName(const std::string& newName)
+{
+    name = newName;
+    if(name.size() > 20)
+        name.resize(20u);
+}
+void bobMAP::setAuthor(const std::string& newAuthor)
+{
+    author = newAuthor;
+    if(author.size() > 20)
+        author.resize(20);
+}
 
 void bobMAP::initVertexCoords()
 {
@@ -217,14 +230,14 @@ bobMAP* CMap::generateMap(int width, int height, MapType type, TriangleTerrainTy
 {
     auto* myMap = new bobMAP();
 
-    setMapname("Ohne Namen");
+    myMap->setName("Ohne Namen");
     myMap->width = width;
     myMap->width_old = width;
     myMap->height = height;
     myMap->height_old = height;
     myMap->type = type;
     myMap->player = 0;
-    setAuthor("Niemand");
+    myMap->setAuthor("Niemand");
     for(int i = 0; i < 7; i++)
     {
         myMap->HQx[i] = 0xFFFF;

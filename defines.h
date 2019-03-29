@@ -152,7 +152,6 @@ enum MapType
 // map strutcture
 struct bobMAP
 {
-    std::array<char, 20> name;
     Uint16 height;
     Uint16 height_old;
     Uint16 height_pixel;
@@ -164,7 +163,6 @@ struct bobMAP
     // these are the original values
     std::array<Uint16, 7> HQx;
     std::array<Uint16, 7> HQy;
-    std::array<char, 20> author;
     // 250 items from the big map header
     std::array<MapHeaderItem, 250> header;
     std::vector<MapNode> vertex;
@@ -177,6 +175,15 @@ struct bobMAP
     void initVertexCoords();
     /// Updates x,y,z positions (e.g. after height change)
     void updateVertexCoords();
+
+    const std::string& getName() const { return name; }
+    const std::string& getAuthor() const { return author; }
+    void setName(const std::string& newName);
+    void setAuthor(const std::string& newAuthor);
+
+private:
+    std::string name;
+    std::string author;
 };
 // structure to save vertex coordinates
 struct cursorPoint : public Point32
