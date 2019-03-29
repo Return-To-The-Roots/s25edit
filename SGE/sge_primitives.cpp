@@ -28,18 +28,13 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 /* Globals used for sge_Update/sge_Lock (defined in sge_surface) */
 extern Uint8 _sge_update;
 extern Uint8 _sge_lock;
 
-template<typename T>
-static void swap(T& x, T& y)
-{
-    T tmp = x;
-    x = y;
-    y = tmp;
-}
+using std::swap;
 
 /**********************************************************************************/
 /**                             Line functions                                   **/
@@ -342,10 +337,8 @@ static int clipEncode(Sint16 x, Sint16 y, Sint16 left, Sint16 top, Sint16 right,
 
 static int clipLine(SDL_Surface* dst, Sint16* x1, Sint16* y1, Sint16* x2, Sint16* y2)
 {
-    int code1, code2;
     bool draw = false;
 
-    Sint16 tmp;
     float m;
 
     /* Get clipping boundary */
@@ -357,8 +350,8 @@ static int clipLine(SDL_Surface* dst, Sint16* x1, Sint16* y1, Sint16* x2, Sint16
 
     while(true)
     {
-        code1 = clipEncode(*x1, *y1, left, top, right, bottom);
-        code2 = clipEncode(*x2, *y2, left, top, right, bottom);
+        int code1 = clipEncode(*x1, *y1, left, top, right, bottom);
+        int code2 = clipEncode(*x2, *y2, left, top, right, bottom);
 
         if(CLIP_ACCEPT(code1, code2))
         {
@@ -370,15 +363,9 @@ static int clipLine(SDL_Surface* dst, Sint16* x1, Sint16* y1, Sint16* x2, Sint16
         {
             if(CLIP_INSIDE(code1))
             {
-                tmp = *x2;
-                *x2 = *x1;
-                *x1 = tmp;
-                tmp = *y2;
-                *y2 = *y1;
-                *y1 = tmp;
-                tmp = code2;
-                code2 = code1;
-                code1 = tmp;
+                swap(*x1, *x2);
+                swap(*y1, *y2);
+                swap(code1, code2);
             }
             if(*x2 != *x1)
                 m = (*y2 - *y1) / float(*x2 - *x1);
@@ -422,7 +409,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
     if(!clipLine(surface, &x1, &y1, &x2, &y2))
         return;
 
-    Sint16 dx, dy, sdx, sdy, x, y;
+    Sint16 dx, dy, sdx, sdy;
 
     dx = x2 - x1;
     dy = y2 - y1;
@@ -433,7 +420,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
     dx = sdx * dx + 1;
     dy = sdy * dy + 1;
 
-    x = y = 0;
+    Sint16 y = 0;
 
     Sint16 pixx = surface->format->BytesPerPixel;
     auto pixy = (Sint16)surface->pitch;
@@ -456,7 +443,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
     {
         case 1:
         {
-            for(x = 0; x < dx; x++)
+            for(int x = 0; x < dx; x++)
             {
                 *pixel = color;
 
@@ -473,7 +460,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
 
         case 2:
         {
-            for(x = 0; x < dx; x++)
+            for(int x = 0; x < dx; x++)
             {
                 *(Uint16*)pixel = color;
 
@@ -500,7 +487,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
             Uint8 B = (color >> surface->format->Bshift) & 0xff;
             Uint8 A = (color >> surface->format->Ashift) & 0xff;
 
-            for(x = 0; x < dx; x++)
+            for(int x = 0; x < dx; x++)
             {
                 *(pixel + rshift8) = R;
                 *(pixel + gshift8) = G;
@@ -520,7 +507,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
 
         case 4:
         {
-            for(x = 0; x < dx; x++)
+            for(int x = 0; x < dx; x++)
             {
                 *(Uint32*)pixel = color;
 

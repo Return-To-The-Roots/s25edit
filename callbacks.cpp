@@ -2304,7 +2304,7 @@ void callback::EditorCreateMenu(int Param)
     static int border = 0;
     static int border_texture = TRIANGLE_TEXTURE_SNOW;
     static std::array<char, 5> puffer;
-    int PosX = global::s2->GameResolution.x / 2 - 125, PosY = global::s2->GameResolution.y / 2 - 175;
+    static int PosX = global::s2->GameResolution.x / 2 - 125, PosY = global::s2->GameResolution.y / 2 - 175;
 
     enum
     {

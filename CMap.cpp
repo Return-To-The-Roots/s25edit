@@ -1348,7 +1348,6 @@ void CMap::drawMinimap(SDL_Surface* Window)
         if(y % num_y != 0)
             continue;
 
-        row = (Uint32*)Window->pixels + (y + 20) * Window->pitch / 4; //-V206
         for(int x = 0; x < map->width; x++)
         {
             if(x % num_x != 0)

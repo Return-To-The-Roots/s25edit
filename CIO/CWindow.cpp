@@ -596,15 +596,8 @@ bool CWindow::render()
     // at first completly fill the background (not the fastest way, but simplier)
     if(pic_background != WINDOW_NOTHING)
     {
-        if(w_ <= global::bmpArray[pic_background].w)
-            pic_w = w_;
-        else
-            pic_w = global::bmpArray[pic_background].w;
-
-        if(h_ <= global::bmpArray[pic_background].h)
-            pic_h = h_;
-        else
-            pic_h = global::bmpArray[pic_background].h;
+        pic_w = std::min(w_, global::bmpArray[pic_background].w);
+        pic_h = std::min(h_, global::bmpArray[pic_background].h);
 
         while(pos_x + pic_w <= Surf_Window->w)
         {
@@ -678,10 +671,7 @@ bool CWindow::render()
     else
         upperframe = WINDOW_UPPER_FRAME;
 
-    if(w_ <= global::bmpArray[upperframe].w)
-        pic_w = w_;
-    else
-        pic_w = global::bmpArray[upperframe].w;
+    pic_w = std::min(w_, global::bmpArray[upperframe].w);
 
     pos_x = 0;
     pos_y = 0;
@@ -700,11 +690,7 @@ bool CWindow::render()
 
     // now draw the other frames (left, right, down)
     // down
-    if(w_ <= global::bmpArray[WINDOW_LOWER_FRAME].w)
-        pic_w = w_;
-    else
-        pic_w = global::bmpArray[WINDOW_LOWER_FRAME].w;
-
+    pic_w = std::min(w_, global::bmpArray[WINDOW_LOWER_FRAME].w);
     pic_h = global::bmpArray[WINDOW_LOWER_FRAME].h;
     pos_x = 0;
     pos_y = h_ - global::bmpArray[WINDOW_LOWER_FRAME].h;
@@ -716,12 +702,7 @@ bool CWindow::render()
     if(Surf_Window->w - pos_x > 0)
         CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     // left
-    if(h_ <= global::bmpArray[WINDOW_LEFT_FRAME].h)
-        pic_h = h_;
-    else
-        pic_h = global::bmpArray[WINDOW_LEFT_FRAME].h;
-
-    pic_h = global::bmpArray[WINDOW_LEFT_FRAME].h;
+    pic_h = std::min(h_, global::bmpArray[WINDOW_LEFT_FRAME].h);
     pos_x = 0;
     pos_y = 0;
     while(pos_y + pic_h <= Surf_Window->h)
@@ -732,12 +713,7 @@ bool CWindow::render()
     if(Surf_Window->w - pos_x > 0)
         CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
     // right
-    if(h_ <= global::bmpArray[WINDOW_RIGHT_FRAME].h)
-        pic_h = h_;
-    else
-        pic_h = global::bmpArray[WINDOW_RIGHT_FRAME].h;
-
-    pic_h = global::bmpArray[WINDOW_RIGHT_FRAME].h;
+    pic_h = std::min(h_, global::bmpArray[WINDOW_RIGHT_FRAME].h);
     pos_x = w_ - global::bmpArray[WINDOW_RIGHT_FRAME].w;
     pos_y = 0;
     while(pos_y + pic_h <= Surf_Window->h)
