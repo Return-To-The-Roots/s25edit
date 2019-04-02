@@ -1337,14 +1337,100 @@ void CMap::render()
     CFont::writeText(Surf_Map, "Save", displayRect.getSize().x - 35, displayRect.getSize().y / 2 + 231);
 }
 
+static void getTriangleColor(TriangleTerrainType terrainType, MapType mapType, Sint16& r, Sint16& g, Sint16& b)
+{
+    switch(terrainType)
+    {
+        case TRIANGLE_TEXTURE_STEPPE_MEADOW1:
+            r = (mapType == MAP_GREENLAND ? 100 : (mapType == MAP_WASTELAND ? 68 : 160));
+            g = (mapType == MAP_GREENLAND ? 144 : (mapType == MAP_WASTELAND ? 72 : 172));
+            b = (mapType == MAP_GREENLAND ? 20 : (mapType == MAP_WASTELAND ? 80 : 204));
+            break;
+        case TRIANGLE_TEXTURE_MINING1:
+            r = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 112 : 84));
+            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 108 : 88));
+            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 84 : 108));
+            break;
+        case TRIANGLE_TEXTURE_SNOW:
+            r = (mapType == MAP_GREENLAND ? 180 : (mapType == MAP_WASTELAND ? 132 : 0));
+            g = (mapType == MAP_GREENLAND ? 192 : (mapType == MAP_WASTELAND ? 0 : 48));
+            b = (mapType == MAP_GREENLAND ? 200 : (mapType == MAP_WASTELAND ? 0 : 104));
+            break;
+        case TRIANGLE_TEXTURE_SWAMP:
+            r = (mapType == MAP_GREENLAND ? 100 : 0);
+            g = (mapType == MAP_GREENLAND ? 144 : (mapType == MAP_WASTELAND ? 24 : 40));
+            b = (mapType == MAP_GREENLAND ? 20 : (mapType == MAP_WASTELAND ? 32 : 108));
+            break;
+        case TRIANGLE_TEXTURE_STEPPE:
+            r = (mapType == MAP_GREENLAND ? 192 : (mapType == MAP_WASTELAND ? 156 : 0));
+            g = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 124 : 112));
+            b = (mapType == MAP_GREENLAND ? 124 : (mapType == MAP_WASTELAND ? 100 : 176));
+            break;
+        case TRIANGLE_TEXTURE_WATER:
+            r = (mapType == MAP_GREENLAND ? 16 : (mapType == MAP_WASTELAND ? 68 : 0));
+            g = (mapType == MAP_GREENLAND ? 56 : (mapType == MAP_WASTELAND ? 68 : 48));
+            b = (mapType == MAP_GREENLAND ? 164 : (mapType == MAP_WASTELAND ? 44 : 104));
+            break;
+        case TRIANGLE_TEXTURE_MEADOW1:
+            r = (mapType == MAP_GREENLAND ? 72 : (mapType == MAP_WASTELAND ? 92 : 176));
+            g = (mapType == MAP_GREENLAND ? 120 : (mapType == MAP_WASTELAND ? 88 : 164));
+            b = (mapType == MAP_GREENLAND ? 12 : (mapType == MAP_WASTELAND ? 64 : 148));
+            break;
+        case TRIANGLE_TEXTURE_MEADOW2:
+            r = (mapType == MAP_GREENLAND ? 100 : (mapType == MAP_WASTELAND ? 100 : 180));
+            g = (mapType == MAP_GREENLAND ? 144 : (mapType == MAP_WASTELAND ? 96 : 184));
+            b = (mapType == MAP_GREENLAND ? 20 : (mapType == MAP_WASTELAND ? 72 : 180));
+            break;
+        case TRIANGLE_TEXTURE_MEADOW3:
+            r = (mapType == MAP_GREENLAND ? 64 : (mapType == MAP_WASTELAND ? 100 : 160));
+            g = (mapType == MAP_GREENLAND ? 112 : (mapType == MAP_WASTELAND ? 96 : 172));
+            b = (mapType == MAP_GREENLAND ? 8 : (mapType == MAP_WASTELAND ? 72 : 204));
+            break;
+        case TRIANGLE_TEXTURE_MINING2:
+            r = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 112 : 96));
+            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 100 : 96));
+            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 84 : 124));
+            break;
+        case TRIANGLE_TEXTURE_MINING3:
+            r = (mapType == MAP_GREENLAND ? 156 : 104);
+            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 76 : 108));
+            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 36 : 140));
+            break;
+        case TRIANGLE_TEXTURE_MINING4:
+            r = (mapType == MAP_GREENLAND ? 140 : 104);
+            g = (mapType == MAP_GREENLAND ? 112 : (mapType == MAP_WASTELAND ? 76 : 108));
+            b = (mapType == MAP_GREENLAND ? 72 : (mapType == MAP_WASTELAND ? 36 : 140));
+            break;
+        case TRIANGLE_TEXTURE_STEPPE_MEADOW2:
+            r = (mapType == MAP_GREENLAND ? 136 : (mapType == MAP_WASTELAND ? 112 : 100));
+            g = (mapType == MAP_GREENLAND ? 176 : (mapType == MAP_WASTELAND ? 108 : 144));
+            b = (mapType == MAP_GREENLAND ? 40 : (mapType == MAP_WASTELAND ? 84 : 20));
+            break;
+        case TRIANGLE_TEXTURE_FLOWER:
+            r = (mapType == MAP_GREENLAND ? 72 : (mapType == MAP_WASTELAND ? 68 : 124));
+            g = (mapType == MAP_GREENLAND ? 120 : (mapType == MAP_WASTELAND ? 72 : 132));
+            b = (mapType == MAP_GREENLAND ? 12 : (mapType == MAP_WASTELAND ? 80 : 172));
+            break;
+        case TRIANGLE_TEXTURE_LAVA:
+            r = (mapType == MAP_GREENLAND ? 192 : (mapType == MAP_WASTELAND ? 128 : 144));
+            g = (mapType == MAP_GREENLAND ? 32 : (mapType == MAP_WASTELAND ? 20 : 44));
+            b = (mapType == MAP_GREENLAND ? 32 : (mapType == MAP_WASTELAND ? 0 : 4));
+            break;
+        case TRIANGLE_TEXTURE_MINING_MEADOW:
+            r = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 0 : 148));
+            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 24 : 160));
+            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 32 : 192));
+            break;
+        default: // color grey
+            r = 128;
+            g = 128;
+            b = 128;
+            break;
+    }
+}
+
 void CMap::drawMinimap(SDL_Surface* Window)
 {
-    Uint32* pixel;
-    Uint32* row;
-
-    Uint8 r8, g8, b8;
-    Sint16 r, g, b;
-
     // this variables are needed to reduce the size of minimap-windows of big maps
     int num_x = (map->width > 256 ? map->width / 256 : 1);
     int num_y = (map->height > 256 ? map->height / 256 : 1);
@@ -1366,106 +1452,20 @@ void CMap::drawMinimap(SDL_Surface* Window)
             if(x % num_x != 0)
                 continue;
 
-            switch(map->getVertex(x, y).rsuTexture)
-            {
-                case TRIANGLE_TEXTURE_STEPPE_MEADOW1:
-                    r = (map->type == 0x00 ? 100 : (map->type == 0x01 ? 68 : 160));
-                    g = (map->type == 0x00 ? 144 : (map->type == 0x01 ? 72 : 172));
-                    b = (map->type == 0x00 ? 20 : (map->type == 0x01 ? 80 : 204));
-                    break;
-                case TRIANGLE_TEXTURE_MINING1:
-                    r = (map->type == 0x00 ? 156 : (map->type == 0x01 ? 112 : 84));
-                    g = (map->type == 0x00 ? 128 : (map->type == 0x01 ? 108 : 88));
-                    b = (map->type == 0x00 ? 88 : (map->type == 0x01 ? 84 : 108));
-                    break;
-                case TRIANGLE_TEXTURE_SNOW:
-                    r = (map->type == 0x00 ? 180 : (map->type == 0x01 ? 132 : 0));
-                    g = (map->type == 0x00 ? 192 : (map->type == 0x01 ? 0 : 48));
-                    b = (map->type == 0x00 ? 200 : (map->type == 0x01 ? 0 : 104));
-                    break;
-                case TRIANGLE_TEXTURE_SWAMP:
-                    r = (map->type == 0x00 ? 100 : (map->type == 0x01 ? 0 : 0));
-                    g = (map->type == 0x00 ? 144 : (map->type == 0x01 ? 24 : 40));
-                    b = (map->type == 0x00 ? 20 : (map->type == 0x01 ? 32 : 108));
-                    break;
-                case TRIANGLE_TEXTURE_STEPPE:
-                    r = (map->type == 0x00 ? 192 : (map->type == 0x01 ? 156 : 0));
-                    g = (map->type == 0x00 ? 156 : (map->type == 0x01 ? 124 : 112));
-                    b = (map->type == 0x00 ? 124 : (map->type == 0x01 ? 100 : 176));
-                    break;
-                case TRIANGLE_TEXTURE_WATER:
-                    r = (map->type == 0x00 ? 16 : (map->type == 0x01 ? 68 : 0));
-                    g = (map->type == 0x00 ? 56 : (map->type == 0x01 ? 68 : 48));
-                    b = (map->type == 0x00 ? 164 : (map->type == 0x01 ? 44 : 104));
-                    break;
-                case TRIANGLE_TEXTURE_MEADOW1:
-                    r = (map->type == 0x00 ? 72 : (map->type == 0x01 ? 92 : 176));
-                    g = (map->type == 0x00 ? 120 : (map->type == 0x01 ? 88 : 164));
-                    b = (map->type == 0x00 ? 12 : (map->type == 0x01 ? 64 : 148));
-                    break;
-                case TRIANGLE_TEXTURE_MEADOW2:
-                    r = (map->type == 0x00 ? 100 : (map->type == 0x01 ? 100 : 180));
-                    g = (map->type == 0x00 ? 144 : (map->type == 0x01 ? 96 : 184));
-                    b = (map->type == 0x00 ? 20 : (map->type == 0x01 ? 72 : 180));
-                    break;
-                case TRIANGLE_TEXTURE_MEADOW3:
-                    r = (map->type == 0x00 ? 64 : (map->type == 0x01 ? 100 : 160));
-                    g = (map->type == 0x00 ? 112 : (map->type == 0x01 ? 96 : 172));
-                    b = (map->type == 0x00 ? 8 : (map->type == 0x01 ? 72 : 204));
-                    break;
-                case TRIANGLE_TEXTURE_MINING2:
-                    r = (map->type == 0x00 ? 156 : (map->type == 0x01 ? 112 : 96));
-                    g = (map->type == 0x00 ? 128 : (map->type == 0x01 ? 100 : 96));
-                    b = (map->type == 0x00 ? 88 : (map->type == 0x01 ? 84 : 124));
-                    break;
-                case TRIANGLE_TEXTURE_MINING3:
-                    r = (map->type == 0x00 ? 156 : 104);
-                    g = (map->type == 0x00 ? 128 : (map->type == 0x01 ? 76 : 108));
-                    b = (map->type == 0x00 ? 88 : (map->type == 0x01 ? 36 : 140));
-                    break;
-                case TRIANGLE_TEXTURE_MINING4:
-                    r = (map->type == 0x00 ? 140 : 104);
-                    g = (map->type == 0x00 ? 112 : (map->type == 0x01 ? 76 : 108));
-                    b = (map->type == 0x00 ? 72 : (map->type == 0x01 ? 36 : 140));
-                    break;
-                case TRIANGLE_TEXTURE_STEPPE_MEADOW2:
-                    r = (map->type == 0x00 ? 136 : (map->type == 0x01 ? 112 : 100));
-                    g = (map->type == 0x00 ? 176 : (map->type == 0x01 ? 108 : 144));
-                    b = (map->type == 0x00 ? 40 : (map->type == 0x01 ? 84 : 20));
-                    break;
-                case TRIANGLE_TEXTURE_FLOWER:
-                    r = (map->type == 0x00 ? 72 : (map->type == 0x01 ? 68 : 124));
-                    g = (map->type == 0x00 ? 120 : (map->type == 0x01 ? 72 : 132));
-                    b = (map->type == 0x00 ? 12 : (map->type == 0x01 ? 80 : 172));
-                    break;
-                case TRIANGLE_TEXTURE_LAVA:
-                    r = (map->type == 0x00 ? 192 : (map->type == 0x01 ? 128 : 144));
-                    g = (map->type == 0x00 ? 32 : (map->type == 0x01 ? 20 : 44));
-                    b = (map->type == 0x00 ? 32 : (map->type == 0x01 ? 0 : 4));
-                    break;
-                case TRIANGLE_TEXTURE_MINING_MEADOW:
-                    r = (map->type == 0x00 ? 156 : (map->type == 0x01 ? 0 : 148));
-                    g = (map->type == 0x00 ? 128 : (map->type == 0x01 ? 24 : 160));
-                    b = (map->type == 0x00 ? 88 : (map->type == 0x01 ? 32 : 192));
-                    break;
-                default: // color grey
-                    r = 128;
-                    g = 128;
-                    b = 128;
-                    break;
-            }
+            Sint16 r, g, b;
+            getTriangleColor(TriangleTerrainType(map->getVertex(x, y).rsuTexture), map->type, r, g, b);
 
-            row = (Uint32*)Window->pixels + (y / num_y + 20) * Window->pitch / 4; //-V206
+            Uint32* row = (Uint32*)Window->pixels + (y / num_y + 20) * Window->pitch / 4; //-V206
             //+6 because of the left window frame
-            pixel = row + x / num_x + 6;
+            Uint32* pixel = row + x / num_x + 6;
 
             Sint32 vertexLighting = map->getVertex(x, y).i;
             r = ((r * vertexLighting) >> 16);
             g = ((g * vertexLighting) >> 16);
             b = ((b * vertexLighting) >> 16);
-            r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-            g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-            b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
+            const auto r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
+            const auto g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
+            const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
             *pixel = ((r8 << Window->format->Rshift) + (g8 << Window->format->Gshift) + (b8 << Window->format->Bshift));
         }
     }
