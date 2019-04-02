@@ -1092,7 +1092,7 @@ void callback::EditorTextureMenu(int Param)
         PICMEADOW_MIXED
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
     {
         assert(MapObj);
         assert(map);
@@ -1397,7 +1397,7 @@ void callback::EditorTreeMenu(int Param)
         PICPALM_MIXED
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDTree && MapObj && map);
 
     switch(Param)
@@ -1595,7 +1595,7 @@ void callback::EditorResourceMenu(int Param)
         PICGRANITE
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDResource && MapObj);
 
     switch(Param)
@@ -1706,7 +1706,7 @@ void callback::EditorLandscapeMenu(int Param)
         PICFLOWERS
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDLandscape && MapObj && map);
 
     switch(Param)
@@ -1901,7 +1901,7 @@ void callback::EditorAnimalMenu(int Param)
         PICSHEEP
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDAnimal && MapObj);
 
     switch(Param)
@@ -2016,7 +2016,7 @@ void callback::EditorPlayerMenu(int Param)
         WINDOWQUIT
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDPlayer && MapObj);
 
     switch(Param)
@@ -2146,7 +2146,7 @@ void callback::EditorCursorMenu(int Param)
         CURSORRANDOM
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDCursor && MapObj);
 
     switch(Param)
@@ -2363,7 +2363,7 @@ void callback::EditorCreateMenu(int Param)
         WINDOWQUIT
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
     {
         assert(WNDCreate);
         assert(MapObj);
@@ -3089,7 +3089,7 @@ void callback::MinimapMenu(int Param)
         WINDOWQUIT
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
         assert(WNDMinimap && MapObj);
 
     switch(Param)
@@ -3221,7 +3221,7 @@ void callback::viewer(int Param)
         FORWARD_100,
         WINDOWQUIT
     };
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
     {
         assert(WNDViewer);
     }
@@ -3362,7 +3362,7 @@ void callback::submenu1(int Param)
         SELECTBOX_OPTION3
     };
 
-    if(Param != INITIALIZING_CALL)
+    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
     {
         assert(SubMenu);
     }
