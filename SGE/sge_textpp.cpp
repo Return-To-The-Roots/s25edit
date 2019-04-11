@@ -19,11 +19,10 @@
  *********************************************************************/
 
 #include "sge_textpp.h"
+#include "sge_bm_text.h"
 #include "sge_surface.h"
-#include <SDL.h>
 #include <array>
 #include <cstdarg>
-#include <cstdlib>
 
 #ifndef _SGE_NO_CLASSES
 

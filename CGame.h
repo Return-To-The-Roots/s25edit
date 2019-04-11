@@ -1,7 +1,9 @@
 #ifndef _CGAME_H
 #define _CGAME_H
 
-#include "includes.h"
+#include "defines.h"
+#include <Point.h>
+#include <SDL.h>
 #include <array>
 
 class CWindow;

@@ -7,7 +7,6 @@
 #include "globals.h"
 #include "gameData/LandscapeDesc.h"
 #include "gameData/TerrainDesc.h"
-#include <algorithm>
 #include <iostream>
 #include <string>
 

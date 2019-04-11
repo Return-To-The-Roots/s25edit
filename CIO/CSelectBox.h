@@ -1,7 +1,8 @@
 #ifndef _CSELECTBOX_H
 #define _CSELECTBOX_H
 
-#include "../includes.h"
+#include "../defines.h"
+#include <SDL.h>
 
 class CFont;
 class CButton;

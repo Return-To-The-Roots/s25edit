@@ -1,7 +1,7 @@
 #ifndef _CMENU_H
 #define _CMENU_H
 
-#include "../includes.h"
+#include "../defines.h"
 
 class CButton;
 class CFont;

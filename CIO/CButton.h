@@ -1,7 +1,8 @@
 #ifndef _CBUTTON_H
 #define _CBUTTON_H
 
-#include "../includes.h"
+#include "../defines.h"
+#include "SDL.h"
 
 class CButton
 {

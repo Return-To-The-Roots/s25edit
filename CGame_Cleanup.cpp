@@ -1,8 +1,7 @@
+#include "defines.h"
 #include "CGame.h"
-#include "CIO/CMenu.h"
-#include "CIO/CWindow.h"
-#include "CSurface.h"
 #include "globals.h"
+#include <SDL.h>
 
 void CGame::Cleanup()
 {
@@ -20,16 +19,16 @@ void CGame::Cleanup()
     }
 
     // free all picture surfaces
-    for(int i = 0; i < MAXBOBBMP; i++)
+    for(auto& i : global::bmpArray)
     {
-        if(global::bmpArray[i].surface)
-            SDL_FreeSurface(global::bmpArray[i].surface);
+        if(i.surface)
+            SDL_FreeSurface(i.surface);
     }
     // free all shadow surfaces
-    for(int i = 0; i < MAXBOBSHADOW; i++)
+    for(auto& i : global::shadowArray)
     {
-        if(global::shadowArray[i].surface)
-            SDL_FreeSurface(global::shadowArray[i].surface);
+        if(i.surface)
+            SDL_FreeSurface(i.surface);
     }
 
     SDL_FreeSurface(Surf_Display);

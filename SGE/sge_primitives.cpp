@@ -23,11 +23,8 @@
 #include "sge_primitives.h"
 #include "sge_primitives_int.h"
 #include "sge_surface.h"
-#include <SDL.h>
 #include <cmath>
-#include <cstdarg>
 #include <cstdlib>
-#include <cstring>
 #include <utility>
 
 /* Globals used for sge_Update/sge_Lock (defined in sge_surface) */

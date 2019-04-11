@@ -24,10 +24,7 @@
 #include "sge_bm_text.h"
 #include "sge_surface.h"
 #include "sge_textpp.h"
-#include "sge_tt_text.h"
-#include <SDL.h>
 #include <array>
-#include <cmath>
 #include <cstdarg>
 #include <cstring>
 #include <new>

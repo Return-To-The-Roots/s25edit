@@ -8,8 +8,6 @@
 #ifndef _CALLBACKS_H
 #define _CALLBACKS_H
 
-#include "includes.h"
-
 namespace callback {
 // PleaseWait creates a small window (not moveable, not resizeable, not minimizable, not closeable) with the String "Please wait..."
 void PleaseWait(int Param);

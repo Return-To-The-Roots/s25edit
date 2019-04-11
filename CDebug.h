@@ -1,11 +1,10 @@
 #ifndef _CDEBUG_H
 #define _CDEBUG_H
 
-#include "includes.h"
-
 class CFont;
 class CWindow;
 class CMap;
+struct bobMAP;
 
 class CDebug
 {

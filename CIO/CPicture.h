@@ -1,7 +1,7 @@
 #ifndef _CPICTURE_H
 #define _CPICTURE_H
 
-#include "../includes.h"
+#include <SDL.h>
 
 class CPicture
 {

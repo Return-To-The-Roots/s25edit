@@ -16,12 +16,8 @@
  *********************************************************************/
 
 #include "sge_shape.h"
-#include "sge_misc.h"
 #include "sge_primitives.h"
 #include "sge_surface.h"
-#include <SDL.h>
-#include <cmath>
-#include <cstdio>
 
 #ifndef _SGE_NO_CLASSES
 

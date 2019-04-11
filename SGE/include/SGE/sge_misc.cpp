@@ -16,9 +16,6 @@
  *********************************************************************/
 
 #include "sge_misc.h"
-#include <SDL.h>
-#include <cmath>
-#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 

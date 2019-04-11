@@ -1,7 +1,8 @@
 #ifndef _CWINDOW_H
 #define _CWINDOW_H
 
-#include "../includes.h"
+#include "../defines.h"
+#include <SDL.h>
 
 class CPicture;
 class CTextfield;

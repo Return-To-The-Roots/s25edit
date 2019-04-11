@@ -22,15 +22,13 @@
 #define sge_textpp_H
 
 #include "sge_internal.h"
-#include <SDL.h>
 
 #ifndef _SGE_NO_CLASSES
 
-#include "sge_bm_text.h"
 #include "sge_shape.h"
-#include "sge_tt_text.h"
-#include <cstdio>
 #include <string>
+
+struct sge_bmpFont;
 
 //==================================================================================
 // Edits text from SDL_Event

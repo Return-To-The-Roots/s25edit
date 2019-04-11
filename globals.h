@@ -1,11 +1,14 @@
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
 
-#include "includes.h"
 #include "gameData/WorldDescription.h"
+#include <SDL.h>
 #include <vector>
 
 class CGame;
+struct bobBMP;
+struct bobSHADOW;
+struct bobPAL;
 
 namespace global {
 // array for all pictures

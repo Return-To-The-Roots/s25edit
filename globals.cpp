@@ -1,3 +1,4 @@
+#include "defines.h"
 #include "globals.h"
 
 // array for all pictures

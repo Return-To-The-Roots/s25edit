@@ -18,10 +18,8 @@
 #include "sge_rotation.h"
 #include "sge_blib.h"
 #include "sge_surface.h"
-#include <SDL.h>
 #include <array>
 #include <cmath>
-#include <cstdio>
 
 extern Uint8 _sge_update; // Declared in sge_draw.cpp
 extern Uint8 _sge_lock;

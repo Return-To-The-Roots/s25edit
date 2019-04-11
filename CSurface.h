@@ -1,7 +1,10 @@
 #ifndef _CSURFACE_H
 #define _CSURFACE_H
 
-#include "includes.h"
+#include "defines.h"
+#include <SDL.h>
+
+struct vector;
 
 class CSurface
 {

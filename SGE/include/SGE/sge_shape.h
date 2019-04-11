@@ -30,11 +30,10 @@
 #pragma warning(disable : 4251)
 #endif
 
-#include "sge_collision.h"
-#include "sge_surface.h"
 #include <list>
 #include <vector>
 
+struct sge_cdata;
 class DECLSPEC sge_shape;
 
 //==================================================================================

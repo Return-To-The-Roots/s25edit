@@ -24,9 +24,7 @@
 #include "sge_primitives_int.h"
 #include "sge_surface.h"
 #include <boost/numeric/conversion/cast.hpp>
-#include <SDL.h>
 #include <array>
-#include <type_traits>
 
 using boost::numeric_cast;
 

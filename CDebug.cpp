@@ -1,3 +1,4 @@
+#include "defines.h"
 #include "CDebug.h"
 #include "CGame.h"
 #include "CIO/CFont.h"
@@ -5,6 +6,7 @@
 #include "CMap.h"
 #include "globals.h"
 #include "helpers/format.hpp"
+#include <cmath>
 
 #ifdef _ADMINMODE
 

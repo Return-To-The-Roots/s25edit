@@ -1,8 +1,8 @@
 /*
  *	SDL Graphics Extension
- *	Rotation routines (header)
+ *	Misc functions (header)
  *
- *	Started 000625
+ *	Started 990819
  *
  *	License: LGPL v2+ (see the file LICENSE)
  *	(c)1999-2003 Anders Lindström
@@ -15,26 +15,22 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_rotation_H
-#define sge_rotation_H
+#ifndef sge_misc_H
+#define sge_misc_H
 
 #include "sge_internal.h"
-#include <SDL.h>
-
-/* Transformation flags */
-#define SGE_TAA SGE_FLAG1
-#define SGE_TSAFE SGE_FLAG2
-#define SGE_TTMAP SGE_FLAG3
 
 #ifdef _SGE_C
 extern "C" {
 #endif
-DECLSPEC SDL_Rect sge_transform(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py,
-                                Uint16 qx, Uint16 qy, Uint8 flags);
-DECLSPEC SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, float xscale, float yscale, Uint8 flags);
+DECLSPEC int sge_Random(int min, int max);
+DECLSPEC void sge_Randomize();
 
+DECLSPEC Uint32 sge_CalibrateDelay();
+DECLSPEC Uint32 sge_DelayRes();
+DECLSPEC Uint32 sge_Delay(Uint32 ticks);
 #ifdef _SGE_C
 }
 #endif
 
-#endif /* sge_rotation_H */
+#endif /* sge_misc_H */

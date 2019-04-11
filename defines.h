@@ -6,6 +6,7 @@
 #include "gameData/DescIdx.h"
 #include <SDL.h>
 #include <array>
+#include <string>
 #include <vector>
 
 struct TerrainDesc;
@@ -66,7 +67,7 @@ struct bobBMP
     Uint16 ny;
     Uint16 w;
     Uint16 h;
-    SDL_Surface* surface;
+    SDL_Surface* surface = nullptr;
 };
 
 // Structure for Bobtype 5 (Palette)
@@ -82,7 +83,7 @@ struct bobSHADOW
     Uint16 ny;
     Uint16 w;
     Uint16 h;
-    SDL_Surface* surface;
+    SDL_Surface* surface = nullptr;
 };
 
 // Datatypes for the Map

@@ -18,9 +18,7 @@
 #include "sge_collision.h"
 #include "sge_shape.h"
 #include "sge_surface.h"
-#include <SDL.h>
 #include <array>
-#include <cstdio>
 #include <cstring>
 #include <new>
 

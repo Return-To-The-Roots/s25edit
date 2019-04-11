@@ -3,8 +3,8 @@
 #include "CIO/CWindow.h"
 #include "CMap.h"
 #include "CSurface.h"
+#include "SGE/sge_blib.h"
 #include "globals.h"
-#include <cstdio>
 #ifdef _WIN32
 #include "s25editResource.h"
 #undef WIN32_LEAN_AND_MEAN

@@ -1,6 +1,7 @@
 #include "CGame.h"
 #include "CIO/CFile.h"
 #include "CSurface.h"
+#include "SGE/sge_blib.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"

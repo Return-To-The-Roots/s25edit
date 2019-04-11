@@ -1,7 +1,8 @@
 #ifndef _CTEXTFIELD_H
 #define _CTEXTFIELD_H
 
-#include "../includes.h"
+#include "../defines.h"
+#include <SDL.h>
 #include <vector>
 
 class CFont;

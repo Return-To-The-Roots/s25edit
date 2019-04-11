@@ -1,7 +1,8 @@
 #ifndef _CFONT_H
 #define _CFONT_H
 
-#include "../includes.h"
+#include "../defines.h"
+#include <SDL.h>
 #include <string>
 
 class CFont

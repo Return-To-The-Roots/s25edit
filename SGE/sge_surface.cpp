@@ -21,9 +21,7 @@
  */
 
 #include "sge_surface.h"
-#include <SDL.h>
 #include <array>
-#include <cmath>
 #include <cstdarg>
 #include <cstring>
 

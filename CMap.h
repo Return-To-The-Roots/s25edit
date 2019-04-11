@@ -1,8 +1,11 @@
 #ifndef _CMAP_H
 #define _CMAP_H
 
-#include "includes.h"
+#include "defines.h"
+#include <Point.h>
+#include <SDL.h>
 #include <array>
+#include <list>
 #include <string>
 
 struct SavedVertex

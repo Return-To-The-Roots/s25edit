@@ -3,8 +3,14 @@
 #ifndef _CFILE_H
 #define _CFILE_H
 
-#include "../includes.h"
+#include "../defines.h"
+#include <cstdio>
 #include <string>
+
+struct bobBMP;
+struct bobSHADOW;
+struct bobPAL;
+struct bobMAP;
 
 class CFile
 {

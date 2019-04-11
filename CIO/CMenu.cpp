@@ -7,6 +7,7 @@
 #include "CPicture.h"
 #include "CSelectBox.h"
 #include "CTextfield.h"
+#include <SGE/sge_blib.h>
 
 CMenu::CMenu(int pic_background)
 {

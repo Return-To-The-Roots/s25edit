@@ -2,11 +2,14 @@
 #include "CGame.h"
 #include "CMap.h"
 #include "Rect.h"
+#include "SGE/sge_blib.h"
+#include "SGE/sge_rotation.h"
 #include "globals.h"
 #include "gameData/EdgeDesc.h"
 #include "gameData/TerrainDesc.h"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 namespace {
 SDL_Rect rect2SDL_Rect(const Rect& rect)

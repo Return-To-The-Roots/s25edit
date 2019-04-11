@@ -19,7 +19,6 @@
 #define sge_collision_H
 
 #include "sge_internal.h"
-#include <SDL.h>
 
 /* The collision struct */
 struct sge_cdata
