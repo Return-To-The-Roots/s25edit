@@ -1114,9 +1114,8 @@ void CMap::render()
     if(needSurface)
     {
         SDL_FreeSurface(Surf_Map);
-        Surf_Map = nullptr;
-        if((Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.getSize().x, displayRect.getSize().y, BitsPerPixel, 0, 0, 0, 0))
-           == nullptr)
+        Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.getSize().x, displayRect.getSize().y, BitsPerPixel, 0, 0, 0, 0);
+        if(Surf_Map == nullptr)
             return;
         if(BitsPerPixel == 8)
             SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors.data(), 0, global::palArray[PAL_xBBM].colors.size());
@@ -1174,18 +1173,11 @@ void CMap::render()
     CFont::writeText(Surf_Map, textBuffer.data(), 100, 20);
     // text for MovementLocked
     if(HorizontalMovementLocked && VerticalMovementLocked)
-    {
-        sprintf(textBuffer.data(), "Movement locked (F9 or F10 to unlock)");
-        CFont::writeText(Surf_Map, textBuffer.data(), 20, 40, 14, FONT_ORANGE);
-    } else if(HorizontalMovementLocked)
-    {
-        sprintf(textBuffer.data(), "Horizontal movement locked (F9 to unlock)");
-        CFont::writeText(Surf_Map, textBuffer.data(), 20, 40, 14, FONT_ORANGE);
-    } else if(VerticalMovementLocked)
-    {
-        sprintf(textBuffer.data(), "Vertikal movement locked (F10 to unlock)");
-        CFont::writeText(Surf_Map, textBuffer.data(), 20, 40, 14, FONT_ORANGE);
-    }
+        CFont::writeText(Surf_Map, "Movement locked (F9 or F10 to unlock)", 20, 40, 14, FONT_ORANGE);
+    else if(HorizontalMovementLocked)
+        CFont::writeText(Surf_Map, "Horizontal movement locked (F9 to unlock)", 20, 40, 14, FONT_ORANGE);
+    else if(VerticalMovementLocked)
+        CFont::writeText(Surf_Map, "Vertikal movement locked (F10 to unlock)", 20, 40, 14, FONT_ORANGE);
 
     // draw the frame
     if(displayRect.getSize() == Extent(640, 480))
@@ -1470,7 +1462,6 @@ void CMap::drawMinimap(SDL_Surface* Window)
     }
 
     // draw the player flags
-    std::array<char, 10> playerNumber;
     for(int i = 0; i < MAXPLAYERS; i++)
     {
         if(PlayerHQx[i] != 0xFFFF && PlayerHQy[i] != 0xFFFF)
@@ -1481,8 +1472,7 @@ void CMap::drawMinimap(SDL_Surface* Window)
                            6 + PlayerHQx[i] / num_x - global::bmpArray[FLAG_BLUE_DARK + i % 7].nx,
                            20 + PlayerHQy[i] / num_y - global::bmpArray[FLAG_BLUE_DARK + i % 7].ny);
             // write player number
-            sprintf(playerNumber.data(), "%d", i + 1);
-            CFont::writeText(Window, playerNumber.data(), 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y, 9, FONT_MINTGREEN);
+            CFont::writeText(Window, std::to_string(i + 1), 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y, 9, FONT_MINTGREEN);
         }
     }
 

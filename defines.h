@@ -208,7 +208,7 @@ enum
 };
 
 // font alignment (after all used by CFont and other objects using CFont)
-enum
+enum FontAlign
 {
     ALIGN_LEFT = 0,
     ALIGN_MIDDLE,
