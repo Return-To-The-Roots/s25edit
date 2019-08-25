@@ -11,7 +11,7 @@ CFont::CFont(std::string text, unsigned x, unsigned y, unsigned fontsize, unsign
         this->fontsize_ = 9;
     else
         this->fontsize_ = fontsize;
-    this->color_ = color;
+    initialColor_ = this->color_ = color;
     callback = nullptr;
     clickedParam = 0;
     // create surface and write text to it
@@ -34,7 +34,7 @@ void CFont::setFontsize(unsigned fontsize)
 
 void CFont::setColor(unsigned color)
 {
-    this->color_ = color;
+    initialColor_ = color_ = color;
     writeText();
 }
 
@@ -50,21 +50,25 @@ void CFont::setText(std::string text)
 
 void CFont::setMouseData(SDL_MouseButtonEvent button)
 {
+    if(!callback)
+        return;
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
     {
         if((button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
         {
             // if mouse button is pressed ON the text
-            if((button.state == SDL_PRESSED) && callback)
+            if((button.state == SDL_PRESSED) && getColor() == initialColor_)
             {
+                const auto tmpInitialColor = initialColor_;
                 setColor(FONT_ORANGE);
-            } else if(button.state == SDL_RELEASED)
+                initialColor_ = tmpInitialColor;
+            } else if(button.state == SDL_RELEASED && getColor() == FONT_ORANGE)
             {
-                if(color_ == FONT_ORANGE && callback)
-                    callback(clickedParam);
+                callback(clickedParam);
             }
-        }
+        }else if(getColor() != initialColor_)
+            setColor(initialColor_);
     }
 }
 

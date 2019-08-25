@@ -3,12 +3,12 @@
 
 #include "../defines.h"
 #include <SDL.h>
+#include <functional>
+#include <memory>
+#include <vector>
 
 class CFont;
 class CButton;
-
-// maximum number of entries for a selectbox
-#define MAXSELECTBOXENTRIES 20000
 
 class CSelectBox
 {
@@ -16,7 +16,7 @@ class CSelectBox
 
 private:
     SDL_Surface* Surf_SelectBox;
-    CFont* Entries[MAXSELECTBOXENTRIES];
+    std::vector<std::unique_ptr<CFont>> Entries;
     bool needSurface;
     bool needRender;
     Uint16 x_;
@@ -28,10 +28,10 @@ private:
     int pic_background;
     int pic_foreground;
     int text_color;
-    // we need this to say the window if it needs to render, otherwise no chiffres are shown
+    // we need this to say the window if it needs to render, otherwise no chiffre are shown
     bool rendered;
-    CButton* ScrollUpButton;
-    CButton* ScrollDownButton;
+    std::unique_ptr<CButton> ScrollUpButton;
+    std::unique_ptr<CButton> ScrollDownButton;
 
 public:
     // Constructor - Destructor
@@ -60,7 +60,7 @@ public:
         text_color = color;
         needRender = true;
     }
-    void setOption(const char* string, void (*callback)(int) = nullptr, int param = 0);
+    void setOption(const std::string& string, std::function<void(int)> callback = nullptr, int param = 0);
 };
 
 #endif

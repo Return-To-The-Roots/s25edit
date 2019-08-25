@@ -3,6 +3,7 @@
 
 #include "../defines.h"
 #include <SDL.h>
+#include <functional>
 #include <string>
 
 class CFont
@@ -17,8 +18,8 @@ private:
     Uint16 h;
     std::string string_;
     unsigned fontsize_; //== Uint16 h;
-    unsigned color_;
-    void (*callback)(int);
+    unsigned color_, initialColor_;
+    std::function<void(int)> callback;
     int clickedParam;
 
 public:
@@ -36,9 +37,9 @@ public:
     void setColor(unsigned color);
     unsigned getColor() { return color_; }
     void setText(std::string text);
-    void setCallback(void (*callback)(int), int param)
+    void setCallback(std::function<void(int)> callback, int param)
     {
-        this->callback = callback;
+        this->callback = std::move(callback);
         clickedParam = param;
     }
     void unsetCallback()

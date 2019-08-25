@@ -754,8 +754,8 @@ void callback::EditorMainMenu(int Param)
 void callback::EditorLoadMenu(int Param)
 {
     static CWindow* WNDLoad = nullptr;
-    static CTextfield* TXTF_Filename = nullptr;
     static CMap* MapObj = nullptr;
+    static std::string curFilename;
 
     enum
     {
@@ -766,26 +766,34 @@ void callback::EditorLoadMenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
+        {
             if(WNDLoad)
                 break;
             WNDLoad = global::s2->RegisterWindow(
               std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 140,
-                                        global::s2->GameResolution.y / 2 - 45, 280, 120, "Load", WINDOW_GREEN1, WINDOW_CLOSE));
+                                        global::s2->GameResolution.y / 2 - 45, 280, 160, "Load", WINDOW_GREEN1, WINDOW_CLOSE));
             MapObj = global::s2->getMapObj();
 
-            TXTF_Filename = WNDLoad->addTextfield(10, 10, 21, 1);
-            TXTF_Filename->setText("MyMap");
+            auto* CB_Filename = WNDLoad->addSelectBox(10, 20, 160, 130, 11);
+            curFilename.clear();
+            for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
+            {
+                if(is_regular_file(itFile.status()))
+                {
+                    const std::string filename = itFile.path().filename().string();
+                    CB_Filename->setOption(filename, [filename](int) { curFilename = filename; });
+                }
+            }
             WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Load");
             WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "Abort");
             break;
-
+        }
         case WINDOWQUIT:
             if(WNDLoad)
             {
                 WNDLoad->setWaste();
                 WNDLoad = nullptr;
             }
-            TXTF_Filename = nullptr;
             break;
 
         case MAP_QUIT:
@@ -794,11 +802,12 @@ void callback::EditorLoadMenu(int Param)
                 WNDLoad->setWaste();
                 WNDLoad = nullptr;
             }
-            TXTF_Filename = nullptr;
             break;
 
         case LOADMAP:
         {
+            if(curFilename.empty())
+                return;
             PleaseWait(INITIALIZING_CALL);
 
             // we have to close the windows and initialize them again to prevent failures
@@ -812,7 +821,7 @@ void callback::EditorLoadMenu(int Param)
             EditorPlayerMenu(MAP_QUIT);
 
             MapObj->destructMap();
-            bfs::path filepath = bfs::path(global::userMapsPath) / TXTF_Filename->getText();
+            bfs::path filepath = bfs::path(global::userMapsPath) / curFilename;
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");
             if(!bfs::exists(filepath))

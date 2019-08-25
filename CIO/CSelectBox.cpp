@@ -14,49 +14,31 @@ CSelectBox::CSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int
     this->fontsize = fontsize;
     this->text_color = text_color;
     setColor(bg_color);
-    // initialize CFont array
-    for(auto& entry : Entries)
-        entry = nullptr;
 
     Surf_SelectBox = nullptr;
     needSurface = true;
     needRender = true;
     rendered = false;
     // button position is relative to the selectbox
-    ScrollUpButton = new CButton(nullptr, 0, w - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
-    ScrollDownButton = new CButton(nullptr, 0, w - 1 - 20, h - 1 - 20, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
+    ScrollUpButton = std::make_unique<CButton>(nullptr, 0, w - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
+    ScrollDownButton =
+      std::make_unique<CButton>(nullptr, 0, w - 1 - 20, h - 1 - 20, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
 CSelectBox::~CSelectBox()
 {
-    for(auto& entry : Entries)
-    {
-        if(entry)
-        {
-            delete entry;
-            entry = nullptr;
-        }
-    }
-    delete ScrollUpButton;
-    delete ScrollDownButton;
     SDL_FreeSurface(Surf_SelectBox);
 }
 
-void CSelectBox::setOption(const char* string, void (*callback)(int), int param)
+void CSelectBox::setOption(const std::string& string, std::function<void(int)> callback, int param)
 {
     // explanation: row_height = row_separator + fontsize
     int row_height = (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4)) + fontsize;
 
-    for(auto& Entry : Entries)
-    {
-        if(!Entry)
-        {
-            Entry = new CFont(string, 10, last_text_pos_y, fontsize, FONT_YELLOW);
-            Entry->setCallback(callback, param);
-            last_text_pos_y += row_height;
-            break;
-        }
-    }
+    auto Entry = std::make_unique<CFont>(string, 10, last_text_pos_y, fontsize, FONT_YELLOW);
+    Entry->setCallback(std::move(callback), param);
+    Entries.emplace_back(std::move(Entry));
+    last_text_pos_y += row_height;
 }
 
 bool CSelectBox::hasRendered()
@@ -156,8 +138,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 
                 for(auto& entry : Entries)
                 {
-                    if(entry)
-                        entry->setMouseData(button);
+                    entry->setMouseData(button);
                 }
             }
         } else if(button.state == SDL_RELEASED)
@@ -174,8 +155,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                         {
                             for(auto& entry : Entries)
                             {
-                                if(entry)
-                                    entry->setY(entry->getY() + 10);
+                                entry->setY(entry->getY() + 10);
                             }
                         }
                     }
@@ -186,19 +166,11 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                     if((button.x > x_ + w_ - 20) && (button.y > y_ + h_ - 20))
                     {
                         // test if last entry is on the most lower position
-                        int j;
-                        for(j = 0; j < MAXSELECTBOXENTRIES; j++)
-                        {
-                            if(Entries[j] == nullptr)
-                                break;
-                        }
-                        j--;
-                        if(j >= 0 && Entries[j] != nullptr && Entries[j]->getY() > h_ - 10)
+                        if(!Entries.empty() && Entries.back()->getY() > h_ - 10)
                         {
                             for(auto& entry : Entries)
                             {
-                                if(entry)
-                                    entry->setY(entry->getY() - 10);
+                                entry->setY(entry->getY() - 10);
                             }
                         }
                     }
@@ -212,8 +184,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 
                 for(auto& entry : Entries)
                 {
-                    if(entry)
-                        entry->setMouseData(button);
+                    entry->setMouseData(button);
                 }
             }
             scroll_up_button_marked = false;
@@ -305,8 +276,7 @@ bool CSelectBox::render()
 
     for(auto& entry : Entries)
     {
-        if(entry)
-            CSurface::Draw(Surf_SelectBox, entry->getSurface(), entry->getX(), entry->getY());
+        CSurface::Draw(Surf_SelectBox, entry->getSurface(), entry->getX(), entry->getY());
     }
 
     CSurface::Draw(Surf_SelectBox, ScrollUpButton->getSurface(), w_ - 1 - 20, 0);
