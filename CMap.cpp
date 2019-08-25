@@ -466,8 +466,7 @@ void CMap::unloadMapPics()
 {
     for(int i = MAPPIC_ARROWCROSS_YELLOW; i <= MAPPIC_LAST_ENTRY; i++)
     {
-        SDL_FreeSurface(global::bmpArray[i].surface);
-        global::bmpArray[i].surface = nullptr;
+        global::bmpArray[i].surface.reset();
     }
     // set back bmpArray-pointer, cause MAP0x.LST is no longer needed
     CFile::set_bmpArray(&global::bmpArray[MAPPIC_ARROWCROSS_YELLOW]);
@@ -1103,7 +1102,7 @@ void CMap::render()
 {
     std::array<char, 100> textBuffer;
 
-    // check if gameresolution has been changed
+    // check if game resolution has been changed
     if(displayRect.getSize() != global::s2->GameResolution)
     {
         displayRect.setSize(global::s2->GameResolution);

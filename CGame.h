@@ -1,10 +1,10 @@
 #ifndef _CGAME_H
 #define _CGAME_H
 
-#include "defines.h"
+#include "SdlSurface.h"
 #include <Point.h>
-#include <SDL.h>
-#include <array>
+#include <memory>
+#include <vector>
 
 class CWindow;
 class CMap;
@@ -20,15 +20,12 @@ public:
 
     bool Running;
     bool showLoadScreen;
-    SDL_Surface *Surf_Display, *Surf_DisplayGL;
+    SdlSurface Surf_Display, Surf_DisplayGL;
 
 private:
 #ifdef _ADMINMODE
     // some debugging variables
     unsigned long int FrameCounter;
-    int RegisteredCallbacks;
-    int RegisteredWindows;
-    int RegisteredMenus;
 #endif
     // milliseconds for SDL_Delay()
     Uint32 msWait;
@@ -45,13 +42,13 @@ private:
     } Cursor;
 
     // Object for Menu Screens
-    std::array<CMenu*, MAXMENUS> Menus;
+    std::vector<std::unique_ptr<CMenu>> Menus;
     // Object for Windows
-    std::array<CWindow*, MAXWINDOWS> Windows;
+    std::vector<std::unique_ptr<CWindow>> Windows;
     // Object for Callbacks
-    std::array<void (*)(int), MAXCALLBACKS> Callbacks;
+    std::vector<void (*)(int)> Callbacks;
     // Object for the Map
-    CMap* MapObj;
+    std::unique_ptr<CMap> MapObj;
 
     void SetAppIcon();
 
@@ -70,19 +67,17 @@ public:
 
     void Render();
 
-    void Cleanup();
-
-    bool RegisterMenu(CMenu* Menu);
+    CMenu* RegisterMenu(std::unique_ptr<CMenu> Menu);
     bool UnregisterMenu(CMenu* Menu);
-    bool RegisterWindow(CWindow* Window);
+    CWindow* RegisterWindow(std::unique_ptr<CWindow> Window);
     bool UnregisterWindow(CWindow* Window);
-    bool RegisterCallback(void (*callback)(int));
+    void RegisterCallback(void (*callback)(int));
     bool UnregisterCallback(void (*callback)(int));
-    void setMapObj(CMap* MapObj) { this->MapObj = MapObj; };
-    CMap* getMapObj() { return MapObj; };
+    void setMapObj(std::unique_ptr<CMap> MapObj);
+    CMap* getMapObj();
     void delMapObj();
-    SDL_Surface* getDisplaySurface() { return Surf_Display; };
-    SDL_Surface* getDisplayGLSurface() { return Surf_DisplayGL; };
+    SDL_Surface* getDisplaySurface() { return Surf_Display.get(); };
+    SDL_Surface* getDisplayGLSurface() { return Surf_DisplayGL.get(); };
     auto getRes() { return GameResolution; }
 };
 

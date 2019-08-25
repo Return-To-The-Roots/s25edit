@@ -3,6 +3,7 @@
 
 #include "Point.h"
 #include "Rect.h"
+#include "SdlSurface.h"
 #include "gameData/DescIdx.h"
 #include <SDL.h>
 #include <array>
@@ -67,7 +68,7 @@ struct bobBMP
     Uint16 ny;
     Uint16 w;
     Uint16 h;
-    SDL_Surface* surface = nullptr;
+    SdlSurface surface;
 };
 
 // Structure for Bobtype 5 (Palette)
@@ -83,7 +84,7 @@ struct bobSHADOW
     Uint16 ny;
     Uint16 w;
     Uint16 h;
-    SDL_Surface* surface = nullptr;
+    SdlSurface surface;
 };
 
 // Datatypes for the Map
@@ -1174,12 +1175,6 @@ enum
 #define MAXBOBPAL 100
 
 // maximum values for GUI stuff
-// maximum number of menus
-#define MAXMENUS 20
-// maximum number of windows
-#define MAXWINDOWS 100
-// maximum number of callbacks
-#define MAXCALLBACKS 100
 // maximum number of buttons that can be created WITHIN a menu or window
 #define MAXBUTTONS 50
 // maximum number of texts that can be written WITHIN a menu or window

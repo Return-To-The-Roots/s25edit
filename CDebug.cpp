@@ -12,9 +12,8 @@
 
 CDebug::CDebug(void dbgCallback(int), int quitParam)
 {
-    dbgWnd = new CWindow(dbgCallback, quitParam, 0, 0, 540, 130, "Debugger", WINDOW_GREEN1,
-                         WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE);
-    global::s2->RegisterWindow(dbgWnd);
+    dbgWnd = global::s2->RegisterWindow(std::make_unique<CWindow>(dbgCallback, quitParam, 0, 0, 540, 130, "Debugger", WINDOW_GREEN1,
+                                                                  WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
     dbgWnd->addText("Debugger started", 0, 0, fontsize);
     this->dbgCallback_ = dbgCallback;
     FrameCounterText = nullptr;
@@ -49,7 +48,7 @@ CDebug::CDebug(void dbgCallback(int), int quitParam)
     unknown5Text = nullptr;
     editorModeText = nullptr;
     fontsize = 9;
-    MapObj = global::s2->MapObj;
+    MapObj = global::s2->MapObj.get();
     map = nullptr;
     global::s2->RegisterCallback(dbgCallback);
 
@@ -150,19 +149,19 @@ void CDebug::actualizeData()
     if(!RegisteredMenusText)
         RegisteredMenusText = dbgWnd->addText("", 0, 60, fontsize);
     // write new RegisteredMenusText and draw it
-    RegisteredMenusText->setText(helpers::format("Registered Menus: %d (max. %d)", global::s2->RegisteredMenus, MAXMENUS));
+    RegisteredMenusText->setText(helpers::format("Registered Menus: %d", global::s2->Menus.size()));
 
     // del RegisteredWindowsText before drawing new
     if(!RegisteredWindowsText)
         RegisteredWindowsText = dbgWnd->addText("", 0, 70, fontsize);
     // write new RegisteredWindowsText and draw it
-    RegisteredWindowsText->setText(helpers::format("Registered Windows: %d (max. %d)", global::s2->RegisteredWindows, MAXWINDOWS));
+    RegisteredWindowsText->setText(helpers::format("Registered Windows: %d", global::s2->Windows.size()));
 
     // del RegisteredCallbacksText before drawing new
     if(!RegisteredCallbacksText)
         RegisteredCallbacksText = dbgWnd->addText("", 0, 80, fontsize);
     // write new RegisteredCallbacksText and draw it
-    RegisteredCallbacksText->setText(helpers::format("Registered Callbacks: %d (max. %d)", global::s2->RegisteredCallbacks, MAXCALLBACKS));
+    RegisteredCallbacksText->setText(helpers::format("Registered Callbacks: %d", global::s2->Callbacks.size()));
 
     if(!DisplayRectText)
         DisplayRectText = dbgWnd->addText("", 0, 90, fontsize);
@@ -171,7 +170,7 @@ void CDebug::actualizeData()
                                              displayRect.right, displayRect.bottom, displayRect.getSize().x, displayRect.getSize().y));
 
     // we will now write the map data if a map is active
-    MapObj = global::s2->MapObj;
+    MapObj = global::s2->MapObj.get();
     if(MapObj)
     {
         map = MapObj->map;

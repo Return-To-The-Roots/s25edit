@@ -17,7 +17,7 @@ extern std::vector<bobBMP> bmpArray;
 extern std::vector<bobSHADOW> shadowArray;
 // array for all palettes
 extern std::vector<bobPAL> palArray;
-// the game objec
+// the game object
 extern CGame* s2;
 // Path to game data (must not be empty!)
 extern std::string gameDataFilePath;

@@ -337,8 +337,8 @@ bool CMenu::render()
     }
 
     // CSurface::Draw(Surf_Menu, global::bmpArray[pic_background].surface, 0, 0);
-    SDL_Surface* surfBG = global::bmpArray[pic_background].surface;
-    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w - 1, 0, 0, Surf_Menu->h - 1, Surf_Menu->w - 1, Surf_Menu->h - 1, surfBG, 0, 0,
+    auto& surfBG = global::bmpArray[pic_background].surface;
+    sge_TexturedRect(Surf_Menu, 0, 0, Surf_Menu->w - 1, 0, 0, Surf_Menu->h - 1, Surf_Menu->w - 1, Surf_Menu->h - 1, surfBG.get(), 0, 0,
                      surfBG->w - 1, 0, 0, surfBG->h - 1, surfBG->w - 1, surfBG->h - 1);
 
     for(auto& static_picture : static_pictures)

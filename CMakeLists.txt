@@ -6,11 +6,7 @@ find_package(Boost 1.64 REQUIRED)
 
 add_subdirectory(SGE)
 
-option(RTTR_EDITOR_EDITORMODE "In editor mode it is possible to load, edit and save created maps" ON)
 option(RTTR_EDITOR_ADMINMODE "In admin mode there are some key combos to open debugger, resource viewer and so on" OFF)
-if(RTTR_EDITOR_EDITORMODE)
-	add_definitions(-D_EDITORMODE)
-endif()
 if(RTTR_EDITOR_ADMINMODE)
 	add_definitions(-D_ADMINMODE)
 endif()

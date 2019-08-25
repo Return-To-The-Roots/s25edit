@@ -435,9 +435,9 @@ bool CFile::open_lbm(const std::string& filename)
     CHECK_READ(libendian::be_read_ui(&length, fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if(!(bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)))
+    if(!(bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)))
         return false;
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, colors.data(), 0, colors.size());
+    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, colors.data(), 0, colors.size());
 
     if(compression_flag == 0)
     {
@@ -451,7 +451,7 @@ bool CFile::open_lbm(const std::string& filename)
                 // read color value (1 Byte)
                 CHECK_READ(libendian::read(&color_value, 1, fp));
                 // draw
-                CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
+                CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, (Uint32)color_value);
             }
         }
 
@@ -478,7 +478,7 @@ bool CFile::open_lbm(const std::string& filename)
                         // read color value (1 Byte)
                         CHECK_READ(libendian::read(&color_value, 1, fp));
                         // draw
-                        CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
+                        CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, (Uint32)color_value);
                     }
                 } else if(ctype >= -127)
                 {
@@ -486,7 +486,7 @@ bool CFile::open_lbm(const std::string& filename)
                     CHECK_READ(libendian::read(&color_value, 1, fp));
 
                     for(int k = 0; k < -ctype + 1; k++, x++)
-                        CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
+                        CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, (Uint32)color_value);
                 } else // if (ctype == -128)
                 {
                     // ignore
@@ -501,12 +501,12 @@ bool CFile::open_lbm(const std::string& filename)
        || filename.find("TEX7.LBM") != std::string::npos || filename.find("TEXTUR_0.LBM") != std::string::npos
        || filename.find("TEXTUR_3.LBM") != std::string::npos)
     {
-        SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+        SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
         bmpArray++;
-        if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32, 0, 0, 0, 0)))
+        if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32, 0, 0, 0, 0)))
         {
-            SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+            SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
             CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface, 0, 0);
         } else
             bmpArray--;
@@ -1029,11 +1029,11 @@ bool CFile::read_bob02()
     fseek(fp, 4, SEEK_CUR);
     // width of picture (2 Bytes)
     CHECK_READ(libendian::le_read_us(&(bmpArray->w), fp));
-    // heigth of picture (2 Bytes)
+    // height of picture (2 Bytes)
     CHECK_READ(libendian::le_read_us(&(bmpArray->h), fp));
     // skip unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
-    // length of datablock (1x 4 Bytes)
+    // length of data block (1x 4 Bytes)
     CHECK_READ(libendian::le_read_ui(&length, fp));
     // fp points now ON the first start adress, so "actual position + length = first offset of next entry in the file"
     starting_point = ftell(fp);
@@ -1046,18 +1046,18 @@ bool CFile::read_bob02()
         return true;
     }
 
-    // array for start adresses of picture lines
+    // array for start addresses of picture lines
     starts = new Uint16[bmpArray->h];
 
-    // read start adresses
+    // read start addresses
     for(int y = 0; y < bmpArray->h; y++)
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
+    if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
-    SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
+    SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
     // SDL_SetAlpha(bmpArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
@@ -1067,7 +1067,7 @@ bool CFile::read_bob02()
         fseek(fp, starting_point + (Uint32)starts[y], SEEK_SET);
 
         // loop for reading pixels of the actual picture line
-        //(cause of a kind of RLE-Compression we cannot read the pixels sequentielly)
+        //(cause of a kind of RLE-Compression we cannot read the pixels sequentially)
         //'x' will be incremented WITHIN the loop
         for(int x = 0; x < bmpArray->w;)
         {
@@ -1080,7 +1080,7 @@ bool CFile::read_bob02()
                 // read color value (1 Byte)
                 CHECK_READ(libendian::read(&color_value, 1, fp));
                 // draw
-                CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
+                CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, (Uint32)color_value);
             }
 
             // number of transparent pixels to draw now (1 Byte)
@@ -1089,17 +1089,17 @@ bool CFile::read_bob02()
             // loop for drawing the transparent pixels to the surface
             for(int k = 0; k < count_trans; k++, x++)
             {
-                CSurface::DrawPixel_RGBA(bmpArray->surface, x, y, 0, 0, 0, 0);
+                CSurface::DrawPixel_RGBA(bmpArray->surface.get(), x, y, 0, 0, 0, 0);
             }
         }
 
-        // the end of line should be 0xFF, otherwise an error has ocurred (1 Byte)
+        // the end of line should be 0xFF, otherwise an error has occurred (1 Byte)
         CHECK_READ(libendian::read(&endmark, 1, fp));
         if(endmark != 0xFF)
             return false;
     }
 
-    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has ocurred (1 Byte)
+    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has occurred (1 Byte)
     CHECK_READ(libendian::read(&endmark, 1, fp));
     if(endmark != 0xFF)
         return false;
@@ -1216,19 +1216,19 @@ bool CFile::read_bob04(int player_color)
         return true;
     }
 
-    // array for start adresses of picture lines
+    // array for start addresses of picture lines
     starts = new Uint16[bmpArray->h];
 
-    // read start adresses
+    // read start addresses
     for(int y = 0; y < bmpArray->h; y++)
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
+    if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
 
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
-    SDL_SetColorKey(bmpArray->surface, SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
+    SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
     // main loop for reading picture lines
     for(int y = 0; y < bmpArray->h; y++)
@@ -1237,7 +1237,7 @@ bool CFile::read_bob04(int player_color)
         fseek(fp, starting_point + (Uint32)starts[y], SEEK_SET);
 
         // loop for reading pixels of the actual picture line
-        //(cause of a kind of RLE-Compression we cannot read the pixels sequentielly)
+        //(cause of a kind of RLE-Compression we cannot read the pixels sequentially)
         //'x' will be incremented WITHIN the loop
         for(int x = 0; x < bmpArray->w;)
         {
@@ -1248,7 +1248,7 @@ bool CFile::read_bob04(int player_color)
             {
                 for(int i = 1; i <= shift; i++, x++)
                 {
-                    CSurface::DrawPixel_RGBA(bmpArray->surface, x, y, 0, 0, 0, 0);
+                    CSurface::DrawPixel_RGBA(bmpArray->surface.get(), x, y, 0, 0, 0, 0);
                 }
             } else if(shift < 0x81)
             {
@@ -1256,7 +1256,7 @@ bool CFile::read_bob04(int player_color)
 
                 for(int i = 1; i <= shift - 0x40; i++, x++)
                 {
-                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, /*0x80 - 0x40*/ +(Uint32)color_value);
+                    CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, /*0x80 - 0x40*/ +(Uint32)color_value);
                 }
             } else if(shift < 0xC1)
             {
@@ -1264,7 +1264,7 @@ bool CFile::read_bob04(int player_color)
 
                 for(int i = 1; i <= shift - 0x80; i++, x++)
                 {
-                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, player_color + (Uint32)color_value);
+                    CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, player_color + (Uint32)color_value);
                 }
             } else // if (shift > 0xC0)
             {
@@ -1272,7 +1272,7 @@ bool CFile::read_bob04(int player_color)
 
                 for(int i = 1; i <= shift - 0xC0; i++, x++)
                 {
-                    CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
+                    CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, (Uint32)color_value);
                 }
             }
         }
@@ -1355,17 +1355,17 @@ bool CFile::read_bob07()
         return true;
     }
 
-    // array for start adresses of picture lines
+    // array for start addresses of picture lines
     starts = new Uint16[shadowArray->h];
 
-    // read start adresses
+    // read start addresses
     for(int y = 0; y < shadowArray->h; y++)
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((shadowArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == nullptr)
+    if((shadowArray->surface = makeSdlSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
-    SDL_SetPalette(shadowArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
+    SDL_SetPalette(shadowArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
     // SDL_SetAlpha(shadowArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
@@ -1375,7 +1375,7 @@ bool CFile::read_bob07()
         fseek(fp, starting_point + (Uint32)starts[y], SEEK_SET);
 
         // loop for reading pixels of the actual picture line
-        //(cause of a kind of RLE-Compression we cannot read the pixels sequentielly)
+        //(cause of a kind of RLE-Compression we cannot read the pixels sequentially)
         //'x' will be incremented WITHIN the loop
         for(int x = 0; x < shadowArray->w;)
         {
@@ -1386,7 +1386,7 @@ bool CFile::read_bob07()
             for(int k = 0; k < count_black; k++, x++)
             {
                 // draw
-                CSurface::DrawPixel_RGBA(shadowArray->surface, x, y, 0, 0, 0, 0x40);
+                CSurface::DrawPixel_RGBA(shadowArray->surface.get(), x, y, 0, 0, 0, 0x40);
             }
 
             // number of transparent pixels to draw now (1 Byte)
@@ -1395,17 +1395,17 @@ bool CFile::read_bob07()
             // loop for drawing the transparent pixels to the surface
             for(int k = 0; k < count_trans; k++, x++)
             {
-                CSurface::DrawPixel_RGBA(shadowArray->surface, x, y, 0, 0, 0, 0);
+                CSurface::DrawPixel_RGBA(shadowArray->surface.get(), x, y, 0, 0, 0, 0);
             }
         }
 
-        // the end of line should be 0xFF, otherwise an error has ocurred (1 Byte)
+        // the end of line should be 0xFF, otherwise an error has occurred (1 Byte)
         CHECK_READ(libendian::read(&endmark, 1, fp));
         if(endmark != 0xFF)
             return false;
     }
 
-    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has ocurred (1 Byte)
+    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has occurred (1 Byte)
     CHECK_READ(libendian::read(&endmark, 1, fp));
     if(endmark != 0xFF)
         return false;
@@ -1453,9 +1453,9 @@ bool CFile::read_bob14()
     data_start = ftell(fp);
     // jump to first offset after data block
     fseek(fp, length, SEEK_CUR);
-    // coordinate for zeropoint x (2 Bytes)
+    // coordinate for zero point x (2 Bytes)
     CHECK_READ(libendian::le_read_us(&(bmpArray->nx), fp));
-    // coordinate for zeropoint y (2 Bytes)
+    // coordinate for zero point y (2 Bytes)
     CHECK_READ(libendian::le_read_us(&(bmpArray->ny), fp));
     // width of picture (2 Bytes)
     CHECK_READ(libendian::le_read_us(&(bmpArray->w), fp));
@@ -1472,9 +1472,9 @@ bool CFile::read_bob14()
         return true;
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = SDL_CreateRGBSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
+    if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8, 0, 0, 0, 0)) == nullptr)
         return false;
-    SDL_SetPalette(bmpArray->surface, SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
+    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
 
     // set fp to back to the first offset of data block
     fseek(fp, data_start, SEEK_SET);
@@ -1488,7 +1488,7 @@ bool CFile::read_bob14()
             // read color value (1 Byte)
             CHECK_READ(libendian::read(&color_value, 1, fp));
             // draw
-            CSurface::DrawPixel_Color(bmpArray->surface, x, y, (Uint32)color_value);
+            CSurface::DrawPixel_Color(bmpArray->surface.get(), x, y, (Uint32)color_value);
         }
     }
 

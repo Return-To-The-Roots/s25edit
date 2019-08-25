@@ -43,15 +43,15 @@ void CGame::Render()
     if(showLoadScreen)
     {
         // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-        SDL_Surface* surfLoadScreen = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-        sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
-                         surfLoadScreen, 0, 0, surfLoadScreen->w - 1, 0, 0, surfLoadScreen->h - 1, surfLoadScreen->w - 1,
+        auto& surfLoadScreen = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
+        sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
+                         surfLoadScreen.get(), 0, 0, surfLoadScreen->w - 1, 0, 0, surfLoadScreen->h - 1, surfLoadScreen->w - 1,
                          surfLoadScreen->h - 1);
 
         if(CSurface::useOpenGL)
             SDL_GL_SwapBuffers();
         else
-            SDL_Flip(Surf_Display);
+            SDL_Flip(Surf_Display.get());
         return;
     }
 
@@ -62,7 +62,7 @@ void CGame::Render()
     // render active menus
     for(auto& Menu : Menus)
     {
-        if(Menu && Menu->isActive())
+        if(Menu->isActive())
             CSurface::Draw(Surf_Display, Menu->getSurface(), 0, 0);
     }
 
@@ -71,7 +71,7 @@ void CGame::Render()
     // first find the highest priority
     for(auto& Window : Windows)
     {
-        if(Window && Window->getPriority() > highestPriority)
+        if(Window->getPriority() > highestPriority)
             highestPriority = Window->getPriority();
     }
     // render from lowest priority to highest
@@ -79,7 +79,7 @@ void CGame::Render()
     {
         for(auto& Window : Windows)
         {
-            if(Window && Window->getPriority() == actualPriority)
+            if(Window->getPriority() == actualPriority)
                 CSurface::Draw(Surf_Display, Window->getSurface(), Window->getX(), Window->getY());
         }
     }
@@ -100,11 +100,11 @@ void CGame::Render()
 
     if(CSurface::useOpenGL)
     {
-        SDL_BlitSurface(Surf_Display, nullptr, Surf_DisplayGL, nullptr);
-        SDL_Flip(Surf_DisplayGL);
+        SDL_BlitSurface(Surf_Display.get(), nullptr, Surf_DisplayGL.get(), nullptr);
+        SDL_Flip(Surf_DisplayGL.get());
         SDL_GL_SwapBuffers();
     } else
-        SDL_Flip(Surf_Display);
+        SDL_Flip(Surf_Display.get());
 
     SDL_Delay(msWait);
 }

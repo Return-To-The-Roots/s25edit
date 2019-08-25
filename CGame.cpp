@@ -14,14 +14,10 @@ namespace bfs = boost::filesystem;
 
 //#include <vld.h>
 
-CGame::CGame()
-    : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), Surf_Display(nullptr), Surf_DisplayGL(nullptr)
+CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true)
 {
 #ifdef _ADMINMODE
     FrameCounter = 0;
-    RegisteredCallbacks = 0;
-    RegisteredWindows = 0;
-    RegisteredMenus = 0;
 #endif
 
     msWait = 0;
@@ -33,16 +29,15 @@ CGame::CGame()
     Cursor.button.left = false;
     Cursor.button.right = false;
 
-    for(auto& Menu : Menus)
-        Menu = nullptr;
-    for(auto& Window : Windows)
-        Window = nullptr;
-    for(auto& Callback : Callbacks)
-        Callback = nullptr;
-    MapObj = nullptr;
+    global::bmpArray.resize(MAXBOBBMP);
+    global::shadowArray.resize(MAXBOBSHADOW);
+    global::s2 = this;
 }
 
-CGame::~CGame() = default;
+CGame::~CGame()
+{
+    global::s2 = nullptr;
+}
 
 int CGame::Execute()
 {
@@ -60,158 +55,106 @@ int CGame::Execute()
         Render();
     }
 
-    Cleanup();
-
     return 0;
 }
 
-bool CGame::RegisterMenu(CMenu* Menu)
+CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)
 {
-    bool success = false;
-
-    if(!Menu)
-        return success;
     for(auto& i : Menus)
-    {
-        if(!success && !i)
-        {
-            i = Menu;
-            i->setActive();
-            success = true;
-#ifdef _ADMINMODE
-            RegisteredMenus++;
-#endif
-        } else if(i)
-            i->setInactive();
-    }
-    return success;
+        i->setInactive();
+
+    Menu->setActive();
+    Menus.emplace_back(std::move(Menu));
+
+    return Menus.back().get();
 }
 
 bool CGame::UnregisterMenu(CMenu* Menu)
 {
-    if(!Menu)
+    auto it = std::find_if(Menus.begin(), Menus.end(), [Menu](const auto& cur) { return cur.get() == Menu; });
+    if(it == Menus.end())
         return false;
-    for(int i = 0; i < MAXMENUS; i++)
-    {
-        if(Menus[i] == Menu)
-        {
-            for(int j = i - 1; j >= 0; j--)
-            {
-                if(Menus[j])
-                {
-                    Menus[j]->setActive();
-                    break;
-                }
-            }
-            delete Menus[i];
-            Menus[i] = nullptr;
-#ifdef _ADMINMODE
-            RegisteredMenus--;
-#endif
-            return true;
-        }
-    }
-    return false;
+    if(it != Menus.begin())
+        it[-1]->setActive();
+    Menus.erase(it);
+    return true;
 }
 
-bool CGame::RegisterWindow(CWindow* Window)
+CWindow* CGame::RegisterWindow(std::unique_ptr<CWindow> Window)
 {
-    bool success = false;
-    int highestPriority = 0;
-
     // first find the highest priority
-    for(const auto* curWnd : Windows)
-    {
-        if(curWnd && curWnd->getPriority() > highestPriority)
-            highestPriority = curWnd->getPriority();
-    }
+    const auto itHighestPriority = std::max_element(
+      Windows.cbegin(), Windows.cend(), [](const auto& lhs, const auto& rhs) { return lhs->getPriority() < rhs->getPriority(); });
+    const int highestPriority = itHighestPriority == Windows.cend() ? 0 : (*itHighestPriority)->getPriority();
 
-    if(!Window)
-        return success;
     for(auto& i : Windows)
-    {
-        if(!success && !i)
-        {
-            i = Window;
-            i->setActive();
-            i->setPriority(highestPriority + 1);
-            success = true;
-#ifdef _ADMINMODE
-            RegisteredWindows++;
-#endif
-        } else if(i)
-            i->setInactive();
-    }
-    return success;
+        i->setInactive();
+
+    Window->setActive();
+    Window->setPriority(highestPriority + 1);
+    Windows.emplace_back(std::move(Window));
+
+    return Windows.back().get();
 }
 
 bool CGame::UnregisterWindow(CWindow* Window)
 {
-    if(!Window)
+    auto it = std::find_if(Windows.begin(), Windows.end(), [Window](const auto& cur) { return cur.get() == Window; });
+    if(it == Windows.end())
         return false;
-    for(int i = 0; i < MAXWINDOWS; i++)
-    {
-        if(Windows[i] == Window)
-        {
-            for(int j = i - 1; j >= 0; j--)
-            {
-                if(Windows[j])
-                {
-                    Windows[j]->setActive();
-                    break;
-                }
-            }
-            delete Windows[i];
-            Windows[i] = nullptr;
-#ifdef _ADMINMODE
-            RegisteredWindows--;
-#endif
-            return true;
-        }
-    }
-    return false;
+    if(it != Windows.begin())
+        it[-1]->setActive();
+    Windows.erase(it);
+    return true;
 }
 
-bool CGame::RegisterCallback(void (*callback)(int))
+void CGame::RegisterCallback(void (*callback)(int))
 {
-    if(!callback)
-        return false;
-    for(auto& Callback : Callbacks)
-    {
-        if(!Callback)
-        {
-            Callback = callback;
-#ifdef _ADMINMODE
-            RegisteredCallbacks++;
-#endif
-            return true;
-        }
-    }
-    return false;
+    assert(callback);
+    Callbacks.push_back(callback);
 }
 
 bool CGame::UnregisterCallback(void (*callback)(int))
 {
-    if(!callback)
+    auto it = std::find(Callbacks.begin(), Callbacks.end(), callback);
+    if(it == Callbacks.end())
         return false;
-    for(auto& Callback : Callbacks)
-    {
-        if(Callback == callback)
-        {
-            Callback = nullptr;
-#ifdef _ADMINMODE
-            RegisteredCallbacks--;
-#endif
-            return true;
-        }
-    }
-    return false;
+    Callbacks.erase(it);
+    return true;
+}
+
+void CGame::setMapObj(std::unique_ptr<CMap> MapObj)
+{
+    this->MapObj = std::move(MapObj);
+}
+
+CMap* CGame::getMapObj()
+{
+    return MapObj.get();
 }
 
 void CGame::delMapObj()
 {
-    delete MapObj;
-    MapObj = nullptr;
+    MapObj.reset();
+}
+
+void CGame::GameLoop()
+{
+    for(auto&& callback : Callbacks)
+        callback(CALL_FROM_GAMELOOP);
+    const auto isWaste = [](const auto& p) { return p->isWaste(); };
+    auto itMenu = std::find_if(Menus.begin(), Menus.end(), isWaste);
+    while(itMenu != Menus.end())
+    {
+        UnregisterMenu(itMenu->get());
+        itMenu = std::find_if(Menus.begin(), Menus.end(), isWaste);
+    }
+    auto itWnd = std::find_if(Windows.begin(), Windows.end(), isWaste);
+    while(itWnd != Windows.end())
+    {
+        UnregisterWindow(itWnd->get());
+        itWnd = std::find_if(Windows.begin(), Windows.end(), isWaste);
+    }
 }
 
 namespace {
@@ -282,20 +225,25 @@ int main(int /*argc*/, char* /*argv*/ [])
         return 1;
     }
 
+    std::cout << "Initializing SDL...";
+    if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
+    {
+        std::cout << "failure";
+        return 1;
+    }
+    std::cout << "done\n";
+    int result = 0;
     try
     {
-        global::s2 = new CGame;
-
-        global::s2->Execute();
+        auto s2 = std::make_unique<CGame>();
+        result = s2->Execute();
     } catch(...)
     {
         std::cerr << "Unhandled Exception" << std::endl;
-        delete global::s2;
-        WaitForEnter();
-        return 1;
+        result = 1;
     }
-    delete global::s2;
+    SDL_Quit();
 
     WaitForEnter();
-    return 0;
+    return result;
 }

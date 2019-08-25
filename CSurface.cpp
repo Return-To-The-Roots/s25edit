@@ -63,6 +63,21 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
     return true;
 }
 
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y)
+{
+    return Draw(Surf_Dest, Surf_Src.get(), X, Y);
+}
+
+bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y)
+{
+    return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y);
+}
+
+bool CSurface::Draw(SdlSurface& Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
+{
+    return Draw(Surf_Dest.get(), Surf_Src, X, Y);
+}
+
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle)
 {
     if(!Surf_Dest || !Surf_Src)
@@ -92,6 +107,11 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
     return true;
 }
 
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle)
+{
+    return Draw(Surf_Dest, Surf_Src.get(), X, Y, angle);
+}
+
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
 {
     if(!Surf_Dest || !Surf_Src)
@@ -114,7 +134,12 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
     return true;
 }
 
-// this is the example function from the sdl-documentation to draw pixels
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+{
+    return Draw(Surf_Dest, Surf_Src.get(), X, Y, X2, Y2, W, H);
+}
+
+// this is the example function from the SDL-documentation to draw pixels
 void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
 {
     int bpp = screen->format->BytesPerPixel;
@@ -752,21 +777,20 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     switch(type)
     {
         case MAP_GREENLAND:
+        default:
             Surf_Tileset =
-              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP].surface;
+              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP]
+                .surface.get();
             break;
         case MAP_WASTELAND:
             Surf_Tileset =
-              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP : TILESET_WASTELAND_32BPP].surface;
+              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP : TILESET_WASTELAND_32BPP]
+                .surface.get();
             break;
         case MAP_WINTERLAND:
             Surf_Tileset =
               global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WINTERLAND_8BPP : TILESET_WINTERLAND_32BPP]
-                .surface;
-            break;
-        default:
-            Surf_Tileset =
-              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP].surface;
+                .surface.get();
             break;
     }
 

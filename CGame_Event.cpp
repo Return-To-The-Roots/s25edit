@@ -20,14 +20,13 @@ void CGame::EventHandling(SDL_Event* Event)
             int highestPriority = 0;
             for(auto& Window : Windows)
             {
-                if(Window && Window->getPriority() > highestPriority)
+                if(Window->getPriority() > highestPriority)
                     highestPriority = Window->getPriority();
             }
 
             for(auto& Window : Windows)
             {
-                if(Window && !Window->isWaste() && Window->isMarked() && Window->getPriority() == highestPriority
-                   && Window->hasActiveInputElement())
+                if(!Window->isWaste() && Window->isMarked() && Window->getPriority() == highestPriority && Window->hasActiveInputElement())
                 {
                     Window->setKeyboardData(Event->key);
                     delivered = true;
@@ -50,7 +49,7 @@ void CGame::EventHandling(SDL_Event* Event)
                 // deliver keyboard data to active menus
                 for(auto& Menu : Menus)
                 {
-                    if(Menu && Menu->isActive() && !Menu->isWaste())
+                    if(Menu->isActive() && !Menu->isWaste())
                         Menu->setKeyboardData(Event->key);
                 }
             }
@@ -173,7 +172,7 @@ void CGame::EventHandling(SDL_Event* Event)
             int highestPriority = 0;
             for(auto& Window : Windows)
             {
-                if(Window && Window->getPriority() > highestPriority)
+                if(Window->getPriority() > highestPriority)
                     highestPriority = Window->getPriority();
             }
 
@@ -181,7 +180,7 @@ void CGame::EventHandling(SDL_Event* Event)
             {
                 for(auto& Window : Windows)
                 {
-                    if(Window && !Window->isWaste() && Window->getPriority() == actualPriority)
+                    if(!Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window or does the user move or resize the window?
                         if(((Event->motion.x >= Window->getX()) && (Event->motion.x < Window->getX() + Window->getW())
@@ -214,7 +213,7 @@ void CGame::EventHandling(SDL_Event* Event)
             // deliver mouse motion data to active menus
             for(auto& Menu : Menus)
             {
-                if(Menu && Menu->isActive() && !Menu->isWaste())
+                if(Menu->isActive() && !Menu->isWaste())
                 {
                     Menu->setMouseData(Event->motion);
                     break;
@@ -251,7 +250,7 @@ void CGame::EventHandling(SDL_Event* Event)
             int highestPriority = 0;
             for(auto& Window : Windows)
             {
-                if(Window && Window->getPriority() > highestPriority)
+                if(Window->getPriority() > highestPriority)
                     highestPriority = Window->getPriority();
             }
 
@@ -259,7 +258,7 @@ void CGame::EventHandling(SDL_Event* Event)
             {
                 for(auto& Window : Windows)
                 {
-                    if(Window && !Window->isWaste() && Window->getPriority() == actualPriority)
+                    if(!Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window?
                         if((Event->button.x >= Window->getX()) && (Event->button.x < Window->getX() + Window->getW())
@@ -292,7 +291,7 @@ void CGame::EventHandling(SDL_Event* Event)
             // deliver mouse button data to active menus
             for(auto& Menu : Menus)
             {
-                if(Menu && Menu->isActive() && !Menu->isWaste())
+                if(Menu->isActive() && !Menu->isWaste())
                     Menu->setMouseData(Event->button);
             }
 
@@ -312,7 +311,7 @@ void CGame::EventHandling(SDL_Event* Event)
             int highestPriority = 0;
             for(auto& Window : Windows)
             {
-                if(Window && Window->getPriority() > highestPriority)
+                if(Window->getPriority() > highestPriority)
                     highestPriority = Window->getPriority();
             }
 
@@ -320,7 +319,7 @@ void CGame::EventHandling(SDL_Event* Event)
             {
                 for(auto& Window : Windows)
                 {
-                    if(Window && !Window->isWaste() && Window->getPriority() == actualPriority)
+                    if(!Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window?
                         if((Event->button.x >= Window->getX()) && (Event->button.x < Window->getX() + Window->getW())
@@ -363,7 +362,7 @@ void CGame::EventHandling(SDL_Event* Event)
             // deliver mouse button data to active menus
             for(auto& Menu : Menus)
             {
-                if(Menu && Menu->isActive() && !Menu->isWaste())
+                if(Menu->isActive() && !Menu->isWaste())
                     Menu->setMouseData(Event->button);
             }
             break;

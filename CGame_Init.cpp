@@ -1,5 +1,6 @@
 #include "CGame.h"
 #include "CIO/CFile.h"
+#include "CMap.h"
 #include "CSurface.h"
 #include "SGE/sge_blib.h"
 #include "callbacks.h"
@@ -11,44 +12,34 @@
 
 bool CGame::ReCreateWindow()
 {
-    SDL_FreeSurface(Surf_Display);
-    Surf_Display = nullptr;
-    SDL_FreeSurface(Surf_DisplayGL);
-    Surf_DisplayGL = nullptr;
     if(CSurface::useOpenGL)
     {
-        Surf_DisplayGL = SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0));
-        Surf_Display = SDL_CreateRGBSurface(SDL_SWSURFACE, GameResolution.x, GameResolution.y, 32, 0, 0, 0, 0);
+        Surf_DisplayGL.reset(SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0)));
+        Surf_Display = makeSdlSurface(SDL_SWSURFACE, GameResolution.x, GameResolution.y, 32);
         if(!Surf_Display || !Surf_DisplayGL)
             return false;
     } else
     {
-        Surf_Display =
-          SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0));
+        Surf_Display.reset(
+          SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0)));
+        Surf_DisplayGL.reset();
         if(!Surf_Display)
             return false;
     }
 
-    SDL_WM_SetCaption("Return to the Roots Mapeditor [BETA]", nullptr);
+    SDL_WM_SetCaption("Return to the Roots Map editor [BETA]", nullptr);
     SetAppIcon();
     return true;
 }
 
 bool CGame::Init()
 {
-    std::cout << "Return to the Roots Mapeditor\n";
-
-    std::cout << "\nInitializing SDL...";
-    if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
-    {
-        std::cout << "failure";
-        return false;
-    }
+    std::cout << "Return to the Roots Map editor\n";
 
     SDL_EnableKeyRepeat(100, 100);
     SDL_ShowCursor(SDL_DISABLE);
 
-    std::cout << "\nCreate Window...";
+    std::cout << "Create Window...";
     if(!ReCreateWindow())
     {
         std::cout << "failure";
@@ -72,7 +63,7 @@ bool CGame::Init()
     if(!CFile::open_file(global::gameDataFilePath + "/GFX/PICS/SETUP997.LBM", LBM))
     {
         std::cout << "failure";
-        // if SETUP997.LBM doesn't exist, it's probably settlers2+missioncd and there we have SETUP998.LBM instead
+        // if SETUP997.LBM doesn't exist, it's probably settlers2+mission cd and there we have SETUP998.LBM instead
         std::cout << "\nTry to load file: /GFX/PICS/SETUP998.LBM instead...";
         if(!CFile::open_file(global::gameDataFilePath + "/GFX/PICS/SETUP998.LBM", LBM))
         {
@@ -84,10 +75,10 @@ bool CGame::Init()
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
     // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-    SDL_Surface* surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-    sge_TexturedRect(Surf_Display, 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
-                     surfSplash, 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1, surfSplash->w - 1, surfSplash->h - 1);
-    SDL_Flip(Surf_Display);
+    auto& surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
+    sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
+                     surfSplash.get(), 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1, surfSplash->w - 1, surfSplash->h - 1);
+    SDL_Flip(Surf_Display.get());
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())
