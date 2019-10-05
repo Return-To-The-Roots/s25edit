@@ -67,7 +67,7 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
             {
                 callback(clickedParam);
             }
-        }else if(getColor() != initialColor_)
+        } else if(getColor() != initialColor_)
             setColor(initialColor_);
     }
 }
