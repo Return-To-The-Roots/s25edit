@@ -12,8 +12,8 @@ private:
     SDL_Surface* Surf_Button;
     bool needSurface;
     bool needRender;
-    Uint16 x_;
-    Uint16 y_;
+    Sint16 x_;
+    Sint16 y_;
     Uint16 w;
     Uint16 h;
     int pic_normal;
@@ -31,7 +31,7 @@ private:
 
 public:
     // Constructor - Destructor
-    CButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 w = 20, Uint16 h = 20, int color = BUTTON_GREY,
+    CButton(void callback(int), int clickedParam, Sint16 x = 0, Sint16 y = 0, Uint16 w = 20, Uint16 h = 20, int color = BUTTON_GREY,
             const char* text = nullptr, int button_picture = -1);
     ~CButton();
     // Access

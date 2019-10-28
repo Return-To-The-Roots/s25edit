@@ -3,7 +3,7 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CButton::CButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color, const char* text,
+CButton::CButton(void callback(int), int clickedParam, Sint16 x, Sint16 y, Uint16 w, Uint16 h, int color, const char* text,
                  int button_picture)
 {
     marked = false;

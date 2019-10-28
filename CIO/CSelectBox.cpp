@@ -4,7 +4,7 @@
 #include "CButton.h"
 #include "CFont.h"
 
-CSelectBox::CSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
+CSelectBox::CSelectBox(Sint16 x, Sint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
 {
     this->x_ = x;
     this->y_ = y;

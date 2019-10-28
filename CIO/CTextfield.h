@@ -16,8 +16,8 @@ private:
     CFont* textObj;
     bool needSurface;
     bool needRender;
-    Uint16 x_;
-    Uint16 y_;
+    Sint16 x_;
+    Sint16 y_;
     Uint16 w;
     Uint16 h;
     Uint16 cols;
@@ -36,7 +36,7 @@ private:
 
 public:
     // Constructor - Destructor
-    CTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fontsize = 14, int text_color = FONT_YELLOW,
+    CTextfield(Sint16 x = 0, Sint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fontsize = 14, int text_color = FONT_YELLOW,
                int bg_color = -1, bool button_style = false);
     ~CTextfield();
     // Access

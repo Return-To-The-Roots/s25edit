@@ -12,8 +12,8 @@ class CFont
 
 private:
     SDL_Surface* Surf_Font;
-    Uint16 x_;
-    Uint16 y_;
+    Sint16 x_;
+    Sint16 y_;
     Uint16 w;
     Uint16 h;
     std::string string_;
@@ -29,8 +29,8 @@ public:
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
-    void setX(unsigned x) { this->x_ = x; };
-    void setY(unsigned y) { this->y_ = y; };
+    void setX(int x) { this->x_ = x; };
+    void setY(int y) { this->y_ = y; };
     unsigned getW() { return w; };
     unsigned getH() { return fontsize_; };
     void setFontsize(unsigned fontsize);

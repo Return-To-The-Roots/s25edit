@@ -19,8 +19,8 @@ private:
     std::vector<std::unique_ptr<CFont>> Entries;
     bool needSurface;
     bool needRender;
-    Uint16 x_;
-    Uint16 y_;
+    Sint16 x_;
+    Sint16 y_;
     Uint16 w_;
     Uint16 h_;
     Uint16 last_text_pos_y;
@@ -35,7 +35,7 @@ private:
 
 public:
     // Constructor - Destructor
-    CSelectBox(Uint16 x = 0, Uint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fontsize = 14, int text_color = FONT_YELLOW,
+    CSelectBox(Sint16 x = 0, Sint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fontsize = 14, int text_color = FONT_YELLOW,
                int bg_color = -1);
     ~CSelectBox();
     // Access;

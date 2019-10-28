@@ -3,7 +3,7 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CTextfield::CTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
+CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
 {
     active = false;
     this->x_ = x;
