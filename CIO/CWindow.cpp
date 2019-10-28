@@ -7,10 +7,12 @@
 #include "CPicture.h"
 #include "CSelectBox.h"
 #include "CTextfield.h"
+#include "helpers/containerUtils.h"
 #include <cassert>
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y, Uint16 w, Uint16 h, const char* title, int color,
                  Uint8 flags)
+    : CControlContainer(color, {global::bmpArray[WINDOW_LEFT_FRAME].w, global::bmpArray[WINDOW_UPPER_FRAME].h})
 {
     assert(callback);
     marked = true;
@@ -40,49 +42,13 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y
     canResize_clicked = false;
     minimized = false;
     priority = 0;
-    pic_background = color;
-    for(auto& button : buttons)
-        button = nullptr;
-    for(auto& text : texts)
-        text = nullptr;
-    for(auto& picture : pictures)
-        picture = nullptr;
-    for(auto& static_picture : static_pictures)
-    {
-        static_picture.x_ = 0;
-        static_picture.y_ = 0;
-        static_picture.pic = -1;
-    }
-    for(auto& textfield : textfields)
-        textfield = nullptr;
-    for(auto& selectboxe : selectboxes)
-        selectboxe = nullptr;
 
     this->title = title;
     this->callback_ = callback;
     this->callbackQuitMessage = callbackQuitMessage;
-    Surf_Window = nullptr;
-    needSurface = true;
-    needRender = true;
     active = true;
-    waste = false;
     moving = false;
     resizing = false;
-}
-
-CWindow::~CWindow()
-{
-    for(auto& button : buttons)
-        delete button;
-    for(auto& text : texts)
-        delete text;
-    for(auto& picture : pictures)
-        delete picture;
-    for(auto& textfield : textfields)
-        delete textfield;
-    for(auto& selectboxe : selectboxes)
-        delete selectboxe;
-    SDL_FreeSurface(Surf_Window);
 }
 
 void CWindow::setTitle(const char* title)
@@ -93,16 +59,12 @@ void CWindow::setTitle(const char* title)
 
 void CWindow::setColor(int color)
 {
-    pic_background = color;
-    needRender = true;
+    setBackgroundPicture(color);
 }
 
 bool CWindow::hasActiveInputElement()
 {
-    for(auto& textfield : textfields)
-        if(textfield && textfield->isActive())
-            return true;
-    return false;
+    return helpers::contains_if(getTextFields(), [](const auto& text) { return text->isActive(); });
 }
 
 void CWindow::setMouseData(SDL_MouseMotionEvent motion)
@@ -182,7 +144,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
                 // MISSING: we have to test if window size is under minimum
 
                 // the window has resized, so we need a new surface
-                needSurface = true;
+                surface.reset();
             }
         }
     }
@@ -194,21 +156,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute - y_window
         motion.x -= x_;
         motion.y -= y_;
-        for(auto& picture : pictures)
-        {
-            if(picture)
-                picture->setMouseData(motion);
-        }
-        for(auto& button : buttons)
-        {
-            if(button)
-                button->setMouseData(motion);
-        }
-        for(auto& selectboxe : selectboxes)
-        {
-            if(selectboxe)
-                selectboxe->setMouseData(motion);
-        }
+        CControlContainer::setMouseData(motion);
     }
 
     needRender = true;
@@ -275,13 +223,13 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
                 {
                     h_ = maximized_h;
                     // the window has resized, so we need a new surface
-                    needSurface = true;
+                    surface.reset();
                     minimized = false;
                 } else // minimize now
                 {
                     h_ = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
                     // the window has resized, so we need a new surface
-                    needSurface = true;
+                    surface.reset();
                     minimized = true;
                 }
             }
@@ -301,26 +249,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute - y_window
         button.x -= x_;
         button.y -= y_;
-        for(auto& picture : pictures)
-        {
-            if(picture)
-                picture->setMouseData(button);
-        }
-        for(auto& i : buttons)
-        {
-            if(i)
-                i->setMouseData(button);
-        }
-        for(auto& textfield : textfields)
-        {
-            if(textfield)
-                textfield->setMouseData(button);
-        }
-        for(auto& selectboxe : selectboxes)
-        {
-            if(selectboxe)
-                selectboxe->setMouseData(button);
-        }
+        CControlContainer::setMouseData(button);
     }
 
     // at least call the callback
@@ -329,236 +258,9 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
-void CWindow::setKeyboardData(const SDL_KeyboardEvent& key)
-{
-    for(auto& textfield : textfields)
-    {
-        if(textfield)
-            textfield->setKeyboardData(key);
-    }
-    needRender = true;
-}
-
-CButton* CWindow::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color, const char* text,
-                            int picture)
-{
-    // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
-    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
-    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
-
-    for(auto& button : buttons)
-    {
-        if(!button)
-        {
-            button = new CButton(callback, clickedParam, x_abs, y_abs, w, h, color, text, picture);
-            needRender = true;
-            return button;
-        }
-    }
-    return nullptr;
-}
-
-bool CWindow::delButton(CButton* ButtonToDelete)
-{
-    if(!ButtonToDelete)
-        return false;
-
-    for(auto& button : buttons)
-    {
-        if(button == ButtonToDelete)
-        {
-            delete button;
-            button = nullptr;
-            needRender = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-CFont* CWindow::addText(std::string string, int x, int y, int fontsize, int color)
-{
-    // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
-    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
-    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
-
-    for(auto& text : texts)
-    {
-        if(!text)
-        {
-            text = new CFont(std::move(string), x_abs, y_abs, fontsize, color);
-            needRender = true;
-            return text;
-        }
-    }
-    return nullptr;
-}
-
-bool CWindow::delText(CFont* TextToDelete)
-{
-    if(!TextToDelete)
-        return false;
-
-    for(auto& text : texts)
-    {
-        if(text == TextToDelete)
-        {
-            delete text;
-            text = nullptr;
-            needRender = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-CPicture* CWindow::addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
-{
-    // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
-    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
-    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
-
-    for(auto& i : pictures)
-    {
-        if(!i)
-        {
-            i = new CPicture(callback, clickedParam, x_abs, y_abs, picture);
-            needRender = true;
-            return i;
-        }
-    }
-    return nullptr;
-}
-
-bool CWindow::delPicture(CPicture* PictureToDelete)
-{
-    if(!PictureToDelete)
-        return false;
-
-    for(auto& picture : pictures)
-    {
-        if(picture == PictureToDelete)
-        {
-            delete picture;
-            picture = nullptr;
-            needRender = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-int CWindow::addStaticPicture(int x, int y, int picture)
-{
-    // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
-    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
-    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
-
-    if(picture < 0)
-        return -1;
-
-    for(int i = 0; i < MAXPICTURES; i++)
-    {
-        if(static_pictures[i].pic == -1)
-        {
-            static_pictures[i].pic = picture;
-            static_pictures[i].x_ = x_abs;
-            static_pictures[i].y_ = y_abs;
-            needRender = true;
-            return i;
-        }
-    }
-    return -1;
-}
-
-bool CWindow::delStaticPicture(int ArrayIndex)
-{
-    if(ArrayIndex < 0 || ArrayIndex >= MAXPICTURES)
-        return false;
-
-    static_pictures[ArrayIndex].pic = -1;
-    static_pictures[ArrayIndex].x_ = 0;
-    static_pictures[ArrayIndex].y_ = 0;
-    needRender = true;
-
-    return true;
-}
-
-CTextfield* CWindow::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color,
-                                  bool button_style)
-{
-    // x_abs and y_abs are not the left upper corner of the window, because the left and upper frames are there
-    int x_abs = x + global::bmpArray[WINDOW_LEFT_FRAME].w;
-    int y_abs = y + global::bmpArray[WINDOW_UPPER_FRAME].h;
-
-    for(auto& textfield : textfields)
-    {
-        if(!textfield)
-        {
-            textfield = new CTextfield(x_abs, y_abs, cols, rows, fontsize, text_color, bg_color, button_style);
-            needRender = true;
-            return textfield;
-        }
-    }
-    return nullptr;
-}
-
-bool CWindow::delTextfield(CTextfield* TextfieldToDelete)
-{
-    if(!TextfieldToDelete)
-        return false;
-
-    for(auto& textfield : textfields)
-    {
-        if(textfield == TextfieldToDelete)
-        {
-            delete textfield;
-            textfield = nullptr;
-            needRender = true;
-            return true;
-        }
-    }
-    return false;
-}
-
-CSelectBox* CWindow::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
-{
-    if(Surf_Window && (x >= Surf_Window->w || y >= Surf_Window->h))
-        return nullptr;
-
-    for(auto& selectboxe : selectboxes)
-    {
-        if(!selectboxe)
-        {
-            selectboxe = new CSelectBox(x, y, w, h, fontsize, text_color, bg_color);
-            needRender = true;
-            return selectboxe;
-        }
-    }
-    return nullptr;
-}
-
-bool CWindow::delSelectBox(CSelectBox* SelectBoxToDelete)
-{
-    if(!SelectBoxToDelete)
-        return false;
-
-    for(auto& selectboxe : selectboxes)
-    {
-        if(selectboxe == SelectBoxToDelete)
-        {
-            delete selectboxe;
-            selectboxe = nullptr;
-            needRender = true;
-            return true;
-        }
-    }
-    return false;
-}
-
 bool CWindow::render()
 {
-    // position in the Surface 'Surf_Window'
+    // position in the Surface 'surface'
     Uint16 pos_x = 0;
     Uint16 pos_y = 0;
     // width and height of the window background color source picture
@@ -574,95 +276,58 @@ bool CWindow::render()
     int resizebutton = WINDOW_BUTTON_RESIZE;
 
     // test if a textfield has changed
-    for(auto& textfield : textfields)
-    {
-        if(textfield)
-            if(textfield->hasRendered())
-                needRender = true;
-    }
+    needRender |= helpers::contains_if(getTextFields(), [](const auto& textfield) { return textfield->hasRendered(); });
 
     // if we don't need to render, all is up to date, return true
     if(!needRender)
         return true;
     needRender = false;
     // if we need a new surface
-    if(needSurface)
+    if(!surface)
     {
-        SDL_FreeSurface(Surf_Window);
-        Surf_Window = nullptr;
-        if((Surf_Window = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == nullptr)
+        if(!(surface = makeSdlSurface(SDL_SWSURFACE, w_, h_, 32)))
             return false;
-        needSurface = false;
     }
 
-    // at first completly fill the background (not the fastest way, but simplier)
-    if(pic_background != WINDOW_NOTHING)
+    // at first completly fill the background (not the fastest way, but simpler)
+    if(getBackground() != WINDOW_NOTHING)
     {
-        pic_w = std::min(w_, global::bmpArray[pic_background].w);
-        pic_h = std::min(h_, global::bmpArray[pic_background].h);
+        pic_w = std::min(w_, global::bmpArray[getBackground()].w);
+        pic_h = std::min(h_, global::bmpArray[getBackground()].h);
 
-        while(pos_x + pic_w <= Surf_Window->w)
+        while(pos_x + pic_w <= surface->w)
         {
-            while(pos_y + pic_h <= Surf_Window->h)
+            while(pos_y + pic_h <= surface->h)
             {
-                CSurface::Draw(Surf_Window, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
                 pos_y += pic_h;
             }
 
-            if(Surf_Window->h - pos_y > 0)
-                CSurface::Draw(Surf_Window, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, pic_w, Surf_Window->h - pos_y);
+            if(surface->h - pos_y > 0)
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, pic_w, surface->h - pos_y);
 
             pos_y = 0;
             pos_x += pic_w;
         }
 
-        if(Surf_Window->w - pos_x > 0)
+        if(surface->w - pos_x > 0)
         {
-            while(pos_y + pic_h <= Surf_Window->h)
+            while(pos_y + pic_h <= surface->h)
             {
-                CSurface::Draw(Surf_Window, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
                 pos_y += pic_h;
             }
 
-            if(Surf_Window->h - pos_y > 0)
-                CSurface::Draw(Surf_Window, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x,
-                               Surf_Window->h - pos_y);
+            if(surface->h - pos_y > 0)
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, surface->w - pos_x,
+                               surface->h - pos_y);
         }
     }
 
     // if not minimized, draw the content now (this stands here to prevent the frames and corners from being overdrawn)
     if(!minimized)
     {
-        for(auto& button : buttons)
-        {
-            if(button && button->getX() < Surf_Window->w && button->getY() < Surf_Window->h)
-                CSurface::Draw(Surf_Window, button->getSurface(), button->getX(), button->getY());
-        }
-        for(auto& static_picture : static_pictures)
-        {
-            if(static_picture.pic >= 0 && static_picture.x_ < Surf_Window->w && static_picture.y_ < Surf_Window->h)
-                CSurface::Draw(Surf_Window, global::bmpArray[static_picture.pic].surface, static_picture.x_, static_picture.y_);
-        }
-        for(auto& picture : pictures)
-        {
-            if(picture && picture->getX() < Surf_Window->w && picture->getY() < Surf_Window->h)
-                CSurface::Draw(Surf_Window, picture->getSurface(), picture->getX(), picture->getY());
-        }
-        for(auto& text : texts)
-        {
-            if(text && text->getX() < Surf_Window->w && text->getY() < Surf_Window->h)
-                CSurface::Draw(Surf_Window, text->getSurface(), text->getX(), text->getY());
-        }
-        for(auto& textfield : textfields)
-        {
-            if(textfield && textfield->getX() < Surf_Window->w && textfield->getY() < Surf_Window->h)
-                CSurface::Draw(Surf_Window, textfield->getSurface(), textfield->getX(), textfield->getY());
-        }
-        for(auto& selectboxe : selectboxes)
-        {
-            if(selectboxe)
-                CSurface::Draw(Surf_Window, selectboxe->getSurface(), selectboxe->getX(), selectboxe->getY());
-        }
+        renderElements();
     }
 
     // now draw the upper frame to the top
@@ -677,17 +342,17 @@ bool CWindow::render()
 
     pos_x = 0;
     pos_y = 0;
-    while(pos_x + pic_w <= Surf_Window->w)
+    while(pos_x + pic_w <= surface->w)
     {
-        CSurface::Draw(Surf_Window, global::bmpArray[upperframe].surface, pos_x, pos_y);
+        CSurface::Draw(surface, global::bmpArray[upperframe].surface, pos_x, pos_y);
         pos_x += pic_w;
     }
 
-    if(Surf_Window->w - pos_x > 0)
-        CSurface::Draw(Surf_Window, global::bmpArray[upperframe].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
+    if(surface->w - pos_x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[upperframe].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
     // write text in the upper frame
     if(title)
-        CFont::writeText(Surf_Window, title, (int)w_ / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
+        CFont::writeText(surface.get(), title, (int)w_ / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
                          ALIGN_MIDDLE);
 
     // now draw the other frames (left, right, down)
@@ -696,41 +361,41 @@ bool CWindow::render()
     pic_h = global::bmpArray[WINDOW_LOWER_FRAME].h;
     pos_x = 0;
     pos_y = h_ - global::bmpArray[WINDOW_LOWER_FRAME].h;
-    while(pos_x + pic_w <= Surf_Window->w)
+    while(pos_x + pic_w <= surface->w)
     {
-        CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y);
+        CSurface::Draw(surface, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y);
         pos_x += pic_w;
     }
-    if(Surf_Window->w - pos_x > 0)
-        CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
+    if(surface->w - pos_x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
     // left
     pic_h = std::min(h_, global::bmpArray[WINDOW_LEFT_FRAME].h);
     pos_x = 0;
     pos_y = 0;
-    while(pos_y + pic_h <= Surf_Window->h)
+    while(pos_y + pic_h <= surface->h)
     {
-        CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y);
+        CSurface::Draw(surface, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y);
         pos_y += pic_h;
     }
-    if(Surf_Window->w - pos_x > 0)
-        CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
+    if(surface->w - pos_x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
     // right
     pic_h = std::min(h_, global::bmpArray[WINDOW_RIGHT_FRAME].h);
     pos_x = w_ - global::bmpArray[WINDOW_RIGHT_FRAME].w;
     pos_y = 0;
-    while(pos_y + pic_h <= Surf_Window->h)
+    while(pos_y + pic_h <= surface->h)
     {
-        CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos_x, pos_y);
+        CSurface::Draw(surface, global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos_x, pos_y);
         pos_y += pic_h;
     }
-    if(Surf_Window->w - pos_x > 0)
-        CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos_x, pos_y, 0, 0, Surf_Window->w - pos_x, pic_h);
+    if(surface->w - pos_x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
 
     // now draw the corners
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_LEFT_UPPER_CORNER].surface, 0, 0);
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].surface, w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w, 0);
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, 0, h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
-    CSurface::Draw(Surf_Window, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, w_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].w,
+    CSurface::Draw(surface, global::bmpArray[WINDOW_LEFT_UPPER_CORNER].surface, 0, 0);
+    CSurface::Draw(surface, global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].surface, w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w, 0);
+    CSurface::Draw(surface, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, 0, h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
+    CSurface::Draw(surface, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, w_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].w,
                    h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
     // now the corner buttons
     // close
@@ -742,7 +407,7 @@ bool CWindow::render()
             closebutton = WINDOW_BUTTON_CLOSE_MARKED;
         else
             closebutton = WINDOW_BUTTON_CLOSE;
-        CSurface::Draw(Surf_Window, global::bmpArray[closebutton].surface, 0, 0);
+        CSurface::Draw(surface, global::bmpArray[closebutton].surface, 0, 0);
     }
     // minimize
     if(canMinimize)
@@ -753,7 +418,7 @@ bool CWindow::render()
             minimizebutton = WINDOW_BUTTON_MINIMIZE_MARKED;
         else
             minimizebutton = WINDOW_BUTTON_MINIMIZE;
-        CSurface::Draw(Surf_Window, global::bmpArray[minimizebutton].surface, w_ - global::bmpArray[minimizebutton].w, 0);
+        CSurface::Draw(surface, global::bmpArray[minimizebutton].surface, w_ - global::bmpArray[minimizebutton].w, 0);
     }
     // resize
     if(canResize)
@@ -764,7 +429,7 @@ bool CWindow::render()
             resizebutton = WINDOW_BUTTON_RESIZE_MARKED;
         else
             resizebutton = WINDOW_BUTTON_RESIZE;
-        CSurface::Draw(Surf_Window, global::bmpArray[resizebutton].surface, w_ - global::bmpArray[resizebutton].w,
+        CSurface::Draw(surface, global::bmpArray[resizebutton].surface, w_ - global::bmpArray[resizebutton].w,
                        h_ - global::bmpArray[resizebutton].h);
     }
 
@@ -778,9 +443,8 @@ void CWindow::setInactive()
     marked = false;
     needRender = true;
 
-    for(auto& textfield : textfields)
+    for(auto& textfield : getTextFields())
     {
-        if(textfield)
-            textfield->setInactive();
+        textfield->setInactive();
     }
 }

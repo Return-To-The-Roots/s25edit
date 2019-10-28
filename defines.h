@@ -1174,18 +1174,6 @@ enum
 // maximum palettes
 #define MAXBOBPAL 100
 
-// maximum values for GUI stuff
-// maximum number of buttons that can be created WITHIN a menu or window
-#define MAXBUTTONS 50
-// maximum number of texts that can be written WITHIN a menu or window
-#define MAXTEXTS 100
-// maximum number of pictures that can be shown WITHIN a menu or window
-#define MAXPICTURES 100
-// maximum number of textfields that can be created WITHIN a menu or window
-#define MAXTEXTFIELDS 20
-// maximum number of selectboxes that can be created WITHIN a menu or window
-#define MAXSELECTBOXES 20
-
 // maximum players for a map
 #define MAXPLAYERS 16
 // maximum map size
