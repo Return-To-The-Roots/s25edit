@@ -33,7 +33,7 @@ ELSE()
 ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
-target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata endian::static nowide::static PUBLIC Boost::disable_autolinking)
+target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata endian::static Boost::nowide PUBLIC Boost::disable_autolinking)
 target_include_directories(s25edit PRIVATE include)
 
 if(MINGW)
