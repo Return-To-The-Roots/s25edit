@@ -24,9 +24,6 @@
 extern "C" {
 #endif
 DECLSPEC void sge_FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2, Uint8 b2);
-// if destination and source surface have both 8bpp or 32bpp then the colorkey will be respected
-DECLSPEC void sge_TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
-                               Sint16 sy2);
 // works at the moment only if destination and source surface have both 32bpp
 DECLSPEC void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1,
                                     Sint16 sx2, Sint16 sy2, Sint32 i1, Sint32 i2);

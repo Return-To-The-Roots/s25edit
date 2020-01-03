@@ -229,10 +229,11 @@ void sge_FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, 
     sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
+template<int dstBytesPerPixel>
 static void _CopyPixelsWithDifferentFormat(SDL_Surface* dest, Sint16 y, Sint16 x1, Sint16 x2, SDL_Surface* source, FixedPoint srcx,
                                            FixedPoint srcy, const SDL_PixelFormat* srcFormat, FixedPoint xstep, FixedPoint ystep)
 {
-    switch(dest->format->BytesPerPixel)
+    switch(dstBytesPerPixel)
     {
         case 1:
         { /* Assuming 8-bpp */
@@ -322,6 +323,7 @@ static void _CopyPixelsWithDifferentFormat(SDL_Surface* dest, Sint16 y, Sint16 x
 //==================================================================================
 // Draws a horisontal, textured line
 //==================================================================================
+template<int srcBytesPerPixel, int dstBytesPerPixel>
 static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, FixedPoint sx1, FixedPoint sy1,
                           FixedPoint sx2, FixedPoint sy2)
 {
@@ -335,6 +337,8 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
         SWAP(sx1, sx2, _tmp2);
         SWAP(sy1, sy2, _tmp2);
     }
+    if(x2 < sge_clip_xmin(dest))
+        return;
 
     /* Fixed point texture starting coords */
     auto srcx = sx1;
@@ -348,8 +352,6 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
     assert(y >= sge_clip_ymin(dest) && y <= sge_clip_ymax(dest));
     assert(x1 <= sge_clip_xmax(dest) && x2 <= sge_clip_xmax(dest));
 
-    if(x2 < sge_clip_xmin(dest))
-        return;
     if(x1 < sge_clip_xmin(dest))
     {
         /* Fix texture starting coord */
@@ -358,12 +360,11 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
         x1 = sge_clip_xmin(dest);
     }
 
-    const auto dstFormat = *dest->format;
-    if(dstFormat.BytesPerPixel == source->format->BytesPerPixel)
+    if(dstBytesPerPixel == srcBytesPerPixel)
     {
         /* Fast mode. Just copy the pixel */
 
-        switch(dstFormat.BytesPerPixel)
+        switch(dstBytesPerPixel)
         {
             case 1:
             { /* Assuming 8-bpp */
@@ -404,6 +405,7 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
 
             case 3:
             { /* Slow 24-bpp mode, usually not used */
+                const auto dstFormat = *dest->format;
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 Uint8 rshift8 = dstFormat.Rshift / 8;
@@ -427,9 +429,9 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / sizeof(Uint32) + x1;
 
-                const Uint16 pitch = source->pitch / 4;
+                const Uint16 pitch = source->pitch / sizeof(Uint32);
                 const Uint32 colorkey = source->format->colorkey;
 
                 for(int x = x1; x <= x2; x++, ++pixel)
@@ -447,7 +449,7 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
     } else
     {
         /* Slow mode. We must translate every pixel color! */
-        _CopyPixelsWithDifferentFormat(dest, y, x1, x2, source, srcx, srcy, source->format, xstep, ystep);
+        _CopyPixelsWithDifferentFormat<dstBytesPerPixel>(dest, y, x1, x2, source, srcx, srcy, source->format, xstep, ystep);
     }
 }
 
@@ -485,18 +487,19 @@ template<class T_IsColorKey = decltype(makeIsColorKey())>
 static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, FixedPoint sx1, FixedPoint sy1,
                                FixedPoint sx2, FixedPoint sy2, Sint32 i1, Sint32 i2, T_IsColorKey isColorKey)
 {
-    Sint16 _tmp1;
-    FixedPoint _tmp2;
-    Sint32 _tmp3;
-
     /* Fix coords */
     if(x1 > x2)
     {
+        Sint16 _tmp1;
+        FixedPoint _tmp2;
+        Sint32 _tmp3;
         SWAP(x1, x2, _tmp1);
         SWAP(sx1, sx2, _tmp2);
         SWAP(sy1, sy2, _tmp2);
         SWAP(i1, i2, _tmp3);
     }
+    if(x2 < sge_clip_xmin(dest))
+        return;
 
     /* We use fixedpoint math */
     Sint32 I = i1;
@@ -504,124 +507,44 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
     /* Color step value */
     Sint32 istep = (i2 - i1) / Sint32(x2 - x1 + 1);
 
-    /* Fixed point texture starting coords */
-    auto srcx = FixedPoint(sx1);
-    auto srcy = FixedPoint(sy1);
-
     /* Texture coords stepping value */
-    auto xstep = FixedPoint(sx2 - sx1) / Sint32(x2 - x1 + 1);
-    auto ystep = FixedPoint(sy2 - sy1) / Sint32(x2 - x1 + 1);
+    auto xstep = (sx2 - sx1) / Sint32(x2 - x1 + 1);
+    auto ystep = (sy2 - sy1) / Sint32(x2 - x1 + 1);
 
     /* Clipping */
     assert(y >= sge_clip_ymin(dest) && y <= sge_clip_ymax(dest));
     assert(x1 <= sge_clip_xmax(dest) && x2 <= sge_clip_xmax(dest));
 
-    if(x2 < sge_clip_xmin(dest))
-        return;
     if(x1 < sge_clip_xmin(dest))
     {
         /* Update start colors */
         I += (sge_clip_xmin(dest) - x1) * istep;
         /* Fix texture starting coord */
-        srcx += (sge_clip_xmin(dest) - x1) * xstep;
-        srcy += (sge_clip_xmin(dest) - x1) * ystep;
+        sx1 += (sge_clip_xmin(dest) - x1) * xstep;
+        sy1 += (sge_clip_xmin(dest) - x1) * ystep;
         x1 = sge_clip_xmin(dest);
     }
 
     const auto dstFormat = *dest->format;
     const auto srcFormat = *source->format;
-    if(dstFormat.BytesPerPixel == srcFormat.BytesPerPixel)
-    {
-        /* Fast mode. Just copy the pixel */
+    assert(dstFormat.BytesPerPixel == srcFormat.BytesPerPixel);
+    assert(dstFormat.BytesPerPixel == 4);
 
-        switch(dstFormat.BytesPerPixel)
+    Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / sizeof(Uint32) + x1;
+    const Uint16 pitch = source->pitch / sizeof(Uint32);
+
+    for(int x = x1; x <= x2; x++, ++pixel)
+    {
+        const Uint32 pixel_value = *((Uint32*)source->pixels + sy1.toInt() * pitch + sx1.toInt());
+        if(!isColorKey(pixel_value))
         {
-            case 1:
-            { /* Assuming 8-bpp */
-                Uint8* pixel;
-                Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
-
-                for(int x = x1; x <= x2; x++)
-                {
-                    pixel = row + x;
-
-                    *pixel = *((Uint8*)source->pixels + srcy.toInt() * source->pitch + srcx.toInt());
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
-
-            case 2:
-            { /* Probably 15-bpp or 16-bpp */
-                Uint16* pixel;
-                Uint16* row = (Uint16*)dest->pixels + y * dest->pitch / sizeof(Uint16);
-
-                Uint16 pitch = source->pitch / 2;
-
-                for(int x = x1; x <= x2; x++)
-                {
-                    pixel = row + x;
-
-                    *pixel = *((Uint16*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
-
-            case 3:
-            { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
-                Uint8* row = (Uint8*)dest->pixels + (Uint32)y * dest->pitch;
-
-                Uint8 rshift8 = dstFormat.Rshift / 8;
-                Uint8 gshift8 = dstFormat.Gshift / 8;
-                Uint8 bshift8 = dstFormat.Bshift / 8;
-
-                for(int x = x1; x <= x2; x++)
-                {
-                    pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + srcy.toInt() * source->pitch + srcx.toInt() * 3;
-
-                    *(pixel + rshift8) = *(srcpixel + rshift8);
-                    *(pixel + gshift8) = *(srcpixel + gshift8);
-                    *(pixel + bshift8) = *(srcpixel + bshift8);
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
-
-            case 4:
-            { /* Probably 32-bpp */
-                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / sizeof(Uint32) + x1;
-
-                const Uint16 pitch = source->pitch / 4;
-
-                for(int x = x1; x <= x2; x++, ++pixel)
-                {
-                    const Uint32 pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
-                    if(!isColorKey(pixel_value))
-                    {
-                        *pixel = ScaleRGB(pixel_value, I);
-                    }
-
-                    I += istep;
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
+            *pixel = ScaleRGB(pixel_value, I);
         }
-    } else
-    {
-        /* Slow mode. We must translate every pixel color! */
-        _CopyPixelsWithDifferentFormat(dest, y, x1, x2, source, srcx, srcy, &srcFormat, xstep, ystep);
+
+        I += istep;
+
+        sx1 += xstep;
+        sy1 += ystep;
     }
 }
 
@@ -643,6 +566,8 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
         SWAP(sy1, sy2, _tmp2);
         SWAP(i1, i2, _tmp3);
     }
+    if(x2 < sge_clip_xmin(dest))
+        return;
 
     /* We use fixedpoint math */
     Uint16 I = i1;
@@ -650,159 +575,45 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
     /* Color step value */
     Sint16 istep = (i2 - i1) / (x2 - x1 + 1);
 
-    /* Fixed point texture starting coords */
-    auto srcx = FixedPoint(sx1);
-    auto srcy = FixedPoint(sy1);
-
     /* Texture coords stepping value */
-    auto xstep = FixedPoint(sx2 - sx1) / Sint32(x2 - x1 + 1);
-    auto ystep = FixedPoint(sy2 - sy1) / Sint32(x2 - x1 + 1);
+    auto xstep = (sx2 - sx1) / Sint32(x2 - x1 + 1);
+    auto ystep = (sy2 - sy1) / Sint32(x2 - x1 + 1);
 
     /* Clipping */
     assert(y >= sge_clip_ymin(dest) && y <= sge_clip_ymax(dest));
     assert(x1 <= sge_clip_xmax(dest) && x2 <= sge_clip_xmax(dest));
 
-    if(x2 < sge_clip_xmin(dest))
-        return;
     if(x1 < sge_clip_xmin(dest))
     {
         /* Update start colors */
         I += (sge_clip_xmin(dest) - x1) * istep;
         /* Fix texture starting coord */
-        srcx += (sge_clip_xmin(dest) - x1) * xstep;
-        srcy += (sge_clip_xmin(dest) - x1) * ystep;
+        sx1 += (sge_clip_xmin(dest) - x1) * xstep;
+        sy1 += (sge_clip_xmin(dest) - x1) * ystep;
         x1 = sge_clip_xmin(dest);
     }
 
     const auto dstFormat = *dest->format;
-    if(dstFormat.BytesPerPixel == source->format->BytesPerPixel)
-    {
-        /* Fast mode. Just copy the pixel */
+    assert(dstFormat.BytesPerPixel == source->format->BytesPerPixel);
+    assert(dstFormat.BytesPerPixel == 1);
 
-        switch(dstFormat.BytesPerPixel)
+    Uint8* pixel = (Uint8*)dest->pixels + y * dest->pitch + x1;
+    const Uint16 pitch = source->pitch;
+
+    for(int x = x1; x <= x2; x++, ++pixel)
+    {
+        const auto pixel_value = *((Uint8*)source->pixels + sy1.toInt() * pitch + sx1.toInt());
+
+        if(!isColorKey(pixel_value))
         {
-            case 1:
-            { /* Assuming 8-bpp */
-                Uint8* pixel;
-                Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
-
-                for(int x = x1; x <= x2; x++)
-                {
-                    pixel = row + x;
-
-                    const auto pixel_value = *((Uint8*)source->pixels + srcy.toInt() * source->pitch + srcx.toInt());
-
-                    if(!isColorKey(pixel_value))
-                    {
-                        *pixel = PreCalcPalettes[(Uint8)(I >> 8)][pixel_value];
-                    }
-
-                    srcx += xstep;
-                    srcy += ystep;
-
-                    I += istep;
-                }
-            }
-            break;
-
-            case 2:
-            { /* Probably 15-bpp or 16-bpp */
-                Uint16* pixel;
-                Uint16* row = (Uint16*)dest->pixels + y * dest->pitch / 2;
-
-                Uint16 pitch = source->pitch / 2;
-
-                for(int x = x1; x <= x2; x++)
-                {
-                    pixel = row + x;
-
-                    *pixel = *((Uint16*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
-
-            case 3:
-            { /* Slow 24-bpp mode, usually not used */
-                Uint8 *pixel, *srcpixel;
-                Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
-
-                Uint8 rshift8 = dstFormat.Rshift / 8;
-                Uint8 gshift8 = dstFormat.Gshift / 8;
-                Uint8 bshift8 = dstFormat.Bshift / 8;
-
-                for(int x = x1; x <= x2; x++)
-                {
-                    pixel = row + x * 3;
-                    srcpixel = (Uint8*)source->pixels + srcy.toInt() * source->pitch + srcx.toInt() * 3;
-
-                    *(pixel + rshift8) = *(srcpixel + rshift8);
-                    *(pixel + gshift8) = *(srcpixel + gshift8);
-                    *(pixel + bshift8) = *(srcpixel + bshift8);
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
-
-            case 4:
-            { /* Probably 32-bpp */
-                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
-
-                Uint16 pitch = source->pitch / 4;
-
-                for(int x = x1; x <= x2; x++, ++pixel)
-                {
-                    const auto pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
-                    *pixel = ScaleRGB(pixel_value, I);
-
-                    I += istep;
-
-                    srcx += xstep;
-                    srcy += ystep;
-                }
-            }
-            break;
+            *pixel = PreCalcPalettes[(Uint8)(I >> 8)][pixel_value];
         }
-    } else
-    {
-        /* Slow mode. We must translate every pixel color! */
-        _CopyPixelsWithDifferentFormat(dest, y, x1, x2, source, srcx, srcy, source->format, xstep, ystep);
+
+        sx1 += xstep;
+        sy1 += ystep;
+
+        I += istep;
     }
-}
-
-void sge_TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
-                      Sint16 sy2)
-{
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        if(SDL_LockSurface(dest) < 0)
-            return;
-    if(SDL_MUSTLOCK(source) && _sge_lock)
-        if(SDL_LockSurface(source) < 0)
-            return;
-
-    {
-        const auto maxX = sge_clip_xmax(dest);
-        x1 = std::min<int>(x1, maxX);
-        x2 = std::min<int>(x2, maxX);
-        if(y < sge_clip_ymin(dest) || y > sge_clip_ymax(dest))
-            return;
-    }
-    _TexturedLine(dest, x1, x2, y, source, FixedPoint(sx1), FixedPoint(sy1), FixedPoint(sx2), FixedPoint(sy2));
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        SDL_UnlockSurface(dest);
-    if(SDL_MUSTLOCK(source) && _sge_lock)
-        SDL_UnlockSurface(source);
-
-    if(_sge_update != 1)
-    {
-        return;
-    }
-    sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
 void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
@@ -1316,8 +1127,9 @@ void sge_FadedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 //==================================================================================
 // Draws a texured trigon (fast)
 //==================================================================================
-void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, SDL_Surface* source,
-                        Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3)
+template<int srcBytesPerPixel, int dstBytesPerPixel>
+static void _TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, SDL_Surface* source,
+                            Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3)
 {
     Sint16 y;
 
@@ -1392,7 +1204,7 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     if(y1 == y2)
     {
         if(y1 >= minY && y1 <= maxY)
-            _TexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
+            _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
     } else
     {
         auto m1 = (xc - xa) / Sint32(y2 - y1);
@@ -1403,7 +1215,7 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
         for(y = y1; y <= std::min<int>(y2, maxY); y++)
         {
             if(y >= minY)
-                _TexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
+                _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
 
             xa += m1;
             xb += m2;
@@ -1419,7 +1231,7 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     if(y2 == y3)
     {
         if(y2 >= minY && y2 <= maxY)
-            _TexturedLine(dest, x2, x3, y2, source, srcx2, srcy2, FixedPoint(sx3), FixedPoint(sy3));
+            _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, x2, x3, y2, source, srcx2, srcy2, FixedPoint(sx3), FixedPoint(sy3));
     } else
     {
         auto m3 = FixedPoint(x3 - x2) / Sint32(y3 - y2);
@@ -1430,7 +1242,7 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
         for(y = y2 + 1; y <= std::min<int>(y3, maxY); y++)
         {
             if(y >= minY)
-                _TexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
+                _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
 
             xb += m2;
             xc += m3;
@@ -1459,6 +1271,27 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     xmin = (xmin < x3) ? xmin : x3;
 
     sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
+}
+
+void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, SDL_Surface* source,
+                        Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3)
+{
+    switch(dest->format->BytesPerPixel)
+    {
+        case 1:
+            if(source->format->BytesPerPixel == 1)
+                return _TexturedTrigon<1, 1>(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3);
+            if(source->format->BytesPerPixel == 4)
+                return _TexturedTrigon<4, 1>(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3);
+            break;
+        case 4:
+            if(source->format->BytesPerPixel == 1)
+                return _TexturedTrigon<1, 4>(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3);
+            if(source->format->BytesPerPixel == 4)
+                return _TexturedTrigon<4, 4>(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3);
+            break;
+    }
+    assert(false);
 }
 
 //==================================================================================
@@ -1688,8 +1521,10 @@ void sge_PreCalcFadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sin
 //==================================================================================
 // Draws a texured *RECTANGLE*
 //==================================================================================
-void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                      SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Sint16 sx4, Sint16 sy4)
+template<int srcBytesPerPixel, int dstBytesPerPixel>
+static void _TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
+                          SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Sint16 sx4,
+                          Sint16 sy4)
 {
     Sint16 y;
 
@@ -1785,7 +1620,7 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     if(y1 == y2)
     {
         if(y1 >= minY && y1 <= maxY)
-            _TexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
+            _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
     } else
     {
         auto m1 = (xc - xa) / Sint32(y2 - y1);
@@ -1796,7 +1631,7 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
         for(y = y1; y <= std::min<int>(y2, maxY); y++)
         {
             if(y >= minY)
-                _TexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
+                _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
 
             xa += m1;
             xb += m2;
@@ -1812,7 +1647,7 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     for(y = y2 + 1; y <= std::min<int>(y3, maxY); y++)
     {
         if(y >= minY)
-            _TexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
+            _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
 
         xb += m2;
         xc += m3;
@@ -1827,7 +1662,7 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     if(y3 == y4)
     {
         if(y3 >= minY && y3 <= maxY)
-            _TexturedLine(dest, x3, x4, y3, source, srcx3, srcy3, FixedPoint(sx4), FixedPoint(sy4));
+            _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, x3, x4, y3, source, srcx3, srcy3, FixedPoint(sx4), FixedPoint(sy4));
     } else
     {
         auto m4 = FixedPoint(x4 - x3) / Sint32(y4 - y3);
@@ -1838,7 +1673,7 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
         for(y = y3 + 1; y <= std::min<int>(y4, maxY); y++)
         {
             if(y >= minY)
-                _TexturedLine(dest, xc.toInt(), xd.toInt(), y, source, srcx2, srcy2, srcx3, srcy3);
+                _TexturedLine<srcBytesPerPixel, dstBytesPerPixel>(dest, xc.toInt(), xd.toInt(), y, source, srcx2, srcy2, srcx3, srcy3);
 
             xc += m3;
             xd += m4;
@@ -1867,6 +1702,27 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     xmin = (xmin < x4) ? xmin : x4;
 
     sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y4 - y1 + 1);
+}
+
+void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
+                      SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Sint16 sx4, Sint16 sy4)
+{
+    switch(dest->format->BytesPerPixel)
+    {
+        case 1:
+            if(source->format->BytesPerPixel == 4)
+                return _TexturedRect<4, 1>(dest, x1, y1, x2, y2, x3, y3, x4, y4, source, sx1, sy1, sx2, sy2, sx3, sy3, sx4, sy4);
+            if(source->format->BytesPerPixel == 1)
+                return _TexturedRect<1, 1>(dest, x1, y1, x2, y2, x3, y3, x4, y4, source, sx1, sy1, sx2, sy2, sx3, sy3, sx4, sy4);
+            break;
+        case 4:
+            if(source->format->BytesPerPixel == 1)
+                return _TexturedRect<1, 4>(dest, x1, y1, x2, y2, x3, y3, x4, y4, source, sx1, sy1, sx2, sy2, sx3, sy3, sx4, sy4);
+            if(source->format->BytesPerPixel == 4)
+                return _TexturedRect<4, 4>(dest, x1, y1, x2, y2, x3, y3, x4, y4, source, sx1, sy1, sx2, sy2, sx3, sy3, sx4, sy4);
+            break;
+    }
+    assert(false);
 }
 
 //==================================================================================
