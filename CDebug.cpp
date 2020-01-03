@@ -174,7 +174,7 @@ void CDebug::actualizeData()
     MapObj = global::s2->MapObj.get();
     if(MapObj)
     {
-        map = MapObj->map;
+        map = MapObj->getMap();
         const MapNode& vertex = map->getVertex(MapObj->VertexX_, MapObj->VertexY_);
 
         if(!MapNameText)

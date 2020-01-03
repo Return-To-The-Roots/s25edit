@@ -1164,21 +1164,21 @@ enum
 };
 
 // maximum range for the cursor in editor mode (user can increase or decrease by pressing '+' or '-') --> Must be >= 0.
-#define MAX_CHANGE_SECTION 10
+constexpr auto MAX_CHANGE_SECTION = 10;
 
 // maximum values for global arrays
 // maximum pics
-#define MAXBOBBMP 5000
+constexpr auto MAXBOBBMP = 5000;
 // maximum shadows
-#define MAXBOBSHADOW 5000
+constexpr auto MAXBOBSHADOW = 5000;
 // maximum palettes
-#define MAXBOBPAL 100
+constexpr auto MAXBOBPAL = 100;
 
 // maximum players for a map
-#define MAXPLAYERS 16
+constexpr auto MAXPLAYERS= 16;
 // maximum map size
-#define MAXMAPWIDTH 1024
-#define MAXMAPHEIGHT 1024
+constexpr auto MAXMAPWIDTH = 1024;
+constexpr auto MAXMAPHEIGHT = 1024;
 
 // triangle values
 // these values are now handled in globals.h and globals.cpp, cause they must be changeable for the zoom mode

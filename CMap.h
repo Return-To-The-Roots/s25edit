@@ -6,6 +6,7 @@
 #include <SDL.h>
 #include <array>
 #include <list>
+#include <memory>
 #include <string>
 
 struct SavedVertex
@@ -27,7 +28,7 @@ private:
     std::string filename_;
     SdlSurface Surf_Map;
     SdlSurface Surf_RightMenubar;
-    bobMAP* map;
+    std::unique_ptr<bobMAP> map;
     DisplayRectangle displayRect;
     bool active;
     int VertexX_, VertexY_;
@@ -86,8 +87,9 @@ public:
     ~CMap();
     void constructMap(const std::string& filename, int width = 32, int height = 32, MapType type = MAP_GREENLAND,
                       TriangleTerrainType texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
+    static std::unique_ptr<bobMAP> generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border,
+                                               int border_texture);
     void destructMap();
-    bobMAP* generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture);
     void loadMapPics();
     void unloadMapPics();
 
@@ -118,7 +120,7 @@ public:
     void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; }
     int getModeContent() { return modeContent; }
     int getModeContent2() { return modeContent2; }
-    bobMAP* getMap() { return map; }
+    bobMAP* getMap() { return map.get(); }
     SDL_Surface* getSurface()
     {
         render();

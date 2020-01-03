@@ -874,7 +874,7 @@ void callback::EditorSaveMenu(int Param)
                 WNDSave->addText("Filename", 100, 2, 9);
                 TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
                 auto const filePath = MapObj->getFilename().empty() ? "MyMap" : MapObj->getFilename();
-                TXTF_Filename->setText(bfs::path(filePath).stem().string());
+                TXTF_Filename->setText(bfs::path(filePath).filename().string());
                 WNDSave->addText("Mapname", 98, 38, 9);
                 TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
                 TXTF_Mapname->setText(MapObj->getMapname());

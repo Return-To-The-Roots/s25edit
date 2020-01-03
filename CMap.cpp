@@ -84,11 +84,17 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
     displayRect.setSize(global::s2->GameResolution);
 
     if(!filename.empty())
-        map = (bobMAP*)CFile::open_file(filename, WLD);
-    filename_ = filename;
+    {
+        map.reset((bobMAP*)CFile::open_file(filename, WLD));
+        if(map)
+            filename_ = filename;
+    }
 
     if(!map)
+    {
+        filename_.clear();
         map = generateMap(width, height, type, texture, border, border_texture);
+    }
 
     // load the right MAP0x.LST for all pictures
     loadMapPics();
@@ -218,12 +224,13 @@ void CMap::destructMap()
     // free vertex array
     Vertices.clear();
     // free map structure memory
-    delete map;
+    map.reset();
+    filename_.clear();
 }
 
-bobMAP* CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture)
+std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture)
 {
-    auto* myMap = new bobMAP();
+    auto myMap = std::make_unique<bobMAP>();
 
     myMap->setName("Ohne Namen");
     myMap->width = width;
@@ -625,7 +632,7 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
         {
             // the bugkill picture was clicked for quicksave
             callback::PleaseWait(INITIALIZING_CALL);
-            if(!CFile::save_file(global::userMapsPath + "/quicksave.swd", SWD, map))
+            if(!CFile::save_file(global::userMapsPath + "/quicksave.swd", SWD, getMap()))
             {
                 callback::ShowStatus(INITIALIZING_CALL);
                 callback::ShowStatus(2);
