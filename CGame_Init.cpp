@@ -6,15 +6,22 @@
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
-#include <boost/assign/std/vector.hpp>
 #include <iostream>
 #include <vector>
 
 bool CGame::ReCreateWindow()
 {
     useOpenGL = CSurface::useOpenGL;
+    static char CENTER_ENV[] = "SDL_VIDEO_CENTERED=center";
+    SDL_putenv(CENTER_ENV);
+
     if(useOpenGL)
     {
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
         Surf_DisplayGL.reset(SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0)));
         Surf_Display = makeSdlSurface(SDL_SWSURFACE, GameResolution.x, GameResolution.y, 32);
         if(!Surf_Display || !Surf_DisplayGL)
@@ -89,10 +96,9 @@ bool CGame::Init()
     }
 
     // continue loading pictures
-    using namespace boost::assign;
-    std::vector<std::string> paths;
-    paths += "/GFX/PICS/SETUP000.LBM", "/GFX/PICS/SETUP010.LBM", "/GFX/PICS/SETUP011.LBM", "/GFX/PICS/SETUP012.LBM",
-      "/GFX/PICS/SETUP013.LBM", "/GFX/PICS/SETUP014.LBM", "/GFX/PICS/SETUP015.LBM";
+    auto paths =
+      std::vector<std::string>{"/GFX/PICS/SETUP000.LBM", "/GFX/PICS/SETUP010.LBM", "/GFX/PICS/SETUP011.LBM", "/GFX/PICS/SETUP012.LBM",
+                               "/GFX/PICS/SETUP013.LBM", "/GFX/PICS/SETUP014.LBM", "/GFX/PICS/SETUP015.LBM"};
     for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
@@ -109,10 +115,10 @@ bool CGame::Init()
         }
     }
 
-    paths.clear();
-    paths += "/GFX/PICS/SETUP666.LBM", "/GFX/PICS/SETUP667.LBM", "/GFX/PICS/SETUP801.LBM", "/GFX/PICS/SETUP802.LBM",
-      "/GFX/PICS/SETUP803.LBM", "/GFX/PICS/SETUP804.LBM", "/GFX/PICS/SETUP805.LBM", "/GFX/PICS/SETUP806.LBM", "/GFX/PICS/SETUP810.LBM",
-      "/GFX/PICS/SETUP811.LBM", "/GFX/PICS/SETUP895.LBM", "/GFX/PICS/SETUP896.LBM";
+    paths =
+      std::vector<std::string>{"/GFX/PICS/SETUP666.LBM", "/GFX/PICS/SETUP667.LBM", "/GFX/PICS/SETUP801.LBM", "/GFX/PICS/SETUP802.LBM",
+                               "/GFX/PICS/SETUP803.LBM", "/GFX/PICS/SETUP804.LBM", "/GFX/PICS/SETUP805.LBM", "/GFX/PICS/SETUP806.LBM",
+                               "/GFX/PICS/SETUP810.LBM", "/GFX/PICS/SETUP811.LBM", "/GFX/PICS/SETUP895.LBM", "/GFX/PICS/SETUP896.LBM"};
     for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
@@ -123,8 +129,7 @@ bool CGame::Init()
         }
     }
 
-    paths.clear();
-    paths += "/GFX/PICS/SETUP897.LBM", "/GFX/PICS/SETUP898.LBM";
+    paths = std::vector<std::string>{"/GFX/PICS/SETUP897.LBM", "/GFX/PICS/SETUP898.LBM"};
     for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
@@ -141,8 +146,7 @@ bool CGame::Init()
         }
     }
 
-    paths.clear();
-    paths += "/GFX/PICS/SETUP899.LBM", "/GFX/PICS/SETUP990.LBM", "/GFX/PICS/WORLD.LBM", "/GFX/PICS/WORLDMSK.LBM";
+    paths = std::vector<std::string>{"/GFX/PICS/SETUP899.LBM", "/GFX/PICS/SETUP990.LBM", "/GFX/PICS/WORLD.LBM", "/GFX/PICS/WORLDMSK.LBM"};
     std::cout << "\nLoading file: /GFX/PICS/SETUP899.LBM...";
     for(const std::string& file : paths)
     {
@@ -155,8 +159,7 @@ bool CGame::Init()
     }
 
     // load gouraud data
-    paths.clear();
-    paths += "/DATA/TEXTURES/GOU5.DAT", "/DATA/TEXTURES/GOU6.DAT", "/DATA/TEXTURES/GOU7.DAT";
+    paths = std::vector<std::string>{"/DATA/TEXTURES/GOU5.DAT", "/DATA/TEXTURES/GOU6.DAT", "/DATA/TEXTURES/GOU7.DAT"};
     std::cout << "\nLoading file: /DATA/TEXTURES/GOU5.DAT...";
     for(const std::string& file : paths)
     {
@@ -210,8 +213,7 @@ bool CGame::Init()
     }
 
     // texture tilesets
-    paths.clear();
-    paths += "/GFX/TEXTURES/TEX5.LBM", "/GFX/TEXTURES/TEX6.LBM", "/GFX/TEXTURES/TEX7.LBM";
+    paths = std::vector<std::string>{"/GFX/TEXTURES/TEX5.LBM", "/GFX/TEXTURES/TEX6.LBM", "/GFX/TEXTURES/TEX7.LBM"};
     for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
@@ -232,9 +234,8 @@ bool CGame::Init()
     */
 
     // EVERY MISSION-FILE SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
-    paths.clear();
-    paths += "/DATA/MIS0BOBS.LST", "/DATA/MIS1BOBS.LST", "/DATA/MIS2BOBS.LST", "/DATA/MIS3BOBS.LST", "/DATA/MIS4BOBS.LST",
-      "/DATA/MIS5BOBS.LST";
+    paths = std::vector<std::string>{"/DATA/MIS0BOBS.LST", "/DATA/MIS1BOBS.LST", "/DATA/MIS2BOBS.LST",
+                                     "/DATA/MIS3BOBS.LST", "/DATA/MIS4BOBS.LST", "/DATA/MIS5BOBS.LST"};
     for(const std::string& file : paths)
     {
         std::cout << "\nLoading file: " << file << "...";
