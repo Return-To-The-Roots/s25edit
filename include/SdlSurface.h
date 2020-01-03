@@ -12,7 +12,7 @@ struct SdlSurfaceDeleter
 using SdlSurface = std::unique_ptr<SDL_Surface, SdlSurfaceDeleter>;
 inline auto makeSdlSurface(Uint32 flags, int width, int height, int depth, bool withAlpha = false)
 {
-    return SdlSurface(SDL_CreateRGBSurface(flags, width, height, depth, 0xFF000000, 0xFF0000, 0xFF00, withAlpha ? 0xFF:0));
+    return SdlSurface(SDL_CreateRGBSurface(flags, width, height, depth, 0xFF0000, 0xFF00, 0xFF, withAlpha ? 0xFF000000:0));
 }
 
 #endif // SdlSurface_h__

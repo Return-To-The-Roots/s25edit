@@ -56,14 +56,14 @@ constexpr Uint32 MapRGB(const SDL_PixelFormat& format, FixedPoint R, FixedPoint 
 
 constexpr Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b)
 {
-    return (Uint32)r << 24 | (Uint32)g << 16 | (Uint32)b << 8;
+    return (Uint32)r << 16 | (Uint32)g << 8 | (Uint32)b;
 }
 
 Uint32 ScaleRGB(Uint32 value, Sint32 factor)
 {
-    const auto r = (Sint32((value & 0xFF000000) >> 24) * factor) >> 16;
-    const auto g = (Sint32((value & 0x00FF0000) >> 16) * factor) >> 16;
-    const auto b = (Sint32((value & 0x0000FF00) >> 8) * factor) >> 16;
+    const auto r = (Sint32((value & 0xFF0000) >> 16) * factor) >> 16;
+    const auto g = (Sint32((value & 0x00FF00) >> 8) * factor) >> 16;
+    const auto b = (Sint32((value & 0x0000FF)) * factor) >> 16;
     const auto r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
     const auto g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
     const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
