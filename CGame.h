@@ -31,9 +31,11 @@ private:
 #endif
     // milliseconds for SDL_Delay()
     Uint32 msWait = 0;
-    Uint32 framesPassedSinceLastFps;
-    Uint32 lastFpsTick;
+    Uint32 framesPassedSinceLastFps = 0;
+    Uint32 lastFpsTick = 0;
     CFont lastFps;
+
+    Uint32 lastFrameTime = 0;
 
     // structure for mouse cursor
     struct

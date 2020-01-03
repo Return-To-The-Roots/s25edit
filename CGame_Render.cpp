@@ -141,4 +141,14 @@ void CGame::Render()
 
     if(msWait)
         SDL_Delay(msWait);
+
+    const auto timeSinceLastFrame = curTicks - lastFrameTime;
+    const auto targetFPS = 60;
+    const auto targetMsPerFrame = 1000 / targetFPS;
+    if(timeSinceLastFrame < targetMsPerFrame)
+    {
+        const auto timeToSleep = targetMsPerFrame - timeSinceLastFrame;
+        SDL_Delay(timeToSleep);
+    }
+    lastFrameTime = curTicks;
 }

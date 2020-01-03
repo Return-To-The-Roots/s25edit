@@ -41,6 +41,7 @@ int CGame::Execute()
     SDL_Event Event;
     lastFps.setText("");
     lastFpsTick = SDL_GetTicks();
+    lastFrameTime = SDL_GetTicks();
     framesPassedSinceLastFps = 0;
 
     while(Running)
