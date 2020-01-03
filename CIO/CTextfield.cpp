@@ -21,18 +21,10 @@ CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, int fontsiz
     // allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
     text_.resize((this->cols + 1) * this->rows + 2);
 
-    Surf_Text = nullptr;
-    needSurface = true;
     needRender = true;
     rendered = false;
     this->button_style = button_style;
-    textObj = new CFont("", x, y, fontsize, text_color);
-}
-
-CTextfield::~CTextfield()
-{
-    SDL_FreeSurface(Surf_Text);
-    delete textObj;
+    textObj = std::make_unique<CFont>("", x, y, fontsize, text_color);
 }
 
 bool CTextfield::hasRendered()
@@ -86,6 +78,25 @@ void CTextfield::setColor(int color)
     }
 
     needRender = true;
+}
+
+void CTextfield::setTextColor(int color)
+{
+    textColor_ = color;
+    textObj->setColor(color);
+    needRender = true;
+}
+
+void CTextfield::setX(int x)
+{
+    this->x_ = x;
+    textObj->setPos(Position(x_, y_));
+}
+
+void CTextfield::setY(int y)
+{
+    this->y_ = y;
+    textObj->setPos(Position(x_, y_));
 }
 
 void CTextfield::setText(const std::string& text)
@@ -257,13 +268,11 @@ bool CTextfield::render()
         return true;
     needRender = false;
     // if we need a new surface
-    if(needSurface)
+    if(!Surf_Text)
     {
-        SDL_FreeSurface(Surf_Text);
-        Surf_Text = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
+        Surf_Text = makeSdlSurface(SDL_SWSURFACE, w, h, 32);
         if(!Surf_Text)
             return false;
-        needSurface = false;
     }
 
     // draw the pictures for background and foreground or, if not set, fill with black color
@@ -411,7 +420,7 @@ bool CTextfield::render()
             }
         }
     } else
-        SDL_FillRect(Surf_Text, nullptr, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
+        SDL_FillRect(Surf_Text.get(), nullptr, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
 
     char* txtPtr = &text_[0];
 
@@ -427,10 +436,8 @@ bool CTextfield::render()
     }
 
     // write text
-    // textObj->setText(text);
-    delete textObj;
-    textObj = nullptr;
-    textObj = new CFont(&text_[0], x_, y_, fontsize_, textColor_);
+    textObj->setText(text_.data());
+    textObj = std::make_unique<CFont>(&text_[0], x_, y_, fontsize_, textColor_);
 
     // delete blinking chiffre (otherwise it could be written between user input chiffres)
     if(blinking_chiffre && active)

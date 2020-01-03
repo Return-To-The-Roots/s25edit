@@ -1,7 +1,7 @@
 #ifndef _CCONTROLCONTAINER_H
 #define _CCONTROLCONTAINER_H
 
-#include "../defines.h"
+#include "defines.h"
 #include <memory>
 #include <vector>
 

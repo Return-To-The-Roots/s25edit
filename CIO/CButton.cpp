@@ -20,14 +20,7 @@ CButton::CButton(void callback(int), int clickedParam, Sint16 x, Sint16 y, Uint1
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
     motionLeaveParam = -1;
-    Surf_Button = nullptr;
-    needSurface = true;
     needRender = true;
-}
-
-CButton::~CButton()
-{
-    SDL_FreeSurface(Surf_Button);
 }
 
 void CButton::setButtonPicture(int picture)
@@ -150,13 +143,10 @@ bool CButton::render()
         return true;
     needRender = false;
     // if we need a new surface
-    if(needSurface)
+    if(!Surf_Button)
     {
-        SDL_FreeSurface(Surf_Button);
-        Surf_Button = nullptr;
-        if((Surf_Button = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)) == nullptr)
+        if((Surf_Button = makeSdlSurface(SDL_SWSURFACE, w, h, 32)) == nullptr)
             return false;
-        needSurface = false;
     }
 
     // at first completly fill the background (not the fastest way, but simplier)

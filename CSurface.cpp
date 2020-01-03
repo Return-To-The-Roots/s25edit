@@ -107,9 +107,9 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
     return true;
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle)
+bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle)
 {
-    return Draw(Surf_Dest, Surf_Src.get(), X, Y, angle);
+    return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, angle);
 }
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)

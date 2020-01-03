@@ -1,16 +1,15 @@
 #ifndef _CBUTTON_H
 #define _CBUTTON_H
 
-#include "../defines.h"
-#include "SDL.h"
+#include "defines.h"
+#include "SdlSurface.h"
 
 class CButton
 {
     friend class CDebug;
 
 private:
-    SDL_Surface* Surf_Button;
-    bool needSurface;
+    SdlSurface Surf_Button;
     bool needRender;
     Sint16 x_;
     Sint16 y_;
@@ -30,10 +29,8 @@ private:
     int motionLeaveParam;
 
 public:
-    // Constructor - Destructor
     CButton(void callback(int), int clickedParam, Sint16 x = 0, Sint16 y = 0, Uint16 w = 20, Uint16 h = 20, int color = BUTTON_GREY,
             const char* text = nullptr, int button_picture = -1);
-    ~CButton();
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
@@ -49,7 +46,7 @@ public:
     SDL_Surface* getSurface()
     {
         render();
-        return Surf_Button;
+        return Surf_Button.get();
     };
     void setColor(int color);
     void setTextColor(int color)

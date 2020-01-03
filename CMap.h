@@ -25,12 +25,11 @@ class CMap
 
 private:
     std::string filename_;
-    SDL_Surface* Surf_Map;
-    SDL_Surface* Surf_RightMenubar;
+    SdlSurface Surf_Map;
+    SdlSurface Surf_RightMenubar;
     bobMAP* map;
     DisplayRectangle displayRect;
     bool active;
-    bool needSurface;
     int VertexX_, VertexY_;
     bool RenderBuildHelp;
     bool RenderBorders;
@@ -111,7 +110,7 @@ public:
     void setBitsPerPixel(int bbp)
     {
         BitsPerPixel = bbp;
-        needSurface = true;
+        Surf_Map.reset();
     }
     void setMode(int mode) { this->mode = mode; }
     int getMode() { return mode; }
@@ -123,7 +122,7 @@ public:
     SDL_Surface* getSurface()
     {
         render();
-        return Surf_Map;
+        return Surf_Map.get();
     }
     DisplayRectangle getDisplayRect() { return displayRect; }
     void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }

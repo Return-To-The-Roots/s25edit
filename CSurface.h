@@ -19,12 +19,17 @@ public:
     static bool Draw(SdlSurface& Surf_Dest, SDL_Surface* Surf_Src, int X = 0, int Y = 0);
     // blits from source on destination to position X,Y and rotates (angle --> degrees --> 90, 180, 270)
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle);
-    static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle);
+    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle);
     // blits rectangle (X2,Y2,W,H) from source on destination to position X,Y
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H);
     static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H);
+    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+    {
+        return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, X2, Y2, W, H);
+    }
     static void DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color);
     static void DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
+    static void DrawPixel_RGB(SdlSurface& screen, int x, int y, Uint8 R, Uint8 G, Uint8 B) { DrawPixel_RGB(screen.get(), x, y, R, G, B); }
     static void DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     static Uint32 GetPixel(SDL_Surface* surface, int x, int y);
     static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap);

@@ -18,14 +18,7 @@ CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
     motionLeaveParam = -1;
-    Surf_Picture = nullptr;
-    needSurface = true;
     needRender = true;
-}
-
-CPicture::~CPicture()
-{
-    SDL_FreeSurface(Surf_Picture);
 }
 
 void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
@@ -77,14 +70,12 @@ bool CPicture::render()
         return true;
     needRender = false;
     // if we need a new surface
-    if(needSurface)
+    if(!Surf_Picture)
     {
-        SDL_FreeSurface(Surf_Picture);
-        Surf_Picture = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
+        Surf_Picture = makeSdlSurface(SDL_SWSURFACE, w, h, 32);
         if(!Surf_Picture)
             return false;
-        SDL_SetColorKey(Surf_Picture, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
-        needSurface = false;
+        SDL_SetColorKey(Surf_Picture.get(), SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
     }
 
     CSurface::Draw(Surf_Picture, global::bmpArray[picture_].surface, 0, 0);

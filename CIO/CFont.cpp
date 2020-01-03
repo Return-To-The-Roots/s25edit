@@ -3,8 +3,7 @@
 #include "../globals.h"
 #include <cassert>
 
-CFont::CFont(std::string text, unsigned x, unsigned y, unsigned fontsize, unsigned color)
-    : Surf_Font(nullptr), x_(x), y_(y), string_(std::move(text))
+CFont::CFont(std::string text, unsigned x, unsigned y, unsigned fontsize, unsigned color) : x_(x), y_(y), string_(std::move(text))
 {
     // only three sizes are available (in pixels)
     if(fontsize != 9 && fontsize != 11 && fontsize != 14)
@@ -14,38 +13,42 @@ CFont::CFont(std::string text, unsigned x, unsigned y, unsigned fontsize, unsign
     initialColor_ = this->color_ = color;
     callback = nullptr;
     clickedParam = 0;
-    // create surface and write text to it
-    writeText();
 }
 
-CFont::~CFont()
+void CFont::setPos(Position pos)
 {
-    SDL_FreeSurface(Surf_Font);
+    if(pos != Position(x_, y_))
+    {
+        x_ = pos.x;
+        y_ = pos.y;
+        Surf_Font.reset();
+    }
 }
 
 void CFont::setFontsize(unsigned fontsize)
 {
     if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        this->fontsize_ = 9;
-    else
-        this->fontsize_ = fontsize;
-    writeText();
+        fontsize = 9;
+    if(fontsize != fontsize_)
+    {
+        fontsize_ = fontsize;
+        Surf_Font.reset();
+    }
 }
 
 void CFont::setColor(unsigned color)
 {
+    if(color != color_)
+        Surf_Font.reset();
     initialColor_ = color_ = color;
-    writeText();
 }
 
 void CFont::setText(std::string text)
 {
     if(text == string_)
         return;
-    SDL_FreeSurface(Surf_Font);
-    Surf_Font = nullptr;
+    Surf_Font.reset();
     this->string_ = std::move(text);
-    writeText();
 }
 
 void CFont::setMouseData(SDL_MouseButtonEvent button)
@@ -70,6 +73,13 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
         } else if(getColor() != initialColor_)
             setColor(initialColor_);
     }
+}
+
+SDL_Surface* CFont::getSurface()
+{
+    if(!Surf_Font)
+        writeText();
+    return Surf_Font.get();
 }
 
 namespace {
@@ -201,10 +211,10 @@ unsigned getCharWidth(uint8_t c, unsigned fontsize, unsigned color)
 }
 } // namespace
 
-bool CFont::writeText()
+void CFont::writeText()
 {
     if(string_.empty())
-        return true;
+        return;
     // data for counting pixels to create the surface
     unsigned pixel_ctr_w = 0;
     unsigned pixel_ctr_w_tmp = 0;
@@ -244,11 +254,10 @@ bool CFont::writeText()
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 w = pixel_ctr_w;
                 h = pixel_ctr_h;
-                if(Surf_Font)
-                    SDL_FreeSurface(Surf_Font);
-                if(!(Surf_Font = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0)))
-                    return false;
-                SDL_SetColorKey(Surf_Font, SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
+                Surf_Font = makeSdlSurface(SDL_SWSURFACE, w, h, 32);
+                if(!Surf_Font)
+                    return;
+                SDL_SetColorKey(Surf_Font.get(), SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
                 chiffre = string_.begin();
                 pixel_count_loop = false;
                 continue;
@@ -286,7 +295,6 @@ bool CFont::writeText()
         // go to next chiffre
         ++chiffre;
     }
-    return true;
 }
 
 bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, unsigned fontsize, unsigned color,

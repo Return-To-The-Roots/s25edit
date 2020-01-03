@@ -1,9 +1,10 @@
 #ifndef _CFONT_H
 #define _CFONT_H
 
-#include "../defines.h"
+#include "defines.h"
 #include <SDL.h>
 #include <functional>
+#include <memory>
 #include <string>
 
 class CFont
@@ -11,7 +12,7 @@ class CFont
     friend class CDebug;
 
 private:
-    SDL_Surface* Surf_Font;
+    SdlSurface Surf_Font;
     Sint16 x_;
     Sint16 y_;
     Uint16 w;
@@ -22,15 +23,14 @@ private:
     std::function<void(int)> callback;
     int clickedParam;
 
+    void writeText();
+
 public:
-    // Constructor - Destructor
     CFont(std::string text, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9, unsigned color = FONT_YELLOW);
-    ~CFont();
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
-    void setX(int x) { this->x_ = x; };
-    void setY(int y) { this->y_ = y; };
+    void setPos(Position pos);
     unsigned getW() { return w; };
     unsigned getH() { return fontsize_; };
     void setFontsize(unsigned fontsize);
@@ -48,10 +48,9 @@ public:
         clickedParam = 0;
     }
     void setMouseData(SDL_MouseButtonEvent button);
-    SDL_Surface* getSurface() { return Surf_Font; };
+    SDL_Surface* getSurface();
     // Methods
     // fontsize can be 9, 11 or 14 (otherwise it will be set to 9) ---- '\n' is possible
-    bool writeText();
     // this function can be used as CFont::writeText to write text directly to a surface without creating an object
     static bool writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9,
                           unsigned color = FONT_YELLOW, FontAlign align = FontAlign::Left);

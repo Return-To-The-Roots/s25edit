@@ -35,7 +35,8 @@ void CGame::SetAppIcon()
 
 void CGame::Render()
 {
-    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0) || useOpenGL != CSurface::useOpenGL)
+    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0)
+       || useOpenGL != CSurface::useOpenGL)
     {
         ReCreateWindow();
     }
@@ -50,8 +51,10 @@ void CGame::Render()
                          surfLoadScreen->h - 1);
 
         if(useOpenGL)
+        {
+            SDL_BlitSurface(Surf_Display.get(), nullptr, Surf_DisplayGL.get(), nullptr);
             SDL_GL_SwapBuffers();
-        else
+        } else
             SDL_Flip(Surf_Display.get());
         return;
     }

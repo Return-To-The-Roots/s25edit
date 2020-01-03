@@ -1,8 +1,8 @@
 #ifndef _CSELECTBOX_H
 #define _CSELECTBOX_H
 
-#include "../defines.h"
-#include <SDL.h>
+#include "defines.h"
+#include "SdlSurface.h"
 #include <functional>
 #include <memory>
 #include <vector>
@@ -15,9 +15,8 @@ class CSelectBox
     friend class CDebug;
 
 private:
-    SDL_Surface* Surf_SelectBox;
+    SdlSurface Surf_SelectBox;
     std::vector<std::unique_ptr<CFont>> Entries;
-    bool needSurface;
     bool needRender;
     Sint16 x_;
     Sint16 y_;
@@ -37,7 +36,6 @@ public:
     // Constructor - Destructor
     CSelectBox(Sint16 x = 0, Sint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fontsize = 14, int text_color = FONT_YELLOW,
                int bg_color = -1);
-    ~CSelectBox();
     // Access;
     int getX() { return x_; }
     int getY() { return y_; }
@@ -52,7 +50,7 @@ public:
     SDL_Surface* getSurface()
     {
         render();
-        return Surf_SelectBox;
+        return Surf_SelectBox.get();
     }
     void setColor(int color);
     void setTextColor(int color)

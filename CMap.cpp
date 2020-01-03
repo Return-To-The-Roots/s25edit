@@ -77,8 +77,8 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
                         int border_texture)
 {
     map = nullptr;
-    Surf_Map = nullptr;
-    Surf_RightMenubar = nullptr;
+    Surf_Map.reset();
+    Surf_RightMenubar.reset();
     displayRect.left = 0;
     displayRect.top = 0;
     displayRect.setSize(global::s2->GameResolution);
@@ -106,7 +106,7 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
         }
     }
 
-    needSurface = true;
+    Surf_Map.reset();
     active = true;
     VertexX_ = 10;
     VertexY_ = 10;
@@ -213,12 +213,8 @@ void CMap::destructMap()
     unloadMapPics();
     undoBuffer.clear();
     redoBuffer.clear();
-    // free the map surface
-    SDL_FreeSurface(Surf_Map);
-    Surf_Map = nullptr;
-    // free the surface of the right menubar
-    SDL_FreeSurface(Surf_RightMenubar);
-    Surf_RightMenubar = nullptr;
+    Surf_Map.reset();
+    Surf_RightMenubar.reset();
     // free vertex array
     Vertices.clear();
     // free map structure memory
@@ -1104,19 +1100,18 @@ void CMap::render()
     if(displayRect.getSize() != global::s2->GameResolution)
     {
         displayRect.setSize(global::s2->GameResolution);
-        needSurface = true;
+        Surf_Map.reset();
     }
 
     // if we need a new surface
-    if(needSurface)
+    if(!Surf_Map)
     {
-        SDL_FreeSurface(Surf_Map);
-        Surf_Map = SDL_CreateRGBSurface(SDL_SWSURFACE, displayRect.getSize().x, displayRect.getSize().y, BitsPerPixel, 0, 0, 0, 0);
-        if(Surf_Map == nullptr)
+        Surf_Map = makeSdlSurface(SDL_SWSURFACE, displayRect.getSize().x, displayRect.getSize().y, BitsPerPixel);
+        if(!Surf_Map)
             return;
         if(BitsPerPixel == 8)
-            SDL_SetPalette(Surf_Map, SDL_LOGPAL, global::palArray[PAL_xBBM].colors.data(), 0, global::palArray[PAL_xBBM].colors.size());
-        needSurface = false;
+            SDL_SetPalette(Surf_Map.get(), SDL_LOGPAL, global::palArray[PAL_xBBM].colors.data(), 0,
+                           global::palArray[PAL_xBBM].colors.size());
     }
     // else
     // clear the surface before drawing new (in normal case not needed)
@@ -1127,7 +1122,7 @@ void CMap::render()
         modifyVertex();
 
     if(!map->vertex.empty())
-        CSurface::DrawTriangleField(Surf_Map, displayRect, *map);
+        CSurface::DrawTriangleField(Surf_Map.get(), displayRect, *map);
 
     // draw pictures to cursor position
     int symbol_index, symbol_index2 = -1;
@@ -1255,13 +1250,11 @@ void CMap::render()
     if(!Surf_RightMenubar)
     {
         // we permute width and height, cause we want to rotate the menubar 90 degrees
-        if((Surf_RightMenubar =
-              SDL_CreateRGBSurface(SDL_SWSURFACE, global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, 8, 0, 0, 0, 0))
-           != nullptr)
+        if((Surf_RightMenubar = makeSdlSurface(SDL_SWSURFACE, global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, 8)) != nullptr)
         {
-            SDL_SetPalette(Surf_RightMenubar, SDL_LOGPAL, global::palArray[PAL_RESOURCE].colors.data(), 0,
+            SDL_SetPalette(Surf_RightMenubar.get(), SDL_LOGPAL, global::palArray[PAL_RESOURCE].colors.data(), 0,
                            global::palArray[PAL_RESOURCE].colors.size());
-            SDL_SetColorKey(Surf_RightMenubar, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
+            SDL_SetColorKey(Surf_RightMenubar.get(), SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
             CSurface::Draw(Surf_RightMenubar, global::bmpArray[MENUBAR].surface, 0, 0, 270);
         }
     }

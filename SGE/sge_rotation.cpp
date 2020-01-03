@@ -560,9 +560,8 @@ SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, f
     Sint16 qx = -xmin;
     Sint16 qy = -ymin;
 
-    SDL_Surface* dest;
-    dest = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, src->format->BitsPerPixel, src->format->Rmask, src->format->Gmask, src->format->Bmask,
-                                src->format->Amask);
+    SDL_Surface* dest = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, src->format->BitsPerPixel, src->format->Rmask, src->format->Gmask,
+                                             src->format->Bmask, src->format->Amask);
     if(!dest)
         return nullptr;
 

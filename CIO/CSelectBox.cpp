@@ -15,19 +15,12 @@ CSelectBox::CSelectBox(Sint16 x, Sint16 y, Uint16 w, Uint16 h, int fontsize, int
     this->text_color = text_color;
     setColor(bg_color);
 
-    Surf_SelectBox = nullptr;
-    needSurface = true;
     needRender = true;
     rendered = false;
     // button position is relative to the selectbox
     ScrollUpButton = std::make_unique<CButton>(nullptr, 0, w - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
     ScrollDownButton =
       std::make_unique<CButton>(nullptr, 0, w - 1 - 20, h - 1 - 20, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
-}
-
-CSelectBox::~CSelectBox()
-{
-    SDL_FreeSurface(Surf_SelectBox);
 }
 
 void CSelectBox::setOption(const std::string& string, std::function<void(int)> callback, int param)
@@ -155,7 +148,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                         {
                             for(auto& entry : Entries)
                             {
-                                entry->setY(entry->getY() + 10);
+                                entry->setPos(Position(entry->getX(), entry->getY() + 10));
                             }
                         }
                     }
@@ -170,7 +163,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                         {
                             for(auto& entry : Entries)
                             {
-                                entry->setY(entry->getY() - 10);
+                                entry->setPos(Position(entry->getX(), entry->getY() - 10));
                             }
                         }
                     }
@@ -218,13 +211,10 @@ bool CSelectBox::render()
         return true;
     needRender = false;
     // if we need a new surface
-    if(needSurface)
+    if(!Surf_SelectBox)
     {
-        SDL_FreeSurface(Surf_SelectBox);
-        Surf_SelectBox = nullptr;
-        if((Surf_SelectBox = SDL_CreateRGBSurface(SDL_SWSURFACE, w_, h_, 32, 0, 0, 0, 0)) == nullptr)
+        if((Surf_SelectBox = makeSdlSurface(SDL_SWSURFACE, w_, h_, 32)) == nullptr)
             return false;
-        needSurface = false;
     }
 
     // draw the pictures for background and foreground or, if not set, fill with black color
@@ -272,7 +262,7 @@ bool CSelectBox::render()
                                Surf_SelectBox->h - pos_y);
         }
     } else
-        SDL_FillRect(Surf_SelectBox, nullptr, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));
+        SDL_FillRect(Surf_SelectBox.get(), nullptr, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));
 
     for(auto& entry : Entries)
     {

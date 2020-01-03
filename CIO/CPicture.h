@@ -1,15 +1,14 @@
 #ifndef _CPICTURE_H
 #define _CPICTURE_H
 
-#include <SDL.h>
+#include "SdlSurface.h"
 
 class CPicture
 {
     friend class CDebug;
 
 private:
-    SDL_Surface* Surf_Picture;
-    bool needSurface;
+    SdlSurface Surf_Picture;
     bool needRender;
     Uint16 x;
     Uint16 y;
@@ -24,9 +23,7 @@ private:
     int motionLeaveParam;
 
 public:
-    // Constructor - Destructor
     CPicture(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, int picture = -1);
-    ~CPicture();
     // Access
     int getX() { return x; };
     int getY() { return y; };
@@ -40,7 +37,7 @@ public:
     SDL_Surface* getSurface()
     {
         render();
-        return Surf_Picture;
+        return Surf_Picture.get();
     };
     void setMotionParams(int entry, int leave)
     {

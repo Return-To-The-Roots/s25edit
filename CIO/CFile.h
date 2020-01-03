@@ -3,7 +3,7 @@
 #ifndef _CFILE_H
 #define _CFILE_H
 
-#include "../defines.h"
+#include "defines.h"
 #include <cstdio>
 #include <string>
 

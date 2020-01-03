@@ -1,7 +1,7 @@
 #ifndef _CTEXTFIELD_H
 #define _CTEXTFIELD_H
 
-#include "../defines.h"
+#include "defines.h"
 #include <SDL.h>
 #include <vector>
 
@@ -12,9 +12,8 @@ class CTextfield
     friend class CDebug;
 
 private:
-    SDL_Surface* Surf_Text;
-    CFont* textObj;
-    bool needSurface;
+    SdlSurface Surf_Text;
+    std::unique_ptr<CFont> textObj;
     bool needRender;
     Sint16 x_;
     Sint16 y_;
@@ -38,7 +37,6 @@ public:
     // Constructor - Destructor
     CTextfield(Sint16 x = 0, Sint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fontsize = 14, int text_color = FONT_YELLOW,
                int bg_color = -1, bool button_style = false);
-    ~CTextfield();
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
@@ -46,8 +44,8 @@ public:
     int getH() { return h; };
     int getCols() { return cols; };
     int getRows() { return rows; };
-    void setX(int x) { this->x_ = x; }
-    void setY(int y) { this->y_ = y; }
+    void setX(int x);
+    void setY(int y);
     void setText(const std::string& text);
     void setActive() { active = true; }
     void setInactive() { active = false; }
@@ -59,14 +57,10 @@ public:
     SDL_Surface* getSurface()
     {
         render();
-        return Surf_Text;
+        return Surf_Text.get();
     }
     void setColor(int color);
-    void setTextColor(int color)
-    {
-        textColor_ = color;
-        needRender = true;
-    }
+    void setTextColor(int color);
     std::string getText() const { return &text_.front(); }
 };
 
