@@ -69,14 +69,6 @@ DECLSPEC void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 
 DECLSPEC void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
                                SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Sint16 sx4,
                                Sint16 sy4);
-// works at the moment only if destination and source surface have both 32bpp (colorkey will be respected)
-DECLSPEC void sge_FadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
-                                    Sint16 y4, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3,
-                                    Sint16 sx4, Sint16 sy4, Sint32 I1, Sint32 I2);
-// works at the moment only if destination and source surface have both 8bpp (colorkey will be respected)
-DECLSPEC void sge_PreCalcFadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
-                                           Sint16 y4, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3,
-                                           Sint16 sy3, Sint16 sx4, Sint16 sy4, Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256]);
 
 DECLSPEC int sge_FilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint32 color);
 DECLSPEC int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint16* y, Uint32 color, Uint8 alpha);

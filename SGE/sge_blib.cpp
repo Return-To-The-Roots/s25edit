@@ -345,7 +345,10 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
     FixedPoint ystep = (sy2 - sy1) / Sint32(x2 - x1 + 1);
 
     /* Clipping */
-    if(x2 < sge_clip_xmin(dest) || x1 > sge_clip_xmax(dest) || y < sge_clip_ymin(dest) || y > sge_clip_ymax(dest))
+    assert(y >= sge_clip_ymin(dest) && y <= sge_clip_ymax(dest));
+    assert(x1 <= sge_clip_xmax(dest) && x2 <= sge_clip_xmax(dest));
+
+    if(x2 < sge_clip_xmin(dest))
         return;
     if(x1 < sge_clip_xmin(dest))
     {
@@ -354,8 +357,6 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
         srcy += (sge_clip_xmin(dest) - x1) * ystep;
         x1 = sge_clip_xmin(dest);
     }
-    if(x2 > sge_clip_xmax(dest))
-        x2 = sge_clip_xmax(dest);
 
     const auto dstFormat = *dest->format;
     if(dstFormat.BytesPerPixel == source->format->BytesPerPixel)
@@ -512,7 +513,10 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
     auto ystep = FixedPoint(sy2 - sy1) / Sint32(x2 - x1 + 1);
 
     /* Clipping */
-    if(x2 < sge_clip_xmin(dest) || x1 > sge_clip_xmax(dest) || y < sge_clip_ymin(dest) || y > sge_clip_ymax(dest))
+    assert(y >= sge_clip_ymin(dest) && y <= sge_clip_ymax(dest));
+    assert(x1 <= sge_clip_xmax(dest) && x2 <= sge_clip_xmax(dest));
+
+    if(x2 < sge_clip_xmin(dest))
         return;
     if(x1 < sge_clip_xmin(dest))
     {
@@ -523,8 +527,6 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
         srcy += (sge_clip_xmin(dest) - x1) * ystep;
         x1 = sge_clip_xmin(dest);
     }
-    if(x2 > sge_clip_xmax(dest))
-        x2 = sge_clip_xmax(dest);
 
     const auto dstFormat = *dest->format;
     const auto srcFormat = *source->format;
@@ -626,10 +628,9 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
 //==================================================================================
 // Draws a horisontal, textured line with precalculated gouraud shading
 //==================================================================================
-template<class T_IsColorKey = decltype(makeIsColorKey())>
-static void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, FixedPoint sx1,
-                                      FixedPoint sy1, FixedPoint sx2, FixedPoint sy2, Uint16 i1, Uint16 i2, Uint8 PreCalcPalettes[][256],
-                                      T_IsColorKey isColorKey = T_IsColorKey())
+template<class T_IsColorKey>
+static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, FixedPoint sx1, FixedPoint sy1,
+                               FixedPoint sx2, FixedPoint sy2, Uint16 i1, Uint16 i2, T_IsColorKey isColorKey, Uint8 PreCalcPalettes[][256])
 {
     /* Fix coords */
     if(x1 > x2)
@@ -658,7 +659,10 @@ static void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, S
     auto ystep = FixedPoint(sy2 - sy1) / Sint32(x2 - x1 + 1);
 
     /* Clipping */
-    if(x2 < sge_clip_xmin(dest) || x1 > sge_clip_xmax(dest) || y < sge_clip_ymin(dest) || y > sge_clip_ymax(dest))
+    assert(y >= sge_clip_ymin(dest) && y <= sge_clip_ymax(dest));
+    assert(x1 <= sge_clip_xmax(dest) && x2 <= sge_clip_xmax(dest));
+
+    if(x2 < sge_clip_xmin(dest))
         return;
     if(x1 < sge_clip_xmin(dest))
     {
@@ -669,8 +673,6 @@ static void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, S
         srcy += (sge_clip_xmin(dest) - x1) * ystep;
         x1 = sge_clip_xmin(dest);
     }
-    if(x2 > sge_clip_xmax(dest))
-        x2 = sge_clip_xmax(dest);
 
     const auto dstFormat = *dest->format;
     if(dstFormat.BytesPerPixel == source->format->BytesPerPixel)
@@ -782,6 +784,13 @@ void sge_TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Sur
         if(SDL_LockSurface(source) < 0)
             return;
 
+    {
+        const auto maxX = sge_clip_xmax(dest);
+        x1 = std::min<int>(x1, maxX);
+        x2 = std::min<int>(x2, maxX);
+        if(y < sge_clip_ymin(dest) || y > sge_clip_ymax(dest))
+            return;
+    }
     _TexturedLine(dest, x1, x2, y, source, FixedPoint(sx1), FixedPoint(sy1), FixedPoint(sx2), FixedPoint(sy2));
 
     if(SDL_MUSTLOCK(dest) && _sge_lock)
@@ -805,6 +814,12 @@ void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SD
     if(SDL_MUSTLOCK(source) && _sge_lock)
         if(SDL_LockSurface(source) < 0)
             return;
+
+    {
+        const auto maxX = sge_clip_xmax(dest);
+        x1 = std::min<int>(x1, maxX);
+        x2 = std::min<int>(x2, maxX);
+    }
 
     _FadedTexturedLine(dest, x1, x2, y, source, FixedPoint(x1), FixedPoint(sy1), FixedPoint(sx2), FixedPoint(sy2), i1, i2,
                        makeIsColorKey());
@@ -1331,6 +1346,14 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
         SWAP(sx1, sx2, y);
         SWAP(sy1, sy2, y);
     }
+    {
+        const auto maxX = sge_clip_xmax(dest);
+        x1 = std::min<int>(x1, maxX);
+        x2 = std::min<int>(x2, maxX);
+        x3 = std::min<int>(x3, maxX);
+    }
+    const auto minY = sge_clip_ymin(dest);
+    const auto maxY = sge_clip_ymax(dest);
 
     /*
      * Again we do the same thing as in sge_FilledTrigon(). But here we must keep track of how the
@@ -1356,7 +1379,6 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 
     /* Texture coords stepping value */
     auto xstep2 = FixedPoint(sx3 - sx1) / Sint32(y3 - y1);
-
     auto ystep2 = FixedPoint(sy3 - sy1) / Sint32(y3 - y1);
 
     if(SDL_MUSTLOCK(dest) && _sge_lock)
@@ -1368,17 +1390,20 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 
     /* Upper half of the triangle */
     if(y1 == y2)
-        _TexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
-    else
+    {
+        if(y1 >= minY && y1 <= maxY)
+            _TexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
+    } else
     {
         auto m1 = (xc - xa) / Sint32(y2 - y1);
 
         auto xstep1 = (srcx2 - srcx1) / Sint32(y2 - y1);
         auto ystep1 = (srcy2 - srcy1) / Sint32(y2 - y1);
 
-        for(y = y1; y <= y2; y++)
+        for(y = y1; y <= std::min<int>(y2, maxY); y++)
         {
-            _TexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
+            if(y >= minY)
+                _TexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
 
             xa += m1;
             xb += m2;
@@ -1392,17 +1417,20 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 
     /* Lower half of the triangle */
     if(y2 == y3)
-        _TexturedLine(dest, x2, x3, y2, source, srcx2, srcy2, FixedPoint(sx3), FixedPoint(sy3));
-    else
     {
-        auto m3 = FixedPoint(x3 - x2) * (1) / Sint32(y3 - y2);
+        if(y2 >= minY && y2 <= maxY)
+            _TexturedLine(dest, x2, x3, y2, source, srcx2, srcy2, FixedPoint(sx3), FixedPoint(sy3));
+    } else
+    {
+        auto m3 = FixedPoint(x3 - x2) / Sint32(y3 - y2);
 
-        auto xstep3 = FixedPoint(sx3 - sx2) * (1) / Sint32(y3 - y2);
-        auto ystep3 = FixedPoint(sy3 - sy2) * (1) / Sint32(y3 - y2);
+        auto xstep3 = FixedPoint(sx3 - sx2) / Sint32(y3 - y2);
+        auto ystep3 = FixedPoint(sy3 - sy2) / Sint32(y3 - y2);
 
-        for(y = y2 + 1; y <= y3; y++)
+        for(y = y2 + 1; y <= std::min<int>(y3, maxY); y++)
         {
-            _TexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
+            if(y >= minY)
+                _TexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
 
             xb += m2;
             xc += m3;
@@ -1436,46 +1464,54 @@ void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 //==================================================================================
 // Draws a gouraud shaded and texured trigon (fast) (respecting colorkeys)
 //==================================================================================
-template<class T_IsColorKey>
+// Aditional args: isColorKey, (opt) Uint8 PreCalcPalettes[][256]
+template<class... T_Args>
 static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
                                           SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3,
-                                          Sint32 I1, Sint32 I2, Sint32 I3, T_IsColorKey isColorKey)
+                                          Sint32 I1, Sint32 I2, Sint32 I3, T_Args... args)
 {
-    Sint16 y;
-
     if(y1 == y3)
         return;
-
-    Sint32 i = 0;
-    Sint32 i_orig1 = I1;
-    Sint32 i_orig2 = I2;
-    Sint32 i_orig3 = I3;
 
     /* Sort coords */
     if(y1 > y2)
     {
-        SWAP(y1, y2, y);
-        SWAP(x1, x2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-        SWAP(i_orig1, i_orig2, i);
+        Sint32 i = 0;
+        Sint16 _tmp;
+        SWAP(y1, y2, _tmp);
+        SWAP(x1, x2, _tmp);
+        SWAP(sx1, sx2, _tmp);
+        SWAP(sy1, sy2, _tmp);
+        SWAP(I1, I2, i);
     }
     if(y2 > y3)
     {
-        SWAP(y2, y3, y);
-        SWAP(x2, x3, y);
-        SWAP(sx2, sx3, y);
-        SWAP(sy2, sy3, y);
-        SWAP(i_orig2, i_orig3, i);
+        Sint32 i = 0;
+        Sint16 _tmp;
+        SWAP(y2, y3, _tmp);
+        SWAP(x2, x3, _tmp);
+        SWAP(sx2, sx3, _tmp);
+        SWAP(sy2, sy3, _tmp);
+        SWAP(I2, I3, i);
     }
     if(y1 > y2)
     {
-        SWAP(y1, y2, y);
-        SWAP(x1, x2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-        SWAP(i_orig1, i_orig2, i);
+        Sint32 i = 0;
+        Sint16 _tmp;
+        SWAP(y1, y2, _tmp);
+        SWAP(x1, x2, _tmp);
+        SWAP(sx1, sx2, _tmp);
+        SWAP(sy1, sy2, _tmp);
+        SWAP(I1, I2, i);
     }
+    {
+        const auto maxX = sge_clip_xmax(dest);
+        x1 = std::min<int>(x1, maxX);
+        x2 = std::min<int>(x2, maxX);
+        x3 = std::min<int>(x3, maxX);
+    }
+    const auto minY = sge_clip_ymin(dest);
+    const auto maxY = sge_clip_ymax(dest);
 
     /*
      * Again we do the same thing as in sge_FilledTrigon(). But here we must keep track of how the
@@ -1488,15 +1524,15 @@ static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y
     auto xc = FixedPoint(x2);
 
     /* Starting colors (rgb) for the three lines */
-    Sint32 i1 = i_orig1;
+    Sint32 i1 = I1;
     Sint32 i2 = i1;
-    Sint32 i3 = i_orig2;
+    Sint32 i3 = I2;
 
     /* Lines step values */
     auto m2 = FixedPoint(x3 - x1) / Sint32(y3 - y1);
 
     /* Colors step values */
-    Sint32 istep2 = (i_orig3 - i1) / Sint32(y3 - y1);
+    Sint32 istep2 = (I3 - i1) / Sint32(y3 - y1);
 
     /* Starting texture coords for the three lines */
     auto srcx1 = FixedPoint(sx1);
@@ -1523,19 +1559,22 @@ static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y
 
     /* Upper half of the triangle */
     if(y1 == y2)
-        _FadedTexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2, i_orig1, i_orig2, isColorKey);
-    else
+    {
+        if(y1 >= minY && y1 <= maxY)
+            _FadedTexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2, I1, I2, args...);
+    } else
     {
         auto m1 = (xc - xa) / Sint32(y2 - y1);
 
-        auto istep1 = (i_orig2 - i_orig1) / Sint32(y2 - y1);
+        auto istep1 = (I2 - I1) / Sint32(y2 - y1);
 
         auto xstep1 = (srcx2 - srcx1) / Sint32(y2 - y1);
         auto ystep1 = (srcy2 - srcy1) / Sint32(y2 - y1);
 
-        for(y = y1; y <= y2; y++)
+        for(int y = y1; y <= std::min<int>(y2, maxY); y++)
         {
-            _FadedTexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2, i1, i2, isColorKey);
+            if(y >= minY)
+                _FadedTexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2, i1, i2, args...);
 
             xa += m1;
             xb += m2;
@@ -1553,19 +1592,22 @@ static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y
 
     /* Lower half of the triangle */
     if(y2 == y3)
-        _FadedTexturedLine(dest, x2, x3, y2, source, srcx2, srcy2, srcx3, srcy3, i_orig2, i_orig3, isColorKey);
-    else
+    {
+        if(y2 >= minY && y2 <= maxY)
+            _FadedTexturedLine(dest, x2, x3, y2, source, srcx2, srcy2, srcx3, srcy3, I2, I3, args...);
+    } else
     {
         auto m3 = FixedPoint(x3 - x2) / Sint32(y3 - y2);
 
-        Sint32 istep3 = (i_orig3 - i_orig2) / Sint32(y3 - y2);
+        Sint32 istep3 = (I3 - I2) / Sint32(y3 - y2);
 
         auto xstep3 = (srcx3 - srcx2) / Sint32(y3 - y2);
         auto ystep3 = (srcy3 - srcy2) / Sint32(y3 - y2);
 
-        for(y = y2 + 1; y <= y3; y++)
+        for(int y = y2 + 1; y <= std::min<int>(y3, maxY); y++)
         {
-            _FadedTexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2, i2, i3, isColorKey);
+            if(y >= minY)
+                _FadedTexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2, i2, i3, args...);
 
             xb += m2;
             xc += m3;
@@ -1620,198 +1662,27 @@ void sge_FadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2,
     _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3, makeIsColorKey());
 }
 
-//==================================================================================
-// Draws a texured trigon  with precalculated gouraud shading (fast) respecting the color keys
-//==================================================================================
-template<class T_IsColorKey>
-void _PreCalcFadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
-                                          SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3,
-                                          Uint16 I1, Uint16 I2, Uint16 I3, Uint8 PreCalcPalettes[][256], T_IsColorKey isColorKey)
-{
-    Sint16 y;
-
-    if(y1 == y3)
-        return;
-
-    Uint16 i = 0;
-    Uint16 i_orig1 = I1;
-    Uint16 i_orig2 = I2;
-    Uint16 i_orig3 = I3;
-
-    /* Sort coords */
-    if(y1 > y2)
-    {
-        SWAP(y1, y2, y);
-        SWAP(x1, x2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-        SWAP(i_orig1, i_orig2, i);
-    }
-    if(y2 > y3)
-    {
-        SWAP(y2, y3, y);
-        SWAP(x2, x3, y);
-        SWAP(sx2, sx3, y);
-        SWAP(sy2, sy3, y);
-        SWAP(i_orig2, i_orig3, i);
-    }
-    if(y1 > y2)
-    {
-        SWAP(y1, y2, y);
-        SWAP(x1, x2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-        SWAP(i_orig1, i_orig2, i);
-    }
-
-    /*
-     * Again we do the same thing as in sge_FilledTrigon(). But here we must keep track of how the
-     * texture coords change along the lines.
-     */
-
-    /* Starting coords for the three lines */
-    auto xa = FixedPoint(x1);
-    auto xb = xa;
-    auto xc = FixedPoint(x2);
-
-    /* Starting colors (rgb) for the three lines */
-    Uint16 i1 = i_orig1;
-    Uint16 i2 = i1;
-    Uint16 i3 = i_orig2;
-
-    /* Lines step values */
-    auto m2 = FixedPoint(x3 - x1) / Sint32(y3 - y1);
-
-    /* Colors step values */
-    Sint16 istep1 = 0;
-    Sint16 istep2 = (i_orig3 - i1) / (y3 - y1);
-    Sint16 istep3 = 0;
-
-    /* Starting texture coords for the three lines */
-    auto srcx1 = FixedPoint(sx1);
-    auto srcx1_2 = srcx1;
-    auto srcx2 = FixedPoint(sx2);
-    auto srcx3 = FixedPoint(sx3);
-
-    auto srcy1 = FixedPoint(sy1);
-    auto srcy1_2 = srcy1;
-    auto srcy2 = FixedPoint(sy2);
-    auto srcy3 = FixedPoint(sy3);
-
-    /* Texture coords stepping value */
-    auto xstep2 = (srcx3 - srcx1) / Sint32(y3 - y1);
-
-    auto ystep2 = (srcy3 - srcy1) / Sint32(y3 - y1);
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        if(SDL_LockSurface(dest) < 0)
-            return;
-    if(SDL_MUSTLOCK(source) && _sge_lock)
-        if(SDL_LockSurface(source) < 0)
-            return;
-
-    /* Upper half of the triangle */
-    if(y1 == y2)
-        _PreCalcFadedTexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2, i_orig1, i_orig2, PreCalcPalettes, isColorKey);
-    else
-    {
-        auto m1 = (xc - xa) / Sint32(y2 - y1);
-
-        istep1 = (i_orig2 - i_orig1) / (y2 - y1);
-
-        auto xstep1 = (srcx2 - srcx1) / Sint32(y2 - y1);
-        auto ystep1 = (srcy2 - srcy1) / Sint32(y2 - y1);
-
-        for(y = y1; y <= y2; y++)
-        {
-            _PreCalcFadedTexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2, i1, i2, PreCalcPalettes,
-                                      isColorKey);
-
-            xa += m1;
-            xb += m2;
-
-            i1 += istep1;
-
-            i2 += istep2;
-
-            srcx1 += xstep1;
-            srcx1_2 += xstep2;
-            srcy1 += ystep1;
-            srcy1_2 += ystep2;
-        }
-    }
-
-    /* Lower half of the triangle */
-    if(y2 == y3)
-        _PreCalcFadedTexturedLine(dest, x2, x3, y2, source, srcx2, srcy2, srcx3, srcy3, i_orig2, i_orig3, PreCalcPalettes, isColorKey);
-    else
-    {
-        auto m3 = FixedPoint(x3 - x2) / Sint32(y3 - y2);
-
-        istep3 = (i_orig3 - i_orig2) / (y3 - y2);
-
-        auto xstep3 = (srcx3 - srcx2) / Sint32(y3 - y2);
-        auto ystep3 = (srcy3 - srcy2) / Sint32(y3 - y2);
-
-        for(y = y2 + 1; y <= y3; y++)
-        {
-            _PreCalcFadedTexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2, i2, i3, PreCalcPalettes,
-                                      isColorKey);
-
-            xb += m2;
-            xc += m3;
-
-            i2 += istep2;
-
-            i3 += istep3;
-
-            srcx1_2 += xstep2;
-            srcx2 += xstep3;
-            srcy1_2 += ystep2;
-            srcy2 += ystep3;
-        }
-    }
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        SDL_UnlockSurface(dest);
-    if(SDL_MUSTLOCK(source) && _sge_lock)
-        SDL_UnlockSurface(source);
-
-    if(_sge_update != 1)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-
-    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
-}
-
 void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
                                              SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3,
                                              Uint16 I1, Uint16 I2, Uint16 I3, Uint8 PreCalcPalettes[][256], Uint32 keys[], int keycount)
 {
     if(keycount == 0)
-        _PreCalcFadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3,
-                                             PreCalcPalettes, makeIsColorKey());
+        _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3, makeIsColorKey()),
+          PreCalcPalettes;
     else if(keycount == 1)
-        _PreCalcFadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3,
-                                             PreCalcPalettes, makeIsColorKey(keys[0]));
+        _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3,
+                                      makeIsColorKey(keys[0]), PreCalcPalettes);
     else
-        _PreCalcFadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3,
-                                             PreCalcPalettes, makeIsColorKey(keys, keycount));
+        _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3,
+                                      makeIsColorKey(keys, keycount), PreCalcPalettes);
 }
 
 void sge_PreCalcFadedTexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
                                     SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Uint16 I1,
                                     Uint16 I2, Uint16 I3, Uint8 PreCalcPalettes[][256])
 {
-    _PreCalcFadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3, PreCalcPalettes,
-                                         makeIsColorKey());
+    _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3, makeIsColorKey(),
+                                  PreCalcPalettes);
 }
 
 //==================================================================================
@@ -1868,6 +1739,15 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
         SWAP(sx1, sx2, y);
         SWAP(sy1, sy2, y);
     }
+    {
+        const auto maxX = sge_clip_xmax(dest);
+        x1 = std::min<int>(x1, maxX);
+        x2 = std::min<int>(x2, maxX);
+        x3 = std::min<int>(x3, maxX);
+        x4 = std::min<int>(x4, maxX);
+    }
+    const auto minY = sge_clip_ymin(dest);
+    const auto maxY = sge_clip_ymax(dest);
 
     /*
      * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
@@ -1903,17 +1783,20 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
 
     /* Upper bit of the rectangle */
     if(y1 == y2)
-        _TexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
-    else
+    {
+        if(y1 >= minY && y1 <= maxY)
+            _TexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2);
+    } else
     {
         auto m1 = (xc - xa) / Sint32(y2 - y1);
 
         auto xstep1 = (srcx2 - srcx1) / Sint32(y2 - y1);
         auto ystep1 = (srcy2 - srcy1) / Sint32(y2 - y1);
 
-        for(y = y1; y <= y2; y++)
+        for(y = y1; y <= std::min<int>(y2, maxY); y++)
         {
-            _TexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
+            if(y >= minY)
+                _TexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2);
 
             xa += m1;
             xb += m2;
@@ -1926,9 +1809,10 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     }
 
     /* Middle bit of the rectangle */
-    for(y = y2 + 1; y <= y3; y++)
+    for(y = y2 + 1; y <= std::min<int>(y3, maxY); y++)
     {
-        _TexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
+        if(y >= minY)
+            _TexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2);
 
         xb += m2;
         xc += m3;
@@ -1941,17 +1825,20 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
 
     /* Lower bit of the rectangle */
     if(y3 == y4)
-        _TexturedLine(dest, x3, x4, y3, source, srcx3, srcy3, FixedPoint(sx4), FixedPoint(sy4));
-    else
+    {
+        if(y3 >= minY && y3 <= maxY)
+            _TexturedLine(dest, x3, x4, y3, source, srcx3, srcy3, FixedPoint(sx4), FixedPoint(sy4));
+    } else
     {
         auto m4 = FixedPoint(x4 - x3) / Sint32(y4 - y3);
 
         auto xstep4 = FixedPoint(sx4 - sx3) / Sint32(y4 - y3);
         auto ystep4 = FixedPoint(sy4 - sy3) / Sint32(y4 - y3);
 
-        for(y = y3 + 1; y <= y4; y++)
+        for(y = y3 + 1; y <= std::min<int>(y4, maxY); y++)
         {
-            _TexturedLine(dest, xc.toInt(), xd.toInt(), y, source, srcx2, srcy2, srcx3, srcy3);
+            if(y >= minY)
+                _TexturedLine(dest, xc.toInt(), xd.toInt(), y, source, srcx2, srcy2, srcx3, srcy3);
 
             xc += m3;
             xd += m4;
@@ -1960,402 +1847,6 @@ void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
             srcx3 += xstep4;
             srcy2 += ystep3;
             srcy3 += ystep4;
-        }
-    }
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        SDL_UnlockSurface(dest);
-
-    if(_sge_update != 1)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-    xmax = (xmax > x4) ? xmax : x4;
-    xmin = (xmin < x4) ? xmin : x4;
-
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y4 - y1 + 1);
-}
-
-//==================================================================================
-// Draws a gouraud shaded and texured *RECTANGLE* (shaded only from left to right) - respecting the colorkey
-//==================================================================================
-void sge_FadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                           SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Sint16 sx4,
-                           Sint16 sy4, Sint32 I1, Sint32 I2)
-{
-    Sint16 y;
-    Sint32 i, i_orig1 = I1, i_orig2 = I2, i_orig3 = I1, i_orig4 = I2;
-
-    if(y1 == y3 || y1 == y4 || y4 == y2)
-        return;
-
-    /* Sort the coords */
-    if(y1 > y2)
-    {
-        SWAP(i_orig1, i_orig2, i);
-        SWAP(x1, x2, y);
-        SWAP(y1, y2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-    }
-    if(y2 > y3)
-    {
-        SWAP(i_orig3, i_orig2, i);
-        SWAP(x3, x2, y);
-        SWAP(y3, y2, y);
-        SWAP(sx3, sx2, y);
-        SWAP(sy3, sy2, y);
-    }
-    if(y1 > y2)
-    {
-        SWAP(i_orig1, i_orig2, i);
-        SWAP(x1, x2, y);
-        SWAP(y1, y2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-    }
-    if(y3 > y4)
-    {
-        SWAP(i_orig3, i_orig4, i);
-        SWAP(x3, x4, y);
-        SWAP(y3, y4, y);
-        SWAP(sx3, sx4, y);
-        SWAP(sy3, sy4, y);
-    }
-    if(y2 > y3)
-    {
-        SWAP(i_orig3, i_orig2, i);
-        SWAP(x3, x2, y);
-        SWAP(y3, y2, y);
-        SWAP(sx3, sx2, y);
-        SWAP(sy3, sy2, y);
-    }
-    if(y1 > y2)
-    {
-        SWAP(i_orig1, i_orig2, i);
-        SWAP(x1, x2, y);
-        SWAP(y1, y2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-    }
-
-    /*
-     * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
-     */
-
-    auto xa = FixedPoint(x1);
-    auto xb = xa;
-    auto xc = FixedPoint(x2);
-    auto xd = FixedPoint(x3);
-
-    /* Starting colors (rgb) for the three lines */
-    Sint32 i1 = i_orig1;
-    Sint32 i2 = i1;
-    Sint32 i3 = i_orig3;
-    Sint32 i4 = i_orig2;
-
-    FixedPoint m2 = FixedPoint(x3 - x1) / Sint32(y3 - y1);
-    FixedPoint m3 = FixedPoint(x4 - x2) / Sint32(y4 - y2);
-
-    /* Colors step values */
-    Sint32 istep1 = (i_orig3 - i1) / Sint32(y3 - y1);
-    Sint32 istep4 = (i_orig4 - i2) / Sint32(y4 - y2);
-
-    auto srcx1 = FixedPoint(sx1);
-    auto srcx1_2 = srcx1;
-    auto srcx2 = FixedPoint(sx2);
-    auto srcx3 = FixedPoint(sx3);
-
-    auto srcy1 = FixedPoint(sy1);
-    auto srcy1_2 = srcy1;
-    auto srcy2 = FixedPoint(sy2);
-    auto srcy3 = FixedPoint(sy3);
-
-    auto xstep2 = (srcx3 - srcx1) / Sint32(y3 - y1);
-    auto xstep3 = FixedPoint(sx4 - sx2) / Sint32(y4 - y2);
-
-    auto ystep2 = (srcy3 - srcy1) / Sint32(y3 - y1);
-    auto ystep3 = FixedPoint(sy4 - sy2) / Sint32(y4 - y2);
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        if(SDL_LockSurface(dest) < 0)
-            return;
-
-    auto isColorKey = makeIsColorKey(source);
-
-    /* Upper bit of the rectangle */
-    if(y1 == y2)
-        _FadedTexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2, i1, i2, isColorKey);
-    else
-    {
-        auto m1 = (xc - xa) / Sint32(y2 - y1);
-
-        auto xstep1 = (srcx2 - srcx1) / Sint32(y2 - y1);
-        auto ystep1 = (srcy2 - srcy1) / Sint32(y2 - y1);
-        auto istep2 = (i_orig2 - i1) / Sint32(y2 - y1);
-
-        for(y = y1; y <= y2; y++)
-        {
-            _FadedTexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2, i1, i2, isColorKey);
-
-            xa += m1;
-            xb += m2;
-
-            srcx1 += xstep1;
-            srcx1_2 += xstep2;
-            srcy1 += ystep1;
-            srcy1_2 += ystep2;
-            i1 += istep1;
-            i2 += istep2;
-        }
-    }
-
-    /* Middle bit of the rectangle */
-    for(y = y2 + 1; y <= y3; y++)
-    {
-        _FadedTexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2, i1, i4, isColorKey);
-
-        xb += m2;
-        xc += m3;
-
-        srcx1_2 += xstep2;
-        srcx2 += xstep3;
-        srcy1_2 += ystep2;
-        srcy2 += ystep3;
-        i1 += istep1;
-        i4 += istep4;
-    }
-
-    /* Lower bit of the rectangle */
-    if(y3 == y4)
-        _FadedTexturedLine(dest, x3, x4, y3, source, srcx3, srcy3, FixedPoint(sx4), FixedPoint(sy4), i3, i4, isColorKey);
-    else
-    {
-        auto m4 = FixedPoint(x4 - x3) / Sint32(y4 - y3);
-
-        auto xstep4 = FixedPoint(sx4 - sx3) / Sint32(y4 - y3);
-        auto ystep4 = FixedPoint(sy4 - sy3) / Sint32(y4 - y3);
-        auto istep3 = (i_orig4 - i3) / Sint32(y4 - y3);
-
-        for(y = y3 + 1; y <= y4; y++)
-        {
-            _FadedTexturedLine(dest, xc.toInt(), xd.toInt(), y, source, srcx2, srcy2, srcx3, srcy3, i3, i4, isColorKey);
-
-            xc += m3;
-            xd += m4;
-
-            srcx2 += xstep3;
-            srcx3 += xstep4;
-            srcy2 += ystep3;
-            srcy3 += ystep4;
-            i3 += istep3;
-            i4 += istep4;
-        }
-    }
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        SDL_UnlockSurface(dest);
-
-    if(_sge_update != 1)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-    xmax = (xmax > x4) ? xmax : x4;
-    xmin = (xmin < x4) ? xmin : x4;
-
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y4 - y1 + 1);
-}
-
-//==================================================================================
-// Draws a texured *RECTANGLE* with precalculated gouraud shading (shaded only from left to right) - respecting the colorkey
-//==================================================================================
-void sge_PreCalcFadedTexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                                  SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2, Sint16 sy2, Sint16 sx3, Sint16 sy3, Sint16 sx4,
-                                  Sint16 sy4, Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256])
-{
-    Sint16 y;
-    Uint16 i, i_orig1 = I1, i_orig2 = I2, i_orig3 = I1, i_orig4 = I2;
-
-    if(y1 == y3 || y1 == y4 || y4 == y2)
-        return;
-
-    /* Sort the coords */
-    if(y1 > y2)
-    {
-        SWAP(i_orig1, i_orig2, i);
-        SWAP(x1, x2, y);
-        SWAP(y1, y2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-    }
-    if(y2 > y3)
-    {
-        SWAP(i_orig3, i_orig2, i);
-        SWAP(x3, x2, y);
-        SWAP(y3, y2, y);
-        SWAP(sx3, sx2, y);
-        SWAP(sy3, sy2, y);
-    }
-    if(y1 > y2)
-    {
-        SWAP(i_orig1, i_orig2, i);
-        SWAP(x1, x2, y);
-        SWAP(y1, y2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-    }
-    if(y3 > y4)
-    {
-        SWAP(i_orig3, i_orig4, i);
-        SWAP(x3, x4, y);
-        SWAP(y3, y4, y);
-        SWAP(sx3, sx4, y);
-        SWAP(sy3, sy4, y);
-    }
-    if(y2 > y3)
-    {
-        SWAP(i_orig3, i_orig2, i);
-        SWAP(x3, x2, y);
-        SWAP(y3, y2, y);
-        SWAP(sx3, sx2, y);
-        SWAP(sy3, sy2, y);
-    }
-    if(y1 > y2)
-    {
-        SWAP(i_orig1, i_orig2, i);
-        SWAP(x1, x2, y);
-        SWAP(y1, y2, y);
-        SWAP(sx1, sx2, y);
-        SWAP(sy1, sy2, y);
-    }
-
-    /*
-     * We do this exactly like sge_TexturedTrigon(), but here we must trace four lines.
-     */
-
-    auto xa = FixedPoint(x1);
-    auto xb = xa;
-    auto xc = FixedPoint(x2);
-    auto xd = FixedPoint(x3);
-
-    /* Starting colors (rgb) for the three lines */
-    Uint16 i1 = i_orig1;
-    Uint16 i2 = i1;
-    Uint16 i3 = i_orig3;
-    Uint16 i4 = i_orig2;
-
-    auto m2 = FixedPoint(x3 - x1) / Sint32(y3 - y1);
-    auto m3 = FixedPoint(x4 - x2) / Sint32(y4 - y2);
-
-    /* Colors step values */
-    Sint16 istep1 = (i_orig3 - i1) / (y3 - y1);
-    Sint16 istep4 = (i_orig4 - i2) / (y4 - y2);
-
-    auto srcx1 = FixedPoint(sx1);
-    auto srcx1_2 = srcx1;
-    auto srcx2 = FixedPoint(sx2);
-    auto srcx3 = FixedPoint(sx3);
-
-    auto srcy1 = FixedPoint(sy1);
-    auto srcy1_2 = srcy1;
-    auto srcy2 = FixedPoint(sy2);
-    auto srcy3 = FixedPoint(sy3);
-
-    auto xstep2 = FixedPoint(sx3 - sx1) / Sint32(y3 - y1);
-    auto xstep3 = FixedPoint(sx4 - sx2) / Sint32(y4 - y2);
-
-    auto ystep2 = FixedPoint(sy3 - sy1) / Sint32(y3 - y1);
-    auto ystep3 = FixedPoint(sy4 - sy2) / Sint32(y4 - y2);
-
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
-        if(SDL_LockSurface(dest) < 0)
-            return;
-
-    const auto isColorKey = makeIsColorKey(source);
-
-    /* Upper bit of the rectangle */
-    if(y1 == y2)
-        _PreCalcFadedTexturedLine(dest, x1, x2, y1, source, srcx1, srcy1, srcx2, srcy2, i1, i2, PreCalcPalettes, isColorKey);
-    else
-    {
-        auto m1 = (xc - xa) / Sint32(y2 - y1);
-
-        auto xstep1 = (srcx2 - srcx1) / Sint32(y2 - y1);
-        auto ystep1 = (srcy2 - srcy1) / Sint32(y2 - y1);
-        Sint16 istep2 = (i_orig2 - i1) / (y2 - y1);
-
-        for(y = y1; y <= y2; y++)
-        {
-            _PreCalcFadedTexturedLine(dest, xa.toInt(), xb.toInt(), y, source, srcx1, srcy1, srcx1_2, srcy1_2, i1, i2, PreCalcPalettes,
-                                      isColorKey);
-
-            xa += m1;
-            xb += m2;
-
-            srcx1 += xstep1;
-            srcx1_2 += xstep2;
-            srcy1 += ystep1;
-            srcy1_2 += ystep2;
-            i1 += istep1;
-            i2 += istep2;
-        }
-    }
-
-    /* Middle bit of the rectangle */
-    for(y = y2 + 1; y <= y3; y++)
-    {
-        _PreCalcFadedTexturedLine(dest, xb.toInt(), xc.toInt(), y, source, srcx1_2, srcy1_2, srcx2, srcy2, i1, i4, PreCalcPalettes,
-                                  isColorKey);
-
-        xb += m2;
-        xc += m3;
-
-        srcx1_2 += xstep2;
-        srcx2 += xstep3;
-        srcy1_2 += ystep2;
-        srcy2 += ystep3;
-        i1 += istep1;
-        i4 += istep4;
-    }
-
-    /* Lower bit of the rectangle */
-    if(y3 == y4)
-        _PreCalcFadedTexturedLine(dest, x3, x4, y3, source, srcx3, srcy3, FixedPoint(sx4), FixedPoint(sy4), i3, i4, PreCalcPalettes,
-                                  isColorKey);
-    else
-    {
-        auto m4 = FixedPoint(x4 - x3) / Sint32(y4 - y3);
-
-        auto xstep4 = FixedPoint(sx4 - sx3) / Sint32(y4 - y3);
-        auto ystep4 = FixedPoint(sy4 - sy3) / Sint32(y4 - y3);
-        Sint16 istep3 = (i_orig4 - i3) / (y4 - y3);
-
-        for(y = y3 + 1; y <= y4; y++)
-        {
-            _PreCalcFadedTexturedLine(dest, xc.toInt(), xd.toInt(), y, source, srcx2, srcy2, srcx3, srcy3, i3, i4, PreCalcPalettes,
-                                      isColorKey);
-
-            xc += m3;
-            xd += m4;
-
-            srcx2 += xstep3;
-            srcx3 += xstep4;
-            srcy2 += ystep3;
-            srcy3 += ystep4;
-            i3 += istep3;
-            i4 += istep4;
         }
     }
 
