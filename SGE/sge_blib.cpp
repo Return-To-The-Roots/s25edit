@@ -54,32 +54,16 @@ constexpr Uint32 MapRGB(const SDL_PixelFormat& format, FixedPoint R, FixedPoint 
     return MapRGB(format, static_cast<Uint8>(R.toUnsigned()), static_cast<Uint8>(G.toUnsigned()), static_cast<Uint8>(B.toUnsigned()));
 }
 
-Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 factor)
-{
-    const auto r = ((static_cast<Uint8>((value & format.Rmask) >> format.Rshift) * factor) >> 16);
-    const auto g = ((static_cast<Uint8>((value & format.Gmask) >> format.Gshift) * factor) >> 16);
-    const auto b = ((static_cast<Uint8>((value & format.Bmask) >> format.Bshift) * factor) >> 16);
-    const auto r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-    const auto g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-    const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-    return MapRGB(format, r8, g8, b8);
-}
-
 constexpr Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b)
 {
     return (Uint32)r << 24 | (Uint32)g << 16 | (Uint32)b << 8;
 }
 
-constexpr Uint32 MapRGB(FixedPoint R, FixedPoint G, FixedPoint B)
-{
-    return MapRGB(static_cast<Uint8>(R.toUnsigned()), static_cast<Uint8>(G.toUnsigned()), static_cast<Uint8>(B.toUnsigned()));
-}
-
 Uint32 ScaleRGB(Uint32 value, Sint32 factor)
 {
-    const auto r = (((value & 0xFF000000) >> 24) * factor) >> 16;
-    const auto g = (((value & 0x00FF0000) >> 16) * factor) >> 16;
-    const auto b = (((value & 0x0000FF00) >> 8) * factor) >> 16;
+    const auto r = (Sint32((value & 0xFF000000) >> 24) * factor) >> 16;
+    const auto g = (Sint32((value & 0x00FF0000) >> 16) * factor) >> 16;
+    const auto b = (Sint32((value & 0x0000FF00) >> 8) * factor) >> 16;
     const auto r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
     const auto g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
     const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
@@ -310,7 +294,7 @@ static void _CopyPixelsWithDifferentFormat(SDL_Surface* dest, Sint16 y, Sint16 x
 
                 Uint8 r, g, b;
                 SDL_GetRGB(sge_GetPixel(source, srcx.toInt(), srcy.toInt()), srcFormat, &r, &g, &b);
-                *pixel = MapRGB(*dest->format, r, g, b);
+                *pixel = MapRGB(r, g, b);
 
                 srcx += xstep;
                 srcy += ystep;
@@ -463,11 +447,6 @@ static auto makeIsColorKey(Uint32 colorKey)
     return [colorKey](const Uint32 color) { return color == colorKey; };
 }
 
-static auto makeIsColorKey(SDL_Surface* surface)
-{
-    return makeIsColorKey(surface->format->colorkey);
-}
-
 static auto makeIsColorKey(const Uint32 keys[], int keycount)
 {
     return [keys, keycount](const Uint32 color) {
@@ -525,10 +504,8 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
         x1 = sge_clip_xmin(dest);
     }
 
-    const auto dstFormat = *dest->format;
-    const auto srcFormat = *source->format;
-    assert(dstFormat.BytesPerPixel == srcFormat.BytesPerPixel);
-    assert(dstFormat.BytesPerPixel == 4);
+    assert(dest->format->BytesPerPixel == source->format->BytesPerPixel);
+    assert(dest->format->BytesPerPixel == 4);
 
     Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / sizeof(Uint32) + x1;
     const Uint16 pitch = source->pitch / sizeof(Uint32);
@@ -593,9 +570,8 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
         x1 = sge_clip_xmin(dest);
     }
 
-    const auto dstFormat = *dest->format;
-    assert(dstFormat.BytesPerPixel == source->format->BytesPerPixel);
-    assert(dstFormat.BytesPerPixel == 1);
+    assert(dest->format->BytesPerPixel == source->format->BytesPerPixel);
+    assert(dest->format->BytesPerPixel == 1);
 
     Uint8* pixel = (Uint8*)dest->pixels + y * dest->pitch + x1;
     const Uint16 pitch = source->pitch;
@@ -632,7 +608,7 @@ void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SD
         x2 = std::min<int>(x2, maxX);
     }
 
-    _FadedTexturedLine(dest, x1, x2, y, source, FixedPoint(x1), FixedPoint(sy1), FixedPoint(sx2), FixedPoint(sy2), i1, i2,
+    _FadedTexturedLine(dest, x1, x2, y, source, FixedPoint(sx1), FixedPoint(sy1), FixedPoint(sx2), FixedPoint(sy2), i1, i2,
                        makeIsColorKey());
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
@@ -1500,8 +1476,8 @@ void sge_PreCalcFadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint1
                                              Uint16 I1, Uint16 I2, Uint16 I3, Uint8 PreCalcPalettes[][256], Uint32 keys[], int keycount)
 {
     if(keycount == 0)
-        _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3, makeIsColorKey()),
-          PreCalcPalettes;
+        _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3, makeIsColorKey(),
+                                      PreCalcPalettes);
     else if(keycount == 1)
         _FadedTexturedTrigonColorKeys(dest, x1, y1, x2, y2, x3, y3, source, sx1, sy1, sx2, sy2, sx3, sy3, I1, I2, I3,
                                       makeIsColorKey(keys[0]), PreCalcPalettes);
