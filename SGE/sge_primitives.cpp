@@ -523,7 +523,7 @@ void _Line(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uin
 
 void sge_Line(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 Color)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         if(SDL_LockSurface(Surface) < 0)
             return;
@@ -533,7 +533,7 @@ void sge_Line(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
     _Line(Surface, x1, y1, x2, y2, Color);
 
     /* unlock the display */
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -571,14 +571,14 @@ void _LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 
 void sge_LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 Color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
     _LineAlpha(Surface, x1, y1, x2, y2, Color, alpha);
 
     /* unlock the display */
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -742,14 +742,14 @@ void _AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
 void sge_AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color, Uint8 alpha)
 {
     /* Lock surface */
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
         if(SDL_LockSurface(dst) < 0)
             return;
 
     _AALineAlpha(dst, x1, y1, x2, y2, color, alpha);
 
     /* unlock the display */
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
     {
         SDL_UnlockSurface(dst);
     }
@@ -852,7 +852,7 @@ void sge_DomcLine(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
                 Uint8 b2)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         if(SDL_LockSurface(Surface) < 0)
             return;
@@ -862,7 +862,7 @@ void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
     sge_DomcLine(Surface, x1, y1, x2, y2, r1, g1, b1, r2, g2, b2, _PutPixel);
 
     /* unlock the display */
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -873,7 +873,7 @@ void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
                      Uint8 b2, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
@@ -883,7 +883,7 @@ void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     sge_DomcLine(Surface, x1, y1, x2, y2, r1, g1, b1, r2, g2, b2, callback_alpha_hack);
 
     /* unlock the display */
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -1059,13 +1059,13 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 void sge_AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
                        Uint8 b2, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
         if(SDL_LockSurface(dst) < 0)
             return;
 
     _AAmcLineAlpha(dst, x1, y1, x2, y2, r1, g1, b1, r2, g2, b2, alpha);
 
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
         SDL_UnlockSurface(dst);
 
     sge_UpdateRect(dst, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
@@ -1110,7 +1110,7 @@ void sge_Rect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
 //==================================================================================
 void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
@@ -1119,7 +1119,7 @@ void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     _VLineAlpha(Surface, x1, y1, y2, color, alpha);
     _VLineAlpha(Surface, x2, y1, y2, color, alpha);
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -1230,7 +1230,7 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
     Uint32 R, G, B, A = 0;
     Sint16 x, y;
 
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
         if(SDL_LockSurface(surface) < 0)
             return;
 
@@ -1355,7 +1355,7 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
         break;
     }
 
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
     {
         SDL_UnlockSurface(surface);
     }
@@ -1498,7 +1498,7 @@ void sge_DoEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 r
 //==================================================================================
 void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         if(SDL_LockSurface(Surface) < 0)
             return;
@@ -1506,7 +1506,7 @@ void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry,
 
     sge_DoEllipse(Surface, x, y, rx, ry, color, _PutPixel);
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -1527,14 +1527,14 @@ void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry,
 //==================================================================================
 void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint32 color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
     _sge_alpha_hack = alpha;
     sge_DoEllipse(Surface, x, y, rx, ry, color, callback_alpha_hack);
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -1665,7 +1665,7 @@ void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx,
     int h, i, j, k;
     int oh, oi, oj, ok;
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
@@ -1755,7 +1755,7 @@ void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx,
         } while(i > h);
     }
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -1802,7 +1802,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
     float cp, is, ip, imax = 1.0;
 
     /* Lock surface */
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
         if(SDL_LockSurface(surface) < 0)
             return;
 
@@ -1814,7 +1814,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
     _PutPixel(surface, 2 * xc - x, 2 * yc - y, color);
 
     /* unlock surface */
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
 
     _VLine(surface, x, y + 1, 2 * yc - y - 1, color);
@@ -1855,7 +1855,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
         ip = imax - is;
 
         /* Lock surface */
-        if(SDL_MUSTLOCK(surface) && _sge_lock)
+        if(_sge_lock && SDL_MUSTLOCK(surface))
             if(SDL_LockSurface(surface) < 0)
                 return;
 
@@ -1874,7 +1874,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
         _PutPixelAlpha(surface, 2 * xc - x, 2 * yc - ys, color, Uint8(is * 255));
 
         /* unlock surface */
-        if(SDL_MUSTLOCK(surface) && _sge_lock)
+        if(_sge_lock && SDL_MUSTLOCK(surface))
             SDL_UnlockSurface(surface);
 
         /* Fill */
@@ -1920,7 +1920,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
         ip = imax - is;
 
         /* Lock surface */
-        if(SDL_MUSTLOCK(surface) && _sge_lock)
+        if(_sge_lock && SDL_MUSTLOCK(surface))
             if(SDL_LockSurface(surface) < 0)
                 return;
 
@@ -1939,7 +1939,7 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
         _PutPixelAlpha(surface, 2 * xc - xs, 2 * yc - y, color, Uint8(is * 255));
 
         /* unlock surface */
-        if(SDL_MUSTLOCK(surface) && _sge_lock)
+        if(_sge_lock && SDL_MUSTLOCK(surface))
             SDL_UnlockSurface(surface);
 
         /* Fill */
@@ -2016,7 +2016,7 @@ void sge_DoCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, U
 //==================================================================================
 void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         if(SDL_LockSurface(Surface) < 0)
             return;
@@ -2024,7 +2024,7 @@ void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color
 
     sge_DoCircle(Surface, x, y, r, color, _PutPixel);
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -2045,14 +2045,14 @@ void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint8 R, Uin
 //==================================================================================
 void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
     _sge_alpha_hack = alpha;
     sge_DoCircle(Surface, x, y, r, color, callback_alpha_hack);
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -2137,7 +2137,7 @@ void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, U
     Sint16 d_e = 3;
     Sint16 d_se = -2 * r + 5;
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
             return;
 
@@ -2175,7 +2175,7 @@ void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, U
         cx++;
     } while(cx <= cy);
 
-    if(SDL_MUSTLOCK(Surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
         SDL_UnlockSurface(Surface);
     }
@@ -2251,7 +2251,7 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     d2y = d3y + 2 * b * delta * delta;                                                                             \
     dy = a * delta * delta * delta + b * delta * delta + c * delta;                                                \
                                                                                                                    \
-    if(SDL_MUSTLOCK(surface) && _sge_lock)                                                                         \
+    if(_sge_lock && SDL_MUSTLOCK(surface))                                                                         \
     {                                                                                                              \
         if(SDL_LockSurface(surface) < 0)                                                                           \
             return;                                                                                                \
@@ -2286,7 +2286,7 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     }                                                                                                              \
                                                                                                                    \
     /* unlock the display */                                                                                       \
-    if(SDL_MUSTLOCK(surface) && _sge_lock)                                                                         \
+    if(_sge_lock && SDL_MUSTLOCK(surface))                                                                         \
     {                                                                                                              \
         SDL_UnlockSurface(surface);                                                                                \
     }                                                                                                              \

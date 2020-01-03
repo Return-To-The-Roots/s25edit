@@ -368,14 +368,14 @@ static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angl
     Sint32 const stdx = sty * dx;
 
     // Lock surfaces... hopfully less than two needs locking!
-    if(SDL_MUSTLOCK(src) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(src))
         if(SDL_LockSurface(src) < 0)
             return r;
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
     {
         if(SDL_LockSurface(dst) < 0)
         {
-            if(SDL_MUSTLOCK(src) && _sge_lock)
+            if(_sge_lock && SDL_MUSTLOCK(src))
                 SDL_UnlockSurface(src);
             return r;
         }
@@ -408,9 +408,9 @@ static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angl
     }
 
     // Unlock surfaces
-    if(SDL_MUSTLOCK(src) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(src))
         SDL_UnlockSurface(src);
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
         SDL_UnlockSurface(dst);
 
     // Return the bounding rectangle
@@ -475,14 +475,14 @@ static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle,
     Sint32 const stdx = sty * dx;
 
     // Lock surfaces... hopfully less than two needs locking!
-    if(SDL_MUSTLOCK(src) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(src))
         if(SDL_LockSurface(src) < 0)
             return r;
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
     {
         if(SDL_LockSurface(dst) < 0)
         {
-            if(SDL_MUSTLOCK(src) && _sge_lock)
+            if(_sge_lock && SDL_MUSTLOCK(src))
                 SDL_UnlockSurface(src);
             return r;
         }
@@ -516,9 +516,9 @@ static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle,
     }
 
     // Unlock surfaces
-    if(SDL_MUSTLOCK(src) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(src))
         SDL_UnlockSurface(src);
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
         SDL_UnlockSurface(dst);
 
     // Return the bounding rectangle

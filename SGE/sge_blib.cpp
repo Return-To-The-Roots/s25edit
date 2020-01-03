@@ -213,16 +213,16 @@ static void _FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, FixedP
 
 void sge_FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2, Uint8 b2)
 {
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
     _FadedLine(dest, x1, x2, y, FixedPoint(r1), FixedPoint(g1), FixedPoint(b1), FixedPoint(r2), FixedPoint(g2), FixedPoint(b2));
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -619,10 +619,10 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
 void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL_Surface* source, Sint16 sx1, Sint16 sy1, Sint16 sx2,
                            Sint16 sy2, Sint32 i1, Sint32 i2)
 {
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
-    if(SDL_MUSTLOCK(source) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(source))
         if(SDL_LockSurface(source) < 0)
             return;
 
@@ -635,12 +635,12 @@ void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SD
     _FadedTexturedLine(dest, x1, x2, y, source, FixedPoint(x1), FixedPoint(sy1), FixedPoint(sx2), FixedPoint(sy2), i1, i2,
                        makeIsColorKey());
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-    if(SDL_MUSTLOCK(source) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(source))
         SDL_UnlockSurface(source);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -652,7 +652,7 @@ void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SD
 //==================================================================================
 void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint32 color)
 {
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
@@ -660,10 +660,10 @@ void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, S
     _Line(dest, x1, y1, x3, y3, color);
     _Line(dest, x3, y3, x2, y2, color);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -691,7 +691,7 @@ void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, S
 //==================================================================================
 void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint32 color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
@@ -699,10 +699,10 @@ void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
     _LineAlpha(dest, x1, y1, x3, y3, color, alpha);
     _LineAlpha(dest, x3, y3, x2, y2, color, alpha);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -731,7 +731,7 @@ void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 //==================================================================================
 void sge_AATrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint32 color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
@@ -739,10 +739,10 @@ void sge_AATrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint1
     _AALineAlpha(dest, x1, y1, x3, y3, color, alpha);
     _AALineAlpha(dest, x3, y3, x2, y2, color, alpha);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -857,7 +857,7 @@ void sge_FilledTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
         }
     }
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -909,7 +909,7 @@ void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
 
     auto m2 = FixedPoint(x3 - x1) / Sint32(y3 - y1);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
@@ -945,10 +945,10 @@ void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -1047,7 +1047,7 @@ void sge_FadedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 
     auto bstep2 = FixedPoint(col3.b - col1.b) / Sint32(y3 - y1);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
@@ -1107,10 +1107,10 @@ void sge_FadedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -1193,10 +1193,10 @@ static void _TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, 
     auto xstep2 = FixedPoint(sx3 - sx1) / Sint32(y3 - y1);
     auto ystep2 = FixedPoint(sy3 - sy1) / Sint32(y3 - y1);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
-    if(SDL_MUSTLOCK(source) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(source))
         if(SDL_LockSurface(source) < 0)
             return;
 
@@ -1254,12 +1254,12 @@ static void _TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, 
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-    if(SDL_MUSTLOCK(source) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(source))
         SDL_UnlockSurface(source);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -1383,10 +1383,10 @@ static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y
 
     auto ystep2 = (srcy3 - srcy1) / Sint32(y3 - y1);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
-    if(SDL_MUSTLOCK(source) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(source))
         if(SDL_LockSurface(source) < 0)
             return;
 
@@ -1456,12 +1456,12 @@ static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-    if(SDL_MUSTLOCK(source) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(source))
         SDL_UnlockSurface(source);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -1612,7 +1612,7 @@ static void _TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Si
     auto ystep2 = (srcy3 - srcy1) / Sint32(y3 - y1);
     auto ystep3 = FixedPoint(sy4 - sy2) / Sint32(y4 - y2);
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return;
 
@@ -1685,10 +1685,10 @@ static void _TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Si
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -1858,7 +1858,7 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const S
     if(n < 3)
         return -1;
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
@@ -1897,7 +1897,7 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const S
         // Reject polygons with negative coords
         if(y1 < 0 || x1 < 0 || x2 < 0)
         {
-            if(SDL_MUSTLOCK(dest) && _sge_lock)
+            if(_sge_lock && SDL_MUSTLOCK(dest))
                 SDL_UnlockSurface(dest);
 
             delete[] line;
@@ -1944,7 +1944,7 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const S
     }
 
     /* Remove surface lock if _HLine() is to be used */
-    if(SDL_MUSTLOCK(dest) && _sge_lock && alpha == SDL_ALPHA_OPAQUE)
+    if(_sge_lock && SDL_MUSTLOCK(dest) && alpha == SDL_ALPHA_OPAQUE)
         SDL_UnlockSurface(dest);
 
     pline* list = nullptr;
@@ -1989,13 +1989,13 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const S
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock && alpha != SDL_ALPHA_OPAQUE)
+    if(_sge_lock && SDL_MUSTLOCK(dest) && alpha != SDL_ALPHA_OPAQUE)
         SDL_UnlockSurface(dest);
 
     delete[] line;
     delete[] plist;
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return 0;
     }
@@ -2029,7 +2029,7 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint
     if(n < 3)
         return -1;
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
@@ -2068,7 +2068,7 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint
         // Reject polygons with negative coords
         if(y1 < 0 || x1 < 0 || x2 < 0)
         {
-            if(SDL_MUSTLOCK(dest) && _sge_lock)
+            if(_sge_lock && SDL_MUSTLOCK(dest))
                 SDL_UnlockSurface(dest);
 
             delete[] line;
@@ -2113,7 +2113,7 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint
         _AALineAlpha(dest, x1, y1, x2, y2, color, SDL_ALPHA_OPAQUE);
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
     pline* list = nullptr;
@@ -2157,7 +2157,7 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint
     delete[] line;
     delete[] plist;
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return 0;
     }
@@ -2210,7 +2210,7 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Si
     if(n < 3)
         return -1;
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
@@ -2262,7 +2262,7 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Si
         // Reject polygons with negative coords
         if(y1 < 0 || x1 < 0 || x2 < 0)
         {
-            if(SDL_MUSTLOCK(dest) && _sge_lock)
+            if(_sge_lock && SDL_MUSTLOCK(dest))
                 SDL_UnlockSurface(dest);
 
             delete[] line;
@@ -2383,13 +2383,13 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Si
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
     delete[] line;
     delete[] plist;
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return 0;
     }
@@ -2412,7 +2412,7 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint1
     if(n < 3)
         return -1;
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         if(SDL_LockSurface(dest) < 0)
             return -2;
 
@@ -2464,7 +2464,7 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint1
         // Reject polygons with negative coords
         if(y1 < 0 || x1 < 0 || x2 < 0)
         {
-            if(SDL_MUSTLOCK(dest) && _sge_lock)
+            if(_sge_lock && SDL_MUSTLOCK(dest))
                 SDL_UnlockSurface(dest);
 
             delete[] line;
@@ -2577,13 +2577,13 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint1
         }
     }
 
-    if(SDL_MUSTLOCK(dest) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
 
     delete[] line;
     delete[] plist;
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return 0;
     }

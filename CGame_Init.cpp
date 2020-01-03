@@ -3,6 +3,7 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "SGE/sge_blib.h"
+#include "SGE/sge_surface.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
@@ -53,6 +54,8 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
+    sge_Update_OFF();
+    sge_Lock_OFF();
     CFile::init();
 
     /*NOTE: its important to load a palette at first,

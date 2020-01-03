@@ -263,7 +263,7 @@ void _PutPixelX(SDL_Surface* dest, Sint16 x, Sint16 y, Uint32 color)
 //==================================================================================
 void sge_PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color)
 {
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
     {
         if(SDL_LockSurface(surface) < 0)
         {
@@ -273,12 +273,12 @@ void sge_PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color)
 
     _PutPixel(surface, x, y, color);
 
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
     {
         SDL_UnlockSurface(surface);
     }
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -534,19 +534,19 @@ void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint
 
 void sge_PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint8 alpha)
 {
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
         if(SDL_LockSurface(surface) < 0)
             return;
 
     _PutPixelAlpha(surface, x, y, color, alpha);
 
     /* unlock the display */
-    if(SDL_MUSTLOCK(surface) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(surface))
     {
         SDL_UnlockSurface(surface);
     }
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -613,7 +613,7 @@ void sge_ClearSurface(SDL_Surface* Surface, Uint32 color)
 {
     SDL_FillRect(Surface, nullptr, color);
 
-    if(_sge_update != 1)
+    if(!_sge_update)
     {
         return;
     }
@@ -1109,7 +1109,7 @@ void DO_FILL(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 // Wrapper function
 void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
 {
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
         if(SDL_LockSurface(dst) < 0)
             return;
 
@@ -1124,7 +1124,7 @@ void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
         case 4: /* Probably 32-bpp */ DO_FILL<Uint32>(dst, x, y, color); break;
     }
 
-    if(SDL_MUSTLOCK(dst) && _sge_lock)
+    if(_sge_lock && SDL_MUSTLOCK(dst))
     {
         SDL_UnlockSurface(dst);
     }
