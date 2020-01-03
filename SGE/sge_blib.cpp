@@ -41,19 +41,19 @@ extern Uint8 _sge_update;
 extern Uint8 _sge_lock;
 extern Uint8 _sge_alpha_hack;
 
-/* Macro to inline RGB mapping */
-static constexpr Uint32 MapRGB(const SDL_PixelFormat& format, Uint8 r, Uint8 g, Uint8 b)
+namespace {
+constexpr Uint32 MapRGB(const SDL_PixelFormat& format, Uint8 r, Uint8 g, Uint8 b)
 {
     return ((Uint32)r >> format.Rloss) << format.Rshift | ((Uint32)g >> format.Gloss) << format.Gshift
            | ((Uint32)b >> format.Bloss) << format.Bshift | format.Amask;
 }
 
-static constexpr Uint32 MapRGB(const SDL_PixelFormat& format, UFixedPoint R, UFixedPoint G, UFixedPoint B)
+constexpr Uint32 MapRGB(const SDL_PixelFormat& format, UFixedPoint R, UFixedPoint G, UFixedPoint B)
 {
     return MapRGB(format, static_cast<Uint8>(R.toUnsigned()), static_cast<Uint8>(G.toUnsigned()), static_cast<Uint8>(B.toUnsigned()));
 }
 
-static Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 factor)
+Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 factor)
 {
     const auto r = ((static_cast<Uint8>((value & format.Rmask) >> format.Rshift) * factor) >> 16);
     const auto g = ((static_cast<Uint8>((value & format.Gmask) >> format.Gshift) * factor) >> 16);
@@ -63,6 +63,28 @@ static Uint32 ScaleRGB(const SDL_PixelFormat& format, Uint32 value, Sint32 facto
     const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
     return MapRGB(format, r8, g8, b8);
 }
+
+constexpr Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b)
+{
+    return (Uint32)r << 24 | (Uint32)g << 16 | (Uint32)b << 8;
+}
+
+constexpr Uint32 MapRGB(UFixedPoint R, UFixedPoint G, UFixedPoint B)
+{
+    return MapRGB(static_cast<Uint8>(R.toUnsigned()), static_cast<Uint8>(G.toUnsigned()), static_cast<Uint8>(B.toUnsigned()));
+}
+
+Uint32 ScaleRGB(Uint32 value, Sint32 factor)
+{
+    const auto r = (((value & 0xFF000000) >> 24) * factor) >> 16;
+    const auto g = (((value & 0x00FF0000) >> 16) * factor) >> 16;
+    const auto b = (((value & 0x0000FF00) >> 8) * factor) >> 16;
+    const auto r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
+    const auto g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
+    const auto b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
+    return MapRGB(r8, g8, b8);
+}
+} // namespace
 //==================================================================================
 // Draws a horisontal line, fading the colors
 //==================================================================================
@@ -551,29 +573,8 @@ static void _FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y
                 {
                     Uint32* pixel = row + x;
 
-                    // SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), srcFormat, &r, &g, &b);
-                    // r1=r*I;
-                    // g1=g*I;
-                    // b1=b*I;
-
-                    /*
-                    //32BPP: 0x FF FF FF FF
-                    //          R  G  B  A
-                    pixel_ptr = (Uint8*)((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16));
-                    r = (*(pixel_ptr++) * I) >> 16;
-                    g = (*(pixel_ptr++) * I) >> 16;
-                    b = (*(pixel_ptr) * I) >> 16;
-                    r8 = (Uint8)(r > 255 ? 255 : (r < 0 ? 0 : r));
-                    g8 = (Uint8)(g > 255 ? 255 : (g < 0 ? 0 : g));
-                    b8 = (Uint8)(b > 255 ? 255 : (b < 0 ? 0 : b));
-                    pixel_ptr = (Uint8*)pixel;
-                    *(pixel_ptr++) = r8;
-                    *(pixel_ptr++) = g8;
-                    *(pixel_ptr) = b8;
-                    */
-
                     Uint32 pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
-                    *pixel = ScaleRGB(dstFormat, pixel_value, I);
+                    *pixel = ScaleRGB(pixel_value, I);
 
                     I += istep;
 
@@ -789,22 +790,13 @@ static void _FadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint16 x2, 
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel;
-                Uint32 pixel_value;
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / 4;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
 
-                Uint16 pitch = source->pitch / 4;
+                const Uint16 pitch = source->pitch / 4;
 
-                for(x = x1; x <= x2; x++)
+                for(x = x1; x <= x2; x++, ++pixel)
                 {
-                    pixel = row + x;
-
-                    // SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), source->format, &r, &g, &b);
-                    // r1=r*I;
-                    // g1=g*I;
-                    // b1=b*I;
-                    // test for colorkey
-                    pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
+                    const Uint32 pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
                     if(pixel_value != source->format->colorkey)
                     {
                         *pixel = ScaleRGB(dstFormat, pixel_value, I);
@@ -1029,23 +1021,16 @@ static void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, S
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel;
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / 4;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
 
-                Uint16 pitch = source->pitch / 4;
+                const Uint16 pitch = source->pitch / 4;
 
                 // Uint32 r1,g1,b1;
 
-                for(x = x1; x <= x2; x++)
+                for(x = x1; x <= x2; x++, ++pixel)
                 {
-                    pixel = row + x;
-
-                    // SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), source->format, &r, &g, &b);
-                    // r1=r*I;
-                    // g1=g*I;
-                    // b1=b*I;
                     const auto pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
-                    *pixel = ScaleRGB(dstFormat, pixel_value, I);
+                    *pixel = ScaleRGB(pixel_value, I);
 
                     I += istep;
 
@@ -1126,13 +1111,10 @@ static void _PreCalcFadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, S
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel;
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / 4;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
 
-                for(x = x1; x <= x2; x++)
+                for(x = x1; x <= x2; x++, ++pixel)
                 {
-                    pixel = row + x;
-
                     SDL_GetRGB(sge_GetPixel(source, srcx.toInt(), srcy.toInt()), source->format, &r, &g, &b);
                     *pixel = MapRGB(*dest->format, r, g, b);
 
@@ -1272,19 +1254,12 @@ static void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel;
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / 4;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
 
                 Uint16 pitch = source->pitch / 4;
 
-                for(x = x1; x <= x2; x++)
+                for(x = x1; x <= x2; x++, ++pixel)
                 {
-                    pixel = row + x;
-
-                    // SDL_GetRGB(*((Uint32 *)source->pixels + (srcy>>16)*pitch + (srcx>>16)), source->format, &r, &g, &b);
-                    // r1=r*I;
-                    // g1=g*I;
-                    // b1=b*I;
                     const auto pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
                     *pixel = ScaleRGB(dstFormat, pixel_value, I);
 
@@ -1367,13 +1342,10 @@ static void _PreCalcFadedTexturedLineColorKey(SDL_Surface* dest, Sint16 x1, Sint
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel;
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / 4;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
 
-                for(x = x1; x <= x2; x++)
+                for(x = x1; x <= x2; x++, ++pixel)
                 {
-                    pixel = row + x;
-
                     SDL_GetRGB(sge_GetPixel(source, srcx.toInt(), srcy.toInt()), source->format, &r, &g, &b);
                     *pixel = MapRGB(*dest->format, r, g, b);
 
@@ -1523,15 +1495,12 @@ static void _PreCalcFadedTexturedLineColorKeys(SDL_Surface* dest, Sint16 x1, Sin
 
             case 4:
             { /* Probably 32-bpp */
-                Uint32* pixel;
-                Uint32* row = (Uint32*)dest->pixels + y * dest->pitch / 4;
+                Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / 4 + x1;
 
                 Uint16 pitch = source->pitch / 4;
 
-                for(x = x1; x <= x2; x++)
+                for(x = x1; x <= x2; x++, ++pixel)
                 {
-                    pixel = row + x;
-
                     const auto pixel_value = *((Uint32*)source->pixels + srcy.toInt() * pitch + srcx.toInt());
                     *pixel = ScaleRGB(dstFormat, pixel_value, I);
 
