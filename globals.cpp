@@ -11,7 +11,7 @@ std::vector<bobPAL> global::palArray(MAXBOBPAL);
 CGame* global::s2;
 
 std::string global::gameDataFilePath(".");
-std::string global::userMapsPath("./WORLDS");
+std::string global::userMapsPath;
 WorldDescription global::worldDesc;
 
 unsigned char TRIANGLE_HEIGHT = 28;

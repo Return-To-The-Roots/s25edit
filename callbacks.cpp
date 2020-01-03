@@ -766,11 +766,11 @@ void callback::EditorLoadMenu(int Param)
         {
             if(WNDLoad)
                 break;
-            WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 160),
+            WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320),
                                                                            "Load", WINDOW_GREEN1, WINDOW_CLOSE));
             MapObj = global::s2->getMapObj();
 
-            auto* CB_Filename = WNDLoad->addSelectBox(10, 20, 160, 130, 11);
+            auto* CB_Filename = WNDLoad->addSelectBox(10, 5, 160, 280, 11);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
             {
@@ -780,8 +780,8 @@ void callback::EditorLoadMenu(int Param)
                     CB_Filename->setOption(filename, [filename](int) { curFilename = filename; });
                 }
             }
-            WNDLoad->addButton(EditorLoadMenu, LOADMAP, 170, 40, 90, 20, BUTTON_GREY, "Load");
-            WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 170, 65, 90, 20, BUTTON_RED1, "Abort");
+            WNDLoad->addButton(EditorLoadMenu, LOADMAP, 175, 140, 90, 20, BUTTON_GREY, "Load");
+            WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, 175, 165, 90, 20, BUTTON_RED1, "Abort");
             break;
         }
         case WINDOWQUIT:
