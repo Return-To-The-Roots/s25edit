@@ -3,44 +3,52 @@
 
 #include "CControlContainer.h"
 
+enum class WindowPos
+{
+    Center
+};
+
 class CWindow final : public CControlContainer
 {
     friend class CDebug;
 
 private:
     // if active is false, the window will be render behind the active windows within the game loop
-    bool active;
+    bool active = true;
     Sint16 x_;
     Sint16 y_;
     Uint16 w_;
     Uint16 h_;
     const char* title;
-    bool marked;
-    bool clicked;
+    bool marked = true;
+    bool clicked = false;
     bool canMove;
     bool canClose;
-    bool canClose_marked;
-    bool canClose_clicked;
+    bool canClose_marked = false;
+    bool canClose_clicked = false;
     bool canMinimize;
-    bool canMinimize_marked;
-    bool canMinimize_clicked;
+    bool canMinimize_marked = false;
+    bool canMinimize_clicked = false;
     bool canResize;
-    bool canResize_marked;
-    bool canResize_clicked;
-    bool minimized;
-    bool moving;
-    bool resizing;
-    int priority; // for register, blit, event
+    bool canResize_marked = false;
+    bool canResize_clicked = false;
+    bool minimized = false;
+    bool moving = false;
+    bool resizing = false;
+    int priority = 0; // for register, blit, event
     void (*callback_)(int);
     int callbackQuitMessage;
 
     bool render() final;
 
 public:
-    // Constructor - Destructor
-    CWindow(void callback(int), int callbackQuitMessage, Uint16 x = 0, Uint16 y = 0, Uint16 w = 200, Uint16 h = 200,
-            const char* title = nullptr, int color = WINDOW_GREEN1, Uint8 flags = 0);
+    CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title = nullptr, int color = WINDOW_GREEN1,
+            Uint8 flags = 0);
+    CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size, const char* title = nullptr, int color = WINDOW_GREEN1,
+            Uint8 flags = 0);
     // Access
+    Position getPos() const { return {x_, y_}; }
+    Extent getSize() const { return {w_, h_}; }
     int getX() const { return x_; };
     int getY() const { return y_; };
     int getW() const { return w_; };

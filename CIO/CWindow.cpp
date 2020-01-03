@@ -7,49 +7,42 @@
 #include "CPicture.h"
 #include "CSelectBox.h"
 #include "CTextfield.h"
+#include "CollisionDetection.h"
 #include "helpers/containerUtils.h"
 #include <cassert>
 
-CWindow::CWindow(void callback(int), int callbackQuitMessage, Uint16 x, Uint16 y, Uint16 w, Uint16 h, const char* title, int color,
-                 Uint8 flags)
-    : CControlContainer(color, {global::bmpArray[WINDOW_LEFT_FRAME].w, global::bmpArray[WINDOW_UPPER_FRAME].h})
+CWindow::CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title, int color, Uint8 flags)
+    : CControlContainer(color, {global::bmpArray[WINDOW_LEFT_FRAME].w, global::bmpArray[WINDOW_UPPER_FRAME].h}), x_(pos.x), y_(pos.y),
+      w_(size.x), h_(size.y), title(title), callback_(callback), callbackQuitMessage(callbackQuitMessage)
 {
     assert(callback);
-    marked = true;
-    clicked = false;
-    this->x_ = x;
-    this->y_ = y;
     // ensure window is big enough to take all basic pictures needed
     // if ( w < (global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + global::bmpArray[WINDOW_UPPER_FRAME].w +
     // global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w) )
     //    this->w = global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + global::bmpArray[WINDOW_UPPER_FRAME].w +
     //    global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w;
     // else
-    this->w_ = w;
     // if ( h < (global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h) )
     //    this->h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
     // else
-    this->h_ = h;
     canMove = (flags & WINDOW_MOVE) != 0;
     canClose = (flags & WINDOW_CLOSE) != 0;
-    canClose_marked = false;
-    canClose_clicked = false;
     canMinimize = (flags & WINDOW_MINIMIZE) != 0;
-    canMinimize_marked = false;
-    canMinimize_clicked = false;
     canResize = (flags & WINDOW_RESIZE) != 0;
-    canResize_marked = false;
-    canResize_clicked = false;
-    minimized = false;
-    priority = 0;
-
-    this->title = title;
-    this->callback_ = callback;
-    this->callbackQuitMessage = callbackQuitMessage;
-    active = true;
-    moving = false;
-    resizing = false;
 }
+
+static Position makePos(WindowPos pos, Extent size)
+{
+    if(pos == WindowPos::Center)
+        return Position(global::s2->getDisplaySurface()->w, global::s2->getDisplaySurface()->h) / 2 - size / 2;
+    else
+        return {};
+}
+
+CWindow::CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size, const char* title /*= nullptr*/,
+                 int color /*= WINDOW_GREEN1*/, Uint8 flags /*= 0*/)
+    : CWindow(callback, callbackQuitMessage, makePos(pos, size), size, title, color, flags)
+{}
 
 void CWindow::setTitle(const char* title)
 {
@@ -70,9 +63,10 @@ bool CWindow::hasActiveInputElement()
 void CWindow::setMouseData(SDL_MouseMotionEvent motion)
 {
     // cursor is on the title frame (+/-2 and +/-4 are only for a good optic)
-    if((motion.x >= x_ + global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2)
-       && (motion.x < x_ + w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2) && (motion.y >= y_ + 4)
-       && (motion.y < y_ + +global::bmpArray[WINDOW_UPPER_FRAME].h - 4))
+    const Position titleFrameLT = Position(x_, y_) + Position(global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2, 4);
+    const Position titleFrameRB =
+      Position(x_ + w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2, y_ + global::bmpArray[WINDOW_UPPER_FRAME].h - 4);
+    if(IsPointInRect(Position(motion.x, motion.y), Rect(titleFrameLT, Extent(titleFrameRB - titleFrameLT))))
     {
         // left button was pressed while moving
         if(clicked)
@@ -150,7 +144,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     }
 
     // deliver mouse data to the content objects of the window (if mouse cursor is inside the window)
-    if((motion.x >= x_) && (motion.x < x_ + w_) && (motion.y >= y_) && (motion.y < y_ + h_))
+    if(IsPointInRect(Position(motion.x, motion.y), Rect(getPos(), getSize())))
     {
         // IMPORTANT: we use the left upper corner of the window as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute - y_window
@@ -243,7 +237,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     }
 
     // deliver mouse data to the content objects of the window (if mouse cursor is inside the window)
-    if((button.x >= x_) && (button.x < x_ + w_) && (button.y >= y_) && (button.y < y_ + h_))
+    if(IsPointInRect(Position(button.x, button.y), Rect(getPos(), getSize())))
     {
         // IMPORTANT: we use the left upper corner of the window as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute - y_window

@@ -12,8 +12,9 @@
 
 CDebug::CDebug(void dbgCallback(int), int quitParam)
 {
-    dbgWnd = global::s2->RegisterWindow(std::make_unique<CWindow>(dbgCallback, quitParam, 0, 0, 540, 130, "Debugger", WINDOW_GREEN1,
-                                                                  WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
+    dbgWnd =
+      global::s2->RegisterWindow(std::make_unique<CWindow>(dbgCallback, quitParam, Position(0, 0), Extent(540, 130), "Debugger",
+                                                           WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
     dbgWnd->addText("Debugger started", 0, 0, fontsize);
     this->dbgCallback_ = dbgCallback;
     FrameCounterText = nullptr;

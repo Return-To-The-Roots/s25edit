@@ -38,8 +38,7 @@ void callback::PleaseWait(int Param)
             if(WNDWait)
                 break;
             WNDWait = global::s2->RegisterWindow(
-              std::make_unique<CWindow>(PleaseWait, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106, //-V807
-                                        global::s2->getDisplaySurface()->h / 2 - 35, 212, 70, "Please wait"));
+              std::make_unique<CWindow>(PleaseWait, WINDOWQUIT, WindowPos::Center, Extent(212, 70), "Please wait"));
             // we don't register this window cause we will destroy it manually if we need
             // global::s2->RegisterCallback(PleaseWait);
 
@@ -92,8 +91,7 @@ void callback::ShowStatus(int Param)
         case INITIALIZING_CALL:
             if(WND)
                 break;
-            WND = global::s2->RegisterWindow(std::make_unique<CWindow>(ShowStatus, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 106,
-                                                                       global::s2->getDisplaySurface()->h / 2 - 35, 250, 90, "Status",
+            WND = global::s2->RegisterWindow(std::make_unique<CWindow>(ShowStatus, WINDOWQUIT, WindowPos::Center, Extent(250, 90), "Status",
                                                                        WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             txt = WND->addText("", 26, 20, 14, FONT_YELLOW);
             break;
@@ -608,9 +606,9 @@ void callback::EditorHelpMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDHelp)
                 break;
-            WNDHelp = global::s2->RegisterWindow(std::make_unique<CWindow>(
-              EditorHelpMenu, WINDOWQUIT, global::s2->getDisplaySurface()->w / 2 - 320, global::s2->getDisplaySurface()->h / 2 - 240, 640,
-              380, "Hilfe", WINDOW_GREEN2, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
+            WNDHelp = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorHelpMenu, WINDOWQUIT, WindowPos::Center, Extent(640, 380),
+                                                                           "Hilfe", WINDOW_GREEN2,
+                                                                           WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
 
             SelectBoxHelp = WNDHelp->addSelectBox(0, 20, 635, 345, 11, FONT_YELLOW, BUTTON_GREEN1);
             SelectBoxHelp->setOption(
@@ -716,9 +714,8 @@ void callback::EditorMainMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDMain)
                 break;
-            WNDMain = global::s2->RegisterWindow(
-              std::make_unique<CWindow>(EditorMainMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 110,
-                                        global::s2->GameResolution.y / 2 - 160, 220, 320, "Main menu", WINDOW_GREEN1, WINDOW_CLOSE));
+            WNDMain = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorMainMenu, WINDOWQUIT, WindowPos::Center, Extent(220, 320),
+                                                                           "Main menu", WINDOW_GREEN1, WINDOW_CLOSE));
             WNDMain->addButton(EditorMainMenu, LOADMENU, 8, 100, 190, 20, BUTTON_GREEN2, "Load map");
             WNDMain->addButton(EditorMainMenu, SAVEMENU, 8, 125, 190, 20, BUTTON_GREEN2, "Save map");
 
@@ -769,9 +766,8 @@ void callback::EditorLoadMenu(int Param)
         {
             if(WNDLoad)
                 break;
-            WNDLoad = global::s2->RegisterWindow(
-              std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 140,
-                                        global::s2->GameResolution.y / 2 - 45, 280, 160, "Load", WINDOW_GREEN1, WINDOW_CLOSE));
+            WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 160),
+                                                                           "Load", WINDOW_GREEN1, WINDOW_CLOSE));
             MapObj = global::s2->getMapObj();
 
             auto* CB_Filename = WNDLoad->addSelectBox(10, 20, 160, 130, 11);
@@ -871,9 +867,8 @@ void callback::EditorSaveMenu(int Param)
             if(WNDSave)
                 break;
             {
-                WNDSave = global::s2->RegisterWindow(
-                  std::make_unique<CWindow>(EditorSaveMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 140,
-                                            global::s2->GameResolution.y / 2 - 100, 280, 200, "Save", WINDOW_GREEN1, WINDOW_CLOSE));
+                WNDSave = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorSaveMenu, WINDOWQUIT, WindowPos::Center,
+                                                                               Extent(280, 200), "Save", WINDOW_GREEN1, WINDOW_CLOSE));
                 MapObj = global::s2->getMapObj();
 
                 WNDSave->addText("Filename", 100, 2, 9);
@@ -952,9 +947,8 @@ void callback::EditorQuitMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDBackToMainMenu)
                 break;
-            WNDBackToMainMenu =
-              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorQuitMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - 106,
-                                                                   global::s2->GameResolution.y / 2 - 55, 212, 110, "Exit?"));
+            WNDBackToMainMenu = global::s2->RegisterWindow(
+              std::make_unique<CWindow>(EditorQuitMenu, WINDOWQUIT, WindowPos::Center, Extent(212, 110), "Exit?"));
             WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, 0, 0, 100, 80, BUTTON_GREEN2, nullptr, PICTURE_SMALL_TICK);
             WNDBackToMainMenu->addButton(EditorQuitMenu, NOTBACKTOMAIN, 100, 0, 100, 80, BUTTON_RED1, nullptr, PICTURE_SMALL_CROSS);
             break;
@@ -1002,7 +996,7 @@ void callback::EditorTextureMenu(int Param)
     static int textureIndex = 0;
     static int harbourPictureCross = 0; // this have to be -1 if we use the harbour button
     static int lastContent = 0x00;
-    static int PosX = 0, PosY = 0;
+    static Position Pos{0, 0};
 
     enum
     {
@@ -1038,8 +1032,9 @@ void callback::EditorTextureMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDTexture)
                 break;
-            WNDTexture = global::s2->RegisterWindow(std::make_unique<CWindow>(
-              EditorTextureMenu, WINDOWQUIT, PosX, PosY, 220, 133, "Terrain", WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
+            WNDTexture =
+              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorTextureMenu, WINDOWQUIT, Pos, Extent(220, 133), "Terrain",
+                                                                   WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
             map = MapObj->getMap();
             switch(map->type)
@@ -1263,8 +1258,7 @@ void callback::EditorTextureMenu(int Param)
         case WINDOWQUIT:
             if(WNDTexture)
             {
-                PosX = WNDTexture->getX();
-                PosY = WNDTexture->getY();
+                Pos = WNDTexture->getPos();
                 WNDTexture->setWaste();
                 WNDTexture = nullptr;
             }
@@ -1281,8 +1275,7 @@ void callback::EditorTextureMenu(int Param)
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
             if(WNDTexture)
             {
-                PosX = WNDTexture->getX();
-                PosY = WNDTexture->getY();
+                Pos = WNDTexture->getPos();
                 WNDTexture->setWaste();
                 WNDTexture = nullptr;
             }
@@ -1304,7 +1297,7 @@ void callback::EditorTreeMenu(int Param)
     static bobMAP* map = nullptr;
     static int lastContent = 0x00;
     static int lastContent2 = 0x00;
-    static int PosX = 230, PosY = 0;
+    static Position Pos{230, 0};
 
     enum
     {
@@ -1332,7 +1325,7 @@ void callback::EditorTreeMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDTree)
                 break;
-            WNDTree = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorTreeMenu, WINDOWQUIT, PosX, PosY, 148, 140, "Trees",
+            WNDTree = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorTreeMenu, WINDOWQUIT, Pos, Extent(148, 140), "Trees",
                                                                            WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
             map = MapObj->getMap();
@@ -1465,8 +1458,7 @@ void callback::EditorTreeMenu(int Param)
         case WINDOWQUIT:
             if(WNDTree)
             {
-                PosX = WNDTree->getX();
-                PosY = WNDTree->getY();
+                Pos = WNDTree->getPos();
                 WNDTree->setWaste();
                 WNDTree = nullptr;
             }
@@ -1483,8 +1475,7 @@ void callback::EditorTreeMenu(int Param)
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
             if(WNDTree)
             {
-                PosX = WNDTree->getX();
-                PosY = WNDTree->getY();
+                Pos = WNDTree->getPos();
                 WNDTree->setWaste();
                 WNDTree = nullptr;
             }
@@ -1503,7 +1494,7 @@ void callback::EditorResourceMenu(int Param)
     static CWindow* WNDResource = nullptr;
     static CMap* MapObj = nullptr;
     static int lastContent = 0x00;
-    static int PosX = 0, PosY = 140;
+    static Position Pos{0, 140};
 
     enum
     {
@@ -1523,7 +1514,7 @@ void callback::EditorResourceMenu(int Param)
             if(WNDResource)
                 break;
             WNDResource =
-              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorResourceMenu, WINDOWQUIT, PosX, PosY, 148, 55, "Resources",
+              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorResourceMenu, WINDOWQUIT, Pos, Extent(148, 55), "Resources",
                                                                    WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
 
@@ -1565,8 +1556,7 @@ void callback::EditorResourceMenu(int Param)
         case WINDOWQUIT:
             if(WNDResource)
             {
-                PosX = WNDResource->getX();
-                PosY = WNDResource->getY();
+                Pos = WNDResource->getPos();
                 WNDResource->setWaste();
                 WNDResource = nullptr;
             }
@@ -1580,8 +1570,7 @@ void callback::EditorResourceMenu(int Param)
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
             if(WNDResource)
             {
-                PosX = WNDResource->getX();
-                PosY = WNDResource->getY();
+                Pos = WNDResource->getPos();
                 WNDResource->setWaste();
                 WNDResource = nullptr;
             }
@@ -1600,7 +1589,7 @@ void callback::EditorLandscapeMenu(int Param)
     static bobMAP* map = nullptr;
     static int lastContent = 0x00;
     static int lastContent2 = 0x00;
-    static int PosX = 390, PosY = 0;
+    static Position Pos{390, 0};
 
     enum
     {
@@ -1627,7 +1616,7 @@ void callback::EditorLandscapeMenu(int Param)
             if(WNDLandscape)
                 break;
             WNDLandscape =
-              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLandscapeMenu, WINDOWQUIT, PosX, PosY, 112, 174, "Landscape",
+              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLandscapeMenu, WINDOWQUIT, Pos, Extent(112, 174), "Landscape",
                                                                    WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
             map = MapObj->getMap();
@@ -1755,8 +1744,7 @@ void callback::EditorLandscapeMenu(int Param)
         case WINDOWQUIT:
             if(WNDLandscape)
             {
-                PosX = WNDLandscape->getX();
-                PosY = WNDLandscape->getY();
+                Pos = WNDLandscape->getPos();
                 WNDLandscape->setWaste();
                 WNDLandscape = nullptr;
             }
@@ -1773,8 +1761,7 @@ void callback::EditorLandscapeMenu(int Param)
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
             if(WNDLandscape)
             {
-                PosX = WNDLandscape->getX();
-                PosY = WNDLandscape->getY();
+                Pos = WNDLandscape->getPos();
                 WNDLandscape->setWaste();
                 WNDLandscape = nullptr;
             }
@@ -1793,7 +1780,7 @@ void callback::EditorAnimalMenu(int Param)
     static CWindow* WNDAnimal = nullptr;
     static CMap* MapObj = nullptr;
     static int lastContent = 0x00;
-    static int PosX = 510, PosY = 0;
+    static Position Pos{510, 0};
 
     enum
     {
@@ -1814,7 +1801,7 @@ void callback::EditorAnimalMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDAnimal)
                 break;
-            WNDAnimal = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorAnimalMenu, WINDOWQUIT, PosX, PosY, 116, 106, "Animals",
+            WNDAnimal = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorAnimalMenu, WINDOWQUIT, Pos, Extent(116, 106), "Animals",
                                                                              WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             WNDAnimal->addPicture(EditorAnimalMenu, PICRABBIT, 2, 2, PICTURE_ANIMAL_RABBIT);
             WNDAnimal->addPicture(EditorAnimalMenu, PICFOX, 36, 2, PICTURE_ANIMAL_FOX);
@@ -1865,8 +1852,7 @@ void callback::EditorAnimalMenu(int Param)
         case WINDOWQUIT:
             if(WNDAnimal)
             {
-                PosX = WNDAnimal->getX();
-                PosY = WNDAnimal->getY();
+                Pos = WNDAnimal->getPos();
                 WNDAnimal->setWaste();
                 WNDAnimal = nullptr;
             }
@@ -1880,8 +1866,7 @@ void callback::EditorAnimalMenu(int Param)
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
             if(WNDAnimal)
             {
-                PosX = WNDAnimal->getX();
-                PosY = WNDAnimal->getY();
+                Pos = WNDAnimal->getPos();
                 WNDAnimal->setWaste();
                 WNDAnimal = nullptr;
             }
@@ -1903,7 +1888,7 @@ void callback::EditorPlayerMenu(int Param)
     static DisplayRectangle tempRect;
     static Uint16* PlayerHQx = nullptr;
     static Uint16* PlayerHQy = nullptr;
-    static int PosX = 0, PosY = 200;
+    static Position Pos{0, 200};
 
     enum
     {
@@ -1921,7 +1906,7 @@ void callback::EditorPlayerMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDPlayer)
                 break;
-            WNDPlayer = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorPlayerMenu, WINDOWQUIT, PosX, PosY, 100, 80, "Players",
+            WNDPlayer = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorPlayerMenu, WINDOWQUIT, Pos, Extent(100, 80), "Players",
                                                                              WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
             tempRect = MapObj->getDisplayRect();
@@ -1981,8 +1966,7 @@ void callback::EditorPlayerMenu(int Param)
         case WINDOWQUIT:
             if(WNDPlayer)
             {
-                PosX = WNDPlayer->getX();
-                PosY = WNDPlayer->getY();
+                Pos = WNDPlayer->getPos();
                 WNDPlayer->setWaste();
                 WNDPlayer = nullptr;
             }
@@ -2000,8 +1984,7 @@ void callback::EditorPlayerMenu(int Param)
             // we do the same like in case WINDOWQUIT, but we won't setMode(EDITOR_MODE_HEIGHT_RAISE), cause map is dead
             if(WNDPlayer)
             {
-                PosX = WNDPlayer->getX();
-                PosY = WNDPlayer->getY();
+                Pos = WNDPlayer->getPos();
                 WNDPlayer->setWaste();
                 WNDPlayer = nullptr;
             }
@@ -2025,7 +2008,7 @@ void callback::EditorCursorMenu(int Param)
     static int trianglePictureRandom = -1;
     static CButton* CursorModeButton = nullptr;
     static CButton* CursorRandomButton = nullptr;
-    static int PosX = 0, PosY = 0;
+    static Position Pos{0, 0};
 
     enum
     {
@@ -2043,7 +2026,7 @@ void callback::EditorCursorMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDCursor)
                 break;
-            WNDCursor = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorCursorMenu, WINDOWQUIT, PosX, PosY, 210, 130, "Cursor",
+            WNDCursor = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorCursorMenu, WINDOWQUIT, Pos, Extent(210, 130), "Cursor",
                                                                              WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
 
@@ -2163,8 +2146,7 @@ void callback::EditorCursorMenu(int Param)
         case WINDOWQUIT:
             if(WNDCursor)
             {
-                PosX = WNDCursor->getX();
-                PosY = WNDCursor->getY();
+                Pos = WNDCursor->getPos();
                 WNDCursor->setWaste();
                 WNDCursor = nullptr;
             }
@@ -2180,8 +2162,7 @@ void callback::EditorCursorMenu(int Param)
             // we do the same like in case WINDOWQUIT
             if(WNDCursor)
             {
-                PosX = WNDCursor->getX();
-                PosY = WNDCursor->getY();
+                Pos = WNDCursor->getPos();
                 WNDCursor->setWaste();
                 WNDCursor = nullptr;
             }
@@ -2217,7 +2198,7 @@ void callback::EditorCreateMenu(int Param)
     static int border = 0;
     static int border_texture = TRIANGLE_TEXTURE_SNOW;
     static std::array<char, 5> puffer;
-    static int PosX = global::s2->GameResolution.x / 2 - 125, PosY = global::s2->GameResolution.y / 2 - 175;
+    static Position Pos(global::s2->GameResolution.x / 2 - 125, global::s2->GameResolution.y / 2 - 175);
 
     enum
     {
@@ -2256,7 +2237,7 @@ void callback::EditorCreateMenu(int Param)
             if(WNDCreate)
                 break;
             WNDCreate =
-              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorCreateMenu, WINDOWQUIT, PosX, PosY, 250, 350, "Create world",
+              global::s2->RegisterWindow(std::make_unique<CWindow>(EditorCreateMenu, WINDOWQUIT, Pos, Extent(250, 350), "Create world",
                                                                    WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE));
             MapObj = global::s2->getMapObj();
 
@@ -2896,8 +2877,7 @@ void callback::EditorCreateMenu(int Param)
         case MAP_QUIT:
             if(WNDCreate)
             {
-                PosX = WNDCreate->getX();
-                PosY = WNDCreate->getY();
+                Pos = WNDCreate->getPos();
                 WNDCreate->setWaste();
                 WNDCreate = nullptr;
             }
@@ -2921,8 +2901,7 @@ void callback::EditorCreateMenu(int Param)
         case WINDOWQUIT:
             if(WNDCreate)
             {
-                PosX = WNDCreate->getX();
-                PosY = WNDCreate->getY();
+                Pos = WNDCreate->getPos();
                 WNDCreate->setWaste();
                 WNDCreate = nullptr;
             }
@@ -2981,10 +2960,9 @@ void callback::MinimapMenu(int Param)
                 //--> 12px is width of left and right window frame and 30px is height of the upper and lower window frame
                 if((global::s2->getDisplaySurface()->w - 12 < width) || (global::s2->getDisplaySurface()->h - 30 < height))
                     break;
-                WNDMinimap = global::s2->RegisterWindow(
-                  std::make_unique<CWindow>(MinimapMenu, WINDOWQUIT, global::s2->GameResolution.x / 2 - width / 2 - 6,
-                                            global::s2->GameResolution.y / 2 - height / 2 - 15, width + 12, height + 30, "Overview",
-                                            WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE));
+                WNDMinimap = global::s2->RegisterWindow(std::make_unique<CWindow>(MinimapMenu, WINDOWQUIT, WindowPos::Center,
+                                                                                  Extent(width + 12, height + 30), "Overview",
+                                                                                  WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE));
                 global::s2->RegisterCallback(MinimapMenu);
                 WndSurface = WNDMinimap->getSurface();
             }
@@ -3098,7 +3076,8 @@ void callback::viewer(int Param)
         case INITIALIZING_CALL:
             if(WNDViewer)
                 break;
-            WNDViewer = global::s2->RegisterWindow(std::make_unique<CWindow>(viewer, WINDOWQUIT, 0, 0, 250, 140, "Viewer", WINDOW_GREEN1,
+            WNDViewer = global::s2->RegisterWindow(std::make_unique<CWindow>(viewer, WINDOWQUIT, Position(0, 0), Extent(250, 140), "Viewer",
+                                                                             WINDOW_GREEN1,
                                                                              WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
             global::s2->RegisterCallback(viewer);
             WNDViewer->addButton(viewer, BACKWARD_100, 0, 0, 35, 20, BUTTON_GREY, "100<-");
@@ -3297,7 +3276,7 @@ void callback::submenu1(int Param)
             if(!testWindow)
             {
                 testWindow = global::s2->RegisterWindow(
-                  std::make_unique<CWindow>(submenu1, TESTWINDOWQUITMESSAGE, 5, 5, 350, 240, "Window", WINDOW_GREEN1,
+                  std::make_unique<CWindow>(submenu1, TESTWINDOWQUITMESSAGE, Position(5, 5), Extent(350, 240), "Window", WINDOW_GREEN1,
                                             WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
                 testWindow->addText("Text inside the window", 10, 10, 14);
                 testWindow->addButton(submenu1, -10, 150, 100, 210, 30, BUTTON_GREEN2, "Button inside the window");
@@ -3310,8 +3289,8 @@ void callback::submenu1(int Param)
             if(!testWindow2)
             {
                 testWindow2 = global::s2->RegisterWindow(
-                  std::make_unique<CWindow>(submenu1, TESTWINDOW2QUITMESSAGE, 200, 5, 350, 240, "Another Window", WINDOW_GREEN1,
-                                            WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
+                  std::make_unique<CWindow>(submenu1, TESTWINDOW2QUITMESSAGE, Position(200, 5), Extent(350, 240), "Another Window",
+                                            WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
                 testWindow2->addText("Text inside the window", 50, 40, 9);
                 testWindow2->addButton(submenu1, -10, 100, 100, 100, 20, BUTTON_GREEN2, "Button");
             }
