@@ -12,7 +12,8 @@
 
 bool CGame::ReCreateWindow()
 {
-    if(CSurface::useOpenGL)
+    useOpenGL = CSurface::useOpenGL;
+    if(useOpenGL)
     {
         Surf_DisplayGL.reset(SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0)));
         Surf_Display = makeSdlSurface(SDL_SWSURFACE, GameResolution.x, GameResolution.y, 32);

@@ -312,7 +312,7 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), 11, button_text_color, ALIGN_MIDDLE);
+        CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), 11, button_text_color, FontAlign::Middle);
 
     return true;
 }

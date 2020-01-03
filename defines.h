@@ -209,11 +209,11 @@ enum
 };
 
 // font alignment (after all used by CFont and other objects using CFont)
-enum FontAlign
+enum class FontAlign
 {
-    ALIGN_LEFT = 0,
-    ALIGN_MIDDLE,
-    ALIGN_RIGHT
+    Left = 0,
+    Middle,
+    Right
 };
 // i put some color values here, cause we need NUM_FONT_COLORS in the next enumeration
 // font color (after all used by CFont and other objects using CFont)

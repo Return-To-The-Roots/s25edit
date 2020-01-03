@@ -98,12 +98,16 @@ public:
     void setKeyboardData(const SDL_KeyboardEvent& key);
     void setActive() { active = true; }
     void setInactive() { active = false; }
-    bool isActive() { return active; }
-    int getVertexX() { return VertexX_; }
-    int getVertexY() { return VertexY_; }
-    bool getRenderBuildHelp() { return RenderBuildHelp; }
-    bool getRenderBorders() { return RenderBorders; }
-    int getBitsPerPixel() { return BitsPerPixel; }
+    bool isActive() const { return active; }
+    int getVertexX() const { return VertexX_; }
+    int getVertexY() const { return VertexY_; }
+    auto getMaxRaiseHeight() const { return MaxRaiseHeight; }
+    auto getMinReduceHeight() const { return MinReduceHeight; }
+    bool isHorizontalMovementLocked() const { return HorizontalMovementLocked; }
+    bool isVerticalMovementLocked() const { return VerticalMovementLocked; }
+    bool getRenderBuildHelp() const { return RenderBuildHelp; }
+    bool getRenderBorders() const { return RenderBorders; }
+    int getBitsPerPixel() const { return BitsPerPixel; }
     void setBitsPerPixel(int bbp)
     {
         BitsPerPixel = bbp;

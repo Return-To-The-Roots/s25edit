@@ -54,7 +54,12 @@ public:
     bool writeText();
     // this function can be used as CFont::writeText to write text directly to a surface without creating an object
     static bool writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9,
-                          unsigned color = FONT_YELLOW, FontAlign align = ALIGN_LEFT);
+                          unsigned color = FONT_YELLOW, FontAlign align = FontAlign::Left);
+    static bool writeText(SdlSurface& Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9,
+                          unsigned color = FONT_YELLOW, FontAlign align = FontAlign::Left)
+    {
+        return writeText(Surf_Dest.get(), string, x, y, fontsize, color, align);
+    }
 };
 
 #endif

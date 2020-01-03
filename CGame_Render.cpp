@@ -1,4 +1,5 @@
 #include "CGame.h"
+#include "CIO/CFont.h"
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
@@ -34,7 +35,7 @@ void CGame::SetAppIcon()
 
 void CGame::Render()
 {
-    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0))
+    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0) || useOpenGL != CSurface::useOpenGL)
     {
         ReCreateWindow();
     }
@@ -48,7 +49,7 @@ void CGame::Render()
                          surfLoadScreen.get(), 0, 0, surfLoadScreen->w - 1, 0, 0, surfLoadScreen->h - 1, surfLoadScreen->w - 1,
                          surfLoadScreen->h - 1);
 
-        if(CSurface::useOpenGL)
+        if(useOpenGL)
             SDL_GL_SwapBuffers();
         else
             SDL_Flip(Surf_Display.get());
@@ -57,7 +58,24 @@ void CGame::Render()
 
     // render the map if active
     if(MapObj && MapObj->isActive())
+    {
         CSurface::Draw(Surf_Display, MapObj->getSurface(), 0, 0);
+        std::array<char, 100> textBuffer;
+        // text for x and y of vertex (shown in upper left corner)
+        sprintf(textBuffer.data(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
+        CFont::writeText(Surf_Display, textBuffer.data(), 20, 20);
+        // text for MinReduceHeight and MaxRaiseHeight
+        sprintf(textBuffer.data(), "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A", MapObj->getMinReduceHeight(),
+                MapObj->getMaxRaiseHeight());
+        CFont::writeText(Surf_Display, textBuffer.data(), 100, 20);
+        // text for MovementLocked
+        if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
+            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", 20, 40, 14, FONT_ORANGE);
+        else if(MapObj->isHorizontalMovementLocked())
+            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, 14, FONT_ORANGE);
+        else if(MapObj->isVerticalMovementLocked())
+            CFont::writeText(Surf_Display, "Vertikal movement locked (F10 to unlock)", 20, 40, 14, FONT_ORANGE);
+    }
 
     // render active menus
     for(auto& Menu : Menus)
@@ -98,7 +116,19 @@ void CGame::Render()
     FrameCounter++;
 #endif
 
-    if(CSurface::useOpenGL)
+    ++framesPassedSinceLastFps;
+
+    const auto curTicks = SDL_GetTicks();
+    const auto diffTicks = curTicks - lastFpsTick;
+    if(diffTicks > 1000)
+    {
+        lastFps.setText(std::to_string((framesPassedSinceLastFps * 1000) / diffTicks) + " FPS");
+        framesPassedSinceLastFps = 0;
+        lastFpsTick = curTicks;
+    }
+    CSurface::Draw(Surf_Display, lastFps.getSurface(), 0, 0);
+
+    if(useOpenGL)
     {
         SDL_BlitSurface(Surf_Display.get(), nullptr, Surf_DisplayGL.get(), nullptr);
         SDL_Flip(Surf_DisplayGL.get());
@@ -106,5 +136,6 @@ void CGame::Render()
     } else
         SDL_Flip(Surf_Display.get());
 
-    SDL_Delay(msWait);
+    if(msWait)
+        SDL_Delay(msWait);
 }

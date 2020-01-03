@@ -14,14 +14,8 @@ namespace bfs = boost::filesystem;
 
 //#include <vld.h>
 
-CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true)
+CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), lastFps("", 0, 0, 11)
 {
-#ifdef _ADMINMODE
-    FrameCounter = 0;
-#endif
-
-    msWait = 0;
-
     // mouse cursor data
     Cursor.x = 0;
     Cursor.y = 0;
@@ -45,6 +39,9 @@ int CGame::Execute()
         return -1;
 
     SDL_Event Event;
+    lastFps.setText("");
+    lastFpsTick = SDL_GetTicks();
+    framesPassedSinceLastFps = 0;
 
     while(Running)
     {

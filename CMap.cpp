@@ -1100,8 +1100,6 @@ int CMap::correctMouseBlitY(int VertexX, int VertexY)
 
 void CMap::render()
 {
-    std::array<char, 100> textBuffer;
-
     // check if game resolution has been changed
     if(displayRect.getSize() != global::s2->GameResolution)
     {
@@ -1163,20 +1161,6 @@ void CMap::render()
                 CSurface::Draw(Surf_Map, global::bmpArray[symbol_index2].surface, Vertices[i].blit_x, Vertices[i].blit_y - 7);
         }
     }
-
-    // text for x and y of vertex (shown in upper left corner)
-    sprintf(textBuffer.data(), "%d    %d", VertexX_, VertexY_);
-    CFont::writeText(Surf_Map, textBuffer.data(), 20, 20);
-    // text for MinReduceHeight and MaxRaiseHeight
-    sprintf(textBuffer.data(), "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A", MinReduceHeight, MaxRaiseHeight);
-    CFont::writeText(Surf_Map, textBuffer.data(), 100, 20);
-    // text for MovementLocked
-    if(HorizontalMovementLocked && VerticalMovementLocked)
-        CFont::writeText(Surf_Map, "Movement locked (F9 or F10 to unlock)", 20, 40, 14, FONT_ORANGE);
-    else if(HorizontalMovementLocked)
-        CFont::writeText(Surf_Map, "Horizontal movement locked (F9 to unlock)", 20, 40, 14, FONT_ORANGE);
-    else if(VerticalMovementLocked)
-        CFont::writeText(Surf_Map, "Vertikal movement locked (F10 to unlock)", 20, 40, 14, FONT_ORANGE);
 
     // draw the frame
     if(displayRect.getSize() == Extent(640, 480))

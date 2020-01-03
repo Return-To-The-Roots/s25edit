@@ -1,6 +1,7 @@
 #ifndef _CGAME_H
 #define _CGAME_H
 
+#include "CIO/CFont.h"
 #include "SdlSurface.h"
 #include <Point.h>
 #include <memory>
@@ -20,15 +21,20 @@ public:
 
     bool Running;
     bool showLoadScreen;
+    bool useOpenGL = false;
     SdlSurface Surf_Display, Surf_DisplayGL;
 
 private:
 #ifdef _ADMINMODE
     // some debugging variables
-    unsigned long int FrameCounter;
+    unsigned long int FrameCounter = 0;
 #endif
     // milliseconds for SDL_Delay()
-    Uint32 msWait;
+    Uint32 msWait = 0;
+    Uint32 framesPassedSinceLastFps;
+    Uint32 lastFpsTick;
+    CFont lastFps;
+
     // structure for mouse cursor
     struct
     {

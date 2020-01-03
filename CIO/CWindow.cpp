@@ -347,7 +347,7 @@ bool CWindow::render()
     // write text in the upper frame
     if(title)
         CFont::writeText(surface.get(), title, (int)w_ / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
-                         ALIGN_MIDDLE);
+                         FontAlign::Middle);
 
     // now draw the other frames (left, right, down)
     // down

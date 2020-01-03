@@ -310,7 +310,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigne
         return false;
 
     // in case of right or middle alignment we must count the pixels first
-    auto pixel_count_loop = (align == ALIGN_MIDDLE) || (align == ALIGN_RIGHT);
+    auto pixel_count_loop = (align == FontAlign::Middle) || (align == FontAlign::Right);
 
     // now lets draw the chiffres
     auto chiffre = string.begin();
@@ -323,7 +323,7 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigne
             pixel_ctr_w += charW;
 
             // if text is to long to go further left, stop loop and begin writing at x=0
-            if((align == ALIGN_MIDDLE && pixel_ctr_w / 2 > x) || static_cast<int>(pixel_ctr_w) >= Surf_Dest->w)
+            if((align == FontAlign::Middle && pixel_ctr_w / 2 > x) || static_cast<int>(pixel_ctr_w) >= Surf_Dest->w)
             {
                 pos_x = 0;
                 chiffre = string.begin();
@@ -338,9 +338,9 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigne
             {
                 chiffre = string.begin();
 
-                if(align == ALIGN_MIDDLE)
+                if(align == FontAlign::Middle)
                     pos_x = x - pixel_ctr_w / 2;
-                else if(align == ALIGN_RIGHT)
+                else if(align == FontAlign::Right)
                     pos_x = Surf_Dest->w - pixel_ctr_w;
 
                 pixel_count_loop = false;
