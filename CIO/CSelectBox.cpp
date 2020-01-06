@@ -144,7 +144,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                     if((button.x > x_ + w_ - 20) && (button.y < y_ + 20))
                     {
                         // test if first entry is on the most upper position
-                        if(Entries[0] != nullptr && Entries[0]->getY() < 10)
+                        if(!Entries.empty() && Entries.front()->getY() < 10)
                         {
                             for(auto& entry : Entries)
                             {
