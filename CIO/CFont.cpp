@@ -254,10 +254,10 @@ void CFont::writeText()
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 w = pixel_ctr_w;
                 h = pixel_ctr_h;
-                Surf_Font = makeSdlSurface(SDL_SWSURFACE, w, h, 32);
+                Surf_Font = makeRGBSurface(w, h);
                 if(!Surf_Font)
                     return;
-                SDL_SetColorKey(Surf_Font.get(), SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
+                SDL_SetColorKey(Surf_Font.get(), SDL_TRUE, SDL_MapRGB(Surf_Font->format, 0, 0, 0));
                 chiffre = string_.begin();
                 pixel_count_loop = false;
                 continue;

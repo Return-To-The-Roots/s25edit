@@ -279,7 +279,7 @@ bool CWindow::render()
     // if we need a new surface
     if(!surface)
     {
-        if(!(surface = makeSdlSurface(SDL_SWSURFACE, w_, h_, 32)))
+        if(!(surface = makeRGBSurface(w_, h_)))
             return false;
     }
 

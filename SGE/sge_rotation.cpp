@@ -15,13 +15,13 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 #define _USE_MATH_DEFINES
+#define HAVE_M_PI 1
 #include "sge_rotation.h"
 #include "sge_blib.h"
 #include "sge_surface.h"
 #include <array>
 #include <cmath>
 
-extern Uint8 _sge_update; // Declared in sge_draw.cpp
 extern Uint8 _sge_lock;
 
 SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 qx, Uint16 qy);
@@ -164,8 +164,8 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
             /* Make sure the source pixel is actually in the source image. */        \
             if((rx >= sxmin) && (rx <= sxmax) && (ry >= symin) && (ry <= symax))     \
             {                                                                        \
-                sge_GetRGBA(sge_GetPixel(src, rx, ry), src->format, &R, &G, &B, &A); \
-                _PutPixelX(dst, x, y, sge_MapRGBA(dst->format, R, G, B, A));         \
+                SDL_GetRGBA(sge_GetPixel(src, rx, ry), src->format, &R, &G, &B, &A); \
+                _PutPixelX(dst, x, y, SDL_MapRGBA(dst->format, R, G, B, A));         \
             }                                                                        \
             sx += ctx; /* Incremental transformations */                             \
             sy -= sty;                                                               \
@@ -293,10 +293,10 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
                 p2 = wx + one - wy;                                                                   \
                 p1 = two - wx - wy;                                                                   \
                                                                                                       \
-                sge_GetRGBA(sge_GetPixel(src, rx, ry), src->format, &R1, &G1, &B1, &A1);              \
-                sge_GetRGBA(sge_GetPixel(src, rx + 1, ry), src->format, &R2, &G2, &B2, &A2);          \
-                sge_GetRGBA(sge_GetPixel(src, rx, ry + 1), src->format, &R3, &G3, &B3, &A3);          \
-                sge_GetRGBA(sge_GetPixel(src, rx + 1, ry + 1), src->format, &R4, &G4, &B4, &A4);      \
+                SDL_GetRGBA(sge_GetPixel(src, rx, ry), src->format, &R1, &G1, &B1, &A1);              \
+                SDL_GetRGBA(sge_GetPixel(src, rx + 1, ry), src->format, &R2, &G2, &B2, &A2);          \
+                SDL_GetRGBA(sge_GetPixel(src, rx, ry + 1), src->format, &R3, &G3, &B3, &A3);          \
+                SDL_GetRGBA(sge_GetPixel(src, rx + 1, ry + 1), src->format, &R4, &G4, &B4, &A4);      \
                                                                                                       \
                 /* Calculate the average */                                                           \
                 R = (p1 * R1 + p2 * R2 + p3 * R3 + p4 * R4) >> 13;                                    \
@@ -304,7 +304,7 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
                 B = (p1 * B1 + p2 * B2 + p3 * B3 + p4 * B4) >> 13;                                    \
                 A = (p1 * A1 + p2 * A2 + p3 * A3 + p4 * A4) >> 13;                                    \
                                                                                                       \
-                _PutPixelX(dst, x, y, sge_MapRGBA(dst->format, R, G, B, A));                          \
+                _PutPixelX(dst, x, y, SDL_MapRGBA(dst->format, R, G, B, A));                          \
             }                                                                                         \
             sx += ctx; /* Incremental transformations */                                              \
             sy -= sty;                                                                                \

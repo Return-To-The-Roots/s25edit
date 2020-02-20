@@ -12,31 +12,21 @@
 
 bool CGame::ReCreateWindow()
 {
-    useOpenGL = CSurface::useOpenGL;
-    static char CENTER_ENV[] = "SDL_VIDEO_CENTERED=center";
-    SDL_putenv(CENTER_ENV);
+    displayTexture_.reset();
+    renderer_.reset();
+    window_.reset();
+    window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                   GameResolution.x, GameResolution.y, fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+    if(!window_)
+        return false;
+    renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
+    if(!renderer_)
+        return false;
+    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x, GameResolution.y);
+    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+    if(!displayTexture_ || !Surf_Display)
+        return false;
 
-    if(useOpenGL)
-    {
-        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
-        Surf_DisplayGL.reset(SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_OPENGL | (fullscreen ? SDL_FULLSCREEN : 0)));
-        Surf_Display = makeSdlSurface(SDL_SWSURFACE, GameResolution.x, GameResolution.y, 32);
-        if(!Surf_Display || !Surf_DisplayGL)
-            return false;
-    } else
-    {
-        Surf_Display.reset(
-          SDL_SetVideoMode(GameResolution.x, GameResolution.y, 32, SDL_SWSURFACE | SDL_DOUBLEBUF | (fullscreen ? SDL_FULLSCREEN : 0)));
-        Surf_DisplayGL.reset();
-        if(!Surf_Display)
-            return false;
-    }
-
-    SDL_WM_SetCaption("Return to the Roots Map editor [BETA]", nullptr);
     SetAppIcon();
     return true;
 }
@@ -45,7 +35,6 @@ bool CGame::Init()
 {
     std::cout << "Return to the Roots Map editor\n";
 
-    SDL_EnableKeyRepeat(100, 100);
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "Create Window...";
@@ -54,7 +43,6 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-    sge_Update_OFF();
     sge_Lock_OFF();
     CFile::init();
 
@@ -89,7 +77,7 @@ bool CGame::Init()
     auto& surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
     sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
                      surfSplash.get(), 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1, surfSplash->w - 1, surfSplash->h - 1);
-    SDL_Flip(Surf_Display.get());
+    RenderPresent();
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())

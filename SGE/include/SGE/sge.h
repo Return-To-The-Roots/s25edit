@@ -18,14 +18,11 @@
 #define sge_H
 
 #include "sge_blib.h"
-#include "sge_bm_text.h"
 #include "sge_collision.h"
 #include "sge_misc.h"
 #include "sge_primitives.h"
 #include "sge_rotation.h"
 #include "sge_shape.h"
 #include "sge_surface.h"
-#include "sge_textpp.h"
-#include "sge_tt_text.h"
 
 #endif /* sge_H */

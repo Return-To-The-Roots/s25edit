@@ -40,6 +40,12 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     Sint16 x, y;
     int i;
 
+    Uint32 colorkey;
+    if(SDL_GetColorKey(img, &colorkey) != 0)
+    {
+        SDL_SetError("SGE - No colorkey set");
+        return nullptr;
+    }
     cdata = new(nothrow) sge_cdata;
     if(!cdata)
     {
@@ -59,7 +65,6 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
     memset(cdata->map, 0x00, offs + 2);
 
     map = cdata->map;
-
     i = 0;
     for(y = 0; y < img->h; y++)
     {
@@ -70,7 +75,7 @@ sge_cdata* sge_make_cmap(SDL_Surface* img)
                 i = 0;
                 map++;
             }
-            if(sge_GetPixel(img, Sint16(x), Sint16(y)) != img->format->colorkey)
+            if(sge_GetPixel(img, Sint16(x), Sint16(y)) != colorkey)
             {
                 *map = *map | sge_mask[i];
             }

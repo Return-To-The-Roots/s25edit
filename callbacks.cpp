@@ -47,7 +47,7 @@ void callback::PleaseWait(int Param)
             // is done and we don't need the "Please wait"-window anymore)
             CSurface::Draw(global::s2->getDisplaySurface(), WNDWait->getSurface(), global::s2->getDisplaySurface()->w / 2 - 106,
                            global::s2->getDisplaySurface()->h / 2 - 35);
-            SDL_Flip(global::s2->getDisplaySurface());
+            global::s2->RenderPresent();
             break;
 
         case CALL_FROM_GAMELOOP: // This window gives a "Please Wait"-string, so it is shown while there is an intensive operation
@@ -175,7 +175,6 @@ void callback::submenuOptions(int Param)
     static CMenu* SubMenu = nullptr;
     static CFont* TextResolution = nullptr;
     static CButton* ButtonFullscreen = nullptr;
-    static CButton* ButtonOpenGL = nullptr;
     std::array<char, 80> puffer;
     static CSelectBox* SelectBoxRes = nullptr;
 
@@ -183,7 +182,6 @@ void callback::submenuOptions(int Param)
     {
         MAINMENU = 1,
         FULLSCREEN,
-        OPENGL,
         GRAPHICS_CHANGE,
         SELECTBOX_800_600,
         SELECTBOX_832_624,
@@ -247,10 +245,6 @@ void callback::submenuOptions(int Param)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 190, 200, 20,
                                                   BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            if(ButtonOpenGL)
-                SubMenu->delButton(ButtonOpenGL);
-            // ButtonOpenGL = SubMenu->addButton(submenuOptions, OPENGL, (int)(global::s2->GameResolution.x/2-100), 210, 200, 20,
-            // BUTTON_RED1, (CSurface::useOpenGL ? "Software-Rendering" : "OpenGL"));  add selectbox for resolutions
             SelectBoxRes = SubMenu->addSelectBox((int)(global::s2->GameResolution.x / 2 - 100), 70, 200, 110, 11, FONT_YELLOW, BUTTON_GREY);
             SelectBoxRes->setOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->setOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
@@ -301,7 +295,6 @@ void callback::submenuOptions(int Param)
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;
-            ButtonOpenGL = nullptr;
             SelectBoxRes = nullptr;
             SubMenu = nullptr;
             mainmenu(INITIALIZING_CALL);
@@ -316,18 +309,11 @@ void callback::submenuOptions(int Param)
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
-        case OPENGL:
-            CSurface::useOpenGL = !CSurface::useOpenGL;
-
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
         case GRAPHICS_CHANGE:
             assert(SubMenu);
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;
-            ButtonOpenGL = nullptr;
             SelectBoxRes = nullptr;
             SubMenu = nullptr;
             submenuOptions(INITIALIZING_CALL);

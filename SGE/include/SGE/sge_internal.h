@@ -57,34 +57,8 @@ constexpr auto absDiff(T a, T b)
 #define SGE_FLAG8 0x80
 
 /*
- *  Define the right alpha values
- *  (they were fliped in SDL 1.1.5+)
- */
-#ifndef SDL_ALPHA_OPAQUE
-#define SDL_ALPHA_OPAQUE 0
-#endif
-#ifndef SDL_ALPHA_TRANSPARENT
-#define SDL_ALPHA_TRANSPARENT 255
-#endif
-
-/*
- *  Older versions of SDL doesn't have SDL_VERSIONNUM
- */
-#ifndef SDL_VERSIONNUM
-#define SDL_VERSIONNUM(X, Y, Z) (X) * 1000 + (Y)*100 + (Z)
-#endif
-
-/*
- *  Older versions of SDL doesn't have SDL_CreateRGBSurface
- */
-#ifndef SDL_AllocSurface
-#define SDL_CreateRGBSurface SDL_AllocSurface
-#endif
-
-/*
  *  Macro to get clipping
  */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) >= SDL_VERSIONNUM(1, 1, 5)
 inline auto sge_clip_xmin(const SDL_Surface* pnt)
 {
     return pnt->clip_rect.x;
@@ -101,36 +75,6 @@ inline auto sge_clip_ymax(const SDL_Surface* pnt)
 {
     return (pnt->clip_rect.y + pnt->clip_rect.h - 1);
 }
-#else
-inline auto sge_clip_xmin(const SDL_Surface* pnt)
-{
-    pnt->clip_minx;
-}
-inline auto sge_clip_xmax(const SDL_Surface* pnt)
-{
-    pnt->clip_maxx;
-}
-inline auto sge_clip_ymin(const SDL_Surface* pnt)
-{
-    pnt->clip_miny;
-}
-inline auto sge_clip_ymax(const SDL_Surface* pnt)
-{
-    pnt->clip_maxy;
-}
-#endif
-
-/*
- *  We need to use alpha sometimes but older versions of SDL doesn't have
- *  alpha support.
- */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) >= SDL_VERSIONNUM(1, 1, 5)
-#define sge_MapRGBA SDL_MapRGBA
-#define sge_GetRGBA SDL_GetRGBA
-#else
-#define sge_MapRGBA(fmt, r, g, b, a) SDL_MapRGB(fmt, r, g, b)
-#define sge_GetRGBA(pixel, fmt, r, g, b, a) SDL_GetRGBA(pixel, fmt, r, g, b)
-#endif
 
 /*
  *  Some compilers use a special export keyword

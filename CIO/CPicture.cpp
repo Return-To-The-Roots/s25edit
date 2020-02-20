@@ -72,10 +72,10 @@ bool CPicture::render()
     // if we need a new surface
     if(!Surf_Picture)
     {
-        Surf_Picture = makeSdlSurface(SDL_SWSURFACE, w, h, 32);
+        Surf_Picture = makeRGBSurface(w, h);
         if(!Surf_Picture)
             return false;
-        SDL_SetColorKey(Surf_Picture.get(), SDL_SRCCOLORKEY, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
+        SDL_SetColorKey(Surf_Picture.get(), SDL_TRUE, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
     }
 
     CSurface::Draw(Surf_Picture, global::bmpArray[picture_].surface, 0, 0);

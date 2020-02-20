@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gameData/LandscapeDesc.h"
 #include "gameData/TerrainDesc.h"
+#include <cassert>
 #include <iostream>
 #include <string>
 
@@ -496,171 +497,153 @@ void CMap::moveMap(Position offset)
 void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // following code important for blitting the right field of the map
-    // is right mouse button pressed?
-    if(motion.state & SDL_BUTTON(3))
+    // Are we scrolling?
+    if(startScrollPos)
     {
-        Position offset{};
-        if(!HorizontalMovementLocked)
-            offset.x = motion.xrel;
-        if(!VerticalMovementLocked)
-            offset.y = motion.yrel;
+        assert(motion.state & SDL_BUTTON(3));
+        Position offset = Position(motion.x, motion.y) - *startScrollPos;
+        if(HorizontalMovementLocked)
+            offset.x = 0;
+        if(VerticalMovementLocked)
+            offset.y = 0;
         moveMap(offset);
 
         // this whole "warping-thing" is to prevent cursor-moving WITHIN the window while user moves over the map
         SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-        SDL_WarpMouse(motion.x - motion.xrel, motion.y - motion.yrel);
+        SDL_WarpMouseInWindow(nullptr, startScrollPos->x, startScrollPos->y);
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
     }
 
     storeVerticesFromMouse(motion.x, motion.y, motion.state);
 }
 
+void CMap::onLeftMouseDown(const Point32& pos)
+{ // find out if user clicked on one of the game menu pictures
+    // we start with lower menubar
+    const Point32 displaySize(displayRect.getSize());
+    if(pos.x >= (displaySize.x / 2 - 236) && pos.x <= (displaySize.x / 2 - 199) && pos.y >= (displaySize.y - 35)
+       && pos.y <= (displaySize.y - 3))
+    {
+        // the height-mode picture was clicked
+        mode = EDITOR_MODE_HEIGHT_RAISE;
+    } else if(pos.x >= (displaySize.x / 2 - 199) && pos.x <= (displaySize.x / 2 - 162) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the texture-mode picture was clicked
+        mode = EDITOR_MODE_TEXTURE;
+        callback::EditorTextureMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 - 162) && pos.x <= (displaySize.x / 2 - 125) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the tree-mode picture was clicked
+        mode = EDITOR_MODE_TREE;
+        callback::EditorTreeMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 - 125) && pos.x <= (displaySize.x / 2 - 88) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the resource-mode picture was clicked
+        mode = EDITOR_MODE_RESOURCE_RAISE;
+        callback::EditorResourceMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 - 88) && pos.x <= (displaySize.x / 2 - 51) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the landscape-mode picture was clicked
+        mode = EDITOR_MODE_LANDSCAPE;
+        callback::EditorLandscapeMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 - 51) && pos.x <= (displaySize.x / 2 - 14) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the animal-mode picture was clicked
+        mode = EDITOR_MODE_ANIMAL;
+        callback::EditorAnimalMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 - 14) && pos.x <= (displaySize.x / 2 + 23) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the player-mode picture was clicked
+        mode = EDITOR_MODE_FLAG;
+        ChangeSection_ = 0;
+        setupVerticesActivity();
+        callback::EditorPlayerMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 + 96) && pos.x <= (displaySize.x / 2 + 133) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the build-help picture was clicked
+        RenderBuildHelp = !RenderBuildHelp;
+    } else if(pos.x >= (displaySize.x / 2 + 131) && pos.x <= (displaySize.x / 2 + 168) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the minimap picture was clicked
+        callback::MinimapMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 + 166) && pos.x <= (displaySize.x / 2 + 203) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the create-world picture was clicked
+        callback::EditorCreateMenu(INITIALIZING_CALL);
+    } else if(pos.x >= (displaySize.x / 2 + 203) && pos.x <= (displaySize.x / 2 + 240) && pos.y >= (displaySize.y - 35)
+              && pos.y <= (displaySize.y - 3))
+    {
+        // the editor-main-menu picture was clicked
+        callback::EditorMainMenu(INITIALIZING_CALL);
+    }
+    // now we check the right menubar
+    else if(pos.x >= (displaySize.x - 37) && pos.x <= (displaySize.x) && pos.y >= (displaySize.y / 2 + 162)
+            && pos.y <= (displaySize.y / 2 + 199))
+    {
+        // the bugkill picture was clicked for quickload
+        callback::PleaseWait(INITIALIZING_CALL);
+        // we have to close the windows and initialize them again to prevent failures
+        callback::EditorCursorMenu(MAP_QUIT);
+        callback::EditorTextureMenu(MAP_QUIT);
+        callback::EditorTreeMenu(MAP_QUIT);
+        callback::EditorLandscapeMenu(MAP_QUIT);
+        callback::MinimapMenu(MAP_QUIT);
+        callback::EditorResourceMenu(MAP_QUIT);
+        callback::EditorAnimalMenu(MAP_QUIT);
+        callback::EditorPlayerMenu(MAP_QUIT);
+
+        destructMap();
+        constructMap(global::userMapsPath + "/quicksave.swd");
+        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+    } else if(pos.x >= (displaySize.x - 37) && pos.x <= (displaySize.x) && pos.y >= (displaySize.y / 2 + 200)
+              && pos.y <= (displaySize.y / 2 + 237))
+    {
+        // the bugkill picture was clicked for quicksave
+        callback::PleaseWait(INITIALIZING_CALL);
+        if(!CFile::save_file(global::userMapsPath + "/quicksave.swd", SWD, getMap()))
+        {
+            callback::ShowStatus(INITIALIZING_CALL);
+            callback::ShowStatus(2);
+        }
+        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+    } else if(pos.x >= (displaySize.x - 37) && pos.x <= (displaySize.x) && pos.y >= (displaySize.y / 2 - 239)
+              && pos.y <= (displaySize.y / 2 - 202))
+    {
+        // the cursor picture was clicked
+        callback::EditorCursorMenu(INITIALIZING_CALL);
+    } else
+    {
+        // no picture was clicked
+        // touch vertex data
+        modify = true;
+        saveCurrentVertices = true;
+    }
+}
+
 void CMap::setMouseData(const SDL_MouseButtonEvent& button)
 {
     if(button.state == SDL_PRESSED)
     {
-        // find out if user clicked on one of the game menu pictures
-        // we start with lower menubar
-        if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 236)
-           && button.x <= (displayRect.getSize().x / 2 - 199) && button.y >= (displayRect.getSize().y - 35)
-           && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the height-mode picture was clicked
-            mode = EDITOR_MODE_HEIGHT_RAISE;
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 199)
-                  && button.x <= (displayRect.getSize().x / 2 - 162) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the texture-mode picture was clicked
-            mode = EDITOR_MODE_TEXTURE;
-            callback::EditorTextureMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 162)
-                  && button.x <= (displayRect.getSize().x / 2 - 125) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the tree-mode picture was clicked
-            mode = EDITOR_MODE_TREE;
-            callback::EditorTreeMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 125)
-                  && button.x <= (displayRect.getSize().x / 2 - 88) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the resource-mode picture was clicked
-            mode = EDITOR_MODE_RESOURCE_RAISE;
-            callback::EditorResourceMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 88)
-                  && button.x <= (displayRect.getSize().x / 2 - 51) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the landscape-mode picture was clicked
-            mode = EDITOR_MODE_LANDSCAPE;
-            callback::EditorLandscapeMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 51)
-                  && button.x <= (displayRect.getSize().x / 2 - 14) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the animal-mode picture was clicked
-            mode = EDITOR_MODE_ANIMAL;
-            callback::EditorAnimalMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 - 14)
-                  && button.x <= (displayRect.getSize().x / 2 + 23) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the player-mode picture was clicked
-            mode = EDITOR_MODE_FLAG;
-            ChangeSection_ = 0;
-            setupVerticesActivity();
-            callback::EditorPlayerMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 96)
-                  && button.x <= (displayRect.getSize().x / 2 + 133) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the build-help picture was clicked
-            RenderBuildHelp = !RenderBuildHelp;
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 131)
-                  && button.x <= (displayRect.getSize().x / 2 + 168) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the minimap picture was clicked
-            callback::MinimapMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 166)
-                  && button.x <= (displayRect.getSize().x / 2 + 203) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the create-world picture was clicked
-            callback::EditorCreateMenu(INITIALIZING_CALL);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x / 2 + 203)
-                  && button.x <= (displayRect.getSize().x / 2 + 240) && button.y >= (displayRect.getSize().y - 35)
-                  && button.y <= (displayRect.getSize().y - 3))
-        {
-            // the editor-main-menu picture was clicked
-            callback::EditorMainMenu(INITIALIZING_CALL);
-            return;
-        }
-        // now we check the right menubar
-        else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x - 37) && button.x <= (displayRect.getSize().x)
-                && button.y >= (displayRect.getSize().y / 2 + 162) && button.y <= (displayRect.getSize().y / 2 + 199))
-        {
-            // the bugkill picture was clicked for quickload
-            callback::PleaseWait(INITIALIZING_CALL);
-            // we have to close the windows and initialize them again to prevent failures
-            callback::EditorCursorMenu(MAP_QUIT);
-            callback::EditorTextureMenu(MAP_QUIT);
-            callback::EditorTreeMenu(MAP_QUIT);
-            callback::EditorLandscapeMenu(MAP_QUIT);
-            callback::MinimapMenu(MAP_QUIT);
-            callback::EditorResourceMenu(MAP_QUIT);
-            callback::EditorAnimalMenu(MAP_QUIT);
-            callback::EditorPlayerMenu(MAP_QUIT);
-
-            destructMap();
-            constructMap(global::userMapsPath + "/quicksave.swd");
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x - 37) && button.x <= (displayRect.getSize().x)
-                  && button.y >= (displayRect.getSize().y / 2 + 200) && button.y <= (displayRect.getSize().y / 2 + 237))
-        {
-            // the bugkill picture was clicked for quicksave
-            callback::PleaseWait(INITIALIZING_CALL);
-            if(!CFile::save_file(global::userMapsPath + "/quicksave.swd", SWD, getMap()))
-            {
-                callback::ShowStatus(INITIALIZING_CALL);
-                callback::ShowStatus(2);
-            }
-            callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-            return;
-        } else if(button.button == SDL_BUTTON_LEFT && button.x >= (displayRect.getSize().x - 37) && button.x <= (displayRect.getSize().x)
-                  && button.y >= (displayRect.getSize().y / 2 - 239) && button.y <= (displayRect.getSize().y / 2 - 202))
-        {
-            // the cursor picture was clicked
-            callback::EditorCursorMenu(INITIALIZING_CALL);
-            return;
-        } else
-        {
-            // no picture was clicked
-
-            // touch vertex data
-            if(button.button == SDL_BUTTON_LEFT)
-            {
-                modify = true;
-                saveCurrentVertices = true;
-            }
-        }
+        if(button.button == SDL_BUTTON_LEFT)
+            onLeftMouseDown({button.x, button.y});
+        else if(button.button == SDL_BUTTON_RIGHT)
+            startScrollPos = Position(button.x, button.y);
     } else if(button.state == SDL_RELEASED)
     {
         // stop touching vertex data
         if(button.button == SDL_BUTTON_LEFT)
             modify = false;
+        else if(button.button == SDL_BUTTON_RIGHT)
+            startScrollPos = boost::none;
     }
 }
 
@@ -825,47 +808,47 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
                 }
                 break;
             case SDLK_1:
-            case SDLK_KP1:
+            case SDLK_KP_1:
                 ChangeSection_ = 0;
                 setupVerticesActivity();
                 break;
             case SDLK_2:
-            case SDLK_KP2:
+            case SDLK_KP_2:
                 ChangeSection_ = 1;
                 setupVerticesActivity();
                 break;
             case SDLK_3:
-            case SDLK_KP3:
+            case SDLK_KP_3:
                 ChangeSection_ = 2;
                 setupVerticesActivity();
                 break;
             case SDLK_4:
-            case SDLK_KP4:
+            case SDLK_KP_4:
                 ChangeSection_ = 3;
                 setupVerticesActivity();
                 break;
             case SDLK_5:
-            case SDLK_KP5:
+            case SDLK_KP_5:
                 ChangeSection_ = 4;
                 setupVerticesActivity();
                 break;
             case SDLK_6:
-            case SDLK_KP6:
+            case SDLK_KP_6:
                 ChangeSection_ = 5;
                 setupVerticesActivity();
                 break;
             case SDLK_7:
-            case SDLK_KP7:
+            case SDLK_KP_7:
                 ChangeSection_ = 6;
                 setupVerticesActivity();
                 break;
             case SDLK_8:
-            case SDLK_KP8:
+            case SDLK_KP_8:
                 ChangeSection_ = 7;
                 setupVerticesActivity();
                 break;
             case SDLK_9:
-            case SDLK_KP9:
+            case SDLK_KP_9:
                 ChangeSection_ = 8;
                 setupVerticesActivity();
                 break;
@@ -1113,12 +1096,10 @@ void CMap::render()
     // if we need a new surface
     if(!Surf_Map)
     {
-        Surf_Map = makeSdlSurface(SDL_SWSURFACE, displayRect.getSize().x, displayRect.getSize().y, BitsPerPixel);
-        if(!Surf_Map)
-            return;
         if(BitsPerPixel == 8)
-            SDL_SetPalette(Surf_Map.get(), SDL_LOGPAL, global::palArray[PAL_xBBM].colors.data(), 0,
-                           global::palArray[PAL_xBBM].colors.size());
+            Surf_Map = makePalSurface(displayRect.getSize().x, displayRect.getSize().y, global::palArray[PAL_xBBM].colors);
+        else
+            Surf_Map = makeRGBSurface(displayRect.getSize().x, displayRect.getSize().y);
     }
     // else
     // clear the surface before drawing new (in normal case not needed)
@@ -1257,11 +1238,11 @@ void CMap::render()
     if(!Surf_RightMenubar)
     {
         // we permute width and height, cause we want to rotate the menubar 90 degrees
-        if((Surf_RightMenubar = makeSdlSurface(SDL_SWSURFACE, global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, 8)) != nullptr)
+        if((Surf_RightMenubar =
+              makePalSurface(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, global::palArray[PAL_RESOURCE].colors))
+           != nullptr)
         {
-            SDL_SetPalette(Surf_RightMenubar.get(), SDL_LOGPAL, global::palArray[PAL_RESOURCE].colors.data(), 0,
-                           global::palArray[PAL_RESOURCE].colors.size());
-            SDL_SetColorKey(Surf_RightMenubar.get(), SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
+            SDL_SetColorKey(Surf_RightMenubar.get(), SDL_TRUE, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
             CSurface::Draw(Surf_RightMenubar, global::bmpArray[MENUBAR].surface, 0, 0, 270);
         }
     }

@@ -24,10 +24,8 @@
 #include "sge_primitives.h"
 #include "sge_primitives_int.h"
 #include "sge_surface.h"
-#include <boost/numeric/conversion/cast.hpp>
 #include <array>
 
-using boost::numeric_cast;
 using FixedPoint = s25edit::FixedPoint<Sint32, 16>;
 using UFixedPoint = s25edit::FixedPoint<Uint32, 16>;
 
@@ -36,8 +34,7 @@ using UFixedPoint = s25edit::FixedPoint<Uint32, 16>;
     (x) = y;             \
     (y) = temp
 
-/* Globals used for sge_Update/sge_Lock (defined in sge_surface) */
-extern Uint8 _sge_update;
+/* Globals used for sge_Lock (defined in sge_surface) */
 extern Uint8 _sge_lock;
 extern Uint8 _sge_alpha_hack;
 
@@ -205,12 +202,6 @@ void sge_FadedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r1, 
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-    sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
 template<int dstBytesPerPixel>
@@ -304,6 +295,14 @@ static void _CopyPixelsWithDifferentFormat(SDL_Surface* dest, Sint16 y, Sint16 x
     }
 }
 
+static Uint32 _GetColorKey(SDL_Surface* surf)
+{
+    Uint32 colorkey;
+    if(SDL_GetColorKey(surf, &colorkey) != 0)
+        throw std::invalid_argument("No colorkey set");
+    return colorkey;
+}
+
 //==================================================================================
 // Draws a horisontal, textured line
 //==================================================================================
@@ -352,6 +351,7 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
         {
             case 1:
             { /* Assuming 8-bpp */
+                const Uint32 colorkey = _GetColorKey(source);
                 Uint8* row = (Uint8*)dest->pixels + y * dest->pitch;
 
                 for(int x = x1; x <= x2; x++)
@@ -360,7 +360,7 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
 
                     const auto pixel_value = *((Uint8*)source->pixels + srcy.toInt() * source->pitch + srcx.toInt());
 
-                    if(pixel_value != source->format->colorkey)
+                    if(pixel_value != colorkey)
                         *pixel = pixel_value;
 
                     srcx += xstep;
@@ -416,7 +416,7 @@ static void _TexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SDL
                 Uint32* pixel = (Uint32*)dest->pixels + y * dest->pitch / sizeof(Uint32) + x1;
 
                 const Uint16 pitch = source->pitch / sizeof(Uint32);
-                const Uint32 colorkey = source->format->colorkey;
+                const Uint32 colorkey = _GetColorKey(source);
 
                 for(int x = x1; x <= x2; x++, ++pixel)
                 {
@@ -615,12 +615,6 @@ void sge_FadedTexturedLine(SDL_Surface* dest, Sint16 x1, Sint16 x2, Sint16 y, SD
         SDL_UnlockSurface(dest);
     if(_sge_lock && SDL_MUSTLOCK(source))
         SDL_UnlockSurface(source);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-    sge_UpdateRect(dest, x1, y, absDiff(x1, x2) + 1, 1);
 }
 
 //==================================================================================
@@ -638,23 +632,6 @@ void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, S
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;
-    xmax = (xmax > x2) ? xmax : x2;
-    ymax = (ymax > y2) ? ymax : y2;
-    xmin = (xmin < x2) ? xmin : x2;
-    ymin = (ymin < y2) ? ymin : y2;
-    xmax = (xmax > x3) ? xmax : x3;
-    ymax = (ymax > y3) ? ymax : y3;
-    xmin = (xmin < x3) ? xmin : x3;
-    ymin = (ymin < y3) ? ymin : y3;
-
-    sge_UpdateRect(dest, xmin, ymin, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(ymax - ymin + 1));
 }
 
 void sge_Trigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B)
@@ -677,23 +654,6 @@ void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;
-    xmax = (xmax > x2) ? xmax : x2;
-    ymax = (ymax > y2) ? ymax : y2;
-    xmin = (xmin < x2) ? xmin : x2;
-    ymin = (ymin < y2) ? ymin : y2;
-    xmax = (xmax > x3) ? xmax : x3;
-    ymax = (ymax > y3) ? ymax : y3;
-    xmin = (xmin < x3) ? xmin : x3;
-    ymin = (ymin < y3) ? ymin : y3;
-
-    sge_UpdateRect(dest, xmin, ymin, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(ymax - ymin + 1));
 }
 
 void sge_TrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B,
@@ -717,23 +677,6 @@ void sge_AATrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint1
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;
-    xmax = (xmax > x2) ? xmax : x2;
-    ymax = (ymax > y2) ? ymax : y2;
-    xmin = (xmin < x2) ? xmin : x2;
-    ymin = (ymin < y2) ? ymin : y2;
-    xmax = (xmax > x3) ? xmax : x3;
-    ymax = (ymax > y3) ? ymax : y3;
-    xmin = (xmin < x3) ? xmin : x3;
-    ymin = (ymin < y3) ? ymin : y3;
-
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
 }
 
 void sge_AATrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B,
@@ -832,19 +775,6 @@ void sge_FilledTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
             xc += m3;
         }
     }
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-
-    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 void sge_FilledTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B)
@@ -923,19 +853,6 @@ void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, S
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-
-    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 void sge_FilledTrigonAlpha(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Uint8 R, Uint8 G, Uint8 B,
@@ -1085,19 +1002,6 @@ void sge_FadedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y3 - y1 + 1);
 }
 
 //==================================================================================
@@ -1234,19 +1138,6 @@ static void _TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, 
         SDL_UnlockSurface(dest);
     if(_sge_lock && SDL_MUSTLOCK(source))
         SDL_UnlockSurface(source);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-
-    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 void sge_TexturedTrigon(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, SDL_Surface* source,
@@ -1436,19 +1327,6 @@ static void _FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y
         SDL_UnlockSurface(dest);
     if(_sge_lock && SDL_MUSTLOCK(source))
         SDL_UnlockSurface(source);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-
-    sge_UpdateRect(dest, xmin, y1, numeric_cast<Uint16>(xmax - xmin + 1), numeric_cast<Uint16>(y3 - y1 + 1));
 }
 
 void sge_FadedTexturedTrigonColorKeys(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
@@ -1663,21 +1541,6 @@ static void _TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Si
 
     if(_sge_lock && SDL_MUSTLOCK(dest))
         SDL_UnlockSurface(dest);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-
-    Sint16 xmax = x1, xmin = x1;
-    xmax = (xmax > x2) ? xmax : x2;
-    xmin = (xmin < x2) ? xmin : x2;
-    xmax = (xmax > x3) ? xmax : x3;
-    xmin = (xmin < x3) ? xmin : x3;
-    xmax = (xmax > x4) ? xmax : x4;
-    xmin = (xmin < x4) ? xmin : x4;
-
-    sge_UpdateRect(dest, xmin, y1, xmax - xmin + 1, y4 - y1 + 1);
 }
 
 void sge_TexturedRect(SDL_Surface* dest, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
@@ -1971,13 +1834,6 @@ int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const S
     delete[] line;
     delete[] plist;
 
-    if(!_sge_update)
-    {
-        return 0;
-    }
-
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
-
     return 0;
 }
 
@@ -2132,13 +1988,6 @@ int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint
 
     delete[] line;
     delete[] plist;
-
-    if(!_sge_update)
-    {
-        return 0;
-    }
-
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
 
     return 0;
 }
@@ -2365,13 +2214,6 @@ int sge_FadedPolygonAlpha(SDL_Surface* dest, Uint16 n, const Sint16* x, const Si
     delete[] line;
     delete[] plist;
 
-    if(!_sge_update)
-    {
-        return 0;
-    }
-
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
-
     return 0;
 }
 
@@ -2558,13 +2400,6 @@ int sge_AAFadedPolygon(SDL_Surface* dest, Uint16 n, const Sint16* x, const Sint1
 
     delete[] line;
     delete[] plist;
-
-    if(!_sge_update)
-    {
-        return 0;
-    }
-
-    sge_UpdateRect(dest, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
 
     return 0;
 }

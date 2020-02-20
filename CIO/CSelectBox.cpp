@@ -213,7 +213,7 @@ bool CSelectBox::render()
     // if we need a new surface
     if(!Surf_SelectBox)
     {
-        if((Surf_SelectBox = makeSdlSurface(SDL_SWSURFACE, w_, h_, 32)) == nullptr)
+        if((Surf_SelectBox = makeRGBSurface(w_, h_)) == nullptr)
             return false;
     }
 

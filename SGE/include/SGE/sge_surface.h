@@ -30,20 +30,14 @@
 #define sge_get_sblock16 sge_read_block16
 #define sge_get_sblock32 sge_read_block32
 
-DECLSPEC void sge_UpdateRect(SDL_Surface* screen, Sint16 x, Sint16 y, Uint16 w, Uint16 h);
-DECLSPEC void sge_UpdateRect(SDL_Surface* screen, const SDL_Rect& area);
 #ifdef _SGE_C
 extern "C" {
 #endif
-DECLSPEC void sge_Update_OFF();
-DECLSPEC void sge_Update_ON();
 DECLSPEC void sge_Lock_OFF();
 DECLSPEC void sge_Lock_ON();
-DECLSPEC Uint8 sge_getUpdate();
 DECLSPEC Uint8 sge_getLock();
 DECLSPEC SDL_Surface* sge_CreateAlphaSurface(Uint32 flags, int width, int height);
 DECLSPEC Uint32 sge_MapAlpha(Uint8 R, Uint8 G, Uint8 B, Uint8 A);
-DECLSPEC SGE_ATTRIBUTE_FORMAT(1, 2) void sge_SetError(const char* format, ...);
 
 DECLSPEC void _PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color);
 DECLSPEC void _PutPixel8(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color);

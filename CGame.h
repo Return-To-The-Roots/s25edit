@@ -21,8 +21,10 @@ public:
 
     bool Running;
     bool showLoadScreen;
-    bool useOpenGL = false;
-    SdlSurface Surf_Display, Surf_DisplayGL;
+    SdlSurface Surf_Display;
+    SdlTexture displayTexture_;
+    SdlRenderer renderer_;
+    SdlWindow window_;
 
 private:
 #ifdef _ADMINMODE
@@ -75,6 +77,8 @@ public:
 
     void Render();
 
+    void RenderPresent();
+
     CMenu* RegisterMenu(std::unique_ptr<CMenu> Menu);
     bool UnregisterMenu(CMenu* Menu);
     CWindow* RegisterWindow(std::unique_ptr<CWindow> Window);
@@ -85,7 +89,6 @@ public:
     CMap* getMapObj();
     void delMapObj();
     SDL_Surface* getDisplaySurface() { return Surf_Display.get(); };
-    SDL_Surface* getDisplayGLSurface() { return Surf_DisplayGL.get(); };
     auto getRes() { return GameResolution; }
 };
 

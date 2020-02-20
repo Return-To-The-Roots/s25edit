@@ -30,8 +30,10 @@ void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const 
     Sint16 right = rect.x + rect.w - 1;
     Sint16 middle = rect.x + rect.w / Sint16(2);
     Sint16 bottom = rect.y + rect.h - 1;
+    Uint32 colorKey;
+    const int keycount = (SDL_GetColorKey(source, &colorKey) < 0) ? 0 : 1;
     sge_PreCalcFadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom,
-                                            I1, I2, I2, PreCalcPalettes, &source->format->colorkey, 1);
+                                            I1, I2, I2, PreCalcPalettes, &colorKey, keycount);
 }
 
 void DrawFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3, SDL_Surface* source,
@@ -40,13 +42,14 @@ void DrawFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16
     Sint16 right = rect.x + rect.w - 1;
     Sint16 middle = rect.x + rect.w / Sint16(2);
     Sint16 bottom = rect.y + rect.h - 1;
+    Uint32 colorKey;
+    const int keycount = (SDL_GetColorKey(source, &colorKey) < 0) ? 0 : 1;
     sge_FadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom, I1,
-                                     I2, I2, &source->format->colorkey, 1);
+                                     I2, I2, &colorKey, keycount);
 }
 } // namespace
 
 bool CSurface::drawTextures = false;
-bool CSurface::useOpenGL = false;
 
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
 {

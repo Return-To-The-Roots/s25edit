@@ -56,6 +56,14 @@ int CGame::Execute()
     return 0;
 }
 
+void CGame::RenderPresent()
+{
+    SDL_UpdateTexture(displayTexture_.get(), nullptr, Surf_Display->pixels, Surf_Display->w * sizeof(Uint32));
+    SDL_RenderClear(renderer_.get());
+    SDL_RenderCopy(renderer_.get(), displayTexture_.get(), nullptr, nullptr);
+    SDL_RenderPresent(renderer_.get());
+}
+
 CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)
 {
     for(auto& i : Menus)

@@ -270,7 +270,7 @@ bool CTextfield::render()
     // if we need a new surface
     if(!Surf_Text)
     {
-        Surf_Text = makeSdlSurface(SDL_SWSURFACE, w, h, 32);
+        Surf_Text = makeRGBSurface(w, h);
         if(!Surf_Text)
             return false;
     }

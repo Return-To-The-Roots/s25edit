@@ -435,9 +435,11 @@ bool CFile::open_lbm(const std::string& filename)
     CHECK_READ(libendian::be_read_ui(&length, fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if(!(bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8)))
+    if(!(bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, colors)))
+    {
+        std::cerr << "Failed to create surface: " << SDL_GetError() << std::endl;
         return false;
-    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, colors.data(), 0, colors.size());
+    }
 
     if(compression_flag == 0)
     {
@@ -501,12 +503,12 @@ bool CFile::open_lbm(const std::string& filename)
        || filename.find("TEX7.LBM") != std::string::npos || filename.find("TEXTUR_0.LBM") != std::string::npos
        || filename.find("TEXTUR_3.LBM") != std::string::npos)
     {
-        SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+        SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
         bmpArray++;
-        if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, (bmpArray - 1)->w, (bmpArray - 1)->h, 32)))
+        if((bmpArray->surface = makeRGBSurface((bmpArray - 1)->w, (bmpArray - 1)->h)))
         {
-            SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+            SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
             CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface, 0, 0);
         } else
             bmpArray--;
@@ -1054,10 +1056,9 @@ bool CFile::read_bob02()
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8)) == nullptr)
+    if((bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, palActual->colors)) == nullptr)
         return false;
-    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
-    SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+    SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
     // SDL_SetAlpha(bmpArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
@@ -1224,11 +1225,10 @@ bool CFile::read_bob04(int player_color)
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8)) == nullptr)
+    if((bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, palActual->colors)) == nullptr)
         return false;
 
-    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
-    SDL_SetColorKey(bmpArray->surface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+    SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
     // main loop for reading picture lines
     for(int y = 0; y < bmpArray->h; y++)
@@ -1363,9 +1363,8 @@ bool CFile::read_bob07()
         CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((shadowArray->surface = makeSdlSurface(SDL_SWSURFACE, shadowArray->w, shadowArray->h, 8)) == nullptr)
+    if((shadowArray->surface = makePalSurface(shadowArray->w, shadowArray->h, palActual->colors)) == nullptr)
         return false;
-    SDL_SetPalette(shadowArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
     // SDL_SetAlpha(shadowArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
@@ -1472,9 +1471,8 @@ bool CFile::read_bob14()
         return true;
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
-    if((bmpArray->surface = makeSdlSurface(SDL_SWSURFACE, bmpArray->w, bmpArray->h, 8)) == nullptr)
+    if((bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, palActual->colors)) == nullptr)
         return false;
-    SDL_SetPalette(bmpArray->surface.get(), SDL_LOGPAL, palActual->colors.data(), 0, palActual->colors.size());
 
     // set fp to back to the first offset of data block
     fseek(fp, data_start, SEEK_SET);

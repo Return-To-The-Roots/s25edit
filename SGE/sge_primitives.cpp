@@ -27,8 +27,7 @@
 #include <cstdlib>
 #include <utility>
 
-/* Globals used for sge_Update/sge_Lock (defined in sge_surface) */
-extern Uint8 _sge_update;
+/* Globals used for sge_Lock (defined in sge_surface) */
 extern Uint8 _sge_lock;
 
 using std::swap;
@@ -48,16 +47,6 @@ void _HLine(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint32 Color)
         x1 = x2;
         x2 = tmp;
     }
-
-// Do the clipping
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(y < Surface->clip_miny || y > Surface->clip_maxy || x1 > Surface->clip_maxx || x2 < Surface->clip_minx)
-        return;
-    if(x1 < Surface->clip_minx)
-        x1 = Surface->clip_minx;
-    if(x2 > Surface->clip_maxx)
-        x2 = Surface->clip_maxx;
-#endif
 
     SDL_Rect l;
     l.x = x1;
@@ -80,16 +69,6 @@ void sge_HLine(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint32 Colo
         x2 = tmp;
     }
 
-// Do the clipping
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(y < Surface->clip_miny || y > Surface->clip_maxy || x1 > Surface->clip_maxx || x2 < Surface->clip_minx)
-        return;
-    if(x1 < Surface->clip_minx)
-        x1 = Surface->clip_minx;
-    if(x2 > Surface->clip_maxx)
-        x2 = Surface->clip_maxx;
-#endif
-
     SDL_Rect l;
     l.x = x1;
     l.y = y;
@@ -97,8 +76,6 @@ void sge_HLine(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint32 Colo
     l.h = 1;
 
     SDL_FillRect(Surface, &l, Color);
-
-    sge_UpdateRect(Surface, x1, y, l.w, 1);
 }
 
 //==================================================================================
@@ -114,12 +91,9 @@ void sge_HLine(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint8 R, Ui
 //==================================================================================
 void _HLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 x2, Sint16 y, Uint32 Color, Uint8 alpha)
 {
-    Uint8 update = _sge_update;
     Uint8 lock = _sge_lock;
-    _sge_update = 0;
     _sge_lock = 0;
     sge_FilledRectAlpha(Surface, x1, y, x2, y, Color, alpha);
-    _sge_update = update;
     _sge_lock = lock;
 }
 
@@ -151,16 +125,6 @@ static void _VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 
         y2 = tmp;
     }
 
-// Do the clipping
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(x < Surface->clip_minx || x > Surface->clip_maxx || y1 > Surface->clip_maxy || y2 < Surface->clip_miny)
-        return;
-    if(y1 < Surface->clip_miny)
-        y1 = Surface->clip_miny;
-    if(y2 > Surface->clip_maxy)
-        y2 = Surface->clip_maxy;
-#endif
-
     SDL_Rect l;
     l.x = x;
     l.y = y1;
@@ -182,16 +146,6 @@ void sge_VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Colo
         y2 = tmp;
     }
 
-// Do the clipping
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(x < Surface->clip_minx || x > Surface->clip_maxx || y1 > Surface->clip_maxy || y2 < Surface->clip_miny)
-        return;
-    if(y1 < Surface->clip_miny)
-        y1 = Surface->clip_miny;
-    if(y2 > Surface->clip_maxy)
-        y2 = Surface->clip_maxy;
-#endif
-
     SDL_Rect l;
     l.x = x;
     l.y = y1;
@@ -199,8 +153,6 @@ void sge_VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Colo
     l.h = (Uint16)(y2 - y1) + 1;
 
     SDL_FillRect(Surface, &l, Color);
-
-    sge_UpdateRect(Surface, x, y1, 1, l.h);
 }
 
 //==================================================================================
@@ -216,12 +168,9 @@ void sge_VLine(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint8 R, Ui
 //==================================================================================
 static void _VLineAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y1, Sint16 y2, Uint32 Color, Uint8 alpha)
 {
-    Uint8 update = _sge_update;
     Uint8 lock = _sge_lock;
-    _sge_update = 0;
     _sge_lock = 0;
     sge_FilledRectAlpha(Surface, x, y1, x, y2, Color, alpha);
-    _sge_update = update;
     _sge_lock = lock;
 }
 
@@ -537,8 +486,6 @@ void sge_Line(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
 }
 
 //==================================================================================
@@ -582,8 +529,6 @@ void sge_LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
 }
 
 //==================================================================================
@@ -753,8 +698,6 @@ void sge_AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y
     {
         SDL_UnlockSurface(dst);
     }
-
-    sge_UpdateRect(dst, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
 }
 
 void sge_AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 alpha)
@@ -866,8 +809,6 @@ void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
 }
 
 void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
@@ -887,8 +828,6 @@ void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
 }
 
 //==================================================================================
@@ -1067,8 +1006,6 @@ void sge_AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
 
     if(_sge_lock && SDL_MUSTLOCK(dst))
         SDL_UnlockSurface(dst);
-
-    sge_UpdateRect(dst, (x1 < x2) ? x1 : x2, (y1 < y2) ? y1 : y2, absDiff(x1, x2) + 1, absDiff(y1, y2) + 1);
 }
 
 void sge_AAmcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
@@ -1090,11 +1027,6 @@ void sge_Rect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, 
     _HLine(Surface, x1, x2, y2, color);
     _VLine(Surface, x1, y1, y2, color);
     _VLine(Surface, x2, y1, y2, color);
-
-    sge_UpdateRect(Surface, x1, y1, static_cast<Uint16>(x2 - x1), 1);
-    sge_UpdateRect(Surface, x1, y2, static_cast<Uint16>(x2 - x1) + 1, 1); /* Hmm? */
-    sge_UpdateRect(Surface, x1, y1, 1, static_cast<Uint16>(y2 - y1));
-    sge_UpdateRect(Surface, x2, y1, 1, static_cast<Uint16>(y2 - y1));
 }
 
 //==================================================================================
@@ -1123,11 +1055,6 @@ void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x1, y1, static_cast<Uint16>(x2 - x1), 1);
-    sge_UpdateRect(Surface, x1, y2, static_cast<Uint16>(x2 - x1) + 1, 1); /* Hmm? */
-    sge_UpdateRect(Surface, x1, y1, 1, static_cast<Uint16>(y2 - y1));
-    sge_UpdateRect(Surface, x2, y1, 1, static_cast<Uint16>(y2 - y1));
 }
 
 //==================================================================================
@@ -1157,19 +1084,6 @@ void sge_FilledRect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint1
         y2 = tmp;
     }
 
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(x2 < Surface->clip_minx || x1 > Surface->clip_maxx || y2 < Surface->clip_miny || y1 > Surface->clip_maxy)
-        return;
-    if(x1 < Surface->clip_minx)
-        x1 = Surface->clip_minx;
-    if(x2 > Surface->clip_maxx)
-        x2 = Surface->clip_maxx;
-    if(y1 < Surface->clip_miny)
-        y1 = Surface->clip_miny;
-    if(y2 > Surface->clip_maxy)
-        y2 = Surface->clip_maxy;
-#endif
-
     SDL_Rect area;
     area.x = x1;
     area.y = y1;
@@ -1177,8 +1091,6 @@ void sge_FilledRect(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint1
     area.h = static_cast<Uint16>(y2 - y1) + 1;
 
     SDL_FillRect(Surface, &area, color);
-
-    sge_UpdateRect(Surface, area);
 }
 
 //==================================================================================
@@ -1359,8 +1271,6 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
     {
         SDL_UnlockSurface(surface);
     }
-
-    sge_UpdateRect(surface, x1, y1, static_cast<Uint16>(x2 - x1) + 1, static_cast<Uint16>(y2 - y1) + 1);
 }
 
 void sge_FilledRectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
@@ -1510,8 +1420,6 @@ void sge_Ellipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry,
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x - rx, y - ry, 2 * rx + 1, 2 * ry + 1);
 }
 
 //==================================================================================
@@ -1538,8 +1446,6 @@ void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint1
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x - rx, y - ry, 2 * rx + 1, 2 * ry + 1);
 }
 
 //==================================================================================
@@ -1644,8 +1550,6 @@ void sge_FilledEllipse(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint
 
         } while(i > h);
     }
-
-    sge_UpdateRect(Surface, x - rx, y - ry, 2 * rx + 1, 2 * ry + 1);
 }
 
 //==================================================================================
@@ -1759,8 +1663,6 @@ void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx,
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x - rx, y - ry, 2 * rx + 1, 2 * ry + 1);
 }
 
 //==================================================================================
@@ -1948,9 +1850,6 @@ void sge_AAFilledEllipse(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 rx, 
         _HLine(surface, x + 1, 2 * xc - x - 1, 2 * yc - y, color);
         _HLine(surface, xs + 1, 2 * xc - xs - 1, 2 * yc - y, color);
     }
-
-    /* Update surface if needed */
-    sge_UpdateRect(surface, xc - rx, yc - ry, 2 * rx + 1, 2 * ry + 1);
 }
 
 //==================================================================================
@@ -2028,8 +1927,6 @@ void sge_Circle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 color
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x - r, y - r, 2 * r + 1, 2 * r + 1);
 }
 
 //==================================================================================
@@ -2056,8 +1953,6 @@ void sge_CircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32 
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x - r, y - r, 2 * r + 1, 2 * r + 1);
 }
 
 //==================================================================================
@@ -2113,8 +2008,6 @@ void sge_FilledCircle(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, Uint32
         }
         cx++;
     } while(cx <= cy);
-
-    sge_UpdateRect(Surface, x - r, y - r, 2 * r + 1, 2 * r + 1);
 }
 
 //==================================================================================
@@ -2179,8 +2072,6 @@ void sge_FilledCircleAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 r, U
     {
         SDL_UnlockSurface(Surface);
     }
-
-    sge_UpdateRect(Surface, x - r, y - r, 2 * r + 1, 2 * r + 1);
 }
 
 //==================================================================================
@@ -2222,7 +2113,6 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     float dx, d2x, d3x;                                                                                            \
     float dy, d2y, d3y;                                                                                            \
     float a, b, c;                                                                                                 \
-    Sint16 xmax = x1, ymax = y1, xmin = x1, ymin = y1;                                                             \
                                                                                                                    \
     /* compute number of iterations */                                                                             \
     if(level < 1)                                                                                                  \
@@ -2269,17 +2159,6 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
         if(Sint16(xp) != Sint16(x) || Sint16(yp) != Sint16(y))                                                     \
         {                                                                                                          \
             function;                                                                                              \
-            if(_sge_update == 1)                                                                                   \
-            {                                                                                                      \
-                xmax = (xmax > Sint16(xp)) ? xmax : Sint16(xp);                                                    \
-                ymax = (ymax > Sint16(yp)) ? ymax : Sint16(yp);                                                    \
-                xmin = (xmin < Sint16(xp)) ? xmin : Sint16(xp);                                                    \
-                ymin = (ymin < Sint16(yp)) ? ymin : Sint16(yp);                                                    \
-                xmax = (xmax > Sint16(x)) ? xmax : Sint16(x);                                                      \
-                ymax = (ymax > Sint16(y)) ? ymax : Sint16(y);                                                      \
-                xmin = (xmin < Sint16(x)) ? xmin : Sint16(x);                                                      \
-                ymin = (ymin < Sint16(y)) ? ymin : Sint16(y);                                                      \
-            }                                                                                                      \
         }                                                                                                          \
         xp = x;                                                                                                    \
         yp = y;                                                                                                    \
@@ -2289,10 +2168,7 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
     if(_sge_lock && SDL_MUSTLOCK(surface))                                                                         \
     {                                                                                                              \
         SDL_UnlockSurface(surface);                                                                                \
-    }                                                                                                              \
-                                                                                                                   \
-    /* Update the area */                                                                                          \
-    sge_UpdateRect(surface, xmin, ymin, xmax - xmin + 1, ymax - ymin + 1);
+    }
 
 //==================================================================================
 // Draws a bezier line
@@ -2338,9 +2214,7 @@ void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
                        int level, Uint32 color, Uint8 alpha)
 {
-    Uint8 update = _sge_update;
     Uint8 lock = _sge_lock;
-    _sge_update = 0;
     _sge_lock = 0;
 
     if(SDL_MUSTLOCK(surface) && lock)
@@ -2354,10 +2228,7 @@ void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Si
         SDL_UnlockSurface(surface);
     }
 
-    _sge_update = update;
     _sge_lock = lock;
-
-    sge_UpdateRect(surface, xmin, ymin, (Uint16)(xmax - xmin) + 1, (Uint16)(ymax - ymin) + 1);
 }
 
 //==================================================================================

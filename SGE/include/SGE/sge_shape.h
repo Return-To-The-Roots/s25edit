@@ -37,43 +37,6 @@ struct sge_cdata;
 class DECLSPEC sge_shape;
 
 //==================================================================================
-// The screen class
-//==================================================================================
-class DECLSPEC sge_screen
-{
-protected:
-    SDL_Surface* screen;         // The SDL screen surface
-    std::vector<SDL_Rect> rects; // The list of rectangles to be updated
-
-    std::list<sge_shape*> shapes;   // The list of shapes to draw on screen
-    std::list<sge_shape*> shapes_p; // The list of permanent shapes to draw on screen
-
-    using RI = std::list<SDL_Rect>::const_iterator;   // List iterator (for rects)
-    using SI = std::list<sge_shape*>::const_iterator; // List iterator (for shapes)
-
-    bool HW, DB, FS; // video memory, double-buffered or/and fullscreen?
-
-public:
-    sge_screen(SDL_Surface* screen);
-    ~sge_screen()
-    {
-        rects.clear();
-        shapes.clear();
-        shapes_p.clear();
-    }
-    void add_rect(SDL_Rect rect);
-    void add_rect(Sint16 x, Sint16 y, Uint32 w, Uint32 h);
-
-    void add_shape(sge_shape* shape);
-    void add_shape_p(sge_shape* shape); // Adds an shape permanently
-
-    void remove_shape_p(sge_shape* shape);
-    void clear_all();
-
-    void update();
-};
-
-//==================================================================================
 // sge_shape
 // Abstract base class for different shapes (surfaces, sprites, ...)
 //==================================================================================
@@ -89,10 +52,6 @@ protected:
 public:
     virtual ~sge_shape() = default; // Destructor
     virtual void draw() = 0;        // Draws the shape - prev_pos = last_pos; last_pos = the new position of shape
-
-    // Updates the screen (last_pos+prev_pos)
-    // If sge_screen is used this member will use it (the_screen) instead of doing it directly!
-    virtual void UpdateRects() = 0;
 
     // Some functions to clear (remove) shape
     virtual void clear(Uint32 color) = 0;                               // Clears to color
@@ -172,7 +131,6 @@ protected:
 
     // Helper functions
     void warp_draw();
-    void warp_update(SDL_Rect rec);
     void warp_clear(Uint32 color);
     void warp_clear(SDL_Surface* src, Sint16 srcX, Sint16 srcY);
 
@@ -186,8 +144,6 @@ public:
     virtual void clear(Uint32 color) override;
     virtual void clear(SDL_Surface* src, Sint16 srcX, Sint16 srcY) override;
     // virtual void clear(SDL_Surface *src){clear(src,last_pos.x,last_pos.y);}
-
-    virtual void UpdateRects() override;
 
     // Move the surface
     virtual void move_to(Sint16 x, Sint16 y)

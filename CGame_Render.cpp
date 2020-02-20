@@ -26,17 +26,17 @@ void CGame::SetAppIcon()
     SDL_SysWMinfo info;
     // get window handle from SDL
     SDL_VERSION(&info.version);
-    if(SDL_GetWMInfo(&info) != 1)
+    if(SDL_GetWindowWMInfo(window_.get(), &info) != 1)
         return;
-    SendMessage(info.window, WM_SETICON, ICON_BIG, icon);
-    SendMessage(info.window, WM_SETICON, ICON_SMALL, icon);
+    SendMessage(info.info.win.window, WM_SETICON, ICON_BIG, icon);
+    SendMessage(info.info.win.window, WM_SETICON, ICON_SMALL, icon);
 #endif // _WIN32
 }
 
 void CGame::Render()
 {
-    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution || fullscreen != ((Surf_Display->flags & SDL_FULLSCREEN) != 0)
-       || useOpenGL != CSurface::useOpenGL)
+    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution
+       || fullscreen != ((SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0))
     {
         ReCreateWindow();
     }
@@ -49,13 +49,7 @@ void CGame::Render()
         sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
                          surfLoadScreen.get(), 0, 0, surfLoadScreen->w - 1, 0, 0, surfLoadScreen->h - 1, surfLoadScreen->w - 1,
                          surfLoadScreen->h - 1);
-
-        if(useOpenGL)
-        {
-            SDL_BlitSurface(Surf_Display.get(), nullptr, Surf_DisplayGL.get(), nullptr);
-            SDL_GL_SwapBuffers();
-        } else
-            SDL_Flip(Surf_Display.get());
+        RenderPresent();
         return;
     }
 
@@ -131,13 +125,7 @@ void CGame::Render()
     }
     CSurface::Draw(Surf_Display, lastFps.getSurface(), 0, 0);
 
-    if(useOpenGL)
-    {
-        SDL_BlitSurface(Surf_Display.get(), nullptr, Surf_DisplayGL.get(), nullptr);
-        SDL_Flip(Surf_DisplayGL.get());
-        SDL_GL_SwapBuffers();
-    } else
-        SDL_Flip(Surf_Display.get());
+    RenderPresent();
 
     if(msWait)
         SDL_Delay(msWait);

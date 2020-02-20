@@ -145,7 +145,7 @@ bool CButton::render()
     // if we need a new surface
     if(!Surf_Button)
     {
-        if((Surf_Button = makeSdlSurface(SDL_SWSURFACE, w, h, 32)) == nullptr)
+        if((Surf_Button = makeRGBSurface(w, h)) == nullptr)
             return false;
     }
 

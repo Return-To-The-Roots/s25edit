@@ -17,7 +17,7 @@ bool CMenu::render()
     // if we need a new surface
     if(!surface)
     {
-        surface = makeSdlSurface(SDL_SWSURFACE, global::s2->getRes().x, global::s2->getRes().y, 32);
+        surface = makeRGBSurface(global::s2->getRes().x, global::s2->getRes().y);
         if(!surface)
             return false;
     }

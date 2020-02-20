@@ -25,29 +25,12 @@
 #include <cstdarg>
 #include <cstring>
 
-/* Globals used for sge_Update/sge_Lock */
-Uint8 _sge_update = 1;
+/* Globals used for sge_Lock */
 Uint8 _sge_lock = 1;
 
 /**********************************************************************************/
 /**                            Misc. functions                                   **/
 /**********************************************************************************/
-
-//==================================================================================
-// Turns off automatic update (to avoid tearing).
-//==================================================================================
-void sge_Update_OFF()
-{
-    _sge_update = 0;
-}
-
-//==================================================================================
-// Turns on automatic update (default)
-//==================================================================================
-void sge_Update_ON()
-{
-    _sge_update = 1;
-}
 
 //==================================================================================
 // Turns off automatic locking of surfaces
@@ -66,62 +49,11 @@ void sge_Lock_ON()
 }
 
 //==================================================================================
-// Returns update&locking mode (1-on and 0-off)
+// Returns locking mode (1-on and 0-off)
 //==================================================================================
-Uint8 sge_getUpdate()
-{
-    return _sge_update;
-}
 Uint8 sge_getLock()
 {
     return _sge_lock;
-}
-
-//==================================================================================
-// SDL_UpdateRect does nothing if any part of the rectangle is outside the surface
-// --- This version always work
-//==================================================================================
-void sge_UpdateRect(SDL_Surface* screen, Sint16 x, Sint16 y, Uint16 w, Uint16 h)
-{
-    if(_sge_update != 1 || screen != SDL_GetVideoSurface())
-    {
-        return;
-    }
-
-    if(x >= screen->w || y >= screen->h)
-    {
-        return;
-    }
-
-    Sint16 a, b;
-
-    a = w;
-    b = h;
-
-    if(x < 0)
-    {
-        x = 0;
-    }
-    if(y < 0)
-    {
-        y = 0;
-    }
-
-    if(a + x > screen->w)
-    {
-        a = screen->w - x;
-    }
-    if(b + y > screen->h)
-    {
-        b = screen->h - y;
-    }
-
-    SDL_UpdateRect(screen, x, y, a, b);
-}
-
-void sge_UpdateRect(SDL_Surface* screen, const SDL_Rect& area)
-{
-    sge_UpdateRect(screen, area.x, area.y, area.w, area.h);
 }
 
 //==================================================================================
@@ -147,25 +79,6 @@ Uint32 sge_MapAlpha(Uint8 R, Uint8 G, Uint8 B, Uint8 A)
     color |= A;
 
     return color;
-}
-
-//==================================================================================
-// Sets an SDL error string
-// Accepts formated argument - like printf()
-// SDL_SetError() also does this, but it does not use standard syntax (why?)
-//==================================================================================
-void sge_SetError(const char* format, ...)
-{
-    std::array<char, 256> buf;
-
-    va_list ap;
-
-    va_start(ap, format);
-
-    vsprintf(buf.data(), format, ap);
-    va_end(ap);
-
-    SDL_SetError(buf.data());
 }
 
 /**********************************************************************************/
@@ -277,12 +190,6 @@ void sge_PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color)
     {
         SDL_UnlockSurface(surface);
     }
-
-    if(!_sge_update)
-    {
-        return;
-    }
-    sge_UpdateRect(surface, x, y, 1, 1);
 }
 
 //==================================================================================
@@ -545,12 +452,6 @@ void sge_PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, U
     {
         SDL_UnlockSurface(surface);
     }
-
-    if(!_sge_update)
-    {
-        return;
-    }
-    sge_UpdateRect(surface, x, y, 1, 1);
 }
 
 void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
@@ -612,12 +513,6 @@ void sge_read_block32(SDL_Surface* Surface, Uint32* block, Sint16 y)
 void sge_ClearSurface(SDL_Surface* Surface, Uint32 color)
 {
     SDL_FillRect(Surface, nullptr, color);
-
-    if(!_sge_update)
-    {
-        return;
-    }
-    SDL_UpdateRect(Surface, 0, 0, 0, 0);
 }
 
 //==================================================================================
@@ -638,41 +533,6 @@ int sge_BlitTransparent(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16
     SDL_Rect src, dest;
     int ret;
 
-/* Dest clipping */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    int flag = 0;
-    if(DestX < Dest->clip_minx)
-    {
-        SrcX += Dest->clip_minx - DestX;
-        W -= Dest->clip_minx - DestX - 1;
-        DestX = Dest->clip_minx;
-    }
-    if(DestY < Dest->clip_miny)
-    {
-        SrcY += Dest->clip_miny - DestY;
-        H -= Dest->clip_miny - DestY - 1;
-        DestY = Dest->clip_miny;
-    }
-    if((DestX + W) > Dest->clip_maxx)
-    {
-        W = W - ((DestX + W) - Dest->clip_maxx) + 1;
-        if(W <= 0)
-        {
-            SDL_SetError("SGE - Blit error");
-            return -1;
-        }
-    }
-    if((DestY + H) > Dest->clip_maxy)
-    {
-        H = H - ((DestY + H) - Dest->clip_maxy) + 1;
-        if(H <= 0)
-        {
-            SDL_SetError("SGE - Blit error");
-            return -1;
-        }
-    }
-#endif
-
     /* Initialize our rectangles */
     src.x = SrcX;
     src.y = SrcY;
@@ -684,35 +544,20 @@ int sge_BlitTransparent(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16
     dest.w = W;
     dest.h = H;
 
-/* We don't care about src clipping, only dest! */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if((Src->flags & SDL_SRCCLIPPING) == SDL_SRCCLIPPING)
-    {
-        Src->flags &= ~SDL_SRCCLIPPING;
-        flag = 1;
-    }
-#endif
-
     /* Set the color to be transparent */
-    SDL_SetColorKey(Src, SDL_SRCCOLORKEY, Clear);
+    SDL_SetColorKey(Src, SDL_TRUE, Clear);
 
     /* Set the alpha value */
-    SDL_SetAlpha(Src, SDL_SRCALPHA, Alpha);
+    Uint8 oldAlpha;
+    SDL_GetSurfaceAlphaMod(Src, &oldAlpha);
+    SDL_SetSurfaceAlphaMod(Src, Alpha);
 
     /* Blit */
     ret = SDL_BlitSurface(Src, &src, Dest, &dest);
 
-/* Set the correct flag */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(flag == 1)
-    {
-        Src->flags |= SDL_SRCCLIPPING;
-    }
-#endif
-
     /* Set normal levels */
-    SDL_SetAlpha(Src, 0, 0);
-    SDL_SetColorKey(Src, 0, 0);
+    SDL_SetSurfaceAlphaMod(Src, oldAlpha);
+    SDL_SetColorKey(Src, SDL_FALSE, 0);
 
     return ret;
 }
@@ -726,41 +571,6 @@ int sge_Blit(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint
     SDL_Rect src, dest;
     int ret;
 
-/* Dest clipping */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    int flag = 0;
-    if(DestX < Dest->clip_minx)
-    {
-        SrcX += Dest->clip_minx - DestX;
-        W -= Dest->clip_minx - DestX - 1;
-        DestX = Dest->clip_minx;
-    }
-    if(DestY < Dest->clip_miny)
-    {
-        SrcY += Dest->clip_miny - DestY;
-        H -= Dest->clip_miny - DestY - 1;
-        DestY = Dest->clip_miny;
-    }
-    if((DestX + W) > Dest->clip_maxx)
-    {
-        W = W - ((DestX + W) - Dest->clip_maxx) + 1;
-        if(W <= 0)
-        {
-            SDL_SetError("SGE - Blit error");
-            return -1;
-        }
-    }
-    if((DestY + H) > Dest->clip_maxy)
-    {
-        H = H - ((DestY + H) - Dest->clip_maxy) + 1;
-        if(H <= 0)
-        {
-            SDL_SetError("SGE - Blit error");
-            return -1;
-        }
-    }
-#endif
-
     /* Initialize our rectangles */
     src.x = SrcX;
     src.y = SrcY;
@@ -772,25 +582,8 @@ int sge_Blit(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint
     dest.w = W;
     dest.h = H;
 
-/* We don't care about src clipping, only dest! */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if((Src->flags & SDL_SRCCLIPPING) == SDL_SRCCLIPPING)
-    {
-        Src->flags &= ~SDL_SRCCLIPPING;
-        flag = 1;
-    }
-#endif
-
     /* Blit */
     ret = SDL_BlitSurface(Src, &src, Dest, &dest);
-
-/* Set the correct flag */
-#if SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL) < SDL_VERSIONNUM(1, 1, 5)
-    if(flag == 1)
-    {
-        Src->flags |= SDL_SRCCLIPPING;
-    }
-#endif
 
     return ret;
 }
@@ -816,7 +609,7 @@ SDL_Color sge_FillPaletteEntry(Uint8 R, Uint8 G, Uint8 B)
     color.r = R;
     color.g = G;
     color.b = B;
-    color.unused = 0;
+    color.a = 0;
 
     return color;
 }

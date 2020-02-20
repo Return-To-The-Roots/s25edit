@@ -2,6 +2,7 @@
 #define _CMAP_H
 
 #include "defines.h"
+#include <boost/optional.hpp>
 #include <Point.h>
 #include <SDL.h>
 #include <array>
@@ -81,6 +82,7 @@ private:
     // lock vertical or horizontal movement
     bool HorizontalMovementLocked;
     bool VerticalMovementLocked;
+    boost::optional<Position> startScrollPos;
 
 public:
     CMap(const std::string& filename);
@@ -205,6 +207,7 @@ private:
     void rotateMap();
     void MirrorMapOnXAxis();
     void MirrorMapOnYAxis();
+    void onLeftMouseDown(const Point32& pos);
 };
 
 #endif
