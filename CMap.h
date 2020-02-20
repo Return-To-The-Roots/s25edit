@@ -12,12 +12,25 @@
 
 struct SavedVertex
 {
+    template<typename T>
+    struct ArrayPtr
+    {
+        std::unique_ptr<T> array_;
+        auto& operator[](size_t index) { return (*array_)[index]; }
+        const auto& operator[](size_t index) const { return (*array_)[index]; }
+        ArrayPtr() : array_(std::make_unique<T>()) {}
+    };
     Position pos;
-    // MAX_CHANGE_SECTION * 2 + 1 = number of vertices in one row or col
+    // NUM_NODES = number of vertices in one row or col
     //+ 10 because if we raise a vertex then the other vertices will be raised too after 5 times
     // this ranges up to 10 vertices
     //+ 2 because modifications on a vertex will touch building and shading around
-    std::array<std::array<MapNode, (MAX_CHANGE_SECTION + 10 + 2) * 2 + 1>, (MAX_CHANGE_SECTION + 10 + 2) * 2 + 1> PointsArroundVertex;
+    // Using int due to signed arithmetic used later
+    static constexpr int NODES_PER_DIR = MAX_CHANGE_SECTION + 10 + 2;
+    static constexpr size_t NUM_NODES = NODES_PER_DIR * 2 + 1;
+    using PointArray = std::array<std::array<MapNode, NUM_NODES>, NUM_NODES>;
+    // Use a unique pointer to not create huge stack arrays
+    ArrayPtr<PointArray> PointsArroundVertex;
 };
 
 class CMap

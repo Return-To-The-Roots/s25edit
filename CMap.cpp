@@ -652,9 +652,9 @@ SavedVertex saveVertex(Position pt, const bobMAP& map)
 {
     SavedVertex res;
     res.pos = pt;
-    for(int i = pt.x - MAX_CHANGE_SECTION - 10 - 2, k = 0; i <= pt.x + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
+    for(int i = pt.x - SavedVertex::NODES_PER_DIR, k = 0; i <= pt.x + SavedVertex::NODES_PER_DIR; i++, k++)
     {
-        for(int j = pt.y - MAX_CHANGE_SECTION - 10 - 2, l = 0; j <= pt.y + MAX_CHANGE_SECTION + 10 + 2; j++, l++)
+        for(int j = pt.y - SavedVertex::NODES_PER_DIR, l = 0; j <= pt.y + SavedVertex::NODES_PER_DIR; j++, l++)
         {
             // i und j muessen wegen den mapraendern noch korrigiert werden!
             int m = i;
@@ -675,9 +675,9 @@ SavedVertex saveVertex(Position pt, const bobMAP& map)
 
 void restoreVertex(const SavedVertex& vertex, bobMAP& map)
 {
-    for(int i = vertex.pos.x - MAX_CHANGE_SECTION - 10 - 2, k = 0; i <= vertex.pos.x + MAX_CHANGE_SECTION + 10 + 2; i++, k++)
+    for(int i = vertex.pos.x - SavedVertex::NODES_PER_DIR, k = 0; i <= vertex.pos.x + SavedVertex::NODES_PER_DIR; i++, k++)
     {
-        for(int j = vertex.pos.y - MAX_CHANGE_SECTION - 10 - 2, l = 0; j <= vertex.pos.y + MAX_CHANGE_SECTION + 10 + 2; j++, l++)
+        for(int j = vertex.pos.y - SavedVertex::NODES_PER_DIR, l = 0; j <= vertex.pos.y + SavedVertex::NODES_PER_DIR; j++, l++)
         {
             int m = i;
             if(m < 0)
