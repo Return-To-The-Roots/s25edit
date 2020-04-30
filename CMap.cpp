@@ -1751,7 +1751,7 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
        || middleVertex.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || middleVertex.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
        || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
     {
-        middleVertex.rsuTexture -= 0x40;
+        middleVertex.rsuTexture &= ~0x40;
     }
 }
 
@@ -1848,7 +1848,7 @@ void CMap::modifyTextureMakeHarbour(int VertexX, int VertexY)
        || vertex.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || vertex.rsuTexture == TRIANGLE_TEXTURE_FLOWER
        || vertex.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW)
     {
-        vertex.rsuTexture += 0x40;
+        vertex.rsuTexture |= 0x40;
     }
 }
 

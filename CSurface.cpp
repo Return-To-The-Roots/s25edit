@@ -403,6 +403,11 @@ enum class BorderPreference
 BorderPreference CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Rect& borderRect)
 {
     // we have to decide which border to blit, "left or right" or "top or bottom"
+    s2Id1 &= ~(0x40 | 0x80);
+    s2Id2 &= ~(0x40 | 0x80);
+
+    assert(s2Id1 < map.s2IdToTerrain.size());
+    assert(s2Id2 < map.s2IdToTerrain.size());
 
     DescIdx<TerrainDesc> idxTop = map.s2IdToTerrain[s2Id1];
     DescIdx<TerrainDesc> idxBottom = map.s2IdToTerrain[s2Id2];
