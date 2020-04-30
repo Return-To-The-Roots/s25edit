@@ -10,6 +10,12 @@
 #include <string>
 #include <vector>
 
+// structure for display, cause SDL_Rect's datatypes are too small
+using DisplayRectangle = RectBase<Sint32>;
+using Point16 = Point<Sint16>;
+using Point32 = Point<Sint32>;
+using Extent16 = Point<Uint16>;
+
 struct TerrainDesc;
 
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
@@ -68,6 +74,7 @@ struct bobBMP
     Uint16 ny;
     Uint16 w;
     Uint16 h;
+    Extent16 getSize() const { return {w, h}; }
     SdlSurface surface;
 };
 
@@ -140,10 +147,6 @@ struct MapNode
         return result;
     }
 };
-// structure for display, cause SDL_Rect's datatypes are too small
-using DisplayRectangle = RectBase<Sint32>;
-using Point16 = Point<Sint16>;
-using Point32 = Point<Sint32>;
 // map types
 enum MapType
 {
@@ -190,8 +193,7 @@ private:
 // structure to save vertex coordinates
 struct cursorPoint : public Point32
 {
-    int blit_x;
-    int blit_y;
+    Position blit;
     bool active;
     bool fill_rsu;
     bool fill_usd;
@@ -1175,7 +1177,7 @@ constexpr auto MAXBOBSHADOW = 5000;
 constexpr auto MAXBOBPAL = 100;
 
 // maximum players for a map
-constexpr auto MAXPLAYERS= 16;
+constexpr auto MAXPLAYERS = 16;
 // maximum map size
 constexpr auto MAXMAPWIDTH = 1024;
 constexpr auto MAXMAPHEIGHT = 1024;

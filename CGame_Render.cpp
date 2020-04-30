@@ -103,11 +103,11 @@ void CGame::Render()
     if(Cursor.clicked)
     {
         if(Cursor.button.right)
-            CSurface::Draw(Surf_Display, global::bmpArray[CROSS].surface, Cursor.x, Cursor.y);
+            CSurface::Draw(Surf_Display, global::bmpArray[CROSS].surface, Cursor.pos);
         else
-            CSurface::Draw(Surf_Display, global::bmpArray[CURSOR_CLICKED].surface, Cursor.x, Cursor.y);
+            CSurface::Draw(Surf_Display, global::bmpArray[CURSOR_CLICKED].surface, Cursor.pos);
     } else
-        CSurface::Draw(Surf_Display, global::bmpArray[CURSOR].surface, Cursor.x, Cursor.y);
+        CSurface::Draw(Surf_Display, global::bmpArray[CURSOR].surface, Cursor.pos);
 
 #ifdef _ADMINMODE
     FrameCounter++;

@@ -223,8 +223,7 @@ void CFont::writeText()
     unsigned pixel_ctr_h = fontsize_ + row_separator;
     bool pixel_count_loop = true;
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
-    unsigned pos_x = 0;
-    unsigned pos_y = 0;
+    Position pos{0, 0};
 
     // now lets draw the chiffres
     auto chiffre = string_.begin();
@@ -270,27 +269,27 @@ void CFont::writeText()
         // test for new line
         if(*chiffre == '\n')
         {
-            pos_y += row_separator + fontsize_;
-            pos_x = 0;
+            pos.x = 0;
+            pos.y += row_separator + fontsize_;
             ++chiffre;
             continue;
         }
 
         // if right end of surface is reached, stop drawing chiffres
-        if(Surf_Font->w < static_cast<int>(pos_x + charW))
+        if(Surf_Font->w < static_cast<int>(pos.x + charW))
             break;
 
         const auto chiffre_index = getIndexForChar(*chiffre, fontsize_, color_);
 
         // if lower end of surface is reached, stop drawing chiffres
-        if(Surf_Font->h < static_cast<int>(pos_y + row_separator + global::bmpArray[chiffre_index].h))
+        if(Surf_Font->h < static_cast<int>(pos.y + row_separator + global::bmpArray[chiffre_index].h))
             break;
 
         // draw the chiffre to the destination
-        CSurface::Draw(Surf_Font, global::bmpArray[chiffre_index].surface, pos_x, pos_y);
+        CSurface::Draw(Surf_Font, global::bmpArray[chiffre_index].surface, pos);
 
         // set position for next chiffre
-        pos_x += charW;
+        pos.x += charW;
 
         // go to next chiffre
         ++chiffre;

@@ -16,13 +16,6 @@ namespace bfs = boost::filesystem;
 
 CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), lastFps("", 0, 0, 11)
 {
-    // mouse cursor data
-    Cursor.x = 0;
-    Cursor.y = 0;
-    Cursor.clicked = false;
-    Cursor.button.left = false;
-    Cursor.button.right = false;
-
     global::bmpArray.resize(MAXBOBBMP);
     global::shadowArray.resize(MAXBOBSHADOW);
     global::s2 = this;
@@ -199,7 +192,7 @@ bool checkWriteable(const bfs::path& folder)
 } // namespace
 
 #undef main
-int main(int /*argc*/, char* /*argv*/ [])
+int main(int /*argc*/, char* /*argv*/[])
 {
     if(!RTTRCONFIG.Init())
     {

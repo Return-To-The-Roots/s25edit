@@ -12,8 +12,9 @@
 #include <cassert>
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title, int color, Uint8 flags)
-    : CControlContainer(color, {global::bmpArray[WINDOW_LEFT_FRAME].w, global::bmpArray[WINDOW_UPPER_FRAME].h}), x_(pos.x), y_(pos.y),
-      w_(size.x), h_(size.y), title(title), callback_(callback), callbackQuitMessage(callbackQuitMessage)
+    : CControlContainer(color, {global::bmpArray[WINDOW_LEFT_FRAME].w, global::bmpArray[WINDOW_UPPER_FRAME].h},
+                        {global::bmpArray[WINDOW_RIGHT_FRAME].w, global::bmpArray[WINDOW_LOWER_FRAME].h}),
+      x_(pos.x), y_(pos.y), w_(size.x), h_(size.y), title(title), callback_(callback), callbackQuitMessage(callbackQuitMessage)
 {
     assert(callback);
     // ensure window is big enough to take all basic pictures needed
@@ -255,8 +256,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
 bool CWindow::render()
 {
     // position in the Surface 'surface'
-    Uint16 pos_x = 0;
-    Uint16 pos_y = 0;
+    Position pos = {0, 0};
     // width and height of the window background color source picture
     Uint16 pic_w = 0;
     Uint16 pic_h = 0;
@@ -289,32 +289,32 @@ bool CWindow::render()
         pic_w = std::min(w_, global::bmpArray[getBackground()].w);
         pic_h = std::min(h_, global::bmpArray[getBackground()].h);
 
-        while(pos_x + pic_w <= surface->w)
+        while(pos.x + pic_w <= surface->w)
         {
-            while(pos_y + pic_h <= surface->h)
+            while(pos.y + pic_h <= surface->h)
             {
-                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
-                pos_y += pic_h;
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos.x, pos.y, 0, 0, pic_w, pic_h);
+                pos.y += pic_h;
             }
 
-            if(surface->h - pos_y > 0)
-                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, pic_w, surface->h - pos_y);
+            if(surface->h - pos.y > 0)
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos.x, pos.y, 0, 0, pic_w, surface->h - pos.y);
 
-            pos_y = 0;
-            pos_x += pic_w;
+            pos.y = 0;
+            pos.x += pic_w;
         }
 
-        if(surface->w - pos_x > 0)
+        if(surface->w - pos.x > 0)
         {
-            while(pos_y + pic_h <= surface->h)
+            while(pos.y + pic_h <= surface->h)
             {
-                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
-                pos_y += pic_h;
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos.x, pos.y, 0, 0, surface->w - pos.x, pic_h);
+                pos.y += pic_h;
             }
 
-            if(surface->h - pos_y > 0)
-                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos_x, pos_y, 0, 0, surface->w - pos_x,
-                               surface->h - pos_y);
+            if(surface->h - pos.y > 0)
+                CSurface::Draw(surface.get(), global::bmpArray[getBackground()].surface, pos.x, pos.y, 0, 0, surface->w - pos.x,
+                               surface->h - pos.y);
         }
     }
 
@@ -334,16 +334,16 @@ bool CWindow::render()
 
     pic_w = std::min(w_, global::bmpArray[upperframe].w);
 
-    pos_x = 0;
-    pos_y = 0;
-    while(pos_x + pic_w <= surface->w)
+    pos.x = 0;
+    pos.y = 0;
+    while(pos.x + pic_w <= surface->w)
     {
-        CSurface::Draw(surface, global::bmpArray[upperframe].surface, pos_x, pos_y);
-        pos_x += pic_w;
+        CSurface::Draw(surface, global::bmpArray[upperframe].surface, pos);
+        pos.x += pic_w;
     }
 
-    if(surface->w - pos_x > 0)
-        CSurface::Draw(surface.get(), global::bmpArray[upperframe].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
+    if(surface->w - pos.x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[upperframe].surface, pos.x, pos.y, 0, 0, surface->w - pos.x, pic_h);
     // write text in the upper frame
     if(title)
         CFont::writeText(surface.get(), title, (int)w_ / 2, (int)((global::bmpArray[WINDOW_UPPER_FRAME].h - 9) / 2), 9, FONT_YELLOW,
@@ -353,44 +353,46 @@ bool CWindow::render()
     // down
     pic_w = std::min(w_, global::bmpArray[WINDOW_LOWER_FRAME].w);
     pic_h = global::bmpArray[WINDOW_LOWER_FRAME].h;
-    pos_x = 0;
-    pos_y = h_ - global::bmpArray[WINDOW_LOWER_FRAME].h;
-    while(pos_x + pic_w <= surface->w)
+    pos.x = 0;
+    pos.y = h_ - global::bmpArray[WINDOW_LOWER_FRAME].h;
+    while(pos.x + pic_w <= surface->w)
     {
-        CSurface::Draw(surface, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y);
-        pos_x += pic_w;
+        CSurface::Draw(surface, global::bmpArray[WINDOW_LOWER_FRAME].surface, pos);
+        pos.x += pic_w;
     }
-    if(surface->w - pos_x > 0)
-        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_LOWER_FRAME].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
+    if(surface->w - pos.x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_LOWER_FRAME].surface, pos.x, pos.y, 0, 0, surface->w - pos.x, pic_h);
     // left
     pic_h = std::min(h_, global::bmpArray[WINDOW_LEFT_FRAME].h);
-    pos_x = 0;
-    pos_y = 0;
-    while(pos_y + pic_h <= surface->h)
+    pos.x = 0;
+    pos.y = 0;
+    while(pos.y + pic_h <= surface->h)
     {
-        CSurface::Draw(surface, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y);
-        pos_y += pic_h;
+        CSurface::Draw(surface, global::bmpArray[WINDOW_LEFT_FRAME].surface, pos);
+        pos.y += pic_h;
     }
-    if(surface->w - pos_x > 0)
-        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_LEFT_FRAME].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
+    if(surface->w - pos.x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_LEFT_FRAME].surface, pos.x, pos.y, 0, 0, surface->w - pos.x, pic_h);
     // right
     pic_h = std::min(h_, global::bmpArray[WINDOW_RIGHT_FRAME].h);
-    pos_x = w_ - global::bmpArray[WINDOW_RIGHT_FRAME].w;
-    pos_y = 0;
-    while(pos_y + pic_h <= surface->h)
+    pos.x = w_ - global::bmpArray[WINDOW_RIGHT_FRAME].w;
+    pos.y = 0;
+    while(pos.y + pic_h <= surface->h)
     {
-        CSurface::Draw(surface, global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos_x, pos_y);
-        pos_y += pic_h;
+        CSurface::Draw(surface, global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos);
+        pos.y += pic_h;
     }
-    if(surface->w - pos_x > 0)
-        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos_x, pos_y, 0, 0, surface->w - pos_x, pic_h);
+    if(surface->w - pos.x > 0)
+        CSurface::Draw(surface.get(), global::bmpArray[WINDOW_RIGHT_FRAME].surface, pos.x, pos.y, 0, 0, surface->w - pos.x, pic_h);
 
     // now draw the corners
-    CSurface::Draw(surface, global::bmpArray[WINDOW_LEFT_UPPER_CORNER].surface, 0, 0);
-    CSurface::Draw(surface, global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].surface, w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w, 0);
-    CSurface::Draw(surface, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, 0, h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
-    CSurface::Draw(surface, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface, w_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].w,
-                   h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h);
+    CSurface::Draw(surface, global::bmpArray[WINDOW_LEFT_UPPER_CORNER].surface);
+    CSurface::Draw(surface, global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].surface,
+                   Position(w_ - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w, 0));
+    CSurface::Draw(surface, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface,
+                   Position(0, h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h));
+    CSurface::Draw(surface, global::bmpArray[WINDOW_CORNER_RECTANGLE].surface,
+                   Position(w_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].w, h_ - global::bmpArray[WINDOW_CORNER_RECTANGLE].h));
     // now the corner buttons
     // close
     if(canClose)
@@ -401,7 +403,7 @@ bool CWindow::render()
             closebutton = WINDOW_BUTTON_CLOSE_MARKED;
         else
             closebutton = WINDOW_BUTTON_CLOSE;
-        CSurface::Draw(surface, global::bmpArray[closebutton].surface, 0, 0);
+        CSurface::Draw(surface, global::bmpArray[closebutton].surface);
     }
     // minimize
     if(canMinimize)
@@ -412,7 +414,7 @@ bool CWindow::render()
             minimizebutton = WINDOW_BUTTON_MINIMIZE_MARKED;
         else
             minimizebutton = WINDOW_BUTTON_MINIMIZE;
-        CSurface::Draw(surface, global::bmpArray[minimizebutton].surface, w_ - global::bmpArray[minimizebutton].w, 0);
+        CSurface::Draw(surface, global::bmpArray[minimizebutton].surface, Position(w_ - global::bmpArray[minimizebutton].w, 0));
     }
     // resize
     if(canResize)
@@ -423,8 +425,7 @@ bool CWindow::render()
             resizebutton = WINDOW_BUTTON_RESIZE_MARKED;
         else
             resizebutton = WINDOW_BUTTON_RESIZE;
-        CSurface::Draw(surface, global::bmpArray[resizebutton].surface, w_ - global::bmpArray[resizebutton].w,
-                       h_ - global::bmpArray[resizebutton].h);
+        CSurface::Draw(surface, global::bmpArray[resizebutton].surface, Position(w_, h_) - global::bmpArray[resizebutton].getSize());
     }
 
     return true;

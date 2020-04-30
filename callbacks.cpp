@@ -245,7 +245,8 @@ void callback::submenuOptions(int Param)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen = SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 190, 200, 20,
                                                   BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            SelectBoxRes = SubMenu->addSelectBox((int)(global::s2->GameResolution.x / 2 - 100), 70, 200, 110, 11, FONT_YELLOW, BUTTON_GREY);
+            SelectBoxRes =
+              SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 120), Extent16(200, 110), 11, FONT_YELLOW, BUTTON_GREY);
             SelectBoxRes->setOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->setOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
             SelectBoxRes->setOption("960 x 540 (QHD)", submenuOptions, SELECTBOX_960_540);
@@ -596,7 +597,8 @@ void callback::EditorHelpMenu(int Param)
                                                                            "Hilfe", WINDOW_GREEN2,
                                                                            WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
 
-            SelectBoxHelp = WNDHelp->addSelectBox(0, 20, 635, 345, 11, FONT_YELLOW, BUTTON_GREEN1);
+            SelectBoxHelp =
+              WNDHelp->addSelectBox(Point16(0, 0), Extent16(WNDHelp->getSize() - WNDHelp->getBorderSize()), 11, FONT_YELLOW, BUTTON_GREEN1);
             SelectBoxHelp->setOption(
               "Help-Menu......................................................................................................F1\n");
             SelectBoxHelp->setOption(
@@ -748,15 +750,14 @@ void callback::EditorLoadMenu(int Param)
 
     switch(Param)
     {
-        case INITIALIZING_CALL:
-        {
+        case INITIALIZING_CALL: {
             if(WNDLoad)
                 break;
             WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320),
                                                                            "Load", WINDOW_GREEN1, WINDOW_CLOSE));
             MapObj = global::s2->getMapObj();
 
-            auto* CB_Filename = WNDLoad->addSelectBox(10, 5, 160, 280, 11);
+            auto* CB_Filename = WNDLoad->addSelectBox(Point16(10, 5), Extent16(160, 280), 11);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
             {
@@ -786,8 +787,7 @@ void callback::EditorLoadMenu(int Param)
             }
             break;
 
-        case LOADMAP:
-        {
+        case LOADMAP: {
             if(curFilename.empty())
                 return;
             PleaseWait(INITIALIZING_CALL);
@@ -893,8 +893,7 @@ void callback::EditorSaveMenu(int Param)
             TXTF_Author = nullptr;
             break;
 
-        case SAVEMAP:
-        {
+        case SAVEMAP: {
             PleaseWait(INITIALIZING_CALL);
 
             MapObj->setMapname(TXTF_Mapname->getText());
@@ -3208,7 +3207,7 @@ void callback::submenu1(int Param)
             // text block with \n
             SubMenu->addText("\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile", 400, 200, 14);
             testTextfield = SubMenu->addTextfield(400, 300, 10, 3);
-            testSelectBox = SubMenu->addSelectBox(500, 500, 300, 200);
+            testSelectBox = SubMenu->addSelectBox(Point16(500, 500), Extent16(300, 200));
             testSelectBox->setOption("Erste Option", submenu1, SELECTBOX_OPTION1);
             testSelectBox->setOption("Zweite Option", submenu1, SELECTBOX_OPTION2);
             testSelectBox->setOption("Dritte Option", submenu1, SELECTBOX_OPTION3);

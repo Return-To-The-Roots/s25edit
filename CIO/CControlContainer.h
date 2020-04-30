@@ -18,12 +18,13 @@ class CControlContainer
 private:
     struct Picture
     {
-        int x, y, pic;
+        Position pos;
+        int pic;
         unsigned id;
     };
 
     // if waste is true, the menu will be delete within the game loop
-    Point<uint16_t> borderSize; // Width and height of border
+    Extent16 borderBeginSize, borderEndSize; // Width and height of border at left/top and right/bottom
     bool waste = false;
     int pic_background;
     std::vector<std::unique_ptr<CButton>> buttons;
@@ -47,10 +48,11 @@ protected:
     int getBackground() const { return pic_background; }
 
 public:
-    // Constructor - Destructor
-    CControlContainer(int pic_background, Point<uint16_t> borderSize);
-    ~CControlContainer();
+    CControlContainer(int pic_background);
+    CControlContainer(int pic_background, Extent16 borderBeginSize, Extent16 borderEndSize);
+    ~CControlContainer() noexcept;
     // Access
+    Extent16 getBorderSize() const { return borderBeginSize + borderEndSize; }
     void setBackgroundPicture(int pic_background);
     virtual void setMouseData(SDL_MouseMotionEvent motion);
     virtual void setMouseData(SDL_MouseButtonEvent button);
@@ -75,8 +77,7 @@ public:
     CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fontsize = 14, int text_color = FONT_YELLOW,
                              int bg_color = -1, bool button_style = false);
     bool delTextfield(CTextfield* TextfieldToDelete);
-    CSelectBox* addSelectBox(Uint16 x = 0, Uint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fontsize = 14, int text_color = FONT_YELLOW,
-                             int bg_color = -1);
+    CSelectBox* addSelectBox(Point16 pos, Extent16 size, int fontsize = 14, int text_color = FONT_YELLOW, int bg_color = -1);
     bool delSelectBox(CSelectBox* SelectBoxToDelete);
 };
 

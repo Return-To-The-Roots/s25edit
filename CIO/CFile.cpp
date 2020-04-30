@@ -509,7 +509,7 @@ bool CFile::open_lbm(const std::string& filename)
         if((bmpArray->surface = makeRGBSurface((bmpArray - 1)->w, (bmpArray - 1)->h)))
         {
             SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
-            CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface, 0, 0);
+            CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface);
         } else
             bmpArray--;
     }

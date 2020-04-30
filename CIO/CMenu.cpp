@@ -3,7 +3,7 @@
 #include "../globals.h"
 #include <SGE/sge_blib.h>
 
-CMenu::CMenu(int pic_background) : CControlContainer(pic_background, {0, 0}) {}
+CMenu::CMenu(int pic_background) : CControlContainer(pic_background) {}
 
 bool CMenu::render()
 {

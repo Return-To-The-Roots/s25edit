@@ -78,7 +78,7 @@ bool CPicture::render()
         SDL_SetColorKey(Surf_Picture.get(), SDL_TRUE, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
     }
 
-    CSurface::Draw(Surf_Picture, global::bmpArray[picture_].surface, 0, 0);
+    CSurface::Draw(Surf_Picture, global::bmpArray[picture_].surface);
 
     return true;
 }

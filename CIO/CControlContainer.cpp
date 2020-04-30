@@ -8,11 +8,12 @@
 #include "CTextfield.h"
 #include "helpers/containerUtils.h"
 
-CControlContainer::CControlContainer(int pic_background, Point<uint16_t> borderSize)
-    : borderSize(borderSize), pic_background(pic_background)
+CControlContainer::CControlContainer(int pic_background) : CControlContainer(pic_background, Extent16::all(0), Extent16::all(0)) {}
+CControlContainer::CControlContainer(int pic_background, Extent16 borderBeginSize, Extent16 borderEndSize)
+    : borderBeginSize(borderBeginSize), borderEndSize(borderEndSize), pic_background(pic_background)
 {}
 
-CControlContainer::~CControlContainer() = default;
+CControlContainer::~CControlContainer() noexcept = default;
 
 void CControlContainer::setBackgroundPicture(int pic_background)
 {
@@ -82,8 +83,8 @@ bool CControlContainer::eraseElement(T& collection, const U* element)
 CButton* CControlContainer::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color,
                                       const char* text, int picture)
 {
-    x += borderSize.x;
-    y += borderSize.y;
+    x += borderBeginSize.x;
+    y += borderBeginSize.y;
 
     buttons.emplace_back(std::make_unique<CButton>(callback, clickedParam, x, y, w, h, color, text, picture));
     needRender = true;
@@ -97,8 +98,8 @@ bool CControlContainer::delButton(CButton* ButtonToDelete)
 
 CFont* CControlContainer::addText(std::string string, int x, int y, int fontsize, int color)
 {
-    x += borderSize.x;
-    y += borderSize.y;
+    x += borderBeginSize.x;
+    y += borderBeginSize.y;
 
     texts.emplace_back(std::make_unique<CFont>(std::move(string), x, y, fontsize, color));
     needRender = true;
@@ -112,8 +113,8 @@ bool CControlContainer::delText(CFont* TextToDelete)
 
 CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
 {
-    x += borderSize.x;
-    y += borderSize.y;
+    x += borderBeginSize.x;
+    y += borderBeginSize.y;
 
     pictures.emplace_back(std::make_unique<CPicture>(callback, clickedParam, x, y, picture));
     needRender = true;
@@ -129,11 +130,11 @@ int CControlContainer::addStaticPicture(int x, int y, int picture)
 {
     if(picture < 0)
         return -1;
-    x += borderSize.x;
-    y += borderSize.y;
+    Position pos{x, y};
+    pos += Position(borderBeginSize);
 
     unsigned id = static_pictures.empty() ? 0u : static_pictures.back().id + 1u;
-    static_pictures.emplace_back(Picture{x, y, picture, id});
+    static_pictures.emplace_back(Picture{pos, picture, id});
     needRender = true;
     return id;
 }
@@ -155,8 +156,8 @@ bool CControlContainer::delStaticPicture(int picId)
 CTextfield* CControlContainer::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color,
                                             bool button_style)
 {
-    x += borderSize.x;
-    y += borderSize.y;
+    x += borderBeginSize.x;
+    y += borderBeginSize.y;
 
     textfields.emplace_back(std::make_unique<CTextfield>(x, y, cols, rows, fontsize, text_color, bg_color, button_style));
     needRender = true;
@@ -168,12 +169,11 @@ bool CControlContainer::delTextfield(CTextfield* TextfieldToDelete)
     return eraseElement(textfields, TextfieldToDelete);
 }
 
-CSelectBox* CControlContainer::addSelectBox(Uint16 x, Uint16 y, Uint16 w, Uint16 h, int fontsize, int text_color, int bg_color)
+CSelectBox* CControlContainer::addSelectBox(Point16 pos, Extent16 size, int fontsize, int text_color, int bg_color)
 {
-    x += borderSize.x;
-    y += borderSize.y;
+    pos += Point16(borderBeginSize);
 
-    selectboxes.emplace_back(std::make_unique<CSelectBox>(x, y, w, h, fontsize, text_color, bg_color));
+    selectboxes.emplace_back(std::make_unique<CSelectBox>(pos, size, fontsize, text_color, bg_color));
     needRender = true;
     return selectboxes.back().get();
 }
@@ -187,7 +187,7 @@ void CControlContainer::renderElements()
 {
     for(const auto& static_picture : static_pictures)
     {
-        CSurface::Draw(surface, global::bmpArray[static_picture.pic].surface, static_picture.x, static_picture.y);
+        CSurface::Draw(surface, global::bmpArray[static_picture.pic].surface, static_picture.pos);
     }
     for(const auto& picture : pictures)
     {
@@ -203,7 +203,7 @@ void CControlContainer::renderElements()
     }
     for(const auto& selectbox : selectboxes)
     {
-        CSurface::Draw(surface, selectbox->getSurface(), selectbox->getX(), selectbox->getY());
+        CSurface::Draw(surface, selectbox->getSurface(), Position(selectbox->getPos()));
     }
     for(const auto& button : buttons)
     {

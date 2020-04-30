@@ -17,40 +17,31 @@ class CSelectBox
 private:
     SdlSurface Surf_SelectBox;
     std::vector<std::unique_ptr<CFont>> Entries;
-    bool needRender;
-    Sint16 x_;
-    Sint16 y_;
-    Uint16 w_;
-    Uint16 h_;
-    Uint16 last_text_pos_y;
+    Point16 pos_;
+    Extent16 size_;
     int fontsize;
     int pic_background;
     int pic_foreground;
     int text_color;
-    // we need this to say the window if it needs to render, otherwise no chiffre are shown
-    bool rendered;
     std::unique_ptr<CButton> ScrollUpButton;
     std::unique_ptr<CButton> ScrollDownButton;
+    Uint16 last_text_pos_y = 10;
+    // we need this to say the window if it needs to render, otherwise no chiffre are shown
+    bool rendered = false;
+    bool needRender = true;
 
 public:
-    // Constructor - Destructor
-    CSelectBox(Sint16 x = 0, Sint16 y = 0, Uint16 w = 100, Uint16 h = 100, int fontsize = 14, int text_color = FONT_YELLOW,
-               int bg_color = -1);
-    // Access;
-    int getX() { return x_; }
-    int getY() { return y_; }
-    int getW() { return w_; }
-    int getH() { return h_; }
-    void setX(int x) { this->x_ = x; }
-    void setY(int y) { this->y_ = y; }
+    CSelectBox(Point16 pos, Extent16 size, int fontsize = 14, int text_color = FONT_YELLOW, int bg_color = -1);
+    const Point16& getPos() const { return pos_; }
+    const Extent16& getSize() const { return size_; }
     bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
     void setMouseData(SDL_MouseMotionEvent motion);
     bool render();
-    SDL_Surface* getSurface()
+    SdlSurface& getSurface()
     {
         render();
-        return Surf_SelectBox.get();
+        return Surf_SelectBox;
     }
     void setColor(int color);
     void setTextColor(int color)

@@ -34,6 +34,7 @@ public:
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
+    Point16 getPos() const { return {x_, y_}; }
     int getW() { return w; };
     int getH() { return h; };
     void setX(int x) { this->x_ = x; };

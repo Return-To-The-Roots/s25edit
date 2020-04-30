@@ -292,10 +292,10 @@ bool CButton::render()
         if(global::bmpArray[button_picture].w <= Surf_Button->w && global::bmpArray[button_picture].h <= Surf_Button->h)
         {
             // get coordinates of the left upper corner where to positionate the picture
-            int leftup_x = (int)(Surf_Button->w / 2) - (int)(global::bmpArray[button_picture].w / 2);
-            int leftup_y = (int)(Surf_Button->h / 2) - (int)(global::bmpArray[button_picture].h / 2);
+            Position leftup = Position(Surf_Button->w, Surf_Button->h) / 2
+                              - Position(global::bmpArray[button_picture].w, global::bmpArray[button_picture].h) / 2;
             // blit it
-            CSurface::Draw(Surf_Button, global::bmpArray[button_picture].surface, leftup_x, leftup_y);
+            CSurface::Draw(Surf_Button, global::bmpArray[button_picture].surface, leftup);
         } else
         {
             button_picture = -1;

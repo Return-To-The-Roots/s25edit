@@ -42,12 +42,12 @@ private:
     // structure for mouse cursor
     struct
     {
-        Uint16 x, y;
-        bool clicked;
+        Position pos = {0, 0};
+        bool clicked = false;
         struct
         {
-            bool left;
-            bool right;
+            bool left = false;
+            bool right = false;
         } button;
     } Cursor;
 

@@ -144,7 +144,7 @@ void CDebug::actualizeData()
       global::s2->Cursor.clicked ?
         (global::s2->Cursor.button.left ? "LMB clicked" : (global::s2->Cursor.button.right ? "RMB clicked" : "clicked")) :
         "unclicked";
-    MouseText->setText(helpers::format("Mouse: x=%d y=%d %s", global::s2->Cursor.x, global::s2->Cursor.y, clickedStr));
+    MouseText->setText(helpers::format("Mouse: x=%d y=%d %s", global::s2->Cursor.pos.x, global::s2->Cursor.pos.y, clickedStr));
 
     // del RegisteredMenusText before drawing new
     if(!RegisteredMenusText)
@@ -175,7 +175,7 @@ void CDebug::actualizeData()
     if(MapObj)
     {
         map = MapObj->getMap();
-        const MapNode& vertex = map->getVertex(MapObj->VertexX_, MapObj->VertexY_);
+        const MapNode& vertex = map->getVertex(MapObj->Vertex_);
 
         if(!MapNameText)
             MapNameText = dbgWnd->addText("", 260, 10, fontsize);
@@ -197,7 +197,7 @@ void CDebug::actualizeData()
         MapPlayerText->setText(helpers::format("Player: %d", map->player));
         if(!VertexText)
             VertexText = dbgWnd->addText("", 260, 60, fontsize);
-        VertexText->setText(helpers::format("Vertex: %d, %d", MapObj->VertexX_, MapObj->VertexY_));
+        VertexText->setText(helpers::format("Vertex: %d, %d", MapObj->Vertex_.x, MapObj->Vertex_.y));
         if(!VertexDataText)
             VertexDataText = dbgWnd->addText("", 260, 70, fontsize);
         VertexDataText->setText(helpers::format("Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y, vertex.z,

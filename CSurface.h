@@ -15,7 +15,7 @@ public:
     // blits from source on destination to position X,Y
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y);
     static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y);
-    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X = 0, int Y = 0);
+    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, Position pos = {0, 0});
     static bool Draw(SdlSurface& Surf_Dest, SDL_Surface* Surf_Src, int X = 0, int Y = 0);
     // blits from source on destination to position X,Y and rotates (angle --> degrees --> 90, 180, 270)
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle);

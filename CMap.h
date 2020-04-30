@@ -45,7 +45,7 @@ private:
     std::unique_ptr<bobMAP> map;
     DisplayRectangle displayRect;
     bool active;
-    int VertexX_, VertexY_;
+    Position Vertex_;
     bool RenderBuildHelp;
     bool RenderBorders;
     int BitsPerPixel;
@@ -65,8 +65,7 @@ private:
     // get the number of the triangle nearest to cursor and save it to VertexX and VertexY
     void storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
     // blitting coords for the mouse cursor
-    int MouseBlitX;
-    int MouseBlitY;
+    Position MouseBlit;
     // counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor vertex, 1 - six
     // vertices around the cursor vertex ....) (editor mode)
     int ChangeSection_;
@@ -115,8 +114,8 @@ public:
     void setActive() { active = true; }
     void setInactive() { active = false; }
     bool isActive() const { return active; }
-    int getVertexX() const { return VertexX_; }
-    int getVertexY() const { return VertexY_; }
+    int getVertexX() const { return Vertex_.x; }
+    int getVertexY() const { return Vertex_.y; }
     auto getMaxRaiseHeight() const { return MaxRaiseHeight; }
     auto getMinReduceHeight() const { return MinReduceHeight; }
     bool isHorizontalMovementLocked() const { return HorizontalMovementLocked; }
@@ -202,8 +201,7 @@ private:
     void calculateVerticesAround(std::array<Point32, T_size>& newVertices, int x, int y);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
-    int correctMouseBlitX(int VertexX, int VertexY);
-    int correctMouseBlitY(int VertexX, int VertexY);
+    Position correctMouseBlit(Position vertexPos) const;
     void modifyVertex();
     void modifyHeightRaise(int VertexX, int VertexY);
     void modifyHeightReduce(int VertexX, int VertexY);
