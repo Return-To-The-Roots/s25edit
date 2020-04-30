@@ -185,28 +185,16 @@ bool CControlContainer::delSelectBox(CSelectBox* SelectBoxToDelete)
 
 void CControlContainer::renderElements()
 {
-    for(const auto& static_picture : static_pictures)
-    {
-        CSurface::Draw(surface, global::bmpArray[static_picture.pic].surface, static_picture.pos);
-    }
     for(const auto& picture : pictures)
-    {
         CSurface::Draw(surface, picture->getSurface(), picture->getX(), picture->getY());
-    }
     for(const auto& text : texts)
-    {
         CSurface::Draw(surface, text->getSurface(), text->getX(), text->getY());
-    }
     for(const auto& textfield : textfields)
-    {
         CSurface::Draw(surface, textfield->getSurface(), textfield->getX(), textfield->getY());
-    }
     for(const auto& selectbox : selectboxes)
-    {
         CSurface::Draw(surface, selectbox->getSurface(), Position(selectbox->getPos()));
-    }
     for(const auto& button : buttons)
-    {
         CSurface::Draw(surface, button->getSurface(), button->getX(), button->getY());
-    }
+    for(const auto& static_picture : static_pictures)
+        CSurface::Draw(surface, global::bmpArray[static_picture.pic].surface, static_picture.pos);
 }

@@ -2668,8 +2668,8 @@ void CMap::setupVerticesActivity()
                         Vertices[index].active = true;
 
                     // decide which triangle-textures will be filled at this vertex (necessary for border)
-                    Vertices[index].fill_rsu = (VertexFillRSU ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
-                    Vertices[index].fill_usd = (VertexFillUSD ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
+                    Vertices[index].fill_rsu = VertexFillRSU || (VertexFillRandom && (rand() % 2 == 1));
+                    Vertices[index].fill_usd = VertexFillUSD || (VertexFillRandom && (rand() % 2 == 1));
 
                     // if we have a ChangeSection greater than zero
                     if(ChangeSection_)
@@ -2746,8 +2746,8 @@ void CMap::setupVerticesActivity()
                         Vertices[index].active = true;
 
                     // decide which triangle-textures will be filled at this vertex (necessary for border)
-                    Vertices[index].fill_rsu = (VertexFillRSU ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
-                    Vertices[index].fill_usd = (VertexFillUSD ? true : (VertexFillRandom ? (rand() % 2 == 1) : false));
+                    Vertices[index].fill_rsu = VertexFillRSU || (VertexFillRandom && (rand() % 2 == 1));
+                    Vertices[index].fill_usd = VertexFillUSD || (VertexFillRandom && (rand() % 2 == 1));
 
                     // if we have a ChangeSection greater than zero
                     if(ChangeSection_)
