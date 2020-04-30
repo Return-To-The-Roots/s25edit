@@ -979,14 +979,12 @@ void callback::EditorTextureMenu(int Param)
     static CMap* MapObj = nullptr;
     static bobMAP* map = nullptr;
     static int textureIndex = 0;
-    static int harbourPictureCross = 0; // this have to be -1 if we use the harbour button
     static int lastContent = 0x00;
     static Position Pos{0, 0};
 
     enum
     {
         WINDOWQUIT,
-        HARBOUR,
         PICSNOW,
         PICSTEPPE,
         PICSWAMP,
@@ -1031,7 +1029,6 @@ void callback::EditorTextureMenu(int Param)
             }
             MapObj->setMode(EDITOR_MODE_TEXTURE);
             MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW);
-            lastContent = TRIANGLE_TEXTURE_SNOW;
 
             WNDTexture->addPicture(EditorTextureMenu, PICSNOW, 2, 2, textureIndex++);
             WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE, 36, 2, textureIndex++);
@@ -1051,186 +1048,25 @@ void callback::EditorTextureMenu(int Param)
             WNDTexture->addPicture(EditorTextureMenu, PICLAVA, 104, 70, textureIndex++);
             if(map->type != MAP_WASTELAND)
                 WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, 138, 70, textureIndex);
-
-            // WNDTexture->addButton(EditorTextureMenu, HARBOUR, 172, 70, 32, 32, BUTTON_GREY, nullptr, MAPPIC_HOUSE_HARBOUR);
-            // harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
             break;
 
-        case HARBOUR: // harbour mode is active
-            if(harbourPictureCross == -1)
-            {
-                if(MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
-                {
-                    harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-                    MapObj->setModeContent(MapObj->getModeContent() - 0x40);
-                    lastContent = MapObj->getModeContent();
-                }
-            }
-            // harbour mode is inactive
-            else
-            {
-                if(MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW1 || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW1
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW2 || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW3
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_STEPPE_MEADOW2 || MapObj->getModeContent() == TRIANGLE_TEXTURE_FLOWER
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MINING_MEADOW
-                   || MapObj->getModeContent() == TRIANGLE_TEXTURE_MEADOW_MIXED)
-                {
-                    WNDTexture->delStaticPicture(harbourPictureCross);
-                    harbourPictureCross = -1;
-                    MapObj->setModeContent(MapObj->getModeContent() + 0x40);
-                    lastContent = MapObj->getModeContent();
-                }
-            }
-            break;
-        case PICSNOW:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW);
-            lastContent = TRIANGLE_TEXTURE_SNOW;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICSTEPPE:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE);
-            lastContent = TRIANGLE_TEXTURE_STEPPE;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICSWAMP:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_SWAMP);
-            lastContent = TRIANGLE_TEXTURE_SWAMP;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICFLOWER:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_FLOWER_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_FLOWER_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_FLOWER);
-                lastContent = TRIANGLE_TEXTURE_FLOWER;
-            }
-            break;
-        case PICMINING1:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_MINING1);
-            lastContent = TRIANGLE_TEXTURE_MINING1;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICMINING2:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_MINING2);
-            lastContent = TRIANGLE_TEXTURE_MINING2;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICMINING3:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_MINING3);
-            lastContent = TRIANGLE_TEXTURE_MINING3;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICMINING4:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_MINING4);
-            lastContent = TRIANGLE_TEXTURE_MINING4;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICSTEPPE_MEADOW1:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW1);
-                lastContent = TRIANGLE_TEXTURE_STEPPE_MEADOW1;
-            }
-            break;
-        case PICMEADOW1:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW1_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_MEADOW1_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW1);
-                lastContent = TRIANGLE_TEXTURE_MEADOW1;
-            }
-            break;
-        case PICMEADOW2:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW2_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_MEADOW2_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW2);
-                lastContent = TRIANGLE_TEXTURE_MEADOW2;
-            }
-            break;
-        case PICMEADOW3:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW3_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW3);
-                lastContent = TRIANGLE_TEXTURE_MEADOW3;
-            }
-            break;
-        case PICSTEPPE_MEADOW2:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW2);
-                lastContent = TRIANGLE_TEXTURE_STEPPE_MEADOW2;
-            }
-            break;
-        case PICMINING_MEADOW:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MINING_MEADOW);
-                lastContent = TRIANGLE_TEXTURE_MINING_MEADOW;
-            }
-            break;
-        case PICWATER:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_WATER);
-            lastContent = TRIANGLE_TEXTURE_WATER;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICLAVA:
-            MapObj->setModeContent(TRIANGLE_TEXTURE_LAVA);
-            lastContent = TRIANGLE_TEXTURE_LAVA;
-            if(harbourPictureCross == -1)
-                harbourPictureCross = WNDTexture->addStaticPicture(185, 80, PICTURE_SMALL_CROSS);
-            break;
-        case PICMEADOW_MIXED:
-            if(harbourPictureCross == -1)
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR);
-                lastContent = TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR;
-            } else
-            {
-                MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW_MIXED);
-                lastContent = TRIANGLE_TEXTURE_MEADOW_MIXED;
-            }
-            break;
+        case PICSNOW: MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW); break;
+        case PICSTEPPE: MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE); break;
+        case PICSWAMP: MapObj->setModeContent(TRIANGLE_TEXTURE_SWAMP); break;
+        case PICFLOWER: MapObj->setModeContent(TRIANGLE_TEXTURE_FLOWER); break;
+        case PICMINING1: MapObj->setModeContent(TRIANGLE_TEXTURE_MINING1); break;
+        case PICMINING2: MapObj->setModeContent(TRIANGLE_TEXTURE_MINING2); break;
+        case PICMINING3: MapObj->setModeContent(TRIANGLE_TEXTURE_MINING3); break;
+        case PICMINING4: MapObj->setModeContent(TRIANGLE_TEXTURE_MINING4); break;
+        case PICSTEPPE_MEADOW1: MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW1); break;
+        case PICMEADOW1: MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW1); break;
+        case PICMEADOW2: MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW2); break;
+        case PICMEADOW3: MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW3); break;
+        case PICSTEPPE_MEADOW2: MapObj->setModeContent(TRIANGLE_TEXTURE_STEPPE_MEADOW2); break;
+        case PICMINING_MEADOW: MapObj->setModeContent(TRIANGLE_TEXTURE_MINING_MEADOW); break;
+        case PICWATER: MapObj->setModeContent(TRIANGLE_TEXTURE_WATER); break;
+        case PICLAVA: MapObj->setModeContent(TRIANGLE_TEXTURE_LAVA); break;
+        case PICMEADOW_MIXED: MapObj->setModeContent(TRIANGLE_TEXTURE_MEADOW_MIXED); break;
 
         case WINDOW_CLICKED_CALL:
             if(MapObj)
@@ -1253,7 +1089,6 @@ void callback::EditorTextureMenu(int Param)
             MapObj = nullptr;
             map = nullptr;
             textureIndex = 0;
-            harbourPictureCross = 0; // this have to be -1 if we use the harbour button
             break;
 
         case MAP_QUIT:
@@ -1268,11 +1103,12 @@ void callback::EditorTextureMenu(int Param)
             MapObj = nullptr;
             map = nullptr;
             textureIndex = 0;
-            harbourPictureCross = 0; // this have to be -1 if we use the harbour button
             break;
 
         default: break;
     }
+    if(MapObj)
+        lastContent = MapObj->getModeContent();
 }
 
 void callback::EditorTreeMenu(int Param)
