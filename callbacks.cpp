@@ -750,7 +750,8 @@ void callback::EditorLoadMenu(int Param)
 
     switch(Param)
     {
-        case INITIALIZING_CALL: {
+        case INITIALIZING_CALL:
+        {
             if(WNDLoad)
                 break;
             WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320),
@@ -787,7 +788,8 @@ void callback::EditorLoadMenu(int Param)
             }
             break;
 
-        case LOADMAP: {
+        case LOADMAP:
+        {
             if(curFilename.empty())
                 return;
             PleaseWait(INITIALIZING_CALL);
@@ -893,7 +895,8 @@ void callback::EditorSaveMenu(int Param)
             TXTF_Author = nullptr;
             break;
 
-        case SAVEMAP: {
+        case SAVEMAP:
+        {
             PleaseWait(INITIALIZING_CALL);
 
             MapObj->setMapname(TXTF_Mapname->getText());

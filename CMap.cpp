@@ -872,7 +872,8 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             case SDLK_UP:
             case SDLK_DOWN:
             case SDLK_LEFT:
-            case SDLK_RIGHT: {
+            case SDLK_RIGHT:
+            {
                 Position offset{key.keysym.sym == SDLK_LEFT ? -100 : (key.keysym.sym == SDLK_RIGHT ? 100 : 0),
                                 key.keysym.sym == SDLK_UP ? -100 : (key.keysym.sym == SDLK_DOWN ? 100 : 0)};
                 moveMap(offset);

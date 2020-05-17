@@ -207,9 +207,11 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
             else
                 return p[0] | p[1] << 8 | p[2] << 16;
 
-        case 4: return *(Uint32*)p; //-V206
+        case 4:
+            return *(Uint32*)p; //-V206
 
-        default: return 0; /* shouldn't happen, but avoids warnings */
+        default:
+            return 0; /* shouldn't happen, but avoids warnings */
     }
 }
 
@@ -1088,9 +1090,13 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 }
                 break;
             // stone
-            case 0xCC: objIdx = MAPPIC_GRANITE_1_1 + (P2.objectType - 0x01); break;
+            case 0xCC:
+                objIdx = MAPPIC_GRANITE_1_1 + (P2.objectType - 0x01);
+                break;
             // stone
-            case 0xCD: objIdx = MAPPIC_GRANITE_2_1 + (P2.objectType - 0x01); break;
+            case 0xCD:
+                objIdx = MAPPIC_GRANITE_2_1 + (P2.objectType - 0x01);
+                break;
             // headquarter
             case 0x80: // node2.objectType is the number of the player beginning with 0x00
                        //%7 cause in the original game there are only 7 players and 7 different flags

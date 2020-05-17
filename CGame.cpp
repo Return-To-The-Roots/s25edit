@@ -192,7 +192,7 @@ bool checkWriteable(const bfs::path& folder)
 } // namespace
 
 #undef main
-int main(int /*argc*/, char* /*argv*/[])
+int main(int /*argc*/, char* /*argv*/ [])
 {
     if(!RTTRCONFIG.Init())
     {

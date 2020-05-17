@@ -10,7 +10,8 @@ void CGame::EventHandling(SDL_Event* Event)
 {
     switch(Event->type)
     {
-        case SDL_KEYDOWN: {
+        case SDL_KEYDOWN:
+        {
             // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
             //      delivering earlier, for doing this we make use of a variable showing us the deliver status
             bool delivered = false;
@@ -86,7 +87,8 @@ void CGame::EventHandling(SDL_Event* Event)
                         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                     }
                     break;
-                case SDLK_F6: {
+                case SDLK_F6:
+                {
                     if(MapObj->getMap())
                     {
                         callback::PleaseWait(INITIALIZING_CALL);
@@ -120,7 +122,8 @@ void CGame::EventHandling(SDL_Event* Event)
             break;
         }
 
-        case SDL_KEYUP: {
+        case SDL_KEYUP:
+        {
             // deliver keyboard data to map
             if(MapObj)
                 MapObj->setKeyboardData(Event->key);
@@ -128,7 +131,8 @@ void CGame::EventHandling(SDL_Event* Event)
             break;
         }
 
-        case SDL_MOUSEMOTION: {
+        case SDL_MOUSEMOTION:
+        {
             // setup mouse cursor data
             if(MapObj && MapObj->isActive())
             {
@@ -217,7 +221,8 @@ void CGame::EventHandling(SDL_Event* Event)
             break;
         }
 
-        case SDL_MOUSEBUTTONDOWN: {
+        case SDL_MOUSEBUTTONDOWN:
+        {
             // setup mouse cursor data
             Cursor.clicked = true;
             Cursor.button.left = false;
@@ -291,7 +296,8 @@ void CGame::EventHandling(SDL_Event* Event)
             break;
         }
 
-        case SDL_MOUSEBUTTONUP: {
+        case SDL_MOUSEBUTTONUP:
+        {
             // setup mouse cursor data
             Cursor.clicked = false;
 
