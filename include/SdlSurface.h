@@ -2,8 +2,8 @@
 #define SdlSurface_h__
 
 #include <SDL.h>
-#include <memory>
 #include <array>
+#include <memory>
 
 struct SdlSurfaceDeleter
 {
@@ -33,7 +33,7 @@ inline SdlSurface makeRGBSurface(int width, int height, bool withAlpha = false)
 }
 inline SdlSurface makePalSurface(int width, int height, const std::array<SDL_Color, 256>& palette)
 {
-    auto surf = SdlSurface(SDL_CreateRGBSurface(0, width, height, 8, 0,0,0,0));
+    auto surf = SdlSurface(SDL_CreateRGBSurface(0, width, height, 8, 0, 0, 0, 0));
     if(surf)
         SDL_SetPaletteColors(surf->format->palette, palette.data(), 0, palette.size());
     return surf;

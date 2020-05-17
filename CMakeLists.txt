@@ -11,7 +11,7 @@ if(RTTR_EDITOR_ADMINMODE)
 	add_definitions(-D_ADMINMODE)
 endif()
 
-file(GLOB MAIN_SOURCES *.cpp *.h)
+file(GLOB MAIN_SOURCES *.cpp *.h include/*.h)
 file(GLOB CIO_SOURCES CIO/*.cpp CIO/*.h)
 SOURCE_GROUP(Main FILES ${MAIN_SOURCES})
 SOURCE_GROUP(CIO FILES ${CIO_SOURCES})
