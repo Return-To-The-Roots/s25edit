@@ -105,7 +105,7 @@ public:
                                                int border_texture);
     void destructMap();
     void loadMapPics();
-    void unloadMapPics();
+    static void unloadMapPics();
 
     void moveMap(Position offset);
     void setMouseData(const SDL_MouseMotionEvent& motion);
@@ -186,8 +186,6 @@ public:
     bool getVertexActivityRandom() { return VertexActivityRandom; }
 
 private:
-    // returns count of the vertices that are involved in changes (editor mode) -->THIS FUNCTION IS OUTDATED
-    int getActiveVertices(int tempChangeSection);
     // this will calculate ALL vertices for the whole square
     void calculateVertices();
     // this will calculate the vertices two sections around one vertex (like a great hexagon) --> necessary to calculate the possible

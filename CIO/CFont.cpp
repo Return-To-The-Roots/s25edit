@@ -184,8 +184,7 @@ unsigned getIndexForChar(uint8_t c)
     else if(c == 252)
         return 88;
     // chiffre not available, use '_' instead
-    else
-        return 60;
+    return 60;
 }
 
 unsigned getIndexForChar(uint8_t c, unsigned fontsize, unsigned color)

@@ -972,10 +972,6 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
                 mode = lastMode;
                 break;
             case SDLK_b: // user probably released EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE
-                mode = lastMode;
-                ChangeSection_ = lastChangeSection;
-                setupVerticesActivity();
-                break;
             case SDLK_h: // user probably released EDITOR_MODE_TEXTURE_MAKE_HARBOUR
                 mode = lastMode;
                 ChangeSection_ = lastChangeSection;
@@ -1116,7 +1112,7 @@ void CMap::render()
         case EDITOR_MODE_TEXTURE: symbol_index = CURSOR_SYMBOL_TEXTURE; break;
         case EDITOR_MODE_TEXTURE_MAKE_HARBOUR: symbol_index = MAPPIC_ARROWCROSS_RED_HOUSE_HARBOUR; break;
         case EDITOR_MODE_LANDSCAPE: symbol_index = CURSOR_SYMBOL_LANDSCAPE; break;
-        case EDITOR_MODE_FLAG: symbol_index = CURSOR_SYMBOL_FLAG; break;
+        case EDITOR_MODE_FLAG:
         case EDITOR_MODE_FLAG_DELETE: symbol_index = CURSOR_SYMBOL_FLAG; break;
         case EDITOR_MODE_RESOURCE_REDUCE: symbol_index = CURSOR_SYMBOL_PICKAXE_MINUS; break;
         case EDITOR_MODE_RESOURCE_RAISE: symbol_index = CURSOR_SYMBOL_PICKAXE_PLUS; break;
@@ -2484,14 +2480,6 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
     }
 }
 
-int CMap::getActiveVertices(int tempChangeSection)
-{
-    int total = 0;
-    for(int i = tempChangeSection; i > 0; i--)
-        total += i;
-    return (6 * total + 1);
-}
-
 void CMap::calculateVertices()
 {
     const bool even = Vertex_.y % 2 == 0;
@@ -2708,8 +2696,8 @@ void CMap::setupVerticesActivity()
                         // we are in square mode
                         else
                         {
-                            // if we are at the last lower row
-                            if(i == ChangeSection_)
+                            // if we are at the last lower row or right vertex of the row
+                            if(i == ChangeSection_ || j == ChangeSection_)
                             {
                                 Vertices[index].fill_rsu = false;
                                 Vertices[index].fill_usd = false;
@@ -2717,12 +2705,6 @@ void CMap::setupVerticesActivity()
                             // left vertex of the row
                             else if(j == -ChangeSection_)
                                 Vertices[index].fill_rsu = false;
-                            // right vertex of the row
-                            else if(j == ChangeSection_)
-                            {
-                                Vertices[index].fill_rsu = false;
-                                Vertices[index].fill_usd = false;
-                            }
                         }
                     }
                 } else

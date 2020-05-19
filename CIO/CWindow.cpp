@@ -96,21 +96,15 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     if(canClose)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        if((motion.x >= x_ + 2) && (motion.x < x_ + global::bmpArray[WINDOW_BUTTON_CLOSE].w - 2) && (motion.y >= y_ + 2)
-           && (motion.y < y_ + global::bmpArray[WINDOW_BUTTON_CLOSE].h - 2))
-            canClose_marked = true;
-        else
-            canClose_marked = false;
+        canClose_marked = (motion.x >= x_ + 2) && (motion.x < x_ + global::bmpArray[WINDOW_BUTTON_CLOSE].w - 2) && (motion.y >= y_ + 2)
+                          && (motion.y < y_ + global::bmpArray[WINDOW_BUTTON_CLOSE].h - 2);
     }
     // check whats happen to the minimize button
     if(canMinimize)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        if((motion.x >= x_ + w_ - global::bmpArray[WINDOW_BUTTON_MINIMIZE].w + 2) && (motion.x < x_ + w_ - 2) && (motion.y >= y_ + 2)
-           && (motion.y < y_ + global::bmpArray[WINDOW_BUTTON_MINIMIZE].h - 2))
-            canMinimize_marked = true;
-        else
-            canMinimize_marked = false;
+        canMinimize_marked = (motion.x >= x_ + w_ - global::bmpArray[WINDOW_BUTTON_MINIMIZE].w + 2) && (motion.x < x_ + w_ - 2)
+                             && (motion.y >= y_ + 2) && (motion.y < y_ + global::bmpArray[WINDOW_BUTTON_MINIMIZE].h - 2);
     }
     // check whats happen to the resize button
     if(canResize)

@@ -135,10 +135,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            if((button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
-                active = true;
-            else
-                active = false;
+            active = (button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h);
         }
     }
     needRender = true;
@@ -207,7 +204,7 @@ void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
                         break;
                 }
                 // decide which chiffre to save
-                if((key.keysym.sym >= 48 && key.keysym.sym <= 57) || key.keysym.sym == 32)
+                if((key.keysym.sym >= 48 && key.keysym.sym <= 57) || key.keysym.sym == 32 || key.keysym.sym == 46 || key.keysym.sym == 47)
                     chiffre = (unsigned char)key.keysym.sym;
                 else if(key.keysym.sym >= 97 && key.keysym.sym <= 122)
                 {
@@ -221,9 +218,6 @@ void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
                     // test for '_' ('-' and shift pressed)
                     if(key.keysym.mod & KMOD_SHIFT)
                         chiffre = 95;
-                } else if(key.keysym.sym == 46 || key.keysym.sym == 47)
-                {
-                    chiffre = (unsigned char)key.keysym.sym;
                 }
 
                 if(chiffre != '\0')

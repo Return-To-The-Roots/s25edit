@@ -39,10 +39,7 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
 {
     void* return_value = nullptr;
 
-    if(filename.empty() || !bmpArray || !shadowArray || !palArray || !palActual)
-        return nullptr;
-
-    else if(!(fp = boost::nowide::fopen(filename.c_str(), "rb")))
+    if(filename.empty() || !bmpArray || !shadowArray || !palArray || !palActual || !(fp = boost::nowide::fopen(filename.c_str(), "rb")))
         return nullptr;
 
     if(only_loadPAL)

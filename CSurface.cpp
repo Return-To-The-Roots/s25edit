@@ -620,51 +620,15 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
             }
             break;
         case TRIANGLE_TEXTURE_STEPPE:
-            upper = Point16(65, 0);
-            left = Point16(48, 30);
-            right = Point16(83, 30);
-            break;
         case TRIANGLE_TEXTURE_STEPPE_:
-            upper = Point16(65, 0);
-            left = Point16(48, 30);
-            right = Point16(83, 30);
-            break;
         case TRIANGLE_TEXTURE_STEPPE__:
-            upper = Point16(65, 0);
-            left = Point16(48, 30);
-            right = Point16(83, 30);
-            break;
         case TRIANGLE_TEXTURE_STEPPE___:
             upper = Point16(65, 0);
             left = Point16(48, 30);
             right = Point16(83, 30);
             break;
         case TRIANGLE_TEXTURE_WATER:
-            if(isRSU)
-            {
-                upper = Point16(231, 61) + animOffset;
-                left = Point16(207, 62) + animOffset;
-                right = Point16(223, 78) + animOffset;
-            } else
-            {
-                upper = Point16(224, 79) + animOffset;
-                left = Point16(232, 62) + animOffset;
-                right = Point16(245, 76) + animOffset;
-            }
-            break;
         case TRIANGLE_TEXTURE_WATER_:
-            if(isRSU)
-            {
-                upper = Point16(231, 61) + animOffset;
-                left = Point16(207, 62) + animOffset;
-                right = Point16(223, 78) + animOffset;
-            } else
-            {
-                upper = Point16(224, 79) + animOffset;
-                left = Point16(232, 62) + animOffset;
-                right = Point16(245, 76) + animOffset;
-            }
-            break;
         case TRIANGLE_TEXTURE_WATER__:
             if(isRSU)
             {

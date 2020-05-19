@@ -302,10 +302,7 @@ void callback::submenuOptions(int Param)
             break;
 
         case FULLSCREEN:
-            if(global::s2->fullscreen)
-                global::s2->fullscreen = false;
-            else
-                global::s2->fullscreen = true;
+            global::s2->fullscreen = !global::s2->fullscreen;
 
             submenuOptions(GRAPHICS_CHANGE);
             break;
@@ -655,23 +652,7 @@ void callback::EditorHelpMenu(int Param)
 
         case WINDOW_QUIT_MESSAGE: // this is the global window quit message, callback is explicit called with this value, so destroy the
                                   // window
-            if(WNDHelp)
-            {
-                WNDHelp->setWaste();
-                WNDHelp = nullptr;
-                SelectBoxHelp = nullptr;
-            }
-            break;
-
-        case WINDOWQUIT: // this is the own window quit message of the callback
-            if(WNDHelp)
-            {
-                WNDHelp->setWaste();
-                WNDHelp = nullptr;
-                SelectBoxHelp = nullptr;
-            }
-            break;
-
+        case WINDOWQUIT:          // this is the own window quit message of the callback
         case MAP_QUIT: // this is the global window quit message, callback is explicit called with this value, so destroy the window
             if(WNDHelp)
             {
@@ -711,13 +692,6 @@ void callback::EditorMainMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDMain)
-            {
-                WNDMain->setWaste();
-                WNDMain = nullptr;
-            }
-            break;
-
         case MAP_QUIT:
             if(WNDMain)
             {
@@ -773,13 +747,6 @@ void callback::EditorLoadMenu(int Param)
             break;
         }
         case WINDOWQUIT:
-            if(WNDLoad)
-            {
-                WNDLoad->setWaste();
-                WNDLoad = nullptr;
-            }
-            break;
-
         case MAP_QUIT:
             if(WNDLoad)
             {
@@ -874,16 +841,6 @@ void callback::EditorSaveMenu(int Param)
                 break;
             }
         case WINDOWQUIT:
-            if(WNDSave)
-            {
-                WNDSave->setWaste();
-                WNDSave = nullptr;
-            }
-            TXTF_Filename = nullptr;
-            TXTF_Mapname = nullptr;
-            TXTF_Author = nullptr;
-            break;
-
         case MAP_QUIT:
             if(WNDSave)
             {
@@ -1968,20 +1925,6 @@ void callback::EditorCursorMenu(int Param)
         case WINDOW_CLICKED_CALL: break;
 
         case WINDOWQUIT:
-            if(WNDCursor)
-            {
-                Pos = WNDCursor->getPos();
-                WNDCursor->setWaste();
-                WNDCursor = nullptr;
-            }
-            MapObj = nullptr;
-            trianglePictureArrowUp = -1;
-            trianglePictureArrowDown = -1;
-            trianglePictureRandom = -1;
-            CursorModeButton = nullptr;
-            CursorRandomButton = nullptr;
-            break;
-
         case MAP_QUIT:
             // we do the same like in case WINDOWQUIT
             if(WNDCursor)
@@ -2699,29 +2642,6 @@ void callback::EditorCreateMenu(int Param)
             break;
 
         case MAP_QUIT:
-            if(WNDCreate)
-            {
-                Pos = WNDCreate->getPos();
-                WNDCreate->setWaste();
-                WNDCreate = nullptr;
-            }
-            MapObj = nullptr;
-            TextWidth = nullptr;
-            width = 32;
-            TextHeight = nullptr;
-            height = 32;
-            ButtonLandscape = nullptr;
-            LandscapeType = 0;
-            PicTextureIndex = -1;
-            PicTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
-            texture = TRIANGLE_TEXTURE_SNOW;
-            PicBorderTextureIndex = -1;
-            PicBorderTextureIndexGlobal = PICTURE_GREENLAND_TEXTURE_SNOW;
-            TextBorder = nullptr;
-            border = 0;
-            border_texture = TRIANGLE_TEXTURE_SNOW;
-            break;
-
         case WINDOWQUIT:
             if(WNDCreate)
             {
@@ -2818,18 +2738,7 @@ void callback::MinimapMenu(int Param)
             break;
 
         case WINDOWQUIT:
-            if(WNDMinimap)
-            {
-                WNDMinimap->setWaste();
-                WNDMinimap = nullptr;
-            }
-            MapObj = nullptr;
-            WndSurface = nullptr;
-            global::s2->UnregisterCallback(MinimapMenu);
-            break;
-
         case MAP_QUIT:
-            // we do the same like in case WINDOWQUIT
             if(WNDMinimap)
             {
                 WNDMinimap->setWaste();
