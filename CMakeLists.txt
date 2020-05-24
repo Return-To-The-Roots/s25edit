@@ -20,7 +20,7 @@ if(WIN32)
     if(CMAKE_HOST_WIN32)
         SET(icon_RC "${CMAKE_CURRENT_SOURCE_DIR}/s25edit.rc")
         if(MSVC)
-            string(APPEND CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
+            string(APPEND CMAKE_EXE_LINKER_FLAGS " /MANIFEST:NO")
         endif()
     else()
         ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/s25edit.res.o
