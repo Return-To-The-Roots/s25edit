@@ -20,7 +20,7 @@ private:
     int pic_background;
     int button_picture;
     const char* button_text;
-    int button_text_color;
+    FontColor button_text_color;
     bool marked;
     bool clicked;
     void (*callback_)(int);
@@ -50,7 +50,7 @@ public:
         return Surf_Button.get();
     };
     void setColor(int color);
-    void setTextColor(int color)
+    void setTextColor(FontColor color)
     {
         button_text_color = color;
         needRender = true;

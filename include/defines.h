@@ -217,20 +217,40 @@ enum class FontAlign
     Middle,
     Right
 };
-// i put some color values here, cause we need NUM_FONT_COLORS in the next enumeration
-// font color (after all used by CFont and other objects using CFont)
-enum
-{
-    FONT_BLUE = 0,
-    FONT_RED,
-    FONT_ORANGE,
-    FONT_GREEN,
-    FONT_MINTGREEN,
-    FONT_YELLOW,
-    FONT_RED_BRIGHT,
 
-    NUM_FONT_COLORS
+/// Font color in order they are loaded (see usage of NUM_FONT_COLORS)
+enum class FontColor
+{
+    Blue,
+    Red,
+    Orange,
+    Green,
+    MintGreen,
+    Yellow,
+    BrightRed,
 };
+constexpr unsigned NUM_FONT_COLORS = static_cast<unsigned>(FontColor::BrightRed) + 1u;
+
+/// Font sizes with values equal to height in pixels
+enum class FontSize
+{
+    Small = 9,
+    Medium = 11,
+    Large = 14
+};
+/// Height of 1 line for the given font including vertical spacing
+inline unsigned getLineHeight(FontSize size)
+{
+    const auto fontSize = static_cast<unsigned>(size);
+    switch(size)
+    {
+        default:
+        case FontSize::Small: return fontSize + 1;
+        case FontSize::Medium: return fontSize + 3;
+        case FontSize::Large: return fontSize + 4;
+    }
+}
+
 // player colors, necessary for the read_bob03- and read_bob04-function
 enum
 {

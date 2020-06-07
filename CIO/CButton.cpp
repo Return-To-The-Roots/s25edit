@@ -15,7 +15,7 @@ CButton::CButton(void callback(int), int clickedParam, Sint16 x, Sint16 y, Uint1
     setColor(color);
     this->button_picture = button_picture;
     button_text = text;
-    button_text_color = FONT_YELLOW;
+    button_text_color = FontColor::Yellow;
     this->callback_ = callback;
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
@@ -302,7 +302,7 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), 11, button_text_color, FontAlign::Middle);
+        CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), FontSize::Medium, button_text_color, FontAlign::Middle);
 
     return true;
 }

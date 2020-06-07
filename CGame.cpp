@@ -14,7 +14,7 @@ namespace bfs = boost::filesystem;
 
 //#include <vld.h>
 
-CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), lastFps("", 0, 0, 11)
+CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), lastFps("", 0, 0, FontSize::Medium)
 {
     global::bmpArray.resize(MAXBOBBMP);
     global::shadowArray.resize(MAXBOBSHADOW);

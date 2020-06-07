@@ -3,20 +3,17 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color, bool button_style)
+CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color, int bg_color,
+                       bool button_style)
 {
     active = false;
-    this->x_ = x;
-    this->y_ = y;
     this->cols = (cols < 1 ? 1 : cols);
     this->rows = (rows < 1 ? 1 : rows);
-    this->fontsize_ = fontsize;
     // calc width by maximum number of chiffres (cols) + one blinking chiffre * average pixel_width of a chiffre (fontsize-3) + tolerance
     // for borders
-    this->w = (this->cols + 1) * (fontsize - 3) + 4;
+    this->w = (this->cols + 1) * (static_cast<unsigned>(fontsize) - 3) + 4;
     // calc height ----------------| this is the row_separator from CFont.cpp    |----        + tolerance for borders
-    this->h = this->rows * (fontsize + (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4))) + 4;
-    this->textColor_ = text_color;
+    this->h = this->rows * getLineHeight(fontsize) + 4;
     setColor(bg_color);
     // allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
     text_.resize((this->cols + 1) * this->rows + 2);
@@ -25,6 +22,16 @@ CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, int fontsiz
     rendered = false;
     this->button_style = button_style;
     textObj = std::make_unique<CFont>("", x, y, fontsize, text_color);
+}
+
+int CTextfield::getX() const
+{
+    return textObj->getX();
+}
+
+int CTextfield::getY() const
+{
+    return textObj->getY();
 }
 
 bool CTextfield::hasRendered()
@@ -80,23 +87,20 @@ void CTextfield::setColor(int color)
     needRender = true;
 }
 
-void CTextfield::setTextColor(int color)
+void CTextfield::setTextColor(FontColor color)
 {
-    textColor_ = color;
     textObj->setColor(color);
     needRender = true;
 }
 
 void CTextfield::setX(int x)
 {
-    this->x_ = x;
-    textObj->setPos(Position(x_, y_));
+    textObj->setPos(Position(x, getY()));
 }
 
 void CTextfield::setY(int y)
 {
-    this->y_ = y;
-    textObj->setPos(Position(x_, y_));
+    textObj->setPos(Position(getX(), y));
 }
 
 void CTextfield::setText(const std::string& text)
@@ -135,7 +139,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            active = (button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h);
+            active = (button.x >= getX()) && (button.x < getX() + w) && (button.y >= getY()) && (button.y < getY() + h);
         }
     }
     needRender = true;
@@ -144,7 +148,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
 void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     unsigned char chiffre = '\0';
-    char* txtPtr = &text_[0];
+    char* txtPtr = text_.data();
     int col_ctr = 1, row_ctr = 1;
 
     if(!active)
@@ -177,7 +181,7 @@ void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
         switch(key.keysym.sym)
         {
             case SDLK_BACKSPACE:
-                if(txtPtr > &text_[0])
+                if(txtPtr > text_.data())
                 {
                     txtPtr--;
                     *txtPtr = '\0';
@@ -416,7 +420,7 @@ bool CTextfield::render()
     } else
         SDL_FillRect(Surf_Text.get(), nullptr, SDL_MapRGB(Surf_Text->format, 0, 0, 0));
 
-    char* txtPtr = &text_[0];
+    char* txtPtr = text_.data();
 
     // go to '\0'
     while(*txtPtr != '\0')
@@ -431,7 +435,6 @@ bool CTextfield::render()
 
     // write text
     textObj->setText(text_.data());
-    textObj = std::make_unique<CFont>(&text_[0], x_, y_, fontsize_, textColor_);
 
     // delete blinking chiffre (otherwise it could be written between user input chiffres)
     if(blinking_chiffre && active)

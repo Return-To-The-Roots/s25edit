@@ -96,7 +96,7 @@ bool CControlContainer::delButton(CButton* ButtonToDelete)
     return eraseElement(buttons, ButtonToDelete);
 }
 
-CFont* CControlContainer::addText(std::string string, int x, int y, int fontsize, int color)
+CFont* CControlContainer::addText(std::string string, int x, int y, FontSize fontsize, FontColor color)
 {
     x += borderBeginSize.x;
     y += borderBeginSize.y;
@@ -153,8 +153,8 @@ bool CControlContainer::delStaticPicture(int picId)
     return false;
 }
 
-CTextfield* CControlContainer::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, int fontsize, int text_color, int bg_color,
-                                            bool button_style)
+CTextfield* CControlContainer::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color,
+                                            int bg_color, bool button_style)
 {
     x += borderBeginSize.x;
     y += borderBeginSize.y;
@@ -169,7 +169,7 @@ bool CControlContainer::delTextfield(CTextfield* TextfieldToDelete)
     return eraseElement(textfields, TextfieldToDelete);
 }
 
-CSelectBox* CControlContainer::addSelectBox(Point16 pos, Extent16 size, int fontsize, int text_color, int bg_color)
+CSelectBox* CControlContainer::addSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor text_color, int bg_color)
 {
     pos += Point16(borderBeginSize);
 

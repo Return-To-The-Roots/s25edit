@@ -67,11 +67,11 @@ void CGame::Render()
         CFont::writeText(Surf_Display, textBuffer.data(), 100, 20);
         // text for MovementLocked
         if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", 20, 40, 14, FONT_ORANGE);
+            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", 20, 40, FontSize::Large, FontColor::Orange);
         else if(MapObj->isHorizontalMovementLocked())
-            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, 14, FONT_ORANGE);
+            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large, FontColor::Orange);
         else if(MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Vertikal movement locked (F10 to unlock)", 20, 40, 14, FONT_ORANGE);
+            CFont::writeText(Surf_Display, "Vertikal movement locked (F10 to unlock)", 20, 40, FontSize::Large, FontColor::Orange);
     }
 
     // render active menus

@@ -3,13 +3,10 @@
 #include "../globals.h"
 #include <cassert>
 
-CFont::CFont(std::string text, unsigned x, unsigned y, unsigned fontsize, unsigned color) : x_(x), y_(y), string_(std::move(text))
+CFont::CFont(std::string text, unsigned x, unsigned y, FontSize fontsize, FontColor color)
+    : x_(x), y_(y), fontsize_(fontsize), string_(std::move(text))
 {
     // only three sizes are available (in pixels)
-    if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        this->fontsize_ = 9;
-    else
-        this->fontsize_ = fontsize;
     initialColor_ = this->color_ = color;
     callback = nullptr;
     clickedParam = 0;
@@ -25,10 +22,8 @@ void CFont::setPos(Position pos)
     }
 }
 
-void CFont::setFontsize(unsigned fontsize)
+void CFont::setFontsize(FontSize fontsize)
 {
-    if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        fontsize = 9;
     if(fontsize != fontsize_)
     {
         fontsize_ = fontsize;
@@ -36,7 +31,7 @@ void CFont::setFontsize(unsigned fontsize)
     }
 }
 
-void CFont::setColor(unsigned color)
+void CFont::setColor(FontColor color)
 {
     if(color != color_)
         Surf_Font.reset();
@@ -64,9 +59,9 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
             if((button.state == SDL_PRESSED) && getColor() == initialColor_)
             {
                 const auto tmpInitialColor = initialColor_;
-                setColor(FONT_ORANGE);
+                setColor(FontColor::Orange);
                 initialColor_ = tmpInitialColor;
-            } else if(button.state == SDL_RELEASED && getColor() == FONT_ORANGE)
+            } else if(button.state == SDL_RELEASED && getColor() == FontColor::Orange)
             {
                 callback(clickedParam);
             }
@@ -187,24 +182,23 @@ unsigned getIndexForChar(uint8_t c)
     return 60;
 }
 
-unsigned getIndexForChar(uint8_t c, unsigned fontsize, unsigned color)
+unsigned getIndexForChar(uint8_t c, FontSize fontsize, FontColor color)
 {
-    assert(color < NUM_FONT_COLORS);
     unsigned offset;
     switch(fontsize)
     {
-        case 9: offset = FONT9_SPACE; break;
+        case FontSize::Small: offset = FONT9_SPACE; break;
         default:
-        case 11: offset = FONT11_SPACE; break;
-        case 14: offset = FONT14_SPACE; break;
+        case FontSize::Medium: offset = FONT11_SPACE; break;
+        case FontSize::Large: offset = FONT14_SPACE; break;
     }
-    return offset + getIndexForChar(c) * NUM_FONT_COLORS + color;
+    return offset + getIndexForChar(c) * NUM_FONT_COLORS + static_cast<unsigned>(color);
 }
 
-unsigned getCharWidth(uint8_t c, unsigned fontsize, unsigned color)
+unsigned getCharWidth(uint8_t c, FontSize fontsize, FontColor color)
 { // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
     // 'í' instead
-    if(fontsize == 9 && c == 236)
+    if(fontsize == FontSize::Small && c == 236)
         c = 109;
     return global::bmpArray[getIndexForChar(c, fontsize, color)].w;
 }
@@ -217,9 +211,8 @@ void CFont::writeText()
     // data for counting pixels to create the surface
     unsigned pixel_ctr_w = 0;
     unsigned pixel_ctr_w_tmp = 0;
-    // ROW_SEPARATOR IS ALSO USED IN CTEXTFIELD-CLASS, SO DO NOT CHANGE!!
-    unsigned row_separator = (fontsize_ == 9 ? 1 : (fontsize_ == 11 ? 3 : 4));
-    unsigned pixel_ctr_h = fontsize_ + row_separator;
+    const unsigned lineHeight = getLineHeight(fontsize_);
+    unsigned pixel_ctr_h = static_cast<unsigned>(fontsize_);
     bool pixel_count_loop = true;
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     Position pos{0, 0};
@@ -234,7 +227,7 @@ void CFont::writeText()
         {
             if(*chiffre == '\n')
             {
-                pixel_ctr_h += row_separator + fontsize_;
+                pixel_ctr_h += lineHeight;
                 if(pixel_ctr_w_tmp > pixel_ctr_w)
                     pixel_ctr_w = pixel_ctr_w_tmp;
                 pixel_ctr_w_tmp = 0;
@@ -269,7 +262,7 @@ void CFont::writeText()
         if(*chiffre == '\n')
         {
             pos.x = 0;
-            pos.y += row_separator + fontsize_;
+            pos.y += lineHeight;
             ++chiffre;
             continue;
         }
@@ -281,7 +274,7 @@ void CFont::writeText()
         const auto chiffre_index = getIndexForChar(*chiffre, fontsize_, color_);
 
         // if lower end of surface is reached, stop drawing chiffres
-        if(Surf_Font->h < static_cast<int>(pos.y + row_separator + global::bmpArray[chiffre_index].h))
+        if(Surf_Font->h < static_cast<int>(pos.y + global::bmpArray[chiffre_index].h))
             break;
 
         // draw the chiffre to the destination
@@ -295,7 +288,7 @@ void CFont::writeText()
     }
 }
 
-bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, unsigned fontsize, unsigned color,
+bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, FontSize fontsize, FontColor color,
                       FontAlign align)
 {
     // data for necessary counting pixels depending on alignment
@@ -307,12 +300,8 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigne
     if(!Surf_Dest || string.empty())
         return false;
 
-    // only three sizes are available (in pixels)
-    if(fontsize != 9 && fontsize != 11 && fontsize != 14)
-        fontsize = 9;
-
     // are there enough vertical pixels to draw the chiffres?
-    if(Surf_Dest->h < static_cast<int>(y + fontsize))
+    if(Surf_Dest->h < static_cast<int>(y + static_cast<unsigned>(fontsize)))
         return false;
 
     // in case of right or middle alignment we must count the pixels first

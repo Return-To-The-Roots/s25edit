@@ -4,7 +4,7 @@
 #include "CButton.h"
 #include "CFont.h"
 
-CSelectBox::CSelectBox(Point16 pos, Extent16 size, int fontsize, int text_color, int bg_color)
+CSelectBox::CSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor text_color, int bg_color)
     : pos_(pos), size_(size), fontsize(fontsize), text_color(text_color)
 {
     setColor(bg_color);
@@ -18,9 +18,9 @@ CSelectBox::CSelectBox(Point16 pos, Extent16 size, int fontsize, int text_color,
 void CSelectBox::setOption(const std::string& string, std::function<void(int)> callback, int param)
 {
     // explanation: row_height = row_separator + fontsize
-    int row_height = (fontsize == 9 ? 1 : (fontsize == 11 ? 3 : 4)) + fontsize;
+    const unsigned row_height = getLineHeight(fontsize);
 
-    auto Entry = std::make_unique<CFont>(string, 10, last_text_pos_y, fontsize, FONT_YELLOW);
+    auto Entry = std::make_unique<CFont>(string, 10, last_text_pos_y, fontsize, FontColor::Yellow);
     Entry->setCallback(std::move(callback), param);
     Entries.emplace_back(std::move(Entry));
     last_text_pos_y += row_height;

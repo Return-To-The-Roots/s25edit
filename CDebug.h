@@ -1,6 +1,8 @@
 #ifndef _CDEBUG_H
 #define _CDEBUG_H
 
+#include "defines.h"
+
 class CFont;
 class CWindow;
 class CMap;
@@ -62,7 +64,7 @@ private:
     CFont* unknown5Text;
     CFont* editorModeText;
     // fontsize for debugging window (remember: only 9, 11 or 14)
-    int fontsize;
+    FontSize fontsize;
     // temporary pointer to Map-Object
     CMap* MapObj;
     // temporary pointer to map

@@ -18,24 +18,24 @@ private:
     Uint16 w;
     Uint16 h;
     std::string string_;
-    unsigned fontsize_; //== Uint16 h;
-    unsigned color_, initialColor_;
+    FontSize fontsize_; //== Uint16 h;
+    FontColor color_, initialColor_;
     std::function<void(int)> callback;
     int clickedParam;
 
     void writeText();
 
 public:
-    CFont(std::string text, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9, unsigned color = FONT_YELLOW);
+    CFont(std::string text, unsigned x = 0, unsigned y = 0, FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow);
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
     void setPos(Position pos);
     unsigned getW() { return w; };
-    unsigned getH() { return fontsize_; };
-    void setFontsize(unsigned fontsize);
-    void setColor(unsigned color);
-    unsigned getColor() { return color_; }
+    unsigned getH() { return static_cast<unsigned>(fontsize_); };
+    void setFontsize(FontSize fontsize);
+    void setColor(FontColor color);
+    FontColor getColor() { return color_; }
     void setText(std::string text);
     void setCallback(std::function<void(int)> callback, int param)
     {
@@ -52,10 +52,10 @@ public:
     // Methods
     // fontsize can be 9, 11 or 14 (otherwise it will be set to 9) ---- '\n' is possible
     // this function can be used as CFont::writeText to write text directly to a surface without creating an object
-    static bool writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9,
-                          unsigned color = FONT_YELLOW, FontAlign align = FontAlign::Left);
-    static bool writeText(SdlSurface& Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0, unsigned fontsize = 9,
-                          unsigned color = FONT_YELLOW, FontAlign align = FontAlign::Left)
+    static bool writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0,
+                          FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow, FontAlign align = FontAlign::Left);
+    static bool writeText(SdlSurface& Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0,
+                          FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow, FontAlign align = FontAlign::Left)
     {
         return writeText(Surf_Dest.get(), string, x, y, fontsize, color, align);
     }

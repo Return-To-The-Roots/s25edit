@@ -68,16 +68,17 @@ public:
     CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 w = 20, Uint16 h = 20,
                        int color = BUTTON_GREY, const char* text = nullptr, int picture = -1);
     bool delButton(CButton* ButtonToDelete);
-    CFont* addText(std::string string, int x = 0, int y = 0, int fontsize = 9, int color = FONT_YELLOW);
+    CFont* addText(std::string string, int x, int y, FontSize fontsize, FontColor color = FontColor::Yellow);
     bool delText(CFont* TextToDelete);
     CPicture* addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture);
     bool delPicture(CPicture* PictureToDelete);
     int addStaticPicture(int x, int y, int picture);
     bool delStaticPicture(int picId);
-    CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, int fontsize = 14, int text_color = FONT_YELLOW,
-                             int bg_color = -1, bool button_style = false);
+    CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, FontSize fontsize = FontSize::Large,
+                             FontColor text_color = FontColor::Yellow, int bg_color = -1, bool button_style = false);
     bool delTextfield(CTextfield* TextfieldToDelete);
-    CSelectBox* addSelectBox(Point16 pos, Extent16 size, int fontsize = 14, int text_color = FONT_YELLOW, int bg_color = -1);
+    CSelectBox* addSelectBox(Point16 pos, Extent16 size, FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
+                             int bg_color = -1);
     bool delSelectBox(CSelectBox* SelectBoxToDelete);
 };
 
