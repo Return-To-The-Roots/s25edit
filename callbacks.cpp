@@ -595,56 +595,58 @@ void callback::EditorHelpMenu(int Param)
                                                                            WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
 
             SelectBoxHelp =
-              WNDHelp->addSelectBox(Point16(0, 0), Extent16(WNDHelp->getSize() - WNDHelp->getBorderSize()), 11, FONT_YELLOW, BUTTON_GREEN1);
+              WNDHelp->addSelectBox(Point16(0, 0), Extent16(WNDHelp->getSize() - WNDHelp->getBorderSize()), 11, Font::Yellow, BUTTON_GREEN1);
+            SelectBoxHelp->setOption("User map path: " + global::userMapsPath);
+            SelectBoxHelp->setOption("");
             SelectBoxHelp->setOption(
-              "Help-Menu......................................................................................................F1\n");
+              "Help-Menu......................................................................................................F1");
             SelectBoxHelp->setOption(
-              "Window/Fullscreen........................................................................................F2\n");
+              "Window/Fullscreen........................................................................................F2");
             SelectBoxHelp->setOption("Zoom in/normal/out "
                                      "(experimental)..............................................................F5/F6/"
-                                     "F7\n");
+                                     "F7");
             SelectBoxHelp->setOption("Scroll..........................................................................................."
-                                     "..................Arrow keys\n");
+                                     "..................Arrow keys");
             SelectBoxHelp->setOption(
-              "Cursor size 1-9 (of 11)....................................................................................1-9\n");
+              "Cursor size 1-9 (of 11)....................................................................................1-9");
             SelectBoxHelp->setOption(
-              "Make Cursor bigger/smaller........................................................................+/-\n");
+              "Make Cursor bigger/smaller........................................................................+/-");
             SelectBoxHelp->setOption(
-              "Scissors-Mode...............................................................................................Ctrl\n");
+              "Scissors-Mode...............................................................................................Ctrl");
             SelectBoxHelp->setOption(
-              "Invert mode....................................................................................................Shift\n");
-            SelectBoxHelp->setOption("(e.g. Lower altitude, remove player, lower resources)\n");
+              "Invert mode....................................................................................................Shift");
+            SelectBoxHelp->setOption("(e.g. Lower altitude, remove player, lower resources)");
             SelectBoxHelp->setOption(
-              "Plane mode.....................................................................................................Alt\n");
+              "Plane mode.....................................................................................................Alt");
             SelectBoxHelp->setOption("Reduce/default/enlarge maximum height.....................................................Ins/Pos1/"
-                                     "PageUp\n");
-            SelectBoxHelp->setOption("(can't increase beyond this)\n");
+                                     "PageUp");
+            SelectBoxHelp->setOption("(can't increase beyond this)");
             SelectBoxHelp->setOption("Reduce/default/enlarge minimum "
                                      "height......................................................Del/End/"
-                                     "PageDown\n");
-            SelectBoxHelp->setOption("(can't decrease below this)\n");
+                                     "PageDown");
+            SelectBoxHelp->setOption("(can't decrease below this)");
             SelectBoxHelp->setOption("Undo............................................................................................."
-                                     ".......................Q\n");
+                                     ".......................Q");
             SelectBoxHelp->setOption("Redo............................................................................................."
-                                     ".................SHIFT+Q\n");
-            SelectBoxHelp->setOption("(just actions made with the cursor)\n");
+                                     ".................SHIFT+Q");
+            SelectBoxHelp->setOption("(just actions made with the cursor)");
             SelectBoxHelp->setOption(
-              "Build help on/off.............................................................................................Space\n");
+              "Build help on/off.............................................................................................Space");
             SelectBoxHelp->setOption(
-              "Castle-Mode....................................................................................................B\n");
-            SelectBoxHelp->setOption("(planes the surrounding terrain\n");
-            SelectBoxHelp->setOption(" so a castle can be build)\n");
+              "Castle-Mode....................................................................................................B");
+            SelectBoxHelp->setOption("(planes the surrounding terrain");
+            SelectBoxHelp->setOption(" so a castle can be build)");
             SelectBoxHelp->setOption(
-              "Harbour-Mode................................................................................................H\n");
-            SelectBoxHelp->setOption("(changes the surrounding terrain,\n");
-            SelectBoxHelp->setOption(" so that a harbour can be build)\n");
-            SelectBoxHelp->setOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland).................G/W/O\n");
-            SelectBoxHelp->setOption("New/Original shadows (experimental)..........................................................P\n");
-            SelectBoxHelp->setOption("Lock/Unlock horizontal movement................................................................F9\n");
+              "Harbour-Mode................................................................................................H");
+            SelectBoxHelp->setOption("(changes the surrounding terrain,");
+            SelectBoxHelp->setOption(" so that a harbour can be build)");
+            SelectBoxHelp->setOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland).................G/W/O");
+            SelectBoxHelp->setOption("New/Original shadows (experimental)..........................................................P");
+            SelectBoxHelp->setOption("Lock/Unlock horizontal movement................................................................F9");
             SelectBoxHelp->setOption(
-              "Lock/Unlock vertical movement....................................................................F10\n");
+              "Lock/Unlock vertical movement....................................................................F10");
             SelectBoxHelp->setOption(
-              "Turn borders on/off......................................................................................F11\n");
+              "Turn borders on/off......................................................................................F11");
 
             break;
 
