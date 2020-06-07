@@ -206,7 +206,7 @@ int main(int /*argc*/, char* /*argv*/ [])
     global::userMapsPath = RTTRCONFIG.ExpandPath("WORLDS");
     if(!checkWriteable(global::userMapsPath))
     {
-        global::userMapsPath = RTTRCONFIG.ExpandPath(s25::folders::worlds);
+        global::userMapsPath = RTTRCONFIG.ExpandPath(s25::folders::mapsOwn);
         if(!checkWriteable(global::userMapsPath))
         {
             std::cerr << "Could not find a writable folder for maps\nCheck " << global::userMapsPath << std::endl;
