@@ -50,7 +50,7 @@ public:
         text_color = color;
         needRender = true;
     }
-    void setOption(const std::string& string, std::function<void(int)> callback = nullptr, int param = 0);
+    void addOption(const std::string& string, std::function<void(int)> callback = nullptr, int param = 0);
 };
 
 #endif

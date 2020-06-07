@@ -15,7 +15,7 @@ CSelectBox::CSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor 
       std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, size_.y - 1 - 20, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
-void CSelectBox::setOption(const std::string& string, std::function<void(int)> callback, int param)
+void CSelectBox::addOption(const std::string& string, std::function<void(int)> callback, int param)
 {
     // explanation: row_height = row_separator + fontsize
     const unsigned row_height = getLineHeight(fontsize);

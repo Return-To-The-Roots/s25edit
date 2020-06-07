@@ -247,48 +247,48 @@ void callback::submenuOptions(int Param)
                                                   BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
             SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 120), Extent16(200, 110), FontSize::Medium,
                                                  FontColor::Yellow, BUTTON_GREY);
-            SelectBoxRes->setOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
-            SelectBoxRes->setOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
-            SelectBoxRes->setOption("960 x 540 (QHD)", submenuOptions, SELECTBOX_960_540);
-            SelectBoxRes->setOption("964 x 544", submenuOptions, SELECTBOX_964_544);
-            SelectBoxRes->setOption("960 x 640 (DVGA)", submenuOptions, SELECTBOX_960_640);
-            SelectBoxRes->setOption("960 x 720", submenuOptions, SELECTBOX_960_720);
-            SelectBoxRes->setOption("1024 x 576 (WXGA)", submenuOptions, SELECTBOX_1024_576);
-            SelectBoxRes->setOption("1024 x 600 (WSVGA)", submenuOptions, SELECTBOX_1024_600);
-            SelectBoxRes->setOption("1072 x 600 (WSVGA)", submenuOptions, SELECTBOX_1072_600);
-            SelectBoxRes->setOption("1152 x 768", submenuOptions, SELECTBOX_1152_768);
-            SelectBoxRes->setOption("1024 x 768 (EVGA)", submenuOptions, SELECTBOX_1024_768);
-            SelectBoxRes->setOption("1152 x 864 (XGA)", submenuOptions, SELECTBOX_1152_864);
-            SelectBoxRes->setOption("1152 x 870 (XGA)", submenuOptions, SELECTBOX_1152_870);
-            SelectBoxRes->setOption("1152 x 900 (XGA)", submenuOptions, SELECTBOX_1152_900);
-            SelectBoxRes->setOption("1200 x 800 (DSVGA)", submenuOptions, SELECTBOX_1200_800);
-            SelectBoxRes->setOption("1200 x 900 (OLPC)", submenuOptions, SELECTBOX_1200_900);
-            SelectBoxRes->setOption("1280 x 720 (720p)", submenuOptions, SELECTBOX_1280_720);
-            SelectBoxRes->setOption("1280 x 768 (WXGA)", submenuOptions, SELECTBOX_1280_768);
-            SelectBoxRes->setOption("1280 x 800 (WXGA)", submenuOptions, SELECTBOX_1280_800);
-            SelectBoxRes->setOption("1280 x 854 (WXGA)", submenuOptions, SELECTBOX_1280_854);
-            SelectBoxRes->setOption("1360 x 768 (WXGA)", submenuOptions, SELECTBOX_1360_768);
-            SelectBoxRes->setOption("1366 x 768 (WXGA)", submenuOptions, SELECTBOX_1366_768);
-            SelectBoxRes->setOption("1376 x 768 (WXGA)", submenuOptions, SELECTBOX_1376_768);
-            SelectBoxRes->setOption("1400 x 900 (WXGA+)", submenuOptions, SELECTBOX_1400_900);
-            SelectBoxRes->setOption("1440 x 900 (WXGA+)", submenuOptions, SELECTBOX_1440_900);
-            SelectBoxRes->setOption("1440 x 960", submenuOptions, SELECTBOX_1440_960);
-            SelectBoxRes->setOption("1280 x 960 (SXGA)", submenuOptions, SELECTBOX_1280_960);
-            SelectBoxRes->setOption("1280 x 1024 (SXGA)", submenuOptions, SELECTBOX_1280_1024);
-            SelectBoxRes->setOption("1360 x 1024 (XGA-2)", submenuOptions, SELECTBOX_1360_1024);
-            SelectBoxRes->setOption("1366 x 1024 (XGA-2)", submenuOptions, SELECTBOX_1366_1024);
-            SelectBoxRes->setOption("1600 x 768 (UWXGA)", submenuOptions, SELECTBOX_1600_768);
-            SelectBoxRes->setOption("1600 x 900 (WSXGA)", submenuOptions, SELECTBOX_1600_900);
-            SelectBoxRes->setOption("1600 x 1024 (WSXGA)", submenuOptions, SELECTBOX_1600_1024);
-            SelectBoxRes->setOption("1400 x 1050 (SXGA+)", submenuOptions, SELECTBOX_1400_1050);
-            SelectBoxRes->setOption("1680 x 1050 (WSXGA+)", submenuOptions, SELECTBOX_1680_1050);
-            SelectBoxRes->setOption("1600 x 1200 (UXGA)", submenuOptions, SELECTBOX_1600_1200);
-            SelectBoxRes->setOption("1920 x 1080 (1080p)", submenuOptions, SELECTBOX_1920_1080);
-            SelectBoxRes->setOption("1920 x 1200 (WUXGA)", submenuOptions, SELECTBOX_1920_1200);
-            SelectBoxRes->setOption("1920 x 1400 (TXGA)", submenuOptions, SELECTBOX_1920_1400);
-            SelectBoxRes->setOption("1920 x 1440", submenuOptions, SELECTBOX_1920_1440);
-            SelectBoxRes->setOption("2048 x 1152 (QWXGA)", submenuOptions, SELECTBOX_2048_1152);
-            SelectBoxRes->setOption("2048 x 1536 (SUXGA)", submenuOptions, SELECTBOX_2048_1536);
+            SelectBoxRes->addOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
+            SelectBoxRes->addOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
+            SelectBoxRes->addOption("960 x 540 (QHD)", submenuOptions, SELECTBOX_960_540);
+            SelectBoxRes->addOption("964 x 544", submenuOptions, SELECTBOX_964_544);
+            SelectBoxRes->addOption("960 x 640 (DVGA)", submenuOptions, SELECTBOX_960_640);
+            SelectBoxRes->addOption("960 x 720", submenuOptions, SELECTBOX_960_720);
+            SelectBoxRes->addOption("1024 x 576 (WXGA)", submenuOptions, SELECTBOX_1024_576);
+            SelectBoxRes->addOption("1024 x 600 (WSVGA)", submenuOptions, SELECTBOX_1024_600);
+            SelectBoxRes->addOption("1072 x 600 (WSVGA)", submenuOptions, SELECTBOX_1072_600);
+            SelectBoxRes->addOption("1152 x 768", submenuOptions, SELECTBOX_1152_768);
+            SelectBoxRes->addOption("1024 x 768 (EVGA)", submenuOptions, SELECTBOX_1024_768);
+            SelectBoxRes->addOption("1152 x 864 (XGA)", submenuOptions, SELECTBOX_1152_864);
+            SelectBoxRes->addOption("1152 x 870 (XGA)", submenuOptions, SELECTBOX_1152_870);
+            SelectBoxRes->addOption("1152 x 900 (XGA)", submenuOptions, SELECTBOX_1152_900);
+            SelectBoxRes->addOption("1200 x 800 (DSVGA)", submenuOptions, SELECTBOX_1200_800);
+            SelectBoxRes->addOption("1200 x 900 (OLPC)", submenuOptions, SELECTBOX_1200_900);
+            SelectBoxRes->addOption("1280 x 720 (720p)", submenuOptions, SELECTBOX_1280_720);
+            SelectBoxRes->addOption("1280 x 768 (WXGA)", submenuOptions, SELECTBOX_1280_768);
+            SelectBoxRes->addOption("1280 x 800 (WXGA)", submenuOptions, SELECTBOX_1280_800);
+            SelectBoxRes->addOption("1280 x 854 (WXGA)", submenuOptions, SELECTBOX_1280_854);
+            SelectBoxRes->addOption("1360 x 768 (WXGA)", submenuOptions, SELECTBOX_1360_768);
+            SelectBoxRes->addOption("1366 x 768 (WXGA)", submenuOptions, SELECTBOX_1366_768);
+            SelectBoxRes->addOption("1376 x 768 (WXGA)", submenuOptions, SELECTBOX_1376_768);
+            SelectBoxRes->addOption("1400 x 900 (WXGA+)", submenuOptions, SELECTBOX_1400_900);
+            SelectBoxRes->addOption("1440 x 900 (WXGA+)", submenuOptions, SELECTBOX_1440_900);
+            SelectBoxRes->addOption("1440 x 960", submenuOptions, SELECTBOX_1440_960);
+            SelectBoxRes->addOption("1280 x 960 (SXGA)", submenuOptions, SELECTBOX_1280_960);
+            SelectBoxRes->addOption("1280 x 1024 (SXGA)", submenuOptions, SELECTBOX_1280_1024);
+            SelectBoxRes->addOption("1360 x 1024 (XGA-2)", submenuOptions, SELECTBOX_1360_1024);
+            SelectBoxRes->addOption("1366 x 1024 (XGA-2)", submenuOptions, SELECTBOX_1366_1024);
+            SelectBoxRes->addOption("1600 x 768 (UWXGA)", submenuOptions, SELECTBOX_1600_768);
+            SelectBoxRes->addOption("1600 x 900 (WSXGA)", submenuOptions, SELECTBOX_1600_900);
+            SelectBoxRes->addOption("1600 x 1024 (WSXGA)", submenuOptions, SELECTBOX_1600_1024);
+            SelectBoxRes->addOption("1400 x 1050 (SXGA+)", submenuOptions, SELECTBOX_1400_1050);
+            SelectBoxRes->addOption("1680 x 1050 (WSXGA+)", submenuOptions, SELECTBOX_1680_1050);
+            SelectBoxRes->addOption("1600 x 1200 (UXGA)", submenuOptions, SELECTBOX_1600_1200);
+            SelectBoxRes->addOption("1920 x 1080 (1080p)", submenuOptions, SELECTBOX_1920_1080);
+            SelectBoxRes->addOption("1920 x 1200 (WUXGA)", submenuOptions, SELECTBOX_1920_1200);
+            SelectBoxRes->addOption("1920 x 1400 (TXGA)", submenuOptions, SELECTBOX_1920_1400);
+            SelectBoxRes->addOption("1920 x 1440", submenuOptions, SELECTBOX_1920_1440);
+            SelectBoxRes->addOption("2048 x 1152 (QWXGA)", submenuOptions, SELECTBOX_2048_1152);
+            SelectBoxRes->addOption("2048 x 1536 (SUXGA)", submenuOptions, SELECTBOX_2048_1536);
             break;
 
         case MAINMENU:
@@ -596,56 +596,56 @@ void callback::EditorHelpMenu(int Param)
 
             SelectBoxHelp = WNDHelp->addSelectBox(Point16(0, 0), Extent16(WNDHelp->getSize() - WNDHelp->getBorderSize()), FontSize::Medium,
                                                   FontColor::Yellow, BUTTON_GREEN1);
-            SelectBoxHelp->setOption("User map path: " + global::userMapsPath);
-            SelectBoxHelp->setOption("");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption("User map path: " + global::userMapsPath);
+            SelectBoxHelp->addOption("");
+            SelectBoxHelp->addOption(
               "Help-Menu......................................................................................................F1");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Window/Fullscreen........................................................................................F2");
-            SelectBoxHelp->setOption("Zoom in/normal/out "
+            SelectBoxHelp->addOption("Zoom in/normal/out "
                                      "(experimental)..............................................................F5/F6/"
                                      "F7");
-            SelectBoxHelp->setOption("Scroll..........................................................................................."
+            SelectBoxHelp->addOption("Scroll..........................................................................................."
                                      "..................Arrow keys");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Cursor size 1-9 (of 11)....................................................................................1-9");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Make Cursor bigger/smaller........................................................................+/-");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Scissors-Mode...............................................................................................Ctrl");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Invert mode....................................................................................................Shift");
-            SelectBoxHelp->setOption("(e.g. Lower altitude, remove player, lower resources)");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption("(e.g. Lower altitude, remove player, lower resources)");
+            SelectBoxHelp->addOption(
               "Plane mode.....................................................................................................Alt");
-            SelectBoxHelp->setOption("Reduce/default/enlarge maximum height.....................................................Ins/Pos1/"
+            SelectBoxHelp->addOption("Reduce/default/enlarge maximum height.....................................................Ins/Pos1/"
                                      "PageUp");
-            SelectBoxHelp->setOption("(can't increase beyond this)");
-            SelectBoxHelp->setOption("Reduce/default/enlarge minimum "
+            SelectBoxHelp->addOption("(can't increase beyond this)");
+            SelectBoxHelp->addOption("Reduce/default/enlarge minimum "
                                      "height......................................................Del/End/"
                                      "PageDown");
-            SelectBoxHelp->setOption("(can't decrease below this)");
-            SelectBoxHelp->setOption("Undo............................................................................................."
+            SelectBoxHelp->addOption("(can't decrease below this)");
+            SelectBoxHelp->addOption("Undo............................................................................................."
                                      ".......................Q");
-            SelectBoxHelp->setOption("Redo............................................................................................."
+            SelectBoxHelp->addOption("Redo............................................................................................."
                                      ".................SHIFT+Q");
-            SelectBoxHelp->setOption("(just actions made with the cursor)");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption("(just actions made with the cursor)");
+            SelectBoxHelp->addOption(
               "Build help on/off.............................................................................................Space");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Castle-Mode....................................................................................................B");
-            SelectBoxHelp->setOption("(planes the surrounding terrain");
-            SelectBoxHelp->setOption(" so a castle can be build)");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption("(planes the surrounding terrain");
+            SelectBoxHelp->addOption(" so a castle can be build)");
+            SelectBoxHelp->addOption(
               "Harbour-Mode................................................................................................H");
-            SelectBoxHelp->setOption("(changes the surrounding terrain,");
-            SelectBoxHelp->setOption(" so that a harbour can be build)");
-            SelectBoxHelp->setOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland).................G/W/O");
-            SelectBoxHelp->setOption("New/Original shadows (experimental)..........................................................P");
-            SelectBoxHelp->setOption("Lock/Unlock horizontal movement................................................................F9");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption("(changes the surrounding terrain,");
+            SelectBoxHelp->addOption(" so that a harbour can be build)");
+            SelectBoxHelp->addOption("Convert map \"on-the-fly\"  (Greenland/Winterworld/Wasteland).................G/W/O");
+            SelectBoxHelp->addOption("New/Original shadows (experimental)..........................................................P");
+            SelectBoxHelp->addOption("Lock/Unlock horizontal movement................................................................F9");
+            SelectBoxHelp->addOption(
               "Lock/Unlock vertical movement....................................................................F10");
-            SelectBoxHelp->setOption(
+            SelectBoxHelp->addOption(
               "Turn borders on/off......................................................................................F11");
 
             break;
@@ -741,7 +741,7 @@ void callback::EditorLoadMenu(int Param)
                 if(is_regular_file(itFile.status()))
                 {
                     const std::string filename = itFile.path().filename().string();
-                    CB_Filename->setOption(filename, [filename](int) { curFilename = filename; });
+                    CB_Filename->addOption(filename, [filename](int) { curFilename = filename; });
                 }
             }
             WNDLoad->addButton(EditorLoadMenu, LOADMAP, 175, 140, 90, 20, BUTTON_GREY, "Load");
@@ -2958,9 +2958,9 @@ void callback::submenu1(int Param)
             SubMenu->addText("\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile", 400, 200, 14);
             testTextfield = SubMenu->addTextfield(400, 300, 10, 3);
             testSelectBox = SubMenu->addSelectBox(Point16(500, 500), Extent16(300, 200));
-            testSelectBox->setOption("Erste Option", submenu1, SELECTBOX_OPTION1);
-            testSelectBox->setOption("Zweite Option", submenu1, SELECTBOX_OPTION2);
-            testSelectBox->setOption("Dritte Option", submenu1, SELECTBOX_OPTION3);
+            testSelectBox->addOption("Erste Option", submenu1, SELECTBOX_OPTION1);
+            testSelectBox->addOption("Zweite Option", submenu1, SELECTBOX_OPTION2);
+            testSelectBox->addOption("Dritte Option", submenu1, SELECTBOX_OPTION3);
             break;
 
         case MAINMENU:
