@@ -4,13 +4,8 @@
 #include <cassert>
 
 CFont::CFont(std::string text, unsigned x, unsigned y, FontSize fontsize, FontColor color)
-    : x_(x), y_(y), fontsize_(fontsize), string_(std::move(text))
-{
-    // only three sizes are available (in pixels)
-    initialColor_ = this->color_ = color;
-    callback = nullptr;
-    clickedParam = 0;
-}
+    : x_(x), y_(y), string_(std::move(text)), fontsize_(fontsize), color_(color), initialColor_(color), clickedParam(0)
+{}
 
 void CFont::setPos(Position pos)
 {
@@ -212,7 +207,7 @@ void CFont::writeText()
     unsigned pixel_ctr_w = 0;
     unsigned pixel_ctr_w_tmp = 0;
     const unsigned lineHeight = getLineHeight(fontsize_);
-    unsigned pixel_ctr_h = static_cast<unsigned>(fontsize_);
+    auto pixel_ctr_h = static_cast<unsigned>(fontsize_);
     bool pixel_count_loop = true;
     // counter for the drawed pixels (cause we dont want to draw outside of the surface)
     Position pos{0, 0};

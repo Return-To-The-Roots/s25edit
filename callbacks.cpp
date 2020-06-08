@@ -2837,7 +2837,7 @@ void callback::viewer(int Param)
             {
                 const auto infos = helpers::format("index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w,
                                                    global::bmpArray[index].h, global::bmpArray[index].nx, global::bmpArray[index].ny);
-                PicInfosText = WNDViewer->addText(infos, 220, 3, 14, FontColor::Red);
+                PicInfosText = WNDViewer->addText(infos, 220, 3, FontSize::Large, FontColor::Red);
             }
 
             break;
@@ -2955,7 +2955,7 @@ void callback::submenu1(int Param)
             picObject = SubMenu->addPicture(submenu1, PICOBJECT, 200, 30, MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
             // text block with \n
-            SubMenu->addText("\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile", 400, 200, 14);
+            SubMenu->addText("\nTextblock:\n\nNeue Zeile\nNoch eine neue Zeile", 400, 200, FontSize::Large);
             testTextfield = SubMenu->addTextfield(400, 300, 10, 3);
             testSelectBox = SubMenu->addSelectBox(Point16(500, 500), Extent16(300, 200));
             testSelectBox->addOption("Erste Option", submenu1, SELECTBOX_OPTION1);
@@ -2991,9 +2991,9 @@ void callback::submenu1(int Param)
             break;
 
         case GREATMOON:
-            SubMenu->addText("Title!", 300, 10, 14);
+            SubMenu->addText("Title!", 300, 10, FontSize::Large);
             SubMenu->addText(helpers::format("Window X: %d Window Y: %d", global::s2->GameResolution.x, global::s2->GameResolution.y), 10,
-                             10, 14);
+                             10, FontSize::Large);
             break;
 
         case SMALLMOON:
@@ -3013,11 +3013,11 @@ void callback::submenu1(int Param)
                 testWindow = global::s2->RegisterWindow(
                   std::make_unique<CWindow>(submenu1, TESTWINDOWQUITMESSAGE, Position(5, 5), Extent(350, 240), "Window", WINDOW_GREEN1,
                                             WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
-                testWindow->addText("Text inside the window", 10, 10, 14);
+                testWindow->addText("Text inside the window", 10, 10, FontSize::Large);
                 testWindow->addButton(submenu1, -10, 150, 100, 210, 30, BUTTON_GREEN2, "Button inside the window");
                 testWindowPicture = testWindow->addPicture(submenu1, TESTWINDOWPICTURE, 10, 60, MIS2BOBS_FORTRESS);
                 testWindowPicture->setMotionParams(TESTWINDOWPICTUREENTRY, TESTWINDOWPICTURELEAVE);
-                testTextfield_testWindow = testWindow->addTextfield(130, 30, 10, 3, 14, FontColor::Red, BUTTON_GREY, true);
+                testTextfield_testWindow = testWindow->addTextfield(130, 30, 10, 3, FontSize::Large, FontColor::Red, BUTTON_GREY, true);
                 testTextfield_testWindow->setText(
                   "This is a very long test text in order to destroy the text field completely once and for all");
             }
@@ -3026,14 +3026,14 @@ void callback::submenu1(int Param)
                 testWindow2 = global::s2->RegisterWindow(
                   std::make_unique<CWindow>(submenu1, TESTWINDOW2QUITMESSAGE, Position(200, 5), Extent(350, 240), "Another Window",
                                             WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
-                testWindow2->addText("Text inside the window", 50, 40, 9);
+                testWindow2->addText("Text inside the window", 50, 40, FontSize::Small);
                 testWindow2->addButton(submenu1, -10, 100, 100, 100, 20, BUTTON_GREEN2, "Button");
             }
             break;
 
         case GREATMOONENTRY:
             if(!greatMoonText)
-                greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
+                greatMoonText = SubMenu->addText("Test-Text", 100, 10, FontSize::Large);
             break;
 
         case GREATMOONLEAVE:
@@ -3054,7 +3054,7 @@ void callback::submenu1(int Param)
 
         case PICOBJECTENTRY:
             if(!greatMoonText)
-                greatMoonText = SubMenu->addText("Test-Text", 100, 10, 14);
+                greatMoonText = SubMenu->addText("Test-Text", 100, 10, FontSize::Large);
             break;
 
         case PICOBJECTLEAVE:
@@ -3068,7 +3068,7 @@ void callback::submenu1(int Param)
         case TESTWINDOWPICTURE:
             assert(testWindow);
             if(!testWindowText)
-                testWindowText = testWindow->addText("Clicked on castle", 10, 200, 11);
+                testWindowText = testWindow->addText("Clicked on castle", 10, 200, FontSize::Medium);
             else
             {
                 testWindow->delText(testWindowText);
@@ -3083,7 +3083,7 @@ void callback::submenu1(int Param)
                 testWindow->delText(testWindowText2);
                 testWindowText2 = nullptr;
             }
-            testWindowText2 = testWindow->addText("Bildbereich betreten", 10, 220, 11);
+            testWindowText2 = testWindow->addText("Bildbereich betreten", 10, 220, FontSize::Medium);
             break;
 
         case TESTWINDOWPICTURELEAVE:
@@ -3093,7 +3093,7 @@ void callback::submenu1(int Param)
                 testWindow->delText(testWindowText2);
                 testWindowText2 = nullptr;
             }
-            testWindowText2 = testWindow->addText("Bildbereich verlassen", 10, 220, 11);
+            testWindowText2 = testWindow->addText("Bildbereich verlassen", 10, 220, FontSize::Medium);
             break;
 
         case TESTWINDOWQUITMESSAGE:
@@ -3118,7 +3118,7 @@ void callback::submenu1(int Param)
                 }
                 if(!counterText)
                 {
-                    counterText = SubMenu->addText(helpers::format("counter: %d", counter), 100, 20, 9);
+                    counterText = SubMenu->addText(helpers::format("counter: %d", counter), 100, 20, FontSize::Small);
                 }
 
                 if(TextFrom_testTextfield)
@@ -3126,7 +3126,8 @@ void callback::submenu1(int Param)
                     SubMenu->delText(TextFrom_testTextfield);
                     TextFrom_testTextfield = nullptr;
                 }
-                TextFrom_testTextfield = SubMenu->addText("Der Text im Textfeld lautet: " + testTextfield->getText(), 200, 400, 14);
+                TextFrom_testTextfield =
+                  SubMenu->addText("Der Text im Textfeld lautet: " + testTextfield->getText(), 200, 400, FontSize::Large);
             }
             counter++;
             break;

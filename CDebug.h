@@ -63,7 +63,6 @@ private:
     CFont* shadingText;
     CFont* unknown5Text;
     CFont* editorModeText;
-    // fontsize for debugging window (remember: only 9, 11 or 14)
     FontSize fontsize;
     // temporary pointer to Map-Object
     CMap* MapObj;

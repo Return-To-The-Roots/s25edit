@@ -18,7 +18,7 @@ private:
     Uint16 w;
     Uint16 h;
     std::string string_;
-    FontSize fontsize_; //== Uint16 h;
+    FontSize fontsize_;
     FontColor color_, initialColor_;
     std::function<void(int)> callback;
     int clickedParam;

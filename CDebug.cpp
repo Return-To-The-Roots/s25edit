@@ -48,7 +48,7 @@ CDebug::CDebug(void dbgCallback(int), int quitParam)
     shadingText = nullptr;
     unknown5Text = nullptr;
     editorModeText = nullptr;
-    fontsize = 9;
+    fontsize = FontSize::Small;
     MapObj = global::s2->MapObj.get();
     map = nullptr;
     global::s2->RegisterCallback(dbgCallback);
