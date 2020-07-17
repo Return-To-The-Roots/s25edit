@@ -1,5 +1,5 @@
-#include "defines.h"
 #include "globals.h"
+#include "defines.h"
 
 // array for all pictures
 std::vector<bobBMP> global::bmpArray(MAXBOBBMP);

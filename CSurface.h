@@ -1,8 +1,8 @@
 #ifndef _CSURFACE_H
 #define _CSURFACE_H
 
-#include "defines.h"
 #include "SdlSurface.h"
+#include "defines.h"
 #include <SDL.h>
 
 struct vector;

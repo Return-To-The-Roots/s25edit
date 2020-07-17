@@ -1,8 +1,8 @@
 #ifndef _CSELECTBOX_H
 #define _CSELECTBOX_H
 
-#include "defines.h"
 #include "SdlSurface.h"
+#include "defines.h"
 #include <functional>
 #include <memory>
 #include <vector>

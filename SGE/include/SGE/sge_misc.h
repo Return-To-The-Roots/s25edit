@@ -21,14 +21,15 @@
 #include "sge_internal.h"
 
 #ifdef _SGE_C
-extern "C" {
+extern "C"
+{
 #endif
-DECLSPEC int sge_Random(int min, int max);
-DECLSPEC void sge_Randomize();
+    DECLSPEC int sge_Random(int min, int max);
+    DECLSPEC void sge_Randomize();
 
-DECLSPEC Uint32 sge_CalibrateDelay();
-DECLSPEC Uint32 sge_DelayRes();
-DECLSPEC Uint32 sge_Delay(Uint32 ticks);
+    DECLSPEC Uint32 sge_CalibrateDelay();
+    DECLSPEC Uint32 sge_DelayRes();
+    DECLSPEC Uint32 sge_Delay(Uint32 ticks);
 #ifdef _SGE_C
 }
 #endif
