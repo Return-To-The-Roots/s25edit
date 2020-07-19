@@ -25,6 +25,7 @@
 #include "sge_primitives_int.h"
 #include "sge_surface.h"
 #include <array>
+#include <stdexcept>
 
 using FixedPoint = s25edit::FixedPoint<Sint32, 16>;
 using UFixedPoint = s25edit::FixedPoint<Uint32, 16>;
