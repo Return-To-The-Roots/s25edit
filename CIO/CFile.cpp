@@ -35,11 +35,12 @@ void CFile::init()
     loadPAL = false;
 }
 
-void* CFile::open_file(const std::string& filename, char filetype, bool only_loadPAL)
+void* CFile::open_file(const boost::filesystem::path& filepath, char filetype, bool only_loadPAL)
 {
     void* return_value = nullptr;
 
-    if(filename.empty() || !bmpArray || !shadowArray || !palArray || !palActual || !(fp = boost::nowide::fopen(filename.c_str(), "rb")))
+    if(filepath.empty() || !bmpArray || !shadowArray || !palArray || !palActual
+       || !(fp = boost::nowide::fopen(filepath.string().c_str(), "rb")))
         return nullptr;
 
     if(only_loadPAL)
@@ -62,7 +63,7 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
                 break;
 
             case IDX:
-                if(open_idx(filename))
+                if(open_idx(filepath))
                     return_value = (void*)-1;
 
                 break;
@@ -74,7 +75,7 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
                 break;
 
             case LBM:
-                if(open_lbm(filename))
+                if(open_lbm(filepath))
                     return_value = (void*)-1;
 
                 break;
@@ -94,7 +95,7 @@ void* CFile::open_file(const std::string& filename, char filetype, bool only_loa
         }
     } catch(const std::exception& e)
     {
-        std::cerr << "Error while reading " << filename << ": " << e.what() << std::endl;
+        std::cerr << "Error while reading " << filepath << ": " << e.what() << std::endl;
     }
 
     if(fp)
@@ -187,7 +188,7 @@ bool CFile::open_bob()
     return false;
 }
 
-bool CFile::open_idx(const std::string& filename)
+bool CFile::open_idx(const boost::filesystem::path& filepath)
 {
     // temporary filepointer to save global fp until this function has finished
     FILE* fp_tmp;
@@ -195,8 +196,6 @@ bool CFile::open_idx(const std::string& filename)
     FILE* fp_idx;
     // pointer to corresponding '******.DAT'-File
     FILE* fp_dat;
-    // array index for the first letter of the file ending ( the 'I' in 'IDX' ) to overwrite IDX with DAT
-    unsigned fileending;
     // starting adress of data in the corresponding '******.DAT'-File
     Uint32 offset;
     // bobtype of the entry
@@ -207,20 +206,14 @@ bool CFile::open_idx(const std::string& filename)
     // save global filepointer
     fp_tmp = fp;
     // get a new filepointer to the '.IDX'-File
-    if(!(fp_idx = boost::nowide::fopen(filename.c_str(), "rb")))
+    if(!(fp_idx = boost::nowide::fopen(filepath.string().c_str(), "rb")))
         return false;
     // following code will open the corresponding '******.DAT'-File
     // allocate memory for new name
-    std::string filename_dat = filename;
-    // if strlen = n, so array walks von 0 to n-1. n-1 is the last letter of the file ending ( the 'X' in 'IDX' ), so we have to walk back
-    // one time to be at the last letter and then two times to be at the 'I' = walk back 3 times
-    fileending = static_cast<unsigned>(filename.size() - 3);
-    // now overwrite 'IDX' with 'DAT'
-    filename_dat[fileending] = 'D';
-    filename_dat[fileending + 1] = 'A';
-    filename_dat[fileending + 2] = 'T';
+    auto filename_dat = filepath;
+    filename_dat.replace_extension(".DAT");
     // get the filepointer of the corresponging '******.DAT'-File
-    if(!(fp_dat = boost::nowide::fopen(filename_dat.c_str(), "rb")))
+    if(!(fp_dat = boost::nowide::fopen(filename_dat.string().c_str(), "rb")))
         return false;
     // we are finished opening the 'DAT'-File, now we can handle the content
 
@@ -325,7 +318,7 @@ bool CFile::open_bbm()
     return true;
 }
 
-bool CFile::open_lbm(const std::string& filename)
+bool CFile::open_lbm(const boost::filesystem::path& filepath)
 {
     // IMPORTANT NOTE: LBM (also ILBM) is the Interchange File Format (IFF) and the 4-byte-blocks are originally organized as Big Endian, so
     // a convertion is needed
@@ -496,9 +489,8 @@ bool CFile::open_lbm(const std::string& filename)
         return false;
 
     // if this is a texture file, we need a secondary 32-bit surface for SGE and we set a color key at both surfaces
-    if(filename.find("TEX5.LBM") != std::string::npos || filename.find("TEX6.LBM") != std::string::npos
-       || filename.find("TEX7.LBM") != std::string::npos || filename.find("TEXTUR_0.LBM") != std::string::npos
-       || filename.find("TEXTUR_3.LBM") != std::string::npos)
+    if(filepath.filename() == "TEX5.LBM" || filepath.filename() == "TEX6.LBM" || filepath.filename() == "TEX7.LBM"
+       || filepath.filename() == "TEXTUR_0.LBM" || filepath.filename() == "TEXTUR_3.LBM")
     {
         SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
 
@@ -710,14 +702,14 @@ bobMAP* CFile::open_swd()
     return open_wld();
 }
 
-bool CFile::save_file(const std::string& filename, char filetype, void* data)
+bool CFile::save_file(const boost::filesystem::path& filepath, char filetype, void* data)
 {
     bool return_value = false;
 
-    if(filename.empty() || !data)
+    if(filepath.empty() || !data)
         return return_value;
 
-    if(!(fp = boost::nowide::fopen(filename.c_str(), "wb")))
+    if(!(fp = boost::nowide::fopen(filepath.string().c_str(), "wb")))
         return return_value;
 
     switch(filetype)
@@ -726,7 +718,7 @@ bool CFile::save_file(const std::string& filename, char filetype, void* data)
 
         case BOB: return_value = save_bob(data); break;
 
-        case IDX: return_value = save_idx(data, filename); break;
+        case IDX: return_value = save_idx(data, filepath); break;
 
         case BBM: return_value = save_bbm(data); break;
 
@@ -760,7 +752,7 @@ bool CFile::save_bob(void*)
     return false;
 }
 
-bool CFile::save_idx(void*, const std::string&)
+bool CFile::save_idx(void*, const boost::filesystem::path&)
 {
     return false;
 }

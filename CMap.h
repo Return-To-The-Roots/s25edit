@@ -2,6 +2,7 @@
 #define _CMAP_H
 
 #include "defines.h"
+#include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
 #include <Point.h>
 #include <SDL.h>
@@ -39,7 +40,7 @@ class CMap
     friend class CSurface;
 
 private:
-    std::string filename_;
+    boost::filesystem::path filepath_;
     SdlSurface Surf_Map;
     SdlSurface Surf_RightMenubar;
     std::unique_ptr<bobMAP> map;
@@ -97,9 +98,9 @@ private:
     boost::optional<Position> startScrollPos;
 
 public:
-    CMap(const std::string& filename);
+    CMap(const boost::filesystem::path& filepath);
     ~CMap();
-    void constructMap(const std::string& filename, int width = 32, int height = 32, MapType type = MAP_GREENLAND,
+    void constructMap(const boost::filesystem::path& filepath, int width = 32, int height = 32, MapType type = MAP_GREENLAND,
                       TriangleTerrainType texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
     static std::unique_ptr<bobMAP> generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border,
                                                int border_texture);
@@ -144,8 +145,8 @@ public:
     void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
     auto& getPlayerHQx() { return PlayerHQx; }
     auto& getPlayerHQy() { return PlayerHQy; }
-    const std::string& getFilename() const { return filename_; }
-    void setFilename(std::string filename) { filename_ = std::move(filename); }
+    const boost::filesystem::path& getFilepath() const { return filepath_; }
+    void setFilepath(boost::filesystem::path filepath) { filepath_ = std::move(filepath); }
     std::string getMapname() const { return map->getName(); }
     void setMapname(const std::string& name) { map->setName(name); }
     std::string getAuthor() const { return map->getAuthor(); }

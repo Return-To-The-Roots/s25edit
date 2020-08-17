@@ -10,8 +10,8 @@ std::vector<bobPAL> global::palArray(MAXBOBPAL);
 // the game object
 CGame* global::s2;
 
-std::string global::gameDataFilePath(".");
-std::string global::userMapsPath;
+boost::filesystem::path global::gameDataFilePath(".");
+boost::filesystem::path global::userMapsPath;
 WorldDescription global::worldDesc;
 
 unsigned char TRIANGLE_HEIGHT = 28;

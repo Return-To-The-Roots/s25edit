@@ -2,6 +2,7 @@
 #define _GLOBALS_H
 
 #include "gameData/WorldDescription.h"
+#include <boost/filesystem/path.hpp>
 #include <SDL.h>
 #include <vector>
 
@@ -20,9 +21,9 @@ extern std::vector<bobPAL> palArray;
 // the game object
 extern CGame* s2;
 // Path to game data (must not be empty!)
-extern std::string gameDataFilePath;
+extern boost::filesystem::path gameDataFilePath;
 // Path where maps will be stored (must not be empty!)
-extern std::string userMapsPath;
+extern boost::filesystem::path userMapsPath;
 extern WorldDescription worldDesc;
 } // namespace global
 

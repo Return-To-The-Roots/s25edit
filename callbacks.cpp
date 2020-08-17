@@ -596,7 +596,7 @@ void callback::EditorHelpMenu(int Param)
 
             SelectBoxHelp = WNDHelp->addSelectBox(Point16(0, 0), Extent16(WNDHelp->getSize() - WNDHelp->getBorderSize()), FontSize::Medium,
                                                   FontColor::Yellow, BUTTON_GREEN1);
-            SelectBoxHelp->addOption("User map path: " + global::userMapsPath);
+            SelectBoxHelp->addOption("User map path: " + global::userMapsPath.string());
             SelectBoxHelp->addOption("");
             SelectBoxHelp->addOption(
               "Help-Menu......................................................................................................F1");
@@ -774,14 +774,14 @@ void callback::EditorLoadMenu(int Param)
             EditorPlayerMenu(MAP_QUIT);
 
             MapObj->destructMap();
-            bfs::path filepath = bfs::path(global::userMapsPath) / curFilename;
+            bfs::path filepath = global::userMapsPath / curFilename;
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");
             if(!bfs::exists(filepath))
                 filepath.replace_extension("WLD");
             if(!bfs::exists(filepath))
                 filepath.replace_extension("SWD");
-            MapObj->constructMap(filepath.string());
+            MapObj->constructMap(filepath);
 
             // we need to check which of these windows was active before
             /*
@@ -830,8 +830,8 @@ void callback::EditorSaveMenu(int Param)
 
                 WNDSave->addText("Filename", 100, 2, FontSize::Small);
                 TXTF_Filename = WNDSave->addTextfield(10, 13, 21, 1);
-                auto const filePath = MapObj->getFilename().empty() ? "MyMap" : MapObj->getFilename();
-                TXTF_Filename->setText(bfs::path(filePath).filename().string());
+                const bfs::path filePath = MapObj->getFilepath().empty() ? "MyMap" : MapObj->getFilepath();
+                TXTF_Filename->setText(filePath.filename().string());
                 WNDSave->addText("Mapname", 98, 38, FontSize::Small);
                 TXTF_Mapname = WNDSave->addTextfield(10, 50, 19, 1);
                 TXTF_Mapname->setText(MapObj->getMapname());
@@ -860,11 +860,11 @@ void callback::EditorSaveMenu(int Param)
 
             MapObj->setMapname(TXTF_Mapname->getText());
             MapObj->setAuthor(TXTF_Author->getText());
-            MapObj->setFilename(TXTF_Filename->getText());
-            bfs::path filepath = bfs::path(global::userMapsPath) / TXTF_Filename->getText();
+            bfs::path filepath = global::userMapsPath / TXTF_Filename->getText();
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");
-            bool result = CFile::save_file(filepath.string(), WLD, MapObj->getMap());
+            MapObj->setFilepath(filepath);
+            bool result = CFile::save_file(filepath, WLD, MapObj->getMap());
 
             ShowStatus(INITIALIZING_CALL);
             ShowStatus(result ? 1 : 2);

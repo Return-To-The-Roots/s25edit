@@ -57,14 +57,14 @@ bool CGame::Init()
      */
 
     // load some pictures (after all the splash-screens)
-    // at first /GFX/PICS/SETUP997.LBM, cause this is the S2-loading picture
-    std::cout << "\nLoading file: /GFX/PICS/SETUP997.LBM...";
-    if(!CFile::open_file(global::gameDataFilePath + "/GFX/PICS/SETUP997.LBM", LBM))
+    // at first GFX/PICS/SETUP997.LBM, cause this is the S2-loading picture
+    std::cout << "\nLoading file: GFX/PICS/SETUP997.LBM...";
+    if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP997.LBM", LBM))
     {
         std::cout << "failure";
         // if SETUP997.LBM doesn't exist, it's probably settlers2+mission cd and there we have SETUP998.LBM instead
-        std::cout << "\nTry to load file: /GFX/PICS/SETUP998.LBM instead...";
-        if(!CFile::open_file(global::gameDataFilePath + "/GFX/PICS/SETUP998.LBM", LBM))
+        std::cout << "\nTry to load file: GFX/PICS/SETUP998.LBM instead...";
+        if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP998.LBM", LBM))
         {
             std::cout << "failure";
             return false;
@@ -87,18 +87,16 @@ bool CGame::Init()
     }
 
     // continue loading pictures
-    auto paths =
-      std::vector<std::string>{"/GFX/PICS/SETUP000.LBM", "/GFX/PICS/SETUP010.LBM", "/GFX/PICS/SETUP011.LBM", "/GFX/PICS/SETUP012.LBM",
-                               "/GFX/PICS/SETUP013.LBM", "/GFX/PICS/SETUP014.LBM", "/GFX/PICS/SETUP015.LBM"};
-    for(const std::string& file : paths)
+    for(const std::string file : {"GFX/PICS/SETUP000.LBM", "GFX/PICS/SETUP010.LBM", "GFX/PICS/SETUP011.LBM", "GFX/PICS/SETUP012.LBM",
+                                  "GFX/PICS/SETUP013.LBM", "GFX/PICS/SETUP014.LBM", "GFX/PICS/SETUP015.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, LBM))
+        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
         {
             std::cout << "failure";
             // if it doesn't exist, it's probably settlers2+missioncd and we simply load SETUP010.LBM instead
-            std::cout << "\nLoading file: /GFX/PICS/SETUP010.LBM instead...";
-            if(!CFile::open_file(global::gameDataFilePath + "/GFX/PICS/SETUP010.LBM", LBM))
+            std::cout << "\nLoading file: GFX/PICS/SETUP010.LBM instead...";
+            if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP010.LBM", LBM))
             {
                 std::cout << "failure";
                 return false;
@@ -106,30 +104,27 @@ bool CGame::Init()
         }
     }
 
-    paths =
-      std::vector<std::string>{"/GFX/PICS/SETUP666.LBM", "/GFX/PICS/SETUP667.LBM", "/GFX/PICS/SETUP801.LBM", "/GFX/PICS/SETUP802.LBM",
-                               "/GFX/PICS/SETUP803.LBM", "/GFX/PICS/SETUP804.LBM", "/GFX/PICS/SETUP805.LBM", "/GFX/PICS/SETUP806.LBM",
-                               "/GFX/PICS/SETUP810.LBM", "/GFX/PICS/SETUP811.LBM", "/GFX/PICS/SETUP895.LBM", "/GFX/PICS/SETUP896.LBM"};
-    for(const std::string& file : paths)
+    for(const std::string file : {"GFX/PICS/SETUP666.LBM", "GFX/PICS/SETUP667.LBM", "GFX/PICS/SETUP801.LBM", "GFX/PICS/SETUP802.LBM",
+                                  "GFX/PICS/SETUP803.LBM", "GFX/PICS/SETUP804.LBM", "GFX/PICS/SETUP805.LBM", "GFX/PICS/SETUP806.LBM",
+                                  "GFX/PICS/SETUP810.LBM", "GFX/PICS/SETUP811.LBM", "GFX/PICS/SETUP895.LBM", "GFX/PICS/SETUP896.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, LBM))
+        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
         {
             std::cout << "failure";
             return false;
         }
     }
 
-    paths = std::vector<std::string>{"/GFX/PICS/SETUP897.LBM", "/GFX/PICS/SETUP898.LBM"};
-    for(const std::string& file : paths)
+    for(const std::string file : {"GFX/PICS/SETUP897.LBM", "GFX/PICS/SETUP898.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, LBM))
+        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
         {
             std::cout << "failure";
             // if it doesn't exist, it's probably settlers2+missioncd and we simply load SETUP896.LBM instead
-            std::cout << "\nLoading file: /GFX/PICS/SETUP896.LBM instead...";
-            if(!CFile::open_file(global::gameDataFilePath + "/GFX/PICS/SETUP896.LBM", LBM))
+            std::cout << "\nLoading file: GFX/PICS/SETUP896.LBM instead...";
+            if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP896.LBM", LBM))
             {
                 std::cout << "failure";
                 return false;
@@ -137,12 +132,10 @@ bool CGame::Init()
         }
     }
 
-    paths = std::vector<std::string>{"/GFX/PICS/SETUP899.LBM", "/GFX/PICS/SETUP990.LBM", "/GFX/PICS/WORLD.LBM", "/GFX/PICS/WORLDMSK.LBM"};
-    std::cout << "\nLoading file: /GFX/PICS/SETUP899.LBM...";
-    for(const std::string& file : paths)
+    for(const std::string file : {"GFX/PICS/SETUP899.LBM", "GFX/PICS/SETUP990.LBM", "GFX/PICS/WORLD.LBM", "GFX/PICS/WORLDMSK.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, LBM))
+        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
         {
             std::cout << "failure";
             return false;
@@ -150,12 +143,10 @@ bool CGame::Init()
     }
 
     // load gouraud data
-    paths = std::vector<std::string>{"/DATA/TEXTURES/GOU5.DAT", "/DATA/TEXTURES/GOU6.DAT", "/DATA/TEXTURES/GOU7.DAT"};
-    std::cout << "\nLoading file: /DATA/TEXTURES/GOU5.DAT...";
-    for(const std::string& file : paths)
+    for(const std::string file : {"DATA/TEXTURES/GOU5.DAT", "DATA/TEXTURES/GOU6.DAT", "DATA/TEXTURES/GOU7.DAT"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, GOU))
+        if(!CFile::open_file(global::gameDataFilePath / file, GOU))
         {
             std::cout << "failure";
             return false;
@@ -163,16 +154,16 @@ bool CGame::Init()
     }
 
     // load only the palette at this time from editres.idx
-    std::cout << "\nLoading palette from file: /DATA/EDITRES.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/EDITRES.IDX", IDX, true))
+    std::cout << "\nLoading palette from file: DATA/EDITRES.IDX...";
+    if(!CFile::open_file(global::gameDataFilePath / "DATA/EDITRES.IDX", IDX, true))
     {
         std::cout << "failure";
         return false;
     }
     // set the right palette
     CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: /DATA/EDITRES.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/EDITRES.IDX", IDX))
+    std::cout << "\nLoading file: DATA/EDITRES.IDX...";
+    if(!CFile::open_file(global::gameDataFilePath / "DATA/EDITRES.IDX", IDX))
     {
         std::cout << "failure";
         return false;
@@ -180,35 +171,34 @@ bool CGame::Init()
     // set back palette
     CFile::set_palActual(CFile::get_palArray());
     // load only the palette at this time from editio.idx
-    std::cout << "\nLoading palette from file: /DATA/IO/EDITIO.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/IO/EDITIO.IDX", IDX, true))
+    std::cout << "\nLoading palette from file: DATA/IO/EDITIO.IDX...";
+    if(!CFile::open_file(global::gameDataFilePath / "DATA/IO/EDITIO.IDX", IDX, true))
     {
         std::cout << "failure";
         return false;
     }
     // set the right palette
     CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: /DATA/IO/EDITIO.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/IO/EDITIO.IDX", IDX))
+    std::cout << "\nLoading file: DATA/IO/EDITIO.IDX...";
+    if(!CFile::open_file(global::gameDataFilePath / "DATA/IO/EDITIO.IDX", IDX))
     {
         std::cout << "failure";
         return false;
     }
     // set back palette
     CFile::set_palActual(CFile::get_palArray());
-    std::cout << "\nLoading file: /DATA/EDITBOB.LST...";
-    if(!CFile::open_file(global::gameDataFilePath + "/DATA/EDITBOB.LST", LST))
+    std::cout << "\nLoading file: DATA/EDITBOB.LST...";
+    if(!CFile::open_file(global::gameDataFilePath / "DATA/EDITBOB.LST", LST))
     {
         std::cout << "failure";
         return false;
     }
 
     // texture tilesets
-    paths = std::vector<std::string>{"/GFX/TEXTURES/TEX5.LBM", "/GFX/TEXTURES/TEX6.LBM", "/GFX/TEXTURES/TEX7.LBM"};
-    for(const std::string& file : paths)
+    for(const std::string file : {"GFX/TEXTURES/TEX5.LBM", "GFX/TEXTURES/TEX6.LBM", "GFX/TEXTURES/TEX7.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, LBM))
+        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
         {
             std::cout << "failure";
             return false;
@@ -216,8 +206,8 @@ bool CGame::Init()
     }
 
     /*
-    std::cout << "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...";
-    if ( !CFile::open_file(global::gameDataFilePath + "/GFX/PALETTE/PAL5.BBM", BBM, true) )
+    std::cout << "\nLoading palette from file: GFX/PALETTE/PAL5.BBM...";
+    if ( !CFile::open_file(global::gameDataFilePath / "GFX/PALETTE/PAL5.BBM", BBM, true) )
     {
         std::cout << "failure";
         return false;
@@ -225,12 +215,11 @@ bool CGame::Init()
     */
 
     // EVERY MISSION-FILE SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
-    paths = std::vector<std::string>{"/DATA/MIS0BOBS.LST", "/DATA/MIS1BOBS.LST", "/DATA/MIS2BOBS.LST",
-                                     "/DATA/MIS3BOBS.LST", "/DATA/MIS4BOBS.LST", "/DATA/MIS5BOBS.LST"};
-    for(const std::string& file : paths)
+    for(const std::string file :
+        {"DATA/MIS0BOBS.LST", "DATA/MIS1BOBS.LST", "DATA/MIS2BOBS.LST", "DATA/MIS3BOBS.LST", "DATA/MIS4BOBS.LST", "DATA/MIS5BOBS.LST"})
     {
         std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath + file, LST))
+        if(!CFile::open_file(global::gameDataFilePath / file, LST))
         {
             std::cout << "failure";
             return false;

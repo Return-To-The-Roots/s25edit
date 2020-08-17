@@ -64,9 +64,9 @@ void bobMAP::updateVertexCoords()
     }
 }
 
-CMap::CMap(const std::string& filename)
+CMap::CMap(const boost::filesystem::path& filepath)
 {
-    constructMap(filename);
+    constructMap(filepath);
 }
 
 CMap::~CMap()
@@ -74,8 +74,8 @@ CMap::~CMap()
     destructMap();
 }
 
-void CMap::constructMap(const std::string& filename, int width, int height, MapType type, TriangleTerrainType texture, int border,
-                        int border_texture)
+void CMap::constructMap(const boost::filesystem::path& filepath, int width, int height, MapType type, TriangleTerrainType texture,
+                        int border, int border_texture)
 {
     map = nullptr;
     Surf_Map.reset();
@@ -84,16 +84,16 @@ void CMap::constructMap(const std::string& filename, int width, int height, MapT
     displayRect.top = 0;
     displayRect.setSize(global::s2->GameResolution);
 
-    if(!filename.empty())
+    if(!filepath.empty())
     {
-        map.reset((bobMAP*)CFile::open_file(filename, WLD));
+        map.reset((bobMAP*)CFile::open_file(filepath, WLD));
         if(map)
-            filename_ = filename;
+            filepath_ = filepath;
     }
 
     if(!map)
     {
-        filename_.clear();
+        filepath_.clear();
         map = generateMap(width, height, type, texture, border, border_texture);
     }
 
@@ -224,7 +224,7 @@ void CMap::destructMap()
     Vertices.clear();
     // free map structure memory
     map.reset();
-    filename_.clear();
+    filepath_.clear();
 }
 
 std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture)
@@ -400,63 +400,51 @@ void CMap::MirrorMapOnYAxis()
 
 void CMap::loadMapPics()
 {
-    std::string outputString1, outputString2, outputString3, picFile, palFile;
+    std::string picFile, palFile;
     switch(map->type)
     {
         case 0:
-            outputString1 = "\nLoading palette from file: /DATA/MAP00.LST...";
-            outputString2 = "\nLoading file: /DATA/MAP00.LST...";
-            picFile = "/DATA/MAP00.LST";
-            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...";
-            palFile = "/GFX/PALETTE/PAL5.BBM";
+            picFile = "DATA/MAP00.LST";
+            palFile = "GFX/PALETTE/PAL5.BBM";
             break;
         case 1:
-            outputString1 = "\nLoading palette from file: /DATA/MAP01.LST...";
-            outputString2 = "\nLoading file: /DATA/MAP01.LST...";
-            picFile = "/DATA/MAP01.LST";
-            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL6.BBM...";
-            palFile = "/GFX/PALETTE/PAL6.BBM";
+            picFile = "DATA/MAP01.LST";
+            palFile = "GFX/PALETTE/PAL6.BBM";
             break;
         case 2:
-            outputString1 = "\nLoading palette from file: /DATA/MAP02.LST...";
-            outputString2 = "\nLoading file: /DATA/MAP02.LST...";
-            picFile = "/DATA/MAP02.LST";
-            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL7.BBM...";
-            palFile = "/GFX/PALETTE/PAL7.BBM";
+            picFile = "DATA/MAP02.LST";
+            palFile = "GFX/PALETTE/PAL7.BBM";
             break;
         default:
-            outputString1 = "\nLoading palette from file: /DATA/MAP00.LST...";
-            outputString2 = "\nLoading file: /DATA/MAP00.LST...";
-            picFile = "/DATA/MAP00.LST";
-            outputString3 = "\nLoading palette from file: /GFX/PALETTE/PAL5.BBM...";
-            palFile = "/GFX/PALETTE/PAL5.BBM";
+            picFile = "DATA/MAP00.LST";
+            palFile = "GFX/PALETTE/PAL5.BBM";
             break;
     }
     // load only the palette at this time from MAP0x.LST
-    std::cout << outputString1;
-    if(!CFile::open_file(global::gameDataFilePath + picFile, LST, true))
+    std::cout << "\nLoading palette from file: " << picFile << "...";
+    if(!CFile::open_file(global::gameDataFilePath / picFile, LST, true))
     {
         std::cout << "failure";
     }
     // set the right palette
     CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << outputString2;
-    if(!CFile::open_file(global::gameDataFilePath + picFile, LST))
+    std::cout << "\nLoading file: " << picFile << "...";
+    if(!CFile::open_file(global::gameDataFilePath / picFile, LST))
     {
         std::cout << "failure";
     }
     // set back palette
     // CFile::set_palActual(CFile::get_palArray());
-    // std::cout << "\nLoading file: /DATA/MBOB/ROM_BOBS.LST...";
-    // if ( !CFile::open_file(global::gameDataFilePath + "/DATA/MBOB/ROM_BOBS.LST", LST) )
+    // std::cout << "\nLoading file: DATA/MBOB/ROM_BOBS.LST...";
+    // if ( !CFile::open_file(global::gameDataFilePath + "DATA/MBOB/ROM_BOBS.LST", LST) )
     //{
     //    std::cout << "failure";
     //}
     // set back palette
     CFile::set_palActual(CFile::get_palArray());
     // load palette file for the map (for precalculated shading)
-    std::cout << outputString3;
-    if(!CFile::open_file(global::gameDataFilePath + palFile, BBM, true))
+    std::cout << "\nLoading palette from file: " << palFile << "...";
+    if(!CFile::open_file(global::gameDataFilePath / palFile, BBM, true))
     {
         std::cout << "failure";
     }
@@ -598,14 +586,14 @@ void CMap::onLeftMouseDown(const Point32& pos)
         callback::EditorPlayerMenu(MAP_QUIT);
 
         destructMap();
-        constructMap(global::userMapsPath + "/quicksave.swd");
+        constructMap(global::userMapsPath / "quicksave.swd");
         callback::PleaseWait(WINDOW_QUIT_MESSAGE);
     } else if(pos.x >= (displaySize.x - 37) && pos.x <= (displaySize.x) && pos.y >= (displaySize.y / 2 + 200)
               && pos.y <= (displaySize.y / 2 + 237))
     {
         // the bugkill picture was clicked for quicksave
         callback::PleaseWait(INITIALIZING_CALL);
-        if(!CFile::save_file(global::userMapsPath + "/quicksave.swd", SWD, getMap()))
+        if(!CFile::save_file(global::userMapsPath / "quicksave.swd", SWD, getMap()))
         {
             callback::ShowStatus(INITIALIZING_CALL);
             callback::ShowStatus(2);
