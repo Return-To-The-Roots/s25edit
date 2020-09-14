@@ -1,3 +1,5 @@
+#pragma once
+
 /* SGE Config header (generated automatically) */
 #define SGE_VER 030809
 #define _SGE_C_AND_CPP

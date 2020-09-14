@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_rotation_H
-#define sge_rotation_H
+#pragma once
 
 #include "sge_internal.h"
 
@@ -36,5 +35,3 @@ extern "C"
 #ifdef _SGE_C
 }
 #endif
-
-#endif /* sge_rotation_H */

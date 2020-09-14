@@ -1,7 +1,6 @@
 // handling of the files and data types is mostly based on the file specification from the 'Return to the Roots'-Team
 
-#ifndef _CFILE_H
-#define _CFILE_H
+#pragma once
 
 #include "defines.h"
 #include <boost/filesystem/path.hpp>
@@ -59,5 +58,3 @@ public:
     static void* open_file(const boost::filesystem::path& filepath, char filetype, bool only_loadPAL = false);
     static bool save_file(const boost::filesystem::path& filepath, char filetype, void* data);
 };
-
-#endif

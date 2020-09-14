@@ -14,8 +14,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_H
-#define sge_H
+#pragma once
 
 #include "sge_blib.h"
 #include "sge_collision.h"
@@ -24,5 +23,3 @@
 #include "sge_rotation.h"
 #include "sge_shape.h"
 #include "sge_surface.h"
-
-#endif /* sge_H */

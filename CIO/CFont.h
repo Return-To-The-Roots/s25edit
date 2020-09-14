@@ -1,5 +1,4 @@
-#ifndef _CFONT_H
-#define _CFONT_H
+#pragma once
 
 #include "defines.h"
 #include <SDL.h>
@@ -60,5 +59,3 @@ public:
         return writeText(Surf_Dest.get(), string, x, y, fontsize, color, align);
     }
 };
-
-#endif

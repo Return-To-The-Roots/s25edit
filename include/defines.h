@@ -1,5 +1,4 @@
-﻿#ifndef _DEFINES_H
-#define _DEFINES_H
+#pragma once
 
 #include "Point.h"
 #include "Rect.h"
@@ -1243,5 +1242,3 @@ enum TriangleTerrainType
     TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR =
       0xFF, // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
 };
-
-#endif

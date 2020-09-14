@@ -1,5 +1,4 @@
-#ifndef RTTR_FIXED_POINT_H
-#define RTTR_FIXED_POINT_H
+#pragma once
 
 #include <cassert>
 #include <type_traits>
@@ -49,5 +48,3 @@ public:
     friend FixedPoint operator/(FixedPoint lhs, T_Underlying rhs) { return lhs /= rhs; }
 };
 } // namespace s25edit
-
-#endif

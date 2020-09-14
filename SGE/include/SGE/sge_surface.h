@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_surface_H
-#define sge_surface_H
+#pragma once
 
 #include "sge_internal.h"
 
@@ -91,5 +90,3 @@ DECLSPEC void sge_PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 
 DECLSPEC void sge_ClearSurface(SDL_Surface* Surface, Uint8 R, Uint8 G, Uint8 B);
 DECLSPEC void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B);
 #endif /* sge_C_ONLY */
-
-#endif /* sge_surface_H */

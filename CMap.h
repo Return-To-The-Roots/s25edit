@@ -1,5 +1,4 @@
-#ifndef _CMAP_H
-#define _CMAP_H
+#pragma once
 
 #include "defines.h"
 #include <boost/filesystem/path.hpp>
@@ -219,5 +218,3 @@ private:
     void MirrorMapOnYAxis();
     void onLeftMouseDown(const Point32& pos);
 };
-
-#endif

@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_blib_H
-#define sge_blib_H
+#pragma once
 
 #include "sge_internal.h"
 
@@ -97,5 +96,3 @@ DECLSPEC int sge_FilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y
 DECLSPEC int sge_FilledPolygonAlpha(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8 r, Uint8 g, Uint8 b, Uint8 alpha);
 DECLSPEC int sge_AAFilledPolygon(SDL_Surface* dest, Uint16 n, Sint16* x, Sint16* y, Uint8 r, Uint8 g, Uint8 b);
 #endif /* sge_C_ONLY */
-
-#endif /* sge_blib_H */

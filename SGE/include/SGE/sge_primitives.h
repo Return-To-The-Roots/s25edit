@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_primitives_H
-#define sge_primitives_H
+#pragma once
 
 #include "sge_internal.h"
 
@@ -117,5 +116,3 @@ DECLSPEC void sge_AABezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2
 DECLSPEC void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
                                 Sint16 y4, int level, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
 #endif /* sge_C_ONLY */
-
-#endif /* sge_primitives_H */

@@ -1,5 +1,4 @@
-#ifndef _CDEBUG_H
-#define _CDEBUG_H
+#pragma once
 
 #include "defines.h"
 
@@ -86,5 +85,3 @@ public:
     void sendParam(int Param);
     void actualizeData();
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef SdlSurface_h__
-#define SdlSurface_h__
+#pragma once
 
 #include <SDL.h>
 #include <array>
@@ -43,5 +42,3 @@ inline SdlTexture makeSdlTexture(const SdlRenderer& renderer, Uint32 format, int
 {
     return SdlTexture(SDL_CreateTexture(renderer.get(), format, access, w, h));
 }
-
-#endif // SdlSurface_h__

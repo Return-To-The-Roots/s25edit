@@ -1,5 +1,4 @@
-#ifndef _CGAME_H
-#define _CGAME_H
+#pragma once
 
 #include "CIO/CFont.h"
 #include "SdlSurface.h"
@@ -91,5 +90,3 @@ public:
     SDL_Surface* getDisplaySurface() { return Surf_Display.get(); };
     auto getRes() { return GameResolution; }
 };
-
-#endif

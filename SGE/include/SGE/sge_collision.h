@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_collision_H
-#define sge_collision_H
+#pragma once
 
 #include "sge_internal.h"
 
@@ -49,5 +48,3 @@ extern "C"
 class DECLSPEC sge_shape;
 DECLSPEC int sge_bbcheck_shape(sge_shape* shape1, sge_shape* shape2);
 #endif /* _SGE_NO_CLASSES */
-
-#endif /* sge_collision_H */

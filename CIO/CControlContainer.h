@@ -1,5 +1,4 @@
-#ifndef _CCONTROLCONTAINER_H
-#define _CCONTROLCONTAINER_H
+#pragma once
 
 #include "defines.h"
 #include <memory>
@@ -81,5 +80,3 @@ public:
                              int bg_color = -1);
     bool delSelectBox(CSelectBox* SelectBoxToDelete);
 };
-
-#endif

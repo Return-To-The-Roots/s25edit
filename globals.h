@@ -1,5 +1,4 @@
-#ifndef _GLOBALS_H
-#define _GLOBALS_H
+#pragma once
 
 #include "gameData/WorldDescription.h"
 #include <boost/filesystem/path.hpp>
@@ -32,5 +31,3 @@ extern unsigned char TRIANGLE_WIDTH;
 extern unsigned char TRIANGLE_INCREASE;
 
 extern Uint8 gouData[3][256][256];
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _CMENU_H
-#define _CMENU_H
+#pragma once
 
 #include "CControlContainer.h"
 
@@ -16,5 +15,3 @@ public:
     void setInactive() { active = false; };
     bool isActive() { return active; };
 };
-
-#endif

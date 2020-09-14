@@ -1,5 +1,4 @@
-#ifndef _CWINDOW_H
-#define _CWINDOW_H
+#pragma once
 
 #include "CControlContainer.h"
 
@@ -78,5 +77,3 @@ public:
     bool hasActiveInputElement();
     void setColor(int color);
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _CPICTURE_H
-#define _CPICTURE_H
+#pragma once
 
 #include "SdlSurface.h"
 
@@ -45,5 +44,3 @@ public:
         motionLeaveParam = leave;
     };
 };
-
-#endif

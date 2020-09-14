@@ -1,5 +1,4 @@
-#ifndef _CSELECTBOX_H
-#define _CSELECTBOX_H
+#pragma once
 
 #include "SdlSurface.h"
 #include "defines.h"
@@ -52,5 +51,3 @@ public:
     }
     void addOption(const std::string& string, std::function<void(int)> callback = nullptr, int param = 0);
 };
-
-#endif

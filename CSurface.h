@@ -1,5 +1,4 @@
-#ifndef _CSURFACE_H
-#define _CSURFACE_H
+#pragma once
 
 #include "SdlSurface.h"
 #include "defines.h"
@@ -55,5 +54,3 @@ private:
     static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move, Point16& upper,
                                         Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2);
 };
-
-#endif

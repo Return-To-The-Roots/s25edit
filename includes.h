@@ -1,5 +1,4 @@
-#ifndef _INCLUDES_H
-#define _INCLUDES_H
+#pragma once
 
 #include <cmath>
 
@@ -8,5 +7,3 @@
 #include "SGE/sge.h"
 
 #include "defines.h"
-
-#endif

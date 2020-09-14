@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_shape_H
-#define sge_shape_H
+#pragma once
 
 #include "sge_internal.h"
 #include <SDL.h>
@@ -374,4 +373,3 @@ public:
 #endif
 
 #endif /* _SGE_NO_CLASSES */
-#endif /* sge_shape_H */

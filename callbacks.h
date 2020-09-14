@@ -5,8 +5,7 @@
 // This happens for example if a new Map will be loaded or user goes to main menu. So if you add a new window, don't forget
 // to add it to this "close lists" if it's necessary (also in the file CMap.cpp, function setMouseData(Button)).
 
-#ifndef _CALLBACKS_H
-#define _CALLBACKS_H
+#pragma once
 
 namespace callback {
 // PleaseWait creates a small window (not moveable, not resizeable, not minimizable, not closeable) with the String "Please wait..."
@@ -35,5 +34,3 @@ void viewer(int Param);
 void submenu1(int Param);
 #endif
 } // namespace callback
-
-#endif

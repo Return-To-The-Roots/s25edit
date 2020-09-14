@@ -15,8 +15,7 @@
  *  version 2 of the License, or (at your option) any later version. *
  *********************************************************************/
 
-#ifndef sge_internal_H
-#define sge_internal_H
+#pragma once
 
 /* This header is included in all sge_*.h files */
 
@@ -100,5 +99,3 @@ inline auto sge_clip_ymax(const SDL_Surface* pnt)
 #else
 #define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx)
 #endif
-
-#endif /* sge_internal_H */

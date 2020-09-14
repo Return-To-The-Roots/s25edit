@@ -1,5 +1,4 @@
-#ifndef _CBUTTON_H
-#define _CBUTTON_H
+#pragma once
 
 #include "SdlSurface.h"
 #include "defines.h"
@@ -61,5 +60,3 @@ public:
         motionLeaveParam = leave;
     };
 };
-
-#endif

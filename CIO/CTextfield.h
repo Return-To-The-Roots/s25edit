@@ -1,5 +1,4 @@
-#ifndef _CTEXTFIELD_H
-#define _CTEXTFIELD_H
+#pragma once
 
 #include "defines.h"
 #include <SDL.h>
@@ -59,5 +58,3 @@ public:
     void setTextColor(FontColor color);
     std::string getText() const { return text_.data(); }
 };
-
-#endif
