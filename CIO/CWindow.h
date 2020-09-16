@@ -41,10 +41,10 @@ private:
     bool render() final;
 
 public:
-    CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title = nullptr, int color = WINDOW_GREEN1,
-            Uint8 flags = 0);
-    CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size, const char* title = nullptr, int color = WINDOW_GREEN1,
-            Uint8 flags = 0);
+    CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title = nullptr,
+            int color = WINDOW_GREEN1, Uint8 flags = 0);
+    CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size, const char* title = nullptr,
+            int color = WINDOW_GREEN1, Uint8 flags = 0);
     // Access
     Position getPos() const { return {x_, y_}; }
     Extent getSize() const { return {w_, h_}; }
@@ -70,10 +70,9 @@ public:
     bool isResizing() const { return resizing; }
     bool isMarked() const { return marked; }
     void setDirty() { needRender = true; }
-    // we can not trust this information, cause if minimized is false, it is possible, that we still have the old minimized surface
-    // bool isMinimized() { return minimized; };
-    // we need an information if a input-element (textfield etc.) is active to not deliver the input to other gui-element in the event
-    // system
+    // we can not trust this information, cause if minimized is false, it is possible, that we still have the old
+    // minimized surface bool isMinimized() { return minimized; }; we need an information if a input-element (textfield
+    // etc.) is active to not deliver the input to other gui-element in the event system
     bool hasActiveInputElement();
     void setColor(int color);
 };

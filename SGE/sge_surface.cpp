@@ -90,7 +90,8 @@ Uint32 sge_MapAlpha(Uint8 R, Uint8 G, Uint8 B, Uint8 A)
 //==================================================================================
 void _PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color)
 {
-    if(x >= sge_clip_xmin(surface) && x <= sge_clip_xmax(surface) && y >= sge_clip_ymin(surface) && y <= sge_clip_ymax(surface))
+    if(x >= sge_clip_xmin(surface) && x <= sge_clip_xmax(surface) && y >= sge_clip_ymin(surface)
+       && y <= sge_clip_ymax(surface))
     {
         switch(surface->format->BytesPerPixel)
         {
@@ -317,7 +318,8 @@ Uint32 sge_GetPixel(SDL_Surface* surface, Sint16 x, Sint16 y)
 //==================================================================================
 void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint32 color, Uint8 alpha)
 {
-    if(x >= sge_clip_xmin(surface) && x <= sge_clip_xmax(surface) && y >= sge_clip_ymin(surface) && y <= sge_clip_ymax(surface))
+    if(x >= sge_clip_xmin(surface) && x <= sge_clip_xmax(surface) && y >= sge_clip_ymin(surface)
+       && y <= sge_clip_ymax(surface))
     {
         Uint32 Rmask = surface->format->Rmask, Gmask = surface->format->Gmask, Bmask = surface->format->Bmask,
                Amask = surface->format->Amask;
@@ -527,8 +529,8 @@ void sge_ClearSurface(SDL_Surface* Surface, Uint8 R, Uint8 G, Uint8 B)
 // Blit from one surface to another
 // Warning! Alpha and color key is lost (=0) on Src surface
 //==================================================================================
-int sge_BlitTransparent(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint16 DestX, Sint16 DestY, Sint16 W, Sint16 H,
-                        Uint32 Clear, Uint8 Alpha)
+int sge_BlitTransparent(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint16 DestX, Sint16 DestY,
+                        Sint16 W, Sint16 H, Uint32 Clear, Uint8 Alpha)
 {
     SDL_Rect src, dest;
     int ret;
@@ -566,7 +568,8 @@ int sge_BlitTransparent(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16
 // Blit from one surface to another (not touching alpha or color key -
 // use SDL_SetColorKey and SDL_SetAlpha)
 //==================================================================================
-int sge_Blit(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint16 DestX, Sint16 DestY, Sint16 W, Sint16 H)
+int sge_Blit(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint16 DestX, Sint16 DestY, Sint16 W,
+             Sint16 H)
 {
     SDL_Rect src, dest;
     int ret;
@@ -629,7 +632,8 @@ SDL_Color sge_GetRGB(SDL_Surface* Surface, Uint32 Color)
 //==================================================================================
 // Fades from (sR,sG,sB) to (dR,dG,dB), puts result in ctab[start] to ctab[stop]
 //==================================================================================
-void sge_Fader(SDL_Surface* Surface, Uint8 sR, Uint8 sG, Uint8 sB, Uint8 dR, Uint8 dG, Uint8 dB, Uint32* ctab, int start, int stop)
+void sge_Fader(SDL_Surface* Surface, Uint8 sR, Uint8 sG, Uint8 sB, Uint8 dR, Uint8 dG, Uint8 dB, Uint32* ctab,
+               int start, int stop)
 {
     // (sR,sG,sB) and (dR,dG,dB) are two points in space (the RGB cube).
 
@@ -661,7 +665,8 @@ void sge_Fader(SDL_Surface* Surface, Uint8 sR, Uint8 sG, Uint8 sB, Uint8 dR, Uin
 //==================================================================================
 // Fades from (sR,sG,sB,sA) to (dR,dG,dB,dA), puts result in ctab[start] to ctab[stop]
 //==================================================================================
-void sge_AlphaFader(Uint8 sR, Uint8 sG, Uint8 sB, Uint8 sA, Uint8 dR, Uint8 dG, Uint8 dB, Uint8 dA, Uint32* ctab, int start, int stop)
+void sge_AlphaFader(Uint8 sR, Uint8 sG, Uint8 sB, Uint8 sA, Uint8 dR, Uint8 dG, Uint8 dB, Uint8 dA, Uint32* ctab,
+                    int start, int stop)
 {
     // (sR,sG,sB,sA) and (dR,dG,dB,dA) are two points in hyperspace (the RGBA hypercube).
 
@@ -687,7 +692,8 @@ void sge_AlphaFader(Uint8 sR, Uint8 sG, Uint8 sB, Uint8 sA, Uint8 dR, Uint8 dG, 
     double step = 1.0 / ((stop + 1) - start);
 
     for(double t = 0.0; t <= 1.0 && i <= stop; t += step)
-        ctab[i++] = sge_MapAlpha((Uint8)(x0 + v[0] * t), (Uint8)(y0 + v[1] * t), (Uint8)(z0 + v[2] * t), (Uint8)(w0 + v[3] * t));
+        ctab[i++] =
+          sge_MapAlpha((Uint8)(x0 + v[0] * t), (Uint8)(y0 + v[1] * t), (Uint8)(z0 + v[2] * t), (Uint8)(w0 + v[3] * t));
 }
 
 //==================================================================================

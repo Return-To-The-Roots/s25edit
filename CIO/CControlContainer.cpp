@@ -8,7 +8,9 @@
 #include "CTextfield.h"
 #include "helpers/containerUtils.h"
 
-CControlContainer::CControlContainer(int pic_background) : CControlContainer(pic_background, Extent16::all(0), Extent16::all(0)) {}
+CControlContainer::CControlContainer(int pic_background)
+    : CControlContainer(pic_background, Extent16::all(0), Extent16::all(0))
+{}
 CControlContainer::CControlContainer(int pic_background, Extent16 borderBeginSize, Extent16 borderEndSize)
     : borderBeginSize(borderBeginSize), borderEndSize(borderEndSize), pic_background(pic_background)
 {}
@@ -80,8 +82,8 @@ bool CControlContainer::eraseElement(T& collection, const U* element)
     return false;
 }
 
-CButton* CControlContainer::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h, int color,
-                                      const char* text, int picture)
+CButton* CControlContainer::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h,
+                                      int color, const char* text, int picture)
 {
     x += borderBeginSize.x;
     y += borderBeginSize.y;
@@ -143,7 +145,8 @@ bool CControlContainer::delStaticPicture(int picId)
 {
     if(picId < 0)
         return false;
-    const auto it = helpers::find_if(static_pictures, [picId](const auto& pic) { return static_cast<unsigned>(picId) == pic.id; });
+    const auto it =
+      helpers::find_if(static_pictures, [picId](const auto& pic) { return static_cast<unsigned>(picId) == pic.id; });
     if(it != static_pictures.end())
     {
         static_pictures.erase(it);
@@ -153,13 +156,14 @@ bool CControlContainer::delStaticPicture(int picId)
     return false;
 }
 
-CTextfield* CControlContainer::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color,
-                                            int bg_color, bool button_style)
+CTextfield* CControlContainer::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, FontSize fontsize,
+                                            FontColor text_color, int bg_color, bool button_style)
 {
     x += borderBeginSize.x;
     y += borderBeginSize.y;
 
-    textfields.emplace_back(std::make_unique<CTextfield>(x, y, cols, rows, fontsize, text_color, bg_color, button_style));
+    textfields.emplace_back(
+      std::make_unique<CTextfield>(x, y, cols, rows, fontsize, text_color, bg_color, button_style));
     needRender = true;
     return textfields.back().get();
 }
@@ -169,7 +173,8 @@ bool CControlContainer::delTextfield(CTextfield* TextfieldToDelete)
     return eraseElement(textfields, TextfieldToDelete);
 }
 
-CSelectBox* CControlContainer::addSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor text_color, int bg_color)
+CSelectBox* CControlContainer::addSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor text_color,
+                                            int bg_color)
 {
     pos += Point16(borderBeginSize);
 

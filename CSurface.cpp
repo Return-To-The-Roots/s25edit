@@ -24,28 +24,29 @@ SDL_Rect rect2SDL_Rect(const Rect& rect)
     return result;
 }
 
-void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3, SDL_Surface* source,
-                                    const SDL_Rect& rect, Uint16 I1, Uint16 I2, Uint8 PreCalcPalettes[][256])
+void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3,
+                                    SDL_Surface* source, const SDL_Rect& rect, Uint16 I1, Uint16 I2,
+                                    Uint8 PreCalcPalettes[][256])
 {
     Sint16 right = rect.x + rect.w - 1;
     Sint16 middle = rect.x + rect.w / Sint16(2);
     Sint16 bottom = rect.y + rect.h - 1;
     Uint32 colorKey;
     const int keycount = (SDL_GetColorKey(source, &colorKey) < 0) ? 0 : 1;
-    sge_PreCalcFadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom,
-                                            I1, I2, I2, PreCalcPalettes, &colorKey, keycount);
+    sge_PreCalcFadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right,
+                                            rect.y, middle, bottom, I1, I2, I2, PreCalcPalettes, &colorKey, keycount);
 }
 
-void DrawFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3, SDL_Surface* source,
-                             const SDL_Rect& rect, Sint32 I1, Sint32 I2)
+void DrawFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3,
+                             SDL_Surface* source, const SDL_Rect& rect, Sint32 I1, Sint32 I2)
 {
     Sint16 right = rect.x + rect.w - 1;
     Sint16 middle = rect.x + rect.w / Sint16(2);
     Sint16 bottom = rect.y + rect.h - 1;
     Uint32 colorKey;
     const int keycount = (SDL_GetColorKey(source, &colorKey) < 0) ? 0 : 1;
-    sge_FadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y, middle, bottom, I1,
-                                     I2, I2, &colorKey, keycount);
+    sge_FadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y,
+                                     middle, bottom, I1, I2, I2, &colorKey, keycount);
 }
 } // namespace
 
@@ -320,37 +321,38 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // first RightSideUp
                     tempP2 = myMap.getVertex(width - 1, y + 1);
                     tempP2.x = 0;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(0, y), tempP2, myMap.getVertex(0, y + 1));
+                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(0, y), tempP2,
+                                 myMap.getVertex(0, y + 1));
                     for(unsigned x = std::max(col_start, 1); x < width && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x - 1, y + 1),
-                                     myMap.getVertex(x, y + 1));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
+                                     myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), myMap.getVertex(x - 1, y),
-                                     myMap.getVertex(x, y));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1),
+                                     myMap.getVertex(x - 1, y), myMap.getVertex(x, y));
                     }
                     // last UpSideDown
                     tempP3 = myMap.getVertex(0, y);
                     tempP3.x = myMap.getVertex(width - 1, y).x + TRIANGLE_WIDTH;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1), myMap.getVertex(width - 1, y),
-                                 tempP3);
+                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
+                                 myMap.getVertex(width - 1, y), tempP3);
                 } else
                 {
                     for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x, y + 1),
-                                     myMap.getVertex(x + 1, y + 1));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
+                                     myMap.getVertex(x, y + 1), myMap.getVertex(x + 1, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1), myMap.getVertex(x, y),
-                                     myMap.getVertex(x + 1, y));
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1),
+                                     myMap.getVertex(x, y), myMap.getVertex(x + 1, y));
                     }
                     // last RightSideUp
                     tempP3 = myMap.getVertex(0, y + 1);
                     tempP3.x = myMap.getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y), myMap.getVertex(width - 1, y + 1),
-                                 tempP3);
+                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y),
+                                 myMap.getVertex(width - 1, y + 1), tempP3);
                     // last UpSideDown
                     tempP1 = myMap.getVertex(0, y + 1);
                     tempP1.x = myMap.getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
@@ -372,7 +374,8 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                 // UpSideDown
                 tempP1 = myMap.getVertex(x + 1, 0);
                 tempP1.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1), myMap.getVertex(x + 1, height - 1));
+                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1),
+                             myMap.getVertex(x + 1, height - 1));
             }
         }
 
@@ -442,7 +445,8 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
 {
     if((!isInRange(p1.x, displayRect.left, displayRect.right) && !isInRange(p2.x, displayRect.left, displayRect.right)
         && !isInRange(p3.x, displayRect.left, displayRect.right))
-       || (!isInRange(p1.y, displayRect.top, displayRect.bottom) && !isInRange(p2.y, displayRect.top, displayRect.bottom)
+       || (!isInRange(p1.y, displayRect.top, displayRect.bottom)
+           && !isInRange(p2.y, displayRect.top, displayRect.bottom)
            && !isInRange(p3.y, displayRect.top, displayRect.bottom)))
     {
         bool triangle_shown = false;
@@ -554,8 +558,9 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
 }
 } // namespace
 
-void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move, Point16& upper,
-                                       Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2)
+void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
+                                       Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
+                                       Point16& right2)
 {
     const auto animOffset = Point16(-texture_move, texture_move);
     switch(texture)
@@ -706,8 +711,8 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
     }
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, MapType type, const MapNode& P1,
-                            const MapNode& P2, const MapNode& P3)
+void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap,
+                            MapType type, const MapNode& P1, const MapNode& P2, const MapNode& P3)
 {
     Point32 p1(P1.x, P1.y);
     Point32 p2(P2.x, P2.y);
@@ -748,19 +753,19 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     {
         case MAP_GREENLAND:
         default:
-            Surf_Tileset =
-              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP]
-                .surface.get();
+            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP :
+                                                                                              TILESET_GREENLAND_32BPP]
+                             .surface.get();
             break;
         case MAP_WASTELAND:
-            Surf_Tileset =
-              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP : TILESET_WASTELAND_32BPP]
-                .surface.get();
+            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP :
+                                                                                              TILESET_WASTELAND_32BPP]
+                             .surface.get();
             break;
         case MAP_WINTERLAND:
-            Surf_Tileset =
-              global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WINTERLAND_8BPP : TILESET_WINTERLAND_32BPP]
-                .surface.get();
+            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WINTERLAND_8BPP :
+                                                                                              TILESET_WINTERLAND_32BPP]
+                             .surface.get();
             break;
     }
 
@@ -770,44 +775,48 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     {
         // upper2, ..... are for special use in winterland.
         Point16 upper, left, right, upper2, left2, right2;
-        auto const texture = TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
+        auto const texture =
+          TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
         GetTerrainTextureCoords(type, texture, isRSU, texture_move, upper, left, right, upper2, left2, right2);
 
         // draw the triangle
         // do not shade water and lava
         if(texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
-            sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x, left.y, right.x,
-                               right.y);
+            sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
+                               left.y, right.x, right.y);
         else
         {
             // draw special winterland textures with moving water (ice floe textures)
             if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
             {
-                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y, left2.x, left2.y,
-                                   right2.x, right2.y);
+                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y,
+                                   left2.x, left2.y, right2.x, right2.y);
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
-                                                            left.x, left.y, right.x, right.y, P1.shading << 8, P2.shading << 8,
-                                                            P3.shading << 8, gouData[type], colorkeys.data(), colorkeys.size());
+                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset,
+                                                            upper.x, upper.y, left.x, left.y, right.x, right.y,
+                                                            P1.shading << 8, P2.shading << 8, P3.shading << 8,
+                                                            gouData[type], colorkeys.data(), colorkeys.size());
                 else
-                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
-                                                     left.y, right.x, right.y, P1.i, P2.i, P3.i, colorkeys.data(), colorkeys.size());
+                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
+                                                     upper.y, left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i,
+                                                     colorkeys.data(), colorkeys.size());
             } else
             {
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
-                                                   left.y, right.x, right.y, P1.shading << 8, P2.shading << 8, P3.shading << 8,
-                                                   gouData[type]);
+                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
+                                                   upper.y, left.x, left.y, right.x, right.y, P1.shading << 8,
+                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
                 else
-                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x, left.y,
-                                            right.x, right.y, P1.i, P2.i, P3.i);
+                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
+                                            left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i);
             }
         }
         return;
     }
 
     // blit borders
-    /// PRIORITY FROM HIGH TO LOW: SNOW, MINING_MEADOW, STEPPE, STEPPE_MEADOW2, MINING, MEADOW, FLOWER, STEPPE_MEADOW1, SWAMP, WATER, LAVA
+    /// PRIORITY FROM HIGH TO LOW: SNOW, MINING_MEADOW, STEPPE, STEPPE_MEADOW2, MINING, MEADOW, FLOWER, STEPPE_MEADOW1,
+    /// SWAMP, WATER, LAVA
     if(global::s2->getMapObj()->getRenderBorders())
     {
         // RSU-Triangle
@@ -844,8 +853,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
-                                                   gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect,
+                                                   P1.shading << 8, P2.shading << 8, gouData[type]);
                 else
                     DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
@@ -887,8 +896,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.shading << 8, P2.shading << 8,
-                                                   gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect,
+                                                   P1.shading << 8, P2.shading << 8, gouData[type]);
                 else
                     DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
@@ -921,10 +930,11 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 Point16 tipPt{(p2 + p3 + thirdPt) / 3};
 
                 if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, P2.shading << 8,
-                                                   P3.shading << 8, gouData[type]);
+                    DrawPreCalcFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect,
+                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
                 else
-                    DrawFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, P2.i, P3.i);
+                    DrawFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, P2.i,
+                                            P3.i);
             }
         }
     }
@@ -1074,18 +1084,21 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         if(P2.resource >= 0x41 && P2.resource <= 0x47)
         {
             for(char i = 0x41; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface, (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface,
+                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
                      (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
         } else if(P2.resource >= 0x49 && P2.resource <= 0x4F)
         {
             for(char i = 0x49; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface, (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface,
+                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
                      (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
         }
         if(P2.resource >= 0x51 && P2.resource <= 0x57)
         {
             for(char i = 0x51; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface, (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
+                Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface,
+                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
                      (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
         }
         if(P2.resource >= 0x59 && P2.resource <= 0x5F)
@@ -1116,23 +1129,29 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                          (int)(p2.y - global::bmpArray[MAPPIC_FLAG].ny));
                     break;
                 case 0x02:
-                    Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface, (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
+                    Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface,
+                         (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
                          (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
                     break;
                 case 0x03:
-                    Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface, (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
+                    Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface,
+                         (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
                          (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
-                    if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+                    if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+                       || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
                        || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
                              (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
                              (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
                     else
-                        Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface, (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
+                        Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface,
+                             (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
                              (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
                     break;
                 case 0x05:
@@ -1195,7 +1214,8 @@ void CSurface::get_nodeVectors(bobMAP& myMap)
     tempP3.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
     tempP3.y = height * TRIANGLE_HEIGHT + myMap.getVertex(0, 0).y;
     tempP3.z = myMap.getVertex(0, 0).z;
-    myMap.getVertex(width - 1, height - 1).flatVector = get_flatVector(myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
+    myMap.getVertex(width - 1, height - 1).flatVector =
+      get_flatVector(myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
 
     // now get the vector at each node and save it to myMap.getVertex(j*width+i, 0).normVector
     for(int j = 0; j < height; j++)
@@ -1207,11 +1227,12 @@ void CSurface::get_nodeVectors(bobMAP& myMap)
                 MapNode& curVertex = myMap.getVertex(i, j);
                 int iM1 = (i == 0 ? width - 1 : i - 1);
                 if(j == 0) // first line
-                    curVertex.normVector = get_nodeVector(myMap.getVertex(iM1, height - 1).flatVector,
-                                                          myMap.getVertex(i, height - 1).flatVector, curVertex.flatVector);
-                else
                     curVertex.normVector =
-                      get_nodeVector(myMap.getVertex(iM1, j - 1).flatVector, myMap.getVertex(i, j - 1).flatVector, curVertex.flatVector);
+                      get_nodeVector(myMap.getVertex(iM1, height - 1).flatVector,
+                                     myMap.getVertex(i, height - 1).flatVector, curVertex.flatVector);
+                else
+                    curVertex.normVector = get_nodeVector(myMap.getVertex(iM1, j - 1).flatVector,
+                                                          myMap.getVertex(i, j - 1).flatVector, curVertex.flatVector);
                 curVertex.i = get_LightIntensity(curVertex.normVector);
             }
         } else
@@ -1221,8 +1242,8 @@ void CSurface::get_nodeVectors(bobMAP& myMap)
                 MapNode& curVertex = myMap.getVertex(i, j);
                 int iP1 = (i + 1 == width ? 0 : i + 1);
 
-                curVertex.normVector =
-                  get_nodeVector(myMap.getVertex(i, j - 1).flatVector, myMap.getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
+                curVertex.normVector = get_nodeVector(myMap.getVertex(i, j - 1).flatVector,
+                                                      myMap.getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
                 curVertex.i = get_LightIntensity(curVertex.normVector);
             }
         }
@@ -1429,19 +1450,19 @@ void CSurface::update_nodeVector(bobMAP& myMap, int VertexX, int VertexY)
         MapNode& curVertex = myMap.getVertex(i, j);
         int iM1 = (i == 0 ? width - 1 : i - 1);
         if(j == 0) // first line
-            curVertex.normVector =
-              get_nodeVector(myMap.getVertex(iM1, height - 1).flatVector, myMap.getVertex(i, height - 1).flatVector, curVertex.flatVector);
+            curVertex.normVector = get_nodeVector(myMap.getVertex(iM1, height - 1).flatVector,
+                                                  myMap.getVertex(i, height - 1).flatVector, curVertex.flatVector);
         else
-            curVertex.normVector =
-              get_nodeVector(myMap.getVertex(iM1, j - 1).flatVector, myMap.getVertex(i, j - 1).flatVector, curVertex.flatVector);
+            curVertex.normVector = get_nodeVector(myMap.getVertex(iM1, j - 1).flatVector,
+                                                  myMap.getVertex(i, j - 1).flatVector, curVertex.flatVector);
         curVertex.i = get_LightIntensity(curVertex.normVector);
     } else
     {
         MapNode& curVertex = myMap.getVertex(i, j);
         int iP1 = (i + 1 == width ? 0 : i + 1);
 
-        curVertex.normVector =
-          get_nodeVector(myMap.getVertex(i, j - 1).flatVector, myMap.getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
+        curVertex.normVector = get_nodeVector(myMap.getVertex(i, j - 1).flatVector,
+                                              myMap.getVertex(iP1, j - 1).flatVector, curVertex.flatVector);
         curVertex.i = get_LightIntensity(curVertex.normVector);
     }
 }

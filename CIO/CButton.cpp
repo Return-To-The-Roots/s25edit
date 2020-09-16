@@ -3,8 +3,8 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CButton::CButton(void callback(int), int clickedParam, Sint16 x, Sint16 y, Uint16 w, Uint16 h, int color, const char* text,
-                 int button_picture)
+CButton::CButton(void callback(int), int clickedParam, Sint16 x, Sint16 y, Uint16 w, Uint16 h, int color,
+                 const char* text, int button_picture)
 {
     marked = false;
     clicked = false;
@@ -112,7 +112,8 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= x_) && (button.x < x_ + w) && (button.y >= y_) && (button.y < y_ + h))
+        if((button.state == SDL_PRESSED) && (button.x >= x_) && (button.x < x_ + w) && (button.y >= y_)
+           && (button.y < y_ + h))
         {
             marked = true;
             clicked = true;
@@ -169,7 +170,8 @@ bool CButton::render()
         }
 
         if(Surf_Button->h - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, pic_w, Surf_Button->h - pos_y);
+            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, pic_w,
+                           Surf_Button->h - pos_y);
 
         pos_y = 0;
         pos_x += pic_w;
@@ -179,13 +181,14 @@ bool CButton::render()
     {
         while(pos_y + pic_h <= Surf_Button->h)
         {
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, Surf_Button->w - pos_x, pic_h);
+            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0,
+                           Surf_Button->w - pos_x, pic_h);
             pos_y += pic_h;
         }
 
         if(Surf_Button->h - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, Surf_Button->w - pos_x,
-                           Surf_Button->h - pos_y);
+            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0,
+                           Surf_Button->w - pos_x, Surf_Button->h - pos_y);
     }
 
     // draw partial black frame
@@ -266,7 +269,8 @@ bool CButton::render()
         }
 
         if(Surf_Button->h - 2 - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0, pic_w, Surf_Button->h - 2 - pos_y);
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0, pic_w,
+                           Surf_Button->h - 2 - pos_y);
 
         pos_y = 2;
         pos_x += pic_w;
@@ -276,13 +280,14 @@ bool CButton::render()
     {
         while(pos_y + pic_h <= Surf_Button->h - 2)
         {
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0, Surf_Button->w - 2 - pos_x, pic_h);
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0,
+                           Surf_Button->w - 2 - pos_x, pic_h);
             pos_y += pic_h;
         }
 
         if(Surf_Button->h - 2 - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0, Surf_Button->w - 2 - pos_x,
-                           Surf_Button->h - 2 - pos_y);
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0,
+                           Surf_Button->w - 2 - pos_x, Surf_Button->h - 2 - pos_y);
     }
 
     // positioning the picture or write text
@@ -302,7 +307,8 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), FontSize::Medium, button_text_color, FontAlign::Middle);
+        CFont::writeText(Surf_Button, button_text, (int)w / 2, (int)((h - 11) / 2), FontSize::Medium, button_text_color,
+                         FontAlign::Middle);
 
     return true;
 }

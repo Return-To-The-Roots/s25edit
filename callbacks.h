@@ -2,13 +2,14 @@
 // callbacks (callbacks that will additionally execute WITHIN the gameloop)
 
 // NOTE: don't forget that if the map quits (Param: MAP_QUIT), there are many windows that have to be closed.
-// This happens for example if a new Map will be loaded or user goes to main menu. So if you add a new window, don't forget
-// to add it to this "close lists" if it's necessary (also in the file CMap.cpp, function setMouseData(Button)).
+// This happens for example if a new Map will be loaded or user goes to main menu. So if you add a new window, don't
+// forget to add it to this "close lists" if it's necessary (also in the file CMap.cpp, function setMouseData(Button)).
 
 #pragma once
 
 namespace callback {
-// PleaseWait creates a small window (not moveable, not resizeable, not minimizable, not closeable) with the String "Please wait..."
+// PleaseWait creates a small window (not moveable, not resizeable, not minimizable, not closeable) with the String
+// "Please wait..."
 void PleaseWait(int Param);
 void ShowStatus(int Param);
 void mainmenu(int Param);

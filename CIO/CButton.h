@@ -28,8 +28,8 @@ private:
     int motionLeaveParam;
 
 public:
-    CButton(void callback(int), int clickedParam, Sint16 x = 0, Sint16 y = 0, Uint16 w = 20, Uint16 h = 20, int color = BUTTON_GREY,
-            const char* text = nullptr, int button_picture = -1);
+    CButton(void callback(int), int clickedParam, Sint16 x = 0, Sint16 y = 0, Uint16 w = 20, Uint16 h = 20,
+            int color = BUTTON_GREY, const char* text = nullptr, int button_picture = -1);
     // Access
     int getX() { return x_; };
     int getY() { return y_; };

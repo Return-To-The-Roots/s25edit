@@ -74,8 +74,8 @@ CMap::~CMap()
     destructMap();
 }
 
-void CMap::constructMap(const boost::filesystem::path& filepath, int width, int height, MapType type, TriangleTerrainType texture,
-                        int border, int border_texture)
+void CMap::constructMap(const boost::filesystem::path& filepath, int width, int height, MapType type,
+                        TriangleTerrainType texture, int border, int border_texture)
 {
     map = nullptr;
     Surf_Map.reset();
@@ -152,7 +152,8 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
     undoBuffer.clear();
     redoBuffer.clear();
 
-    // we count the players, cause the original editor writes number of players to header no matter if they are set or not
+    // we count the players, cause the original editor writes number of players to header no matter if they are set or
+    // not
     int CountPlayers = 0;
     // now for internal reasons save all players to a new array, also players with number greater than 7
     // initalize the internal array
@@ -227,7 +228,8 @@ void CMap::destructMap()
     filepath_.clear();
 }
 
-std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border, int border_texture)
+std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border,
+                                          int border_texture)
 {
     auto myMap = std::make_unique<bobMAP>();
 
@@ -659,9 +661,11 @@ SavedVertex saveVertex(Position pt, const bobMAP& map)
 
 void restoreVertex(const SavedVertex& vertex, bobMAP& map)
 {
-    for(int i = vertex.pos.x - SavedVertex::NODES_PER_DIR, k = 0; i <= vertex.pos.x + SavedVertex::NODES_PER_DIR; i++, k++)
+    for(int i = vertex.pos.x - SavedVertex::NODES_PER_DIR, k = 0; i <= vertex.pos.x + SavedVertex::NODES_PER_DIR;
+        i++, k++)
     {
-        for(int j = vertex.pos.y - SavedVertex::NODES_PER_DIR, l = 0; j <= vertex.pos.y + SavedVertex::NODES_PER_DIR; j++, l++)
+        for(int j = vertex.pos.y - SavedVertex::NODES_PER_DIR, l = 0; j <= vertex.pos.y + SavedVertex::NODES_PER_DIR;
+            j++, l++)
         {
             int m = i;
             if(m < 0)
@@ -980,8 +984,8 @@ void CMap::storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseSta
     int Y = 0, MousePosY = 0;
 
     // get X
-    // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor) we subtract
-    // "TRIANGLE_WIDTH/2"  Xeven = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
+    // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor)
+    // we subtract "TRIANGLE_WIDTH/2"  Xeven = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
     Xeven = (MouseX + displayRect.left - TRIANGLE_WIDTH / 2) / TRIANGLE_WIDTH;
     if(Xeven < 0)
         Xeven += (map->width);
@@ -1069,7 +1073,8 @@ void CMap::render()
     if(!Surf_Map)
     {
         if(BitsPerPixel == 8)
-            Surf_Map = makePalSurface(displayRect.getSize().x, displayRect.getSize().y, global::palArray[PAL_xBBM].colors);
+            Surf_Map =
+              makePalSurface(displayRect.getSize().x, displayRect.getSize().y, global::palArray[PAL_xBBM].colors);
         else
             Surf_Map = makeRGBSurface(displayRect.getSize().x, displayRect.getSize().y);
     }
@@ -1132,22 +1137,26 @@ void CMap::render()
     {
         // draw the corners
         CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0, 0, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.getSize().y - 150, 0, 480 - 150, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, 0, 640 - 150, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, displayRect.getSize().y - 150,
-                       640 - 150, 480 - 150, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.getSize().y - 150, 0,
+                       480 - 150, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, 0,
+                       640 - 150, 0, 150, 150);
+        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150,
+                       displayRect.getSize().y - 150, 640 - 150, 480 - 150, 150, 150);
         // draw the edges
         unsigned x = 150, y = 150;
         while(x + 150 < displayRect.getSize().x)
         {
             CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, 0, 150, 0, 150, 12);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.getSize().y - 12, 150, 0, 150, 12);
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.getSize().y - 12, 150,
+                           0, 150, 12);
             x += 150;
         }
         while(y + 150 < displayRect.getSize().y)
         {
             CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, y, 0, 150, 12, 150);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 12, y, 0, 150, 12, 150);
+            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 12, y, 0,
+                           150, 12, 150);
             y += 150;
         }
     }
@@ -1159,7 +1168,8 @@ void CMap::render()
     CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_LEFT].surface,
                    Position(12, displayRect.getSize().y - global::bmpArray[STATUE_DOWN_LEFT].h - 12));
     CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_RIGHT].surface,
-                   displayRect.getSize() - Position(global::bmpArray[STATUE_DOWN_RIGHT].w, global::bmpArray[STATUE_DOWN_RIGHT].h)
+                   displayRect.getSize()
+                     - Position(global::bmpArray[STATUE_DOWN_RIGHT].w, global::bmpArray[STATUE_DOWN_RIGHT].h)
                      - Position::all(12));
 
     // lower menubar
@@ -1170,17 +1180,28 @@ void CMap::render()
 
     // draw pictures to lower menubar
     // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 236, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 199, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 162, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 125, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 88, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 51, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 14, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 92, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 129, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 166, menubarPos.y - 36, 0, 0, 37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 203, menubarPos.y - 36, 0, 0, 37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 236, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 199, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 162, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 125, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 88, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 51, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 14, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 92, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 129, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 166, menubarPos.y - 36, 0, 0,
+                   37, 32);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 203, menubarPos.y - 36, 0, 0,
+                   37, 32);
     // pictures
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, menubarPos - Extent(232, 35));
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, menubarPos - Extent(195, 35));
@@ -1200,8 +1221,8 @@ void CMap::render()
     if(!Surf_RightMenubar)
     {
         // we permute width and height, cause we want to rotate the menubar 90 degrees
-        if((Surf_RightMenubar =
-              makePalSurface(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w, global::palArray[PAL_RESOURCE].colors))
+        if((Surf_RightMenubar = makePalSurface(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w,
+                                               global::palArray[PAL_RESOURCE].colors))
            != nullptr)
         {
             SDL_SetColorKey(Surf_RightMenubar.get(), SDL_TRUE, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
@@ -1210,21 +1231,33 @@ void CMap::render()
     }
     // draw right menubar (remember permutation of width and height)
     const Position rightMenubarPos = Position(displayRect.getSize().x, displayRect.getSize().y / 2);
-    CSurface::Draw(Surf_Map, Surf_RightMenubar, rightMenubarPos - Extent(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w / 2));
+    CSurface::Draw(Surf_Map, Surf_RightMenubar,
+                   rightMenubarPos - Extent(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w / 2));
 
     // draw pictures to right menubar
     // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y - 239, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y - 202, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y - 165, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y - 128, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y - 22, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y + 15, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y + 52, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y + 89, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y + 126, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y + 163, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36, rightMenubarPos.y + 200, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y - 239, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y - 202, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y - 165, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y - 128, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y - 22, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y + 15, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y + 52, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y + 89, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y + 126, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y + 163, 0, 0, 32, 37);
+    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
+                   rightMenubarPos.y + 200, 0, 0, 32, 37);
     // pictures
     // four cursor menu pictures
     CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(33, 237));
@@ -1383,16 +1416,17 @@ void CMap::drawMinimap(SDL_Surface* Window)
                            6 + PlayerHQx[i] / num_x - global::bmpArray[FLAG_BLUE_DARK + i % 7].nx,
                            20 + PlayerHQy[i] / num_y - global::bmpArray[FLAG_BLUE_DARK + i % 7].ny);
             // write player number
-            CFont::writeText(Window, std::to_string(i + 1), 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y, FontSize::Small,
-                             FontColor::MintGreen);
+            CFont::writeText(Window, std::to_string(i + 1), 6 + PlayerHQx[i] / num_x, 20 + PlayerHQy[i] / num_y,
+                             FontSize::Small, FontColor::MintGreen);
         }
     }
 
     // draw the arrow --> 6px is width of left window frame and 20px is the height of the upper window frame
-    CSurface::Draw(
-      Window, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].surface,
-      6 + (displayRect.left + displayRect.getSize().x / 2) / TRIANGLE_WIDTH / num_x - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
-      20 + (displayRect.top + displayRect.getSize().y / 2) / TRIANGLE_HEIGHT / num_y - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
+    CSurface::Draw(Window, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].surface,
+                   6 + (displayRect.left + displayRect.getSize().x / 2) / TRIANGLE_WIDTH / num_x
+                     - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
+                   20 + (displayRect.top + displayRect.getSize().y / 2) / TRIANGLE_HEIGHT / num_y
+                     - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
 }
 
 void CMap::modifyVertex()
@@ -1530,7 +1564,8 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     Y = VertexY - 1;
     if(Y < 0)
         Y += map->height;
-    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
+    // lines before)
     if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE)) //-V807
         modifyHeightRaise(X, Y);
     // update second vertex right upside
@@ -1540,7 +1575,8 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     Y = VertexY - 1;
     if(Y < 0)
         Y += map->height;
-    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
+    // lines before)
     if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
         modifyHeightRaise(X, Y);
     // update third point bottom left
@@ -1548,7 +1584,8 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     if(X < 0)
         X += map->width;
     Y = VertexY;
-    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
+    // lines before)
     if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
         modifyHeightRaise(X, Y);
     // update fourth point bottom right
@@ -1556,7 +1593,8 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     if(X >= map->width)
         X -= map->width;
     Y = VertexY;
-    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
+    // lines before)
     if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
         modifyHeightRaise(X, Y);
     // update fifth point down left
@@ -1566,7 +1604,8 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     Y = VertexY + 1;
     if(Y >= map->height)
         Y -= map->height;
-    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
+    // lines before)
     if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
         modifyHeightRaise(X, Y);
     // update sixth point down right
@@ -1576,7 +1615,8 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     Y = VertexY + 1;
     if(Y >= map->height)
         Y -= map->height;
-    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few lines before)
+    // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
+    // lines before)
     if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
         modifyHeightRaise(X, Y);
 
@@ -1620,7 +1660,8 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     Y = VertexY - 1;
     if(Y < 0)
         Y += map->height;
-    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
+    // lines before)
     if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE)) //-V807
         modifyHeightReduce(X, Y);
     // update second vertex right upside
@@ -1630,7 +1671,8 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     Y = VertexY - 1;
     if(Y < 0)
         Y += map->height;
-    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
+    // lines before)
     if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
         modifyHeightReduce(X, Y);
     // update third point bottom left
@@ -1638,7 +1680,8 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     if(X < 0)
         X += map->width;
     Y = VertexY;
-    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
+    // lines before)
     if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
         modifyHeightReduce(X, Y);
     // update fourth point bottom right
@@ -1646,7 +1689,8 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     if(X >= map->width)
         X -= map->width;
     Y = VertexY;
-    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
+    // lines before)
     if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
         modifyHeightReduce(X, Y);
     // update fifth point down left
@@ -1656,7 +1700,8 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     Y = VertexY + 1;
     if(Y >= map->height)
         Y -= map->height;
-    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
+    // lines before)
     if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
         modifyHeightReduce(X, Y);
     // update sixth point down right
@@ -1666,7 +1711,8 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     Y = VertexY + 1;
     if(Y >= map->height)
         Y -= map->height;
-    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few lines before)
+    // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
+    // lines before)
     if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
         modifyHeightReduce(X, Y);
 
@@ -1732,9 +1778,12 @@ void CMap::modifyHeightMakeBigHouse(int VertexX, int VertexY)
     }
 
     // remove harbour if there is one
-    if(middleVertex.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || middleVertex.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+    if(middleVertex.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
+       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+       || middleVertex.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
        || middleVertex.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
     {
         middleVertex.rsuTexture &= ~0x40;
@@ -1866,8 +1915,8 @@ void CMap::modifyObject(int x, int y)
                     newContent = 0x70;
                 else
                     newContent = 0xB0;
-                // we set different start pictures for the tree, cause the trees should move different, so we add a random value that
-                // walks from 0 to 7
+                // we set different start pictures for the tree, cause the trees should move different, so we add a
+                // random value that walks from 0 to 7
                 curVertex.objectType = newContent + rand() % 8;
                 curVertex.objectInfo = modeContent2;
             }
@@ -1885,15 +1934,15 @@ void CMap::modifyObject(int x, int y)
                     newContent = 0xF0;
                     newContent2 = 0xC4;
                 }
-                // we set different start pictures for the tree, cause the trees should move different, so we add a random value that
-                // walks from 0 to 7
+                // we set different start pictures for the tree, cause the trees should move different, so we add a
+                // random value that walks from 0 to 7
                 curVertex.objectType = newContent + rand() % 8;
                 curVertex.objectInfo = newContent2;
             }
         } else
         {
-            // we set different start pictures for the tree, cause the trees should move different, so we add a random value that walks
-            // from 0 to 7
+            // we set different start pictures for the tree, cause the trees should move different, so we add a random
+            // value that walks from 0 to 7
             curVertex.objectType = modeContent + rand() % 8;
             curVertex.objectInfo = modeContent2;
         }
@@ -2024,8 +2073,8 @@ void CMap::modifyBuild(int x, int y)
     std::array<Point32, 19> tempVertices;
     calculateVerticesAround(tempVertices, x, y);
 
-    /// evtl. keine festen werte sondern addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine 0x00 sondern
-    /// 0x68)
+    /// evtl. keine festen werte sondern addition und subtraktion wegen originalkompatibilitaet (bei baeumen bspw. keine
+    /// 0x00 sondern 0x68)
 
     Uint8 building;
     MapNode& curVertex = map->getVertex(x, y);
@@ -2125,7 +2174,8 @@ void CMap::modifyBuild(int x, int y)
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SNOW
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_LAVA || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_LAVA
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_LAVA
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_LAVA)
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SNOW
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_LAVA)
         {
             building = 0x00;
         }
@@ -2137,7 +2187,8 @@ void CMap::modifyBuild(int x, int y)
         if(mapVertices[4]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[4]->rsuTexture == TRIANGLE_TEXTURE_LAVA
            || mapVertices[5]->usdTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[5]->usdTexture == TRIANGLE_TEXTURE_LAVA
            || mapVertices[6]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[6]->usdTexture == TRIANGLE_TEXTURE_SNOW
-           || mapVertices[6]->rsuTexture == TRIANGLE_TEXTURE_LAVA || mapVertices[6]->usdTexture == TRIANGLE_TEXTURE_LAVA)
+           || mapVertices[6]->rsuTexture == TRIANGLE_TEXTURE_LAVA
+           || mapVertices[6]->usdTexture == TRIANGLE_TEXTURE_LAVA)
         {
             building = 0x01;
         }
@@ -2146,20 +2197,32 @@ void CMap::modifyBuild(int x, int y)
     // test if vertex is surrounded by water or swamp
     if(building > 0x00)
     {
-        if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SWAMP))
+        if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER
+            || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER
+               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER
+               || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER
+               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER
+               || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER
+               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SWAMP))
         {
             building = 0x00;
-        } else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SWAMP))
+        } else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER
+                   || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER
+                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER
+                      || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER
+                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER
+                      || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER
+                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SWAMP))
         {
             building = 0x01;
         }
@@ -2168,9 +2231,12 @@ void CMap::modifyBuild(int x, int y)
     // test if there is steppe at the vertex or touching the vertex
     if(building > 0x01)
     {
-        if(mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE
-           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE)
+        if(mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE)
         {
             building = 0x01;
         }
@@ -2179,40 +2245,64 @@ void CMap::modifyBuild(int x, int y)
     // test if vertex is surrounded by mining-textures
     if(building > 0x01)
     {
-        if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-            || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
+        if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+            || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+            || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+            || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+           && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1
+               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
+               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3
+               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+           && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+               || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+               || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+               || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+           && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1
+               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
+               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3
+               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+           && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+               || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+               || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+               || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+           && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1
+               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
+               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3
+               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
         {
             building = 0x05;
-        } else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-                   || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
+        } else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+                   || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+                   || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+                   || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1
+                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
+                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3
+                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+                      || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+                      || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+                      || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1
+                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
+                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3
+                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+                      || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+                      || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+                      || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1
+                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
+                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3
+                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
         {
             building = 0x01;
         }
     }
 
     // test for headquarters around the point
-    // NOTE: In EDITORMODE don't test AT the point, cause in Original game we need a big house AT the point, otherwise the game wouldn't
-    // set a player there
+    // NOTE: In EDITORMODE don't test AT the point, cause in Original game we need a big house AT the point, otherwise
+    // the game wouldn't set a player there
     if(building > 0x00)
     {
         for(int i = 1; i < 7; i++)
@@ -2263,70 +2353,108 @@ void CMap::modifyResource(int x, int y)
     // SPECIAL CASE: test if we should set water only
     // test if vertex is surrounded by meadow and meadow-like textures
     if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1
-        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2
-        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3
-        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_FLOWER
-        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_FLOWER
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+        || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
         || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW1 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW2 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW3 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW1
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW2
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW3
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
            || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_FLOWER
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_FLOWER
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW1 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW2 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW3 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW1
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW2
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW3
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
            || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_FLOWER
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_FLOWER
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW1 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW2 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW3 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW1
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW2
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW3
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
            || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_FLOWER
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR))
     {
         curVertex.resource = 0x21;
     }
     // SPECIAL CASE: test if we should set fishes only
     // test if vertex is surrounded by water (first section) and at least one non-water texture in the second section
-    else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER) && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER) && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER) && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[2]->usdTexture != TRIANGLE_TEXTURE_WATER || mapVertices[3]->rsuTexture != TRIANGLE_TEXTURE_WATER
-                || mapVertices[4]->rsuTexture != TRIANGLE_TEXTURE_WATER || mapVertices[4]->usdTexture != TRIANGLE_TEXTURE_WATER
-                || mapVertices[5]->rsuTexture != TRIANGLE_TEXTURE_WATER || mapVertices[5]->usdTexture != TRIANGLE_TEXTURE_WATER
-                || mapVertices[6]->rsuTexture != TRIANGLE_TEXTURE_WATER || mapVertices[6]->usdTexture != TRIANGLE_TEXTURE_WATER
+    else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER)
+            && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER)
+            && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER)
+            && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER)
+            && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER)
+            && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER)
+            && (mapVertices[2]->usdTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[3]->rsuTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[4]->rsuTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[4]->usdTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[5]->rsuTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[5]->usdTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[6]->rsuTexture != TRIANGLE_TEXTURE_WATER
+                || mapVertices[6]->usdTexture != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[7]).rsuTexture != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[7]).usdTexture != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[8]).rsuTexture != TRIANGLE_TEXTURE_WATER
@@ -2341,18 +2469,30 @@ void CMap::modifyResource(int x, int y)
         curVertex.resource = 0x87;
     }
     // test if vertex is surrounded by mining textures
-    else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3 || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
+    else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+            && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1
+                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
+                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3
+                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+            && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+            && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1
+                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
+                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3
+                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+            && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1
+                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
+                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3
+                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
+            && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1
+                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
+                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3
+                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
     {
         // check which resource to set
         if(mode == EDITOR_MODE_RESOURCE_RAISE)
@@ -2402,8 +2542,8 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
             vertex.objectType = modeContent;
             vertex.objectInfo = 0x80;
 
-            // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the first 7
-            // players)
+            // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the
+            // first 7 players)
             if(modeContent >= 0 && modeContent < 7)
             {
                 map->HQx[modeContent] = VertexX;
@@ -2438,8 +2578,8 @@ void CMap::modifyPlayer(int VertexX, int VertexY)
                 PlayerHQx[vertex.objectType] = 0xFFFF;
                 PlayerHQy[vertex.objectType] = 0xFFFF;
 
-                // for compatibility with original settlers 2 we write the headquarters positions to the map header (for the first 7
-                // players)
+                // for compatibility with original settlers 2 we write the headquarters positions to the map header (for
+                // the first 7 players)
                 if(vertex.objectType < 7)
                 {
                     map->HQx[vertex.objectType] = 0xFFFF;

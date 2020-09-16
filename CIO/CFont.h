@@ -25,7 +25,8 @@ private:
     void writeText();
 
 public:
-    CFont(std::string text, unsigned x = 0, unsigned y = 0, FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow);
+    CFont(std::string text, unsigned x = 0, unsigned y = 0, FontSize fontsize = FontSize::Small,
+          FontColor color = FontColor::Yellow);
     // Access
     int getX() { return x_; };
     int getY() { return y_; };
@@ -52,9 +53,11 @@ public:
     // fontsize can be 9, 11 or 14 (otherwise it will be set to 9) ---- '\n' is possible
     // this function can be used as CFont::writeText to write text directly to a surface without creating an object
     static bool writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0,
-                          FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow, FontAlign align = FontAlign::Left);
+                          FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow,
+                          FontAlign align = FontAlign::Left);
     static bool writeText(SdlSurface& Surf_Dest, const std::string& string, unsigned x = 0, unsigned y = 0,
-                          FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow, FontAlign align = FontAlign::Left)
+                          FontSize fontsize = FontSize::Small, FontColor color = FontColor::Yellow,
+                          FontAlign align = FontAlign::Left)
     {
         return writeText(Surf_Dest.get(), string, x, y, fontsize, color, align);
     }

@@ -15,14 +15,16 @@ bool CGame::ReCreateWindow()
     displayTexture_.reset();
     renderer_.reset();
     window_.reset();
-    window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                   GameResolution.x, GameResolution.y, fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+    window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
+                                   SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
+                                   fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
     if(!window_)
         return false;
     renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
     if(!renderer_)
         return false;
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x, GameResolution.y);
+    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
+                                     GameResolution.y);
     Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
     if(!displayTexture_ || !Surf_Display)
         return false;
@@ -75,8 +77,9 @@ bool CGame::Init()
     showLoadScreen = true;
     // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
     auto& surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-    sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
-                     surfSplash.get(), 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1, surfSplash->w - 1, surfSplash->h - 1);
+    sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1,
+                     Surf_Display->h - 1, surfSplash.get(), 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1,
+                     surfSplash->w - 1, surfSplash->h - 1);
     RenderPresent();
 
     GameDataLoader gdLoader(global::worldDesc);
@@ -87,8 +90,9 @@ bool CGame::Init()
     }
 
     // continue loading pictures
-    for(const std::string file : {"GFX/PICS/SETUP000.LBM", "GFX/PICS/SETUP010.LBM", "GFX/PICS/SETUP011.LBM", "GFX/PICS/SETUP012.LBM",
-                                  "GFX/PICS/SETUP013.LBM", "GFX/PICS/SETUP014.LBM", "GFX/PICS/SETUP015.LBM"})
+    for(const std::string file :
+        {"GFX/PICS/SETUP000.LBM", "GFX/PICS/SETUP010.LBM", "GFX/PICS/SETUP011.LBM", "GFX/PICS/SETUP012.LBM",
+         "GFX/PICS/SETUP013.LBM", "GFX/PICS/SETUP014.LBM", "GFX/PICS/SETUP015.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath / file, LBM))
@@ -104,9 +108,10 @@ bool CGame::Init()
         }
     }
 
-    for(const std::string file : {"GFX/PICS/SETUP666.LBM", "GFX/PICS/SETUP667.LBM", "GFX/PICS/SETUP801.LBM", "GFX/PICS/SETUP802.LBM",
-                                  "GFX/PICS/SETUP803.LBM", "GFX/PICS/SETUP804.LBM", "GFX/PICS/SETUP805.LBM", "GFX/PICS/SETUP806.LBM",
-                                  "GFX/PICS/SETUP810.LBM", "GFX/PICS/SETUP811.LBM", "GFX/PICS/SETUP895.LBM", "GFX/PICS/SETUP896.LBM"})
+    for(const std::string file :
+        {"GFX/PICS/SETUP666.LBM", "GFX/PICS/SETUP667.LBM", "GFX/PICS/SETUP801.LBM", "GFX/PICS/SETUP802.LBM",
+         "GFX/PICS/SETUP803.LBM", "GFX/PICS/SETUP804.LBM", "GFX/PICS/SETUP805.LBM", "GFX/PICS/SETUP806.LBM",
+         "GFX/PICS/SETUP810.LBM", "GFX/PICS/SETUP811.LBM", "GFX/PICS/SETUP895.LBM", "GFX/PICS/SETUP896.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath / file, LBM))
@@ -132,7 +137,8 @@ bool CGame::Init()
         }
     }
 
-    for(const std::string file : {"GFX/PICS/SETUP899.LBM", "GFX/PICS/SETUP990.LBM", "GFX/PICS/WORLD.LBM", "GFX/PICS/WORLDMSK.LBM"})
+    for(const std::string file :
+        {"GFX/PICS/SETUP899.LBM", "GFX/PICS/SETUP990.LBM", "GFX/PICS/WORLD.LBM", "GFX/PICS/WORLDMSK.LBM"})
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath / file, LBM))
@@ -215,8 +221,8 @@ bool CGame::Init()
     */
 
     // EVERY MISSION-FILE SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
-    for(const std::string file :
-        {"DATA/MIS0BOBS.LST", "DATA/MIS1BOBS.LST", "DATA/MIS2BOBS.LST", "DATA/MIS3BOBS.LST", "DATA/MIS4BOBS.LST", "DATA/MIS5BOBS.LST"})
+    for(const std::string file : {"DATA/MIS0BOBS.LST", "DATA/MIS1BOBS.LST", "DATA/MIS2BOBS.LST", "DATA/MIS3BOBS.LST",
+                                  "DATA/MIS4BOBS.LST", "DATA/MIS5BOBS.LST"})
     {
         std::cout << "\nLoading file: " << file << "...";
         if(!CFile::open_file(global::gameDataFilePath / file, LST))

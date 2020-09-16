@@ -66,12 +66,13 @@ private:
     void storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
     // blitting coords for the mouse cursor
     Position MouseBlit;
-    // counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor vertex, 1 - six
-    // vertices around the cursor vertex ....) (editor mode)
+    // counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor
+    // vertex, 1 - six vertices around the cursor vertex ....) (editor mode)
     int ChangeSection_;
     // in some cases we change the ChangeSection manually but want to reset it (this is user friendly)
     int lastChangeSection;
-    // decides what to do if user presses '+' or '-', if true, then cursor will increase like an hexagon, otherwise like a square
+    // decides what to do if user presses '+' or '-', if true, then cursor will increase like an hexagon, otherwise like
+    // a square
     bool ChangeSectionHexagonMode;
     // user can decide that only RSU-Triangles will be filled (within the cursor field)
     bool VertexFillRSU;
@@ -79,13 +80,16 @@ private:
     bool VertexFillUSD;
     // user can decide that all triangles will be filled randomly (within the cursor field)
     bool VertexFillRandom;
-    // user can set activity to random, so all active cursor vertices (within the ChangeSection) will change each gameloop
+    // user can set activity to random, so all active cursor vertices (within the ChangeSection) will change each
+    // gameloop
     bool VertexActivityRandom;
     // counts how many vertices we have around the cursor (and including the cursor)
     int VertexCounter;
-    // array to store all vertices (editor mode) --> after constructing class CMap this will have 'VertexCounter' elements
+    // array to store all vertices (editor mode) --> after constructing class CMap this will have 'VertexCounter'
+    // elements
     std::vector<cursorPoint> Vertices;
-    // these are the new (internal) values for player positions (otherwise we had to walk through the objectXXXX-Blocks step by step)
+    // these are the new (internal) values for player positions (otherwise we had to walk through the objectXXXX-Blocks
+    // step by step)
     std::array<Uint16, MAXPLAYERS> PlayerHQx;
     std::array<Uint16, MAXPLAYERS> PlayerHQy;
     // maximum value of height (user can modify this)
@@ -99,10 +103,11 @@ private:
 public:
     CMap(const boost::filesystem::path& filepath);
     ~CMap();
-    void constructMap(const boost::filesystem::path& filepath, int width = 32, int height = 32, MapType type = MAP_GREENLAND,
-                      TriangleTerrainType texture = TRIANGLE_TEXTURE_MEADOW1, int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
-    static std::unique_ptr<bobMAP> generateMap(int width, int height, MapType type, TriangleTerrainType texture, int border,
-                                               int border_texture);
+    void constructMap(const boost::filesystem::path& filepath, int width = 32, int height = 32,
+                      MapType type = MAP_GREENLAND, TriangleTerrainType texture = TRIANGLE_TEXTURE_MEADOW1,
+                      int border = 4, int border_texture = TRIANGLE_TEXTURE_WATER);
+    static std::unique_ptr<bobMAP> generateMap(int width, int height, MapType type, TriangleTerrainType texture,
+                                               int border, int border_texture);
     void destructMap();
     void loadMapPics();
     static void unloadMapPics();
@@ -188,8 +193,8 @@ public:
 private:
     // this will calculate ALL vertices for the whole square
     void calculateVertices();
-    // this will calculate the vertices two sections around one vertex (like a great hexagon) --> necessary to calculate the possible
-    // building for a vertex  view this pic to understand the indices
+    // this will calculate the vertices two sections around one vertex (like a great hexagon) --> necessary to calculate
+    // the possible building for a vertex  view this pic to understand the indices
     //              X=7     X=8     X=9
     //          X=10    X=1     X=2     X=11
     //      X=12    X=3     X=0     X=4     X=13

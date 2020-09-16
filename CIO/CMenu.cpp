@@ -24,8 +24,8 @@ bool CMenu::render()
 
     // CSurface::Draw(surface, global::bmpArray[pic_background].surface, 0, 0);
     auto& surfBG = global::bmpArray[getBackground()].surface;
-    sge_TexturedRect(surface.get(), 0, 0, surface->w - 1, 0, 0, surface->h - 1, surface->w - 1, surface->h - 1, surfBG.get(), 0, 0,
-                     surfBG->w - 1, 0, 0, surfBG->h - 1, surfBG->w - 1, surfBG->h - 1);
+    sge_TexturedRect(surface.get(), 0, 0, surface->w - 1, 0, 0, surface->h - 1, surface->w - 1, surface->h - 1,
+                     surfBG.get(), 0, 0, surfBG->w - 1, 0, 0, surfBG->h - 1, surfBG->w - 1, surfBG->h - 1);
     renderElements();
     return true;
 }

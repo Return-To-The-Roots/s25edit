@@ -24,13 +24,13 @@
 
 // Remove "class 'std::list<>' needs to have dll-interface to be used" warnings
 // from MS VisualC++
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif
+#    ifdef _MSC_VER
+#        pragma warning(push)
+#        pragma warning(disable : 4251)
+#    endif
 
-#include <list>
-#include <vector>
+#    include <list>
+#    include <vector>
 
 struct sge_cdata;
 class DECLSPEC sge_shape;
@@ -321,7 +321,8 @@ public:
         fpos = 0;
     }
 
-    sge_sprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata, Sint16 x = 0, Sint16 y = 0) : sge_ssprite(screen, img, cdata, x, y)
+    sge_sprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata, Sint16 x = 0, Sint16 y = 0)
+        : sge_ssprite(screen, img, cdata, x, y)
     {
         xppms = yppms = fpms = 0;
         tlast = 0;
@@ -368,8 +369,8 @@ public:
     void pause() { tlast = 0; }
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#    ifdef _MSC_VER
+#        pragma warning(pop)
+#    endif
 
 #endif /* _SGE_NO_CLASSES */

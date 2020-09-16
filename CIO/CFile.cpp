@@ -130,8 +130,9 @@ bool CFile::open_lst()
             CHECK_READ(false);
         }
 
-        // if entry is unused, go back to 'while' --- and by the way: after the last entry there are always zeros in the file,
-        // so the following case will happen till we have reached the end of the file and the 'while' will break - PERFECT!
+        // if entry is unused, go back to 'while' --- and by the way: after the last entry there are always zeros in the
+        // file, so the following case will happen till we have reached the end of the file and the 'while' will break -
+        // PERFECT!
         if(entrytype == 0x0000)
             continue;
 
@@ -320,8 +321,8 @@ bool CFile::open_bbm()
 
 bool CFile::open_lbm(const boost::filesystem::path& filepath)
 {
-    // IMPORTANT NOTE: LBM (also ILBM) is the Interchange File Format (IFF) and the 4-byte-blocks are originally organized as Big Endian, so
-    // a convertion is needed
+    // IMPORTANT NOTE: LBM (also ILBM) is the Interchange File Format (IFF) and the 4-byte-blocks are originally
+    // organized as Big Endian, so a convertion is needed
 
     // identifier for the kind of data follows (FORM, BMHD, CMAP, BODY)
     std::array<char, 5> chunk_identifier;
@@ -339,7 +340,8 @@ bool CFile::open_lbm(const boost::filesystem::path& filepath)
     // color value for read pixel
     Uint8 color_value;
 
-    // skip File-Identifier "FORM" (1x 4 Bytes) + unknown data (4x 1 Byte) + Header-Identifier "PBM " (1x 4 Bytes) = 12 Bytes
+    // skip File-Identifier "FORM" (1x 4 Bytes) + unknown data (4x 1 Byte) + Header-Identifier "PBM " (1x 4 Bytes) = 12
+    // Bytes
     fseek(fp, 12, SEEK_CUR);
 
     /* READ FIRST CHUNK "BMHD" */
@@ -1030,7 +1032,8 @@ bool CFile::read_bob02()
     starting_point = ftell(fp);
     next_entry = starting_point + length;
 
-    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and set the filepointer to the next entry
+    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and set the filepointer to the next
+    // entry
     if(loadPAL)
     {
         fseek(fp, (long int)next_entry, SEEK_SET);
@@ -1089,13 +1092,15 @@ bool CFile::read_bob02()
             return false;
     }
 
-    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has occurred (1 Byte)
+    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has occurred (1
+    // Byte)
     CHECK_READ(libendian::read(&endmark, 1, fp));
     if(endmark != 0xFF)
         return false;
 
     // we are finished, the surface is filled
-    // fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT position
+    // fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT
+    // position
     if(ftell(fp) != (long int)next_entry)
     {
         fseek(fp, (long int)next_entry, SEEK_SET);
@@ -1125,7 +1130,8 @@ bool CFile::read_bob03()
     // read bobtype04 115 times (for 115 ansi chars)
     for(int i = 1; i <= 115; i++)
     {
-        // following data blocks are bobtype04 for some ascii chars, bobtype is repeated at the beginning of each data block
+        // following data blocks are bobtype04 for some ascii chars, bobtype is repeated at the beginning of each data
+        // block
         CHECK_READ(libendian::le_read_us(&bobtype, fp));
 
         // bobtype should be 04. if not, it's possible that there are a lot of zeros till the next block begins
@@ -1199,7 +1205,8 @@ bool CFile::read_bob04(int player_color)
     starting_point = ftell(fp);
     next_entry = starting_point + length;
 
-    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and set the filepointer to the next entry
+    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and set the filepointer to the next
+    // entry
     if(loadPAL)
     {
         fseek(fp, (long int)next_entry, SEEK_SET);
@@ -1268,7 +1275,8 @@ bool CFile::read_bob04(int player_color)
     }
 
     // we are finished, the surface is filled
-    // fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT position
+    // fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT
+    // position
     if(ftell(fp) != (long int)next_entry)
     {
         fseek(fp, (long int)next_entry, SEEK_SET);
@@ -1337,7 +1345,8 @@ bool CFile::read_bob07()
     starting_point = ftell(fp);
     next_entry = starting_point + length;
 
-    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and set the filepointer to the next entry
+    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and set the filepointer to the next
+    // entry
     if(loadPAL)
     {
         fseek(fp, (long int)next_entry, SEEK_SET);
@@ -1393,20 +1402,23 @@ bool CFile::read_bob07()
             return false;
     }
 
-    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has occurred (1 Byte)
+    // at the end of the block (after the last line) there should be another 0xFF, otherwise an error has occurred (1
+    // Byte)
     CHECK_READ(libendian::read(&endmark, 1, fp));
     if(endmark != 0xFF)
         return false;
 
     // we are finished, the surface is filled
-    // fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT position
+    // fp should now point to the first offset of the next entry, this is the last check if this is REALLY the RIGHT
+    // position
     if(ftell(fp) != (long int)next_entry)
     {
         fseek(fp, (long int)next_entry, SEEK_SET);
         return false;
     }
 
-    /**FOLLOWING COMMENTS ARE ABSOLUTLY TEMPORARY, UNTIL I KNOW HOW TO HANDLE SHADOWS WITH ALPHA-BLENDING AND THEN BLITTING
+    /**FOLLOWING COMMENTS ARE ABSOLUTLY TEMPORARY, UNTIL I KNOW HOW TO HANDLE SHADOWS WITH ALPHA-BLENDING AND THEN
+    *BLITTING
     ***---THIS CODE IS NOT USEFUL.**/
     // We have to blit picture and shadow together and because of transparency we need to set the colorkey
     // SDL_SetColorKey(shadowArray->surface, SDL_SRCCOLORKEY, SDL_MapRGBA(shadowArray->surface->format, 0, 0, 0, 0));
@@ -1455,7 +1467,8 @@ bool CFile::read_bob14()
     // fp points now ON the first adress of the next entry in the file
     next_entry = ftell(fp);
 
-    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and let fp on the adress of the next entry
+    // if we only want to read a palette at the moment (loadPAL == 1) so skip this and let fp on the adress of the next
+    // entry
     if(loadPAL)
         return true;
 

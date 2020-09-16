@@ -14,7 +14,9 @@ namespace bfs = boost::filesystem;
 
 //#include <vld.h>
 
-CGame::CGame() : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true), lastFps("", 0, 0, FontSize::Medium)
+CGame::CGame()
+    : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true),
+      lastFps("", 0, 0, FontSize::Medium)
 {
     global::bmpArray.resize(MAXBOBBMP);
     global::shadowArray.resize(MAXBOBSHADOW);
@@ -82,8 +84,9 @@ bool CGame::UnregisterMenu(CMenu* Menu)
 CWindow* CGame::RegisterWindow(std::unique_ptr<CWindow> Window)
 {
     // first find the highest priority
-    const auto itHighestPriority = std::max_element(
-      Windows.cbegin(), Windows.cend(), [](const auto& lhs, const auto& rhs) { return lhs->getPriority() < rhs->getPriority(); });
+    const auto itHighestPriority =
+      std::max_element(Windows.cbegin(), Windows.cend(),
+                       [](const auto& lhs, const auto& rhs) { return lhs->getPriority() < rhs->getPriority(); });
     const int highestPriority = itHighestPriority == Windows.cend() ? 0 : (*itHighestPriority)->getPriority();
 
     for(auto& i : Windows)

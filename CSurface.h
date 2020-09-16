@@ -28,12 +28,15 @@ public:
     }
     static void DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color);
     static void DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
-    static void DrawPixel_RGB(SdlSurface& screen, int x, int y, Uint8 R, Uint8 G, Uint8 B) { DrawPixel_RGB(screen.get(), x, y, R, G, B); }
+    static void DrawPixel_RGB(SdlSurface& screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
+    {
+        DrawPixel_RGB(screen.get(), x, y, R, G, B);
+    }
     static void DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     static Uint32 GetPixel(SDL_Surface* surface, int x, int y);
     static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap);
-    static void DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap, MapType type,
-                             const MapNode& P1, const MapNode& P2, const MapNode& P3);
+    static void DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap,
+                             MapType type, const MapNode& P1, const MapNode& P2, const MapNode& P3);
 
     static void get_nodeVectors(bobMAP& myMap);
     static void update_shading(bobMAP& myMap, int VertexX, int VertexY);
@@ -51,6 +54,7 @@ private:
     static void update_flatVectors(bobMAP& myMap, int VertexX, int VertexY);
     // update nodeVector based on new flatVectors around it
     static void update_nodeVector(bobMAP& myMap, int VertexX, int VertexY);
-    static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move, Point16& upper,
-                                        Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2);
+    static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
+                                        Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
+                                        Point16& right2);
 };

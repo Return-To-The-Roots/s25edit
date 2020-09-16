@@ -48,7 +48,8 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= x) && (button.x < x + w) && (button.y >= y) && (button.y < y + h))
+        if((button.state == SDL_PRESSED) && (button.x >= x) && (button.x < x + w) && (button.y >= y)
+           && (button.y < y + h))
         {
             marked = true;
             clicked = true;

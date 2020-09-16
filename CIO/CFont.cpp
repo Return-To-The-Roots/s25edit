@@ -191,7 +191,8 @@ unsigned getIndexForChar(uint8_t c, FontSize fontsize, FontColor color)
 }
 
 unsigned getCharWidth(uint8_t c, FontSize fontsize, FontColor color)
-{ // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width of ansi 237
+{ // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the width
+  // of ansi 237
     // 'í' instead
     if(fontsize == FontSize::Small && c == 236)
         c = 109;
@@ -233,7 +234,8 @@ void CFont::writeText()
                 ++chiffre;
             }
 
-            // if this was the last chiffre setup width, create surface and go in normal mode to write text to the surface
+            // if this was the last chiffre setup width, create surface and go in normal mode to write text to the
+            // surface
             if(chiffre == string_.end())
             {
                 if(pixel_ctr_w_tmp > pixel_ctr_w)
@@ -283,8 +285,8 @@ void CFont::writeText()
     }
 }
 
-bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, FontSize fontsize, FontColor color,
-                      FontAlign align)
+bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, FontSize fontsize,
+                      FontColor color, FontAlign align)
 {
     // data for necessary counting pixels depending on alignment
     unsigned pixel_ctr_w = 0;

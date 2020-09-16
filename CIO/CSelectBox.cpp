@@ -10,9 +10,10 @@ CSelectBox::CSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor 
     setColor(bg_color);
 
     // button position is relative to the selectbox
-    ScrollUpButton = std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
-    ScrollDownButton =
-      std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, size_.y - 1 - 20, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
+    ScrollUpButton =
+      std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
+    ScrollDownButton = std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, size_.y - 1 - 20, 20, 20, BUTTON_GREY,
+                                                 nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
 void CSelectBox::addOption(const std::string& string, std::function<void(int)> callback, int param)
@@ -102,7 +103,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the selectbox
         if(button.state == SDL_PRESSED)
         {
-            if((button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y) && (button.y < pos_.y + size_.y))
+            if((button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y)
+               && (button.y < pos_.y + size_.y))
             {
                 // scroll up button
                 if((button.x > pos_.x + size_.x - 20) && (button.y < pos_.y + 20))
@@ -116,7 +118,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                 }
 
                 // IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
-                //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
+                //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox,
+                //           y_absolute - y_selectbox
                 button.x -= pos_.x;
                 button.y -= pos_.y;
                 manipulated = true;
@@ -128,7 +131,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
             }
         } else if(button.state == SDL_RELEASED)
         {
-            if((button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y) && (button.y < pos_.y + size_.y))
+            if((button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y)
+               && (button.y < pos_.y + size_.y))
             {
                 // scroll up button
                 if(scroll_up_button_marked)
@@ -162,7 +166,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                 }
 
                 // IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
-                //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
+                //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox,
+                //           y_absolute - y_selectbox
                 button.x -= pos_.x;
                 button.y -= pos_.y;
                 manipulated = true;
@@ -176,7 +181,8 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
             scroll_down_button_marked = false;
         }
         // IMPORTANT: we use the left upper corner of the selectbox as (x,y)=(0,0), so we have to manipulate
-        //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute - y_selectbox
+        //           the motion-structure before give it to buttons and entries: x_absolute - x_selectbox, y_absolute -
+        //           y_selectbox
         if(!manipulated)
         {
             button.x -= pos_.x;
@@ -235,7 +241,8 @@ bool CSelectBox::render()
             }
 
             if(Surf_SelectBox->h - pos_y > 0)
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w, Surf_SelectBox->h - pos_y);
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w,
+                               Surf_SelectBox->h - pos_y);
 
             pos_y = 0;
             pos_x += pic_w;
@@ -245,13 +252,14 @@ bool CSelectBox::render()
         {
             while(pos_y + pic_h <= Surf_SelectBox->h)
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_SelectBox->w - pos_x, pic_h);
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0,
+                               Surf_SelectBox->w - pos_x, pic_h);
                 pos_y += pic_h;
             }
 
             if(Surf_SelectBox->h - pos_y > 0)
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_SelectBox->w - pos_x,
-                               Surf_SelectBox->h - pos_y);
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0,
+                               Surf_SelectBox->w - pos_x, Surf_SelectBox->h - pos_y);
         }
     } else
         SDL_FillRect(Surf_SelectBox.get(), nullptr, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));

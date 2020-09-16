@@ -24,7 +24,8 @@ struct TerrainDesc;
 // callback parameters
 enum
 {
-    // NOTE: we don't have a global WINDOW_QUIT_MESSAGE, cause if there were more than one window created by a callback function
+    // NOTE: we don't have a global WINDOW_QUIT_MESSAGE, cause if there were more than one window created by a callback
+    // function
     //      we wouldn't know which window was closed by the user. so we need a specified quit-message for each window.
 
     // first call of a callback function
@@ -120,7 +121,8 @@ struct MapNode
     Sint32 y; /* calculated with section 1 */
     int z;    /* calculated with section 1 */
     Uint8 h;  /* section 1 */
-    Sint32 i; /* calculated light values for new shading by SGE (a 16 bit integer shifted left 16 times --> fixed point math for speed) */
+    Sint32 i; /* calculated light values for new shading by SGE (a 16 bit integer shifted left 16 times --> fixed point
+                 math for speed) */
     vector flatVector;
     vector normVector;
     Uint8 rsuTexture; /* section 2 */
@@ -1205,7 +1207,8 @@ constexpr auto MAXMAPHEIGHT = 1024;
 // these values are now handled in globals.h and globals.cpp, cause they must be changeable for the zoom mode
 //#define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
 //#define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
-//#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be greater than 5
+//#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be
+//greater than 5
 
 enum TriangleTerrainType
 {
@@ -1238,7 +1241,8 @@ enum TriangleTerrainType
     TRIANGLE_TEXTURE_WATER__ = 0x13,
     TRIANGLE_TEXTURE_STEPPE__ = 0x80,
     TRIANGLE_TEXTURE_STEPPE___ = 0x84,
-    TRIANGLE_TEXTURE_MEADOW_MIXED = 0xBF, // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
+    TRIANGLE_TEXTURE_MEADOW_MIXED =
+      0xBF, // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
     TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR =
       0xFF, // this will not be written to map-files, it is only a indicator for mixed meadow in editor mode
 };

@@ -3,14 +3,14 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color, int bg_color,
-                       bool button_style)
+CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color,
+                       int bg_color, bool button_style)
 {
     active = false;
     this->cols = (cols < 1 ? 1 : cols);
     this->rows = (rows < 1 ? 1 : rows);
-    // calc width by maximum number of chiffres (cols) + one blinking chiffre * average pixel_width of a chiffre (fontsize-3) + tolerance
-    // for borders
+    // calc width by maximum number of chiffres (cols) + one blinking chiffre * average pixel_width of a chiffre
+    // (fontsize-3) + tolerance for borders
     this->w = (this->cols + 1) * (static_cast<unsigned>(fontsize) - 3) + 4;
     // calc height ----------------| this is the row_separator from CFont.cpp    |----        + tolerance for borders
     this->h = this->rows * getLineHeight(fontsize) + 4;
@@ -169,8 +169,8 @@ void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
         }
         // decrement col_ctr cause '\0' is not counted
         col_ctr--;
-        // end of text memory reached? ( 'cols'-chiffres from the user + '\n' in each row * rows + blinking chiffre + '\0' -1 for pointer
-        // adress range
+        // end of text memory reached? ( 'cols'-chiffres from the user + '\n' in each row * rows + blinking chiffre +
+        // '\0' -1 for pointer adress range
         if(txtPtr >= &text_.back() - 2)
         {
             // end reached, user may only delete chiffres
@@ -208,7 +208,8 @@ void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
                         break;
                 }
                 // decide which chiffre to save
-                if((key.keysym.sym >= 48 && key.keysym.sym <= 57) || key.keysym.sym == 32 || key.keysym.sym == 46 || key.keysym.sym == 47)
+                if((key.keysym.sym >= 48 && key.keysym.sym <= 57) || key.keysym.sym == 32 || key.keysym.sym == 46
+                   || key.keysym.sym == 47)
                     chiffre = (unsigned char)key.keysym.sym;
                 else if(key.keysym.sym >= 97 && key.keysym.sym <= 122)
                 {
@@ -303,7 +304,8 @@ bool CTextfield::render()
             }
 
             if(Surf_Text->h - pos_y > 0)
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w, Surf_Text->h - pos_y);
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w,
+                               Surf_Text->h - pos_y);
 
             pos_y = 0;
             pos_x += pic_w;
@@ -313,12 +315,14 @@ bool CTextfield::render()
         {
             while(pos_y + pic_h <= Surf_Text->h)
             {
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_Text->w - pos_x, pic_h);
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_Text->w - pos_x,
+                               pic_h);
                 pos_y += pic_h;
             }
 
             if(Surf_Text->h - pos_y > 0)
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_Text->w - pos_x, Surf_Text->h - pos_y);
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_Text->w - pos_x,
+                               Surf_Text->h - pos_y);
         }
 
         // if not button_style, we are finished, otherwise continue drawing
@@ -391,7 +395,8 @@ bool CTextfield::render()
             {
                 while(pos_y + pic_h <= Surf_Text->h - 2)
                 {
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0, pic_w,
+                                   pic_h);
                     pos_y += pic_h;
                 }
 
@@ -407,14 +412,14 @@ bool CTextfield::render()
             {
                 while(pos_y + pic_h <= Surf_Text->h - 2)
                 {
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0, Surf_Text->w - 2 - pos_x,
-                                   pic_h);
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0,
+                                   Surf_Text->w - 2 - pos_x, pic_h);
                     pos_y += pic_h;
                 }
 
                 if(Surf_Text->h - 2 - pos_y > 0)
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0, Surf_Text->w - 2 - pos_x,
-                                   Surf_Text->h - 2 - pos_y);
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0,
+                                   Surf_Text->w - 2 - pos_x, Surf_Text->h - 2 - pos_y);
             }
         }
     } else

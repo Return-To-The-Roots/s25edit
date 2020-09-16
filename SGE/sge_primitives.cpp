@@ -534,7 +534,8 @@ void sge_LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
 //==================================================================================
 // Draws a line (alpha - RGB)
 //==================================================================================
-void sge_LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_LineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B,
+                   Uint8 alpha)
 {
     sge_LineAlpha(Surface, x1, y1, x2, y2, SDL_MapRGB(Surface->format, R, G, B), alpha);
 }
@@ -700,7 +701,8 @@ void sge_AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y
     }
 }
 
-void sge_AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 alpha)
+void sge_AALineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r, Uint8 g, Uint8 b,
+                     Uint8 alpha)
 {
     sge_AALineAlpha(dst, x1, y1, x2, y2, SDL_MapRGB(dst->format, r, g, b), alpha);
 }
@@ -718,8 +720,8 @@ void sge_AALine(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Ui
 //==================================================================================
 // Draws a multicolored line
 //==================================================================================
-void sge_DomcLine(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                  Uint8 b2, void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color))
+void sge_DomcLine(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1,
+                  Uint8 r2, Uint8 g2, Uint8 b2, void Callback(SDL_Surface* Surf, Sint16 X, Sint16 Y, Uint32 Color))
 {
     Sint16 dx, dy, sdx, sdy, x, y, px, py;
 
@@ -792,8 +794,8 @@ void sge_DomcLine(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
     }
 }
 
-void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                Uint8 b2)
+void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1,
+                Uint8 r2, Uint8 g2, Uint8 b2)
 {
     if(_sge_lock && SDL_MUSTLOCK(Surface))
     {
@@ -811,8 +813,8 @@ void sge_mcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
     }
 }
 
-void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                     Uint8 b2, Uint8 alpha)
+void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1,
+                     Uint8 r2, Uint8 g2, Uint8 b2, Uint8 alpha)
 {
     if(_sge_lock && SDL_MUSTLOCK(Surface))
         if(SDL_LockSurface(Surface) < 0)
@@ -833,8 +835,8 @@ void sge_mcLineAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 //==================================================================================
 // Draws a anti-aliased multicolored line
 //==================================================================================
-void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                    Uint8 b2, Uint8 alpha)
+void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1,
+                    Uint8 r2, Uint8 g2, Uint8 b2, Uint8 alpha)
 {
     Uint32 erracc = 0, erradj;
     Uint32 erracctmp, wgt;
@@ -888,7 +890,8 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
     Uint32 intshift = 32 - AAbits;       /* # of bits by which to shift erracc to get intensity level */
 
     if(alpha == 255)
-        _PutPixel(dst, x1, y1, SDL_MapRGB(dst->format, r1, g1, b1)); /* Draw the initial pixel in the foreground color */
+        _PutPixel(dst, x1, y1,
+                  SDL_MapRGB(dst->format, r1, g1, b1)); /* Draw the initial pixel in the foreground color */
     else
         _PutPixelAlpha(dst, x1, y1, SDL_MapRGB(dst->format, r1, g1, b1), alpha);
 
@@ -937,7 +940,8 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
             if(alpha != 255)
                 a = Uint8(a * alpha_pp);
 
-            _PutPixelAlpha(dst, x0pxdir, yy0, SDL_MapRGB(dst->format, Uint8(R >> 16), Uint8(G >> 16), Uint8(B >> 16)), a);
+            _PutPixelAlpha(dst, x0pxdir, yy0, SDL_MapRGB(dst->format, Uint8(R >> 16), Uint8(G >> 16), Uint8(B >> 16)),
+                           a);
         }
     } else
     {
@@ -995,8 +999,8 @@ void _AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
         _PutPixelAlpha(dst, x2, y2, SDL_MapRGB(dst->format, r2, g2, b2), alpha);
 }
 
-void sge_AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                       Uint8 b2, Uint8 alpha)
+void sge_AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1,
+                       Uint8 r2, Uint8 g2, Uint8 b2, Uint8 alpha)
 {
     if(_sge_lock && SDL_MUSTLOCK(dst))
         if(SDL_LockSurface(dst) < 0)
@@ -1008,8 +1012,8 @@ void sge_AAmcLineAlpha(SDL_Surface* dst, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
         SDL_UnlockSurface(dst);
 }
 
-void sge_AAmcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 r2, Uint8 g2,
-                  Uint8 b2)
+void sge_AAmcLine(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 r1, Uint8 g1, Uint8 b1,
+                  Uint8 r2, Uint8 g2, Uint8 b2)
 {
     sge_AAmcLineAlpha(Surface, x1, y1, x2, y2, r1, g1, b1, r2, g2, b2, SDL_ALPHA_OPAQUE);
 }
@@ -1060,7 +1064,8 @@ void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16
 //==================================================================================
 // Draws a rectangle (RGB)
 //==================================================================================
-void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_RectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B,
+                   Uint8 alpha)
 {
     sge_RectAlpha(Surface, x1, y1, x2, y2, SDL_MapRGB(Surface->format, R, G, B), alpha);
 }
@@ -1127,7 +1132,8 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
     }
 
     /* Clipping */
-    if(x2 < sge_clip_xmin(surface) || x1 > sge_clip_xmax(surface) || y2 < sge_clip_ymin(surface) || y1 > sge_clip_ymax(surface))
+    if(x2 < sge_clip_xmin(surface) || x1 > sge_clip_xmax(surface) || y2 < sge_clip_ymin(surface)
+       || y1 > sge_clip_ymax(surface))
         return;
     if(x1 < sge_clip_xmin(surface))
         x1 = sge_clip_xmin(surface);
@@ -1138,7 +1144,8 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
     if(y2 > sge_clip_ymax(surface))
         y2 = sge_clip_ymax(surface);
 
-    Uint32 Rmask = surface->format->Rmask, Gmask = surface->format->Gmask, Bmask = surface->format->Bmask, Amask = surface->format->Amask;
+    Uint32 Rmask = surface->format->Rmask, Gmask = surface->format->Gmask, Bmask = surface->format->Bmask,
+           Amask = surface->format->Amask;
     Uint32 R, G, B, A = 0;
     Sint16 x, y;
 
@@ -1273,7 +1280,8 @@ void sge_FilledRectAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, 
     }
 }
 
-void sge_FilledRectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_FilledRectAlpha(SDL_Surface* Surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 R, Uint8 G, Uint8 B,
+                         Uint8 alpha)
 {
     sge_FilledRectAlpha(Surface, x1, y1, x2, y2, SDL_MapRGB(Surface->format, R, G, B), alpha);
 }
@@ -1451,7 +1459,8 @@ void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint1
 //==================================================================================
 // Draws an ellipse (alpha - RGB)
 //==================================================================================
-void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_EllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B,
+                      Uint8 alpha)
 {
     sge_EllipseAlpha(Surface, x, y, rx, ry, SDL_MapRGB(Surface->format, R, G, B), alpha);
 }
@@ -1668,7 +1677,8 @@ void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx,
 //==================================================================================
 // Draws a filled ellipse (alpha - RGB)
 //==================================================================================
-void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_FilledEllipseAlpha(SDL_Surface* Surface, Sint16 x, Sint16 y, Uint16 rx, Uint16 ry, Uint8 R, Uint8 G, Uint8 B,
+                            Uint8 alpha)
 {
     sge_FilledEllipseAlpha(Surface, x, y, rx, ry, SDL_MapRGB(Surface->format, R, G, B), alpha);
 }
@@ -2173,8 +2183,8 @@ void sge_AAFilledCircle(SDL_Surface* surface, Sint16 xc, Sint16 yc, Uint16 r, Ui
 //==================================================================================
 // Draws a bezier line
 //==================================================================================
-void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4, int level,
-                Uint32 color)
+void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
+                Sint16 y4, int level, Uint32 color)
 {
     DO_BEZIER(_Line(surface, Sint16(xp), Sint16(yp), Sint16(x), Sint16(y), color));
 }
@@ -2182,8 +2192,8 @@ void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 //==================================================================================
 // Draws a bezier line (RGB)
 //==================================================================================
-void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4, int level,
-                Uint8 R, Uint8 G, Uint8 B)
+void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
+                Sint16 y4, int level, Uint8 R, Uint8 G, Uint8 B)
 {
     sge_Bezier(surface, x1, y1, x2, y2, x3, y3, x4, y4, level, SDL_MapRGB(surface->format, R, G, B));
 }
@@ -2191,8 +2201,8 @@ void sge_Bezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 //==================================================================================
 // Draws a bezier line (alpha)
 //==================================================================================
-void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                     int level, Uint32 color, Uint8 alpha)
+void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
+                     Sint16 y4, int level, Uint32 color, Uint8 alpha)
 {
     _sge_alpha_hack = alpha;
 
@@ -2202,8 +2212,8 @@ void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 //==================================================================================
 // Draws a bezier line (alpha - RGB)
 //==================================================================================
-void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                     int level, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
+                     Sint16 y4, int level, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
 {
     sge_BezierAlpha(surface, x1, y1, x2, y2, x3, y3, x4, y4, level, SDL_MapRGB(surface->format, R, G, B), alpha);
 }
@@ -2211,8 +2221,8 @@ void sge_BezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint
 //==================================================================================
 // Draws an AA bezier line (alpha)
 //==================================================================================
-void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                       int level, Uint32 color, Uint8 alpha)
+void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
+                       Sint16 x4, Sint16 y4, int level, Uint32 color, Uint8 alpha)
 {
     Uint8 lock = _sge_lock;
     _sge_lock = 0;
@@ -2234,8 +2244,8 @@ void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Si
 //==================================================================================
 // Draws an AA bezier line (alpha - RGB)
 //==================================================================================
-void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4,
-                       int level, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
+void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3,
+                       Sint16 x4, Sint16 y4, int level, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha)
 {
     sge_AABezierAlpha(surface, x1, y1, x2, y2, x3, y3, x4, y4, level, SDL_MapRGB(surface->format, R, G, B), alpha);
 }
@@ -2243,8 +2253,8 @@ void sge_AABezierAlpha(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Si
 //==================================================================================
 // Draws an AA bezier line
 //==================================================================================
-void sge_AABezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4, int level,
-                  Uint32 color)
+void sge_AABezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
+                  Sint16 y4, int level, Uint32 color)
 {
     sge_AABezierAlpha(surface, x1, y1, x2, y2, x3, y3, x4, y4, level, color, 255);
 }
@@ -2252,8 +2262,8 @@ void sge_AABezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 
 //==================================================================================
 // Draws an AA bezier line (RGB)
 //==================================================================================
-void sge_AABezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4, Sint16 y4, int level,
-                  Uint8 R, Uint8 G, Uint8 B)
+void sge_AABezier(SDL_Surface* surface, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 x3, Sint16 y3, Sint16 x4,
+                  Sint16 y4, int level, Uint8 R, Uint8 G, Uint8 B)
 {
     sge_AABezierAlpha(surface, x1, y1, x2, y2, x3, y3, x4, y4, level, SDL_MapRGB(surface->format, R, G, B), 255);
 }

@@ -30,8 +30,8 @@ private:
     bool needRender = true;
 
 public:
-    CSelectBox(Point16 pos, Extent16 size, FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
-               int bg_color = -1);
+    CSelectBox(Point16 pos, Extent16 size, FontSize fontsize = FontSize::Large,
+               FontColor text_color = FontColor::Yellow, int bg_color = -1);
     const Point16& getPos() const { return pos_; }
     const Extent16& getSize() const { return size_; }
     bool hasRendered();

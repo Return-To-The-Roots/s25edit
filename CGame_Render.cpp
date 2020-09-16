@@ -7,13 +7,13 @@
 #include "SGE/sge_blib.h"
 #include "globals.h"
 #ifdef _WIN32
-#include "s25editResource.h"
-#undef WIN32_LEAN_AND_MEAN
-#include <SDL_syswm.h>
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+#    include "s25editResource.h"
+#    undef WIN32_LEAN_AND_MEAN
+#    include <SDL_syswm.h>
+#    ifndef WIN32_LEAN_AND_MEAN
+#        define WIN32_LEAN_AND_MEAN
+#    endif
+#    include <windows.h>
 #endif
 
 void CGame::SetAppIcon()
@@ -46,9 +46,9 @@ void CGame::Render()
     {
         // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
         auto& surfLoadScreen = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-        sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1, Surf_Display->h - 1,
-                         surfLoadScreen.get(), 0, 0, surfLoadScreen->w - 1, 0, 0, surfLoadScreen->h - 1, surfLoadScreen->w - 1,
-                         surfLoadScreen->h - 1);
+        sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1,
+                         Surf_Display->h - 1, surfLoadScreen.get(), 0, 0, surfLoadScreen->w - 1, 0, 0,
+                         surfLoadScreen->h - 1, surfLoadScreen->w - 1, surfLoadScreen->h - 1);
         RenderPresent();
         return;
     }
@@ -62,16 +62,19 @@ void CGame::Render()
         sprintf(textBuffer.data(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
         CFont::writeText(Surf_Display, textBuffer.data(), 20, 20);
         // text for MinReduceHeight and MaxRaiseHeight
-        sprintf(textBuffer.data(), "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A", MapObj->getMinReduceHeight(),
-                MapObj->getMaxRaiseHeight());
+        sprintf(textBuffer.data(), "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
+                MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
         CFont::writeText(Surf_Display, textBuffer.data(), 100, 20);
         // text for MovementLocked
         if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", 20, 40, FontSize::Large, FontColor::Orange);
+            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", 20, 40, FontSize::Large,
+                             FontColor::Orange);
         else if(MapObj->isHorizontalMovementLocked())
-            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large, FontColor::Orange);
+            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large,
+                             FontColor::Orange);
         else if(MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Vertikal movement locked (F10 to unlock)", 20, 40, FontSize::Large, FontColor::Orange);
+            CFont::writeText(Surf_Display, "Vertikal movement locked (F10 to unlock)", 20, 40, FontSize::Large,
+                             FontColor::Orange);
     }
 
     // render active menus

@@ -73,10 +73,11 @@ public:
     bool delPicture(CPicture* PictureToDelete);
     int addStaticPicture(int x, int y, int picture);
     bool delStaticPicture(int picId);
-    CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, FontSize fontsize = FontSize::Large,
-                             FontColor text_color = FontColor::Yellow, int bg_color = -1, bool button_style = false);
+    CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1,
+                             FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
+                             int bg_color = -1, bool button_style = false);
     bool delTextfield(CTextfield* TextfieldToDelete);
-    CSelectBox* addSelectBox(Point16 pos, Extent16 size, FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
-                             int bg_color = -1);
+    CSelectBox* addSelectBox(Point16 pos, Extent16 size, FontSize fontsize = FontSize::Large,
+                             FontColor text_color = FontColor::Yellow, int bg_color = -1);
     bool delSelectBox(CSelectBox* SelectBoxToDelete);
 };

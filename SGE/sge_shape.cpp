@@ -258,7 +258,8 @@ sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, Sint16 x, Sint16
     bounce_border = true;
 }
 
-sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata, Sint16 x, Sint16 y) : sge_surface(screen, img, x, y)
+sge_ssprite::sge_ssprite(SDL_Surface* screen, SDL_Surface* img, sge_cdata* cdata, Sint16 x, Sint16 y)
+    : sge_surface(screen, img, x, y)
 {
     // Create the first frame
     current_frame = new sge_frame; // User has to catch bad_alloc himself

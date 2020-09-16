@@ -27,19 +27,19 @@
  *  Thanks to Ohbayashi Ippei (ohai@kmc.gr.jp) for this clever hack!
  */
 #ifdef _SGE_C_AND_CPP
-#ifdef __cplusplus
-#define _SGE_C /* use extern "C" on base functions */
-#include <type_traits>
+#    ifdef __cplusplus
+#        define _SGE_C /* use extern "C" on base functions */
+#        include <type_traits>
 template<typename T>
 constexpr auto absDiff(T a, T b)
 {
     using U = std::make_unsigned_t<T>;
     return static_cast<U>(a > b ? a - b : b - a);
 }
-#else
-#define sge_C_ONLY      /* remove overloaded functions */
-#define _SGE_NO_CLASSES /* no C++ classes */
-#endif
+#    else
+#        define sge_C_ONLY      /* remove overloaded functions */
+#        define _SGE_NO_CLASSES /* no C++ classes */
+#    endif
 #endif
 
 /*
@@ -81,21 +81,21 @@ inline auto sge_clip_ymax(const SDL_Surface* pnt)
  *  (From SDL)
  */
 #ifndef DECLSPEC
-#ifdef __BEOS__
-#if defined(__GNUC__)
-#define DECLSPEC __declspec(dllexport)
-#else
-#define DECLSPEC __declspec(export)
-#endif
-#elif defined(WIN32)
-#define DECLSPEC __declspec(dllexport)
-#else
-#define DECLSPEC
-#endif
+#    ifdef __BEOS__
+#        if defined(__GNUC__)
+#            define DECLSPEC __declspec(dllexport)
+#        else
+#            define DECLSPEC __declspec(export)
+#        endif
+#    elif defined(WIN32)
+#        define DECLSPEC __declspec(dllexport)
+#    else
+#        define DECLSPEC
+#    endif
 #endif
 
 #ifdef __GNUC__
-#define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx) __attribute__((format(printf, fmtStringIdx, firstArgIdx)))
+#    define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx) __attribute__((format(printf, fmtStringIdx, firstArgIdx)))
 #else
-#define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx)
+#    define SGE_ATTRIBUTE_FORMAT(fmtStringIdx, firstArgIdx)
 #endif

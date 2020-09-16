@@ -12,7 +12,8 @@ void CGame::EventHandling(SDL_Event* Event)
     {
         case SDL_KEYDOWN:
         {
-            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
+            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and
+            // stop
             //      delivering earlier, for doing this we make use of a variable showing us the deliver status
             bool delivered = false;
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
@@ -26,7 +27,8 @@ void CGame::EventHandling(SDL_Event* Event)
 
             for(auto& Window : Windows)
             {
-                if(!Window->isWaste() && Window->isMarked() && Window->getPriority() == highestPriority && Window->hasActiveInputElement())
+                if(!Window->isWaste() && Window->isMarked() && Window->getPriority() == highestPriority
+                   && Window->hasActiveInputElement())
                 {
                     Window->setKeyboardData(Event->key);
                     delivered = true;
@@ -140,24 +142,28 @@ void CGame::EventHandling(SDL_Event* Event)
                 Cursor.pos = Position(Event->motion.x, Event->motion.y);
             }
             /*
-                        //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
-                        //      delivering earlier, for doing this we make use of a variable showing us the deliver status
-                        int delivered = false;
+                        //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the
+               switch and stop
+                        //      delivering earlier, for doing this we make use of a variable showing us the deliver
+               status int delivered = false;
                         //deliver mouse motion data to the active window
                         for (int i = 0; i < MAXWINDOWS; i++)
                         {
                             if (Windows[i] != nullptr && Windows[i]->isActive() && !Windows[i]->isWaste())
                             {
                                 Windows[i]->setMouseData(Event->motion);
-                                if ( (Event->motion.x >= Windows[i]->getX()) && (Event->motion.x < Windows[i]->getX() + Windows[i]->getW())
-               && (Event->motion.y >= Windows[i]->getY()) && (Event->motion.y < Windows[i]->getY() + Windows[i]->getH()) ) delivered = true;
+                                if ( (Event->motion.x >= Windows[i]->getX()) && (Event->motion.x < Windows[i]->getX() +
+               Windows[i]->getW())
+               && (Event->motion.y >= Windows[i]->getY()) && (Event->motion.y < Windows[i]->getY() + Windows[i]->getH())
+               ) delivered = true;
                             }
                         }
                         if (delivered)
                             break;
             */
 
-            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
+            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and
+            // stop
             //      delivering earlier, for doing this we make use of a variable showing us the deliver status
             bool delivered = false;
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
@@ -177,7 +183,8 @@ void CGame::EventHandling(SDL_Event* Event)
                     {
                         // is the cursor INSIDE the window or does the user move or resize the window?
                         if(((Event->motion.x >= Window->getX()) && (Event->motion.x < Window->getX() + Window->getW())
-                            && (Event->motion.y >= Window->getY()) && (Event->motion.y < Window->getY() + Window->getH()))
+                            && (Event->motion.y >= Window->getY())
+                            && (Event->motion.y < Window->getY() + Window->getH()))
                            || Window->isMoving() || Window->isResizing())
                         {
                             // Windows[i]->setActive();
@@ -235,7 +242,8 @@ void CGame::EventHandling(SDL_Event* Event)
                 break;
             }
 
-            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
+            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and
+            // stop
             //      delivering earlier, for doing this we make use of a variable showing us the deliver status
             bool delivered = false;
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
@@ -255,7 +263,8 @@ void CGame::EventHandling(SDL_Event* Event)
                     {
                         // is the cursor INSIDE the window?
                         if((Event->button.x >= Window->getX()) && (Event->button.x < Window->getX() + Window->getW())
-                           && (Event->button.y >= Window->getY()) && (Event->button.y < Window->getY() + Window->getH()))
+                           && (Event->button.y >= Window->getY())
+                           && (Event->button.y < Window->getY() + Window->getH()))
                         {
                             Window->setActive();
                             Window->setPriority(highestPriority + 1);
@@ -296,7 +305,8 @@ void CGame::EventHandling(SDL_Event* Event)
             // setup mouse cursor data
             Cursor.clicked = false;
 
-            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and stop
+            // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and
+            // stop
             //      delivering earlier, for doing this we make use of a variable showing us the deliver status
             bool delivered = false;
             // now we walk through the windows and find out, if cursor is on one of these (ordered by priority)
@@ -316,7 +326,8 @@ void CGame::EventHandling(SDL_Event* Event)
                     {
                         // is the cursor INSIDE the window?
                         if((Event->button.x >= Window->getX()) && (Event->button.x < Window->getX() + Window->getW())
-                           && (Event->button.y >= Window->getY()) && (Event->button.y < Window->getY() + Window->getH()))
+                           && (Event->button.y >= Window->getY())
+                           && (Event->button.y < Window->getY() + Window->getH()))
                         {
                             // Windows[i]->setActive();
                             // Windows[i]->setPriority(highestPriority+1);
@@ -332,9 +343,9 @@ void CGame::EventHandling(SDL_Event* Event)
                     break;
             }
             // if mouse data has been deliverd, stop delivering anymore
-            /// We can't stop here cause of problems with the map. If user has the left mouse button pressed and modifies the vertices,
-            /// it will cause a problem if he walks over a window with pressed mouse button and releases it in the window.
-            /// So the MapObj needs the "release-event" of the mouse button.
+            /// We can't stop here cause of problems with the map. If user has the left mouse button pressed and
+            /// modifies the vertices, it will cause a problem if he walks over a window with pressed mouse button and
+            /// releases it in the window. So the MapObj needs the "release-event" of the mouse button.
             // if (delivered)
             // break;
 

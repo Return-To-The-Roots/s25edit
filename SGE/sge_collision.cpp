@@ -24,7 +24,8 @@
 
 using namespace std;
 
-std::array<Uint8, 8> sge_mask = {SGE_FLAG1, SGE_FLAG2, SGE_FLAG3, SGE_FLAG4, SGE_FLAG5, SGE_FLAG6, SGE_FLAG7, SGE_FLAG8};
+std::array<Uint8, 8> sge_mask = {SGE_FLAG1, SGE_FLAG2, SGE_FLAG3, SGE_FLAG4,
+                                 SGE_FLAG5, SGE_FLAG6, SGE_FLAG7, SGE_FLAG8};
 SDL_Rect _ua;
 Sint16 _cx = 0, _cy = 0;
 
@@ -368,8 +369,8 @@ void sge_destroy_cmap(sge_cdata* cd)
 #ifndef _SGE_NO_CLASSES
 int sge_bbcheck_shape(sge_shape* shape1, sge_shape* shape2)
 {
-    return _sge_bbcheck(shape1->get_xpos(), shape1->get_ypos(), shape1->get_w(), shape1->get_h(), shape2->get_xpos(), shape2->get_ypos(),
-                        shape2->get_w(), shape2->get_h());
+    return _sge_bbcheck(shape1->get_xpos(), shape1->get_ypos(), shape1->get_w(), shape1->get_h(), shape2->get_xpos(),
+                        shape2->get_ypos(), shape2->get_w(), shape2->get_h());
 }
 #endif
 

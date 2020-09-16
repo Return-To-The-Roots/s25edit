@@ -12,9 +12,9 @@
 
 CDebug::CDebug(void dbgCallback(int), int quitParam)
 {
-    dbgWnd =
-      global::s2->RegisterWindow(std::make_unique<CWindow>(dbgCallback, quitParam, Position(0, 0), Extent(540, 130), "Debugger",
-                                                           WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
+    dbgWnd = global::s2->RegisterWindow(
+      std::make_unique<CWindow>(dbgCallback, quitParam, Position(0, 0), Extent(540, 130), "Debugger", WINDOW_GREEN1,
+                                WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
     dbgWnd->addText("Debugger started", 0, 0, fontsize);
     this->dbgCallback_ = dbgCallback;
     FrameCounterText = nullptr;
@@ -123,7 +123,8 @@ void CDebug::actualizeData()
         // write new FramesPerSecText and draw it
         if(!FramesPerSecText)
             FramesPerSecText = dbgWnd->addText("", 0, 20, fontsize);
-        FramesPerSecText->setText(helpers::format("Frames per Sec: %.2f", tmpFrameCtr / (((float)SDL_GetTicks() - tmpTickCtr) / 1000)));
+        FramesPerSecText->setText(
+          helpers::format("Frames per Sec: %.2f", tmpFrameCtr / (((float)SDL_GetTicks() - tmpTickCtr) / 1000)));
         // set new values
         tmpFrameCtr = 0;
         tmpTickCtr = SDL_GetTicks();
@@ -142,9 +143,11 @@ void CDebug::actualizeData()
     // write new MouseText and draw it
     const char* clickedStr =
       global::s2->Cursor.clicked ?
-        (global::s2->Cursor.button.left ? "LMB clicked" : (global::s2->Cursor.button.right ? "RMB clicked" : "clicked")) :
+        (global::s2->Cursor.button.left ? "LMB clicked" :
+                                          (global::s2->Cursor.button.right ? "RMB clicked" : "clicked")) :
         "unclicked";
-    MouseText->setText(helpers::format("Mouse: x=%d y=%d %s", global::s2->Cursor.pos.x, global::s2->Cursor.pos.y, clickedStr));
+    MouseText->setText(
+      helpers::format("Mouse: x=%d y=%d %s", global::s2->Cursor.pos.x, global::s2->Cursor.pos.y, clickedStr));
 
     // del RegisteredMenusText before drawing new
     if(!RegisteredMenusText)
@@ -167,8 +170,9 @@ void CDebug::actualizeData()
     if(!DisplayRectText)
         DisplayRectText = dbgWnd->addText("", 0, 90, fontsize);
     auto const displayRect = MapObj->getDisplayRect();
-    DisplayRectText->setText(helpers::format("DisplayRect: (%d,%d)->(%d,%d)\n= size(%d, %d)", displayRect.left, displayRect.top,
-                                             displayRect.right, displayRect.bottom, displayRect.getSize().x, displayRect.getSize().y));
+    DisplayRectText->setText(helpers::format("DisplayRect: (%d,%d)->(%d,%d)\n= size(%d, %d)", displayRect.left,
+                                             displayRect.top, displayRect.right, displayRect.bottom,
+                                             displayRect.getSize().x, displayRect.getSize().y));
 
     // we will now write the map data if a map is active
     MapObj = global::s2->MapObj.get();
@@ -188,9 +192,10 @@ void CDebug::actualizeData()
         MapAuthorText->setText("Author: " + map->getAuthor());
         if(!MapTypeText)
             MapTypeText = dbgWnd->addText("", 260, 40, fontsize);
-        const char* ltStr = map->type == MAP_GREENLAND ?
-                              "Greenland" :
-                              (map->type == MAP_WASTELAND ? "Wasteland" : (map->type == MAP_WINTERLAND ? "Winterland" : "Unknown"));
+        const char* ltStr =
+          map->type == MAP_GREENLAND ?
+            "Greenland" :
+            (map->type == MAP_WASTELAND ? "Wasteland" : (map->type == MAP_WINTERLAND ? "Winterland" : "Unknown"));
         MapTypeText->setText(helpers::format("Type: %d (%s)", map->type, ltStr));
         if(!MapPlayerText)
             MapPlayerText = dbgWnd->addText("", 260, 50, fontsize);
@@ -200,16 +205,16 @@ void CDebug::actualizeData()
         VertexText->setText(helpers::format("Vertex: %d, %d", MapObj->Vertex_.x, MapObj->Vertex_.y));
         if(!VertexDataText)
             VertexDataText = dbgWnd->addText("", 260, 70, fontsize);
-        VertexDataText->setText(helpers::format("Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y, vertex.z,
-                                                ((float)vertex.i) / pow(2, 16), vertex.h));
+        VertexDataText->setText(helpers::format("Vertex Data: x=%d, y=%d, z=%d i=%.2f h=%#04x", vertex.x, vertex.y,
+                                                vertex.z, ((float)vertex.i) / pow(2, 16), vertex.h));
         if(!VertexVectorText)
             VertexVectorText = dbgWnd->addText("", 260, 80, fontsize);
-        VertexVectorText->setText(
-          helpers::format("Vertex Vector: (%.2f, %.2f, %.2f)", vertex.normVector.x, vertex.normVector.y, vertex.normVector.z));
+        VertexVectorText->setText(helpers::format("Vertex Vector: (%.2f, %.2f, %.2f)", vertex.normVector.x,
+                                                  vertex.normVector.y, vertex.normVector.z));
         if(!FlatVectorText)
             FlatVectorText = dbgWnd->addText("", 260, 90, fontsize);
-        FlatVectorText->setText(
-          helpers::format("Flat Vector: (%.2f, %.2f, %.2f)", vertex.flatVector.x, vertex.flatVector.y, vertex.flatVector.z));
+        FlatVectorText->setText(helpers::format("Flat Vector: (%.2f, %.2f, %.2f)", vertex.flatVector.x,
+                                                vertex.flatVector.y, vertex.flatVector.z));
         if(!rsuTextureText)
             rsuTextureText = dbgWnd->addText("", 260, 100, fontsize);
         rsuTextureText->setText(helpers::format("RSU-Texture: %#04x", vertex.rsuTexture));
@@ -251,8 +256,8 @@ void CDebug::actualizeData()
         unknown5Text->setText(helpers::format("unknown5: %#04x", vertex.unknown5));
         if(!editorModeText)
             editorModeText = dbgWnd->addText("", 260, 230, fontsize);
-        editorModeText->setText(
-          helpers::format("Editor --> Mode: %d Content: %#04x Content2: %#04x", MapObj->mode, MapObj->modeContent, MapObj->modeContent2));
+        editorModeText->setText(helpers::format("Editor --> Mode: %d Content: %#04x Content2: %#04x", MapObj->mode,
+                                                MapObj->modeContent, MapObj->modeContent2));
     } else
     {
         if(!MapNameText)

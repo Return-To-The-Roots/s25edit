@@ -24,14 +24,15 @@
 
 extern Uint8 _sge_lock;
 
-SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 qx, Uint16 qy);
+SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 qx,
+                            Uint16 qy);
 
 //==================================================================================
 // Helper function to sge_transform()
 // Returns the bounding box
 //==================================================================================
-static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xscale, float yscale, Uint16 px, Uint16 py, Uint16 qx,
-                      Uint16 qy, Sint16* xmin, Sint16* ymin, Sint16* xmax, Sint16* ymax)
+static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xscale, float yscale, Uint16 px, Uint16 py,
+                      Uint16 qx, Uint16 qy, Sint16* xmin, Sint16* ymin, Sint16* xmax, Sint16* ymax)
 {
     Sint16 x, y, rx, ry;
 
@@ -173,94 +174,96 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
     }
 
 // Interpolated transform
-#define TRANSFORM_AA(UintXX_T, DIV)                                                                                        \
-    using UintXX = UintXX_T;                                                                                               \
-    Sint32 const src_pitch = src->pitch / (DIV);                                                                           \
-    Sint32 const dst_pitch = dst->pitch / (DIV);                                                                           \
-    UintXX const* src_row = (UintXX*)src->pixels;                                                                          \
-    UintXX* dst_row;                                                                                                       \
-    UintXX c1, c2, c3, c4;                                                                                                 \
-    Uint32 R, G, B, A = 0;                                                                                                 \
-    UintXX Rmask = src->format->Rmask, Gmask = src->format->Gmask, Bmask = src->format->Bmask, Amask = src->format->Amask; \
-    Uint32 wx, wy;                                                                                                         \
-    Uint32 p1, p2, p3, p4;                                                                                                 \
-                                                                                                                           \
-    /*                                                                                             */                      \
-    /*  Interpolation:                                                                             */                      \
-    /*  We calculate the distances from our point to the four nearest pixels, d1..d4.              */                      \
-    /*  d(a,b) = sqrt(a²+b²) ~= 0.707(a+b)  (Pythagoras (Taylor) expanded around (0.5;0.5))        */                    \
-    /*                                                                                             */                      \
-    /*    1  wx 2                                                                                  */                      \
-    /*     *-|-*  (+ = our point at (x,y))                                                         */                      \
-    /*     | | |  (* = the four nearest pixels)                                                    */                      \
-    /*  wy --+ |  wx = float(x) - int(x)                                                           */                      \
-    /*     |   |  wy = float(y) - int(y)                                                           */                      \
-    /*     *---*                                                                                   */                      \
-    /*    3     4                                                                                  */                      \
-    /*  d1 = d(wx,wy)  d2 = d(1-wx,wy)  d3 = d(wx,1-wy)  d4 = d(1-wx,1-wy)                         */                      \
-    /*  We now want to weight each pixels importance - it's vicinity to our point:                 */                      \
-    /*  w1=d4  w2=d3  w3=d2  w4=d1  (Yes it works... just think a bit about it)                    */                      \
-    /*                                                                                             */                      \
-    /*  If the pixels have the colors c1..c4 then our point should have the color                  */                      \
-    /*  c = (w1*c1 + w2*c2 + w3*c3 + w4*c4)/(w1+w2+w3+w4)   (the weighted average)                 */                      \
-    /*  but  w1+w2+w3+w4 = 4*0.707  so we might as well write it as                                */                      \
-    /*  c = p1*c1 + p2*c2 + p3*c3 + p4*c4  where  p1..p4 = (w1..w4)/(4*0.707)                      */                      \
-    /*                                                                                             */                      \
-    /*  But p1..p4 are fixed point so we can just divide the fixed point constant!                 */                      \
-    /*  8192/(4*0.71) = 2897  and we can skip 0.71 too (the division will cancel it everywhere)    */                      \
-    /*  8192/4 = 2048                                                                              */                      \
-    /*                                                                                             */                      \
-    /*  020102: I changed the fixed-point representation for the variables in the weighted average */                      \
-    /*          to 24.7 to avoid problems with 32bit colors. Everything else is still 18.13. This  */                      \
-    /*          does however not solve the problem with 32bit RGBA colors...                       */                      \
-    /*                                                                                             */                      \
-                                                                                                                           \
-    Sint32 const one = 2048 >> 6;     /* 1 in Fixed-point */                                                               \
-    Sint32 const two = 2 * 2048 >> 6; /* 2 in Fixed-point */                                                               \
-                                                                                                                           \
-    for(y = ymin; y < ymax; y++)                                                                                           \
-    {                                                                                                                      \
-        dy = y - qy;                                                                                                       \
-                                                                                                                           \
-        sx = Sint32(ctdx + stx * dy + mx); /* Compute source anchor points */                                              \
-        sy = Sint32(cty * dy - stdx + my);                                                                                 \
-                                                                                                                           \
-        /* Calculate pointer to dst surface */                                                                             \
-        dst_row = (UintXX*)dst->pixels + y * dst_pitch;                                                                    \
-                                                                                                                           \
-        for(x = xmin; x < xmax; x++)                                                                                       \
-        {                                                                                                                  \
-            rx = Sint16(sx >> 13); /* Convert from fixed-point */                                                          \
-            ry = Sint16(sy >> 13);                                                                                         \
-                                                                                                                           \
-            /* Make sure the source pixel is actually in the source image. */                                              \
-            if((rx >= sxmin) && (rx + 1 <= sxmax) && (ry >= symin) && (ry + 1 <= symax))                                   \
-            {                                                                                                              \
-                wx = (sx & 0x00001FFF) >> 8; /* (float(x) - int(x)) / 4 */                                                 \
-                wy = (sy & 0x00001FFF) >> 8;                                                                               \
-                                                                                                                           \
-                p4 = wx + wy;                                                                                              \
-                p3 = one - wx + wy;                                                                                        \
-                p2 = wx + one - wy;                                                                                        \
-                p1 = two - wx - wy;                                                                                        \
-                                                                                                                           \
-                c1 = *(src_row + ry * src_pitch + rx);                                                                     \
-                c2 = *(src_row + ry * src_pitch + rx + 1);                                                                 \
-                c3 = *(src_row + (ry + 1) * src_pitch + rx);                                                               \
-                c4 = *(src_row + (ry + 1) * src_pitch + rx + 1);                                                           \
-                                                                                                                           \
-                /* Calculate the average */                                                                                \
-                R = ((p1 * (c1 & Rmask) + p2 * (c2 & Rmask) + p3 * (c3 & Rmask) + p4 * (c4 & Rmask)) >> 7) & Rmask;        \
-                G = ((p1 * (c1 & Gmask) + p2 * (c2 & Gmask) + p3 * (c3 & Gmask) + p4 * (c4 & Gmask)) >> 7) & Gmask;        \
-                B = ((p1 * (c1 & Bmask) + p2 * (c2 & Bmask) + p3 * (c3 & Bmask) + p4 * (c4 & Bmask)) >> 7) & Bmask;        \
-                if(Amask)                                                                                                  \
-                    A = ((p1 * (c1 & Amask) + p2 * (c2 & Amask) + p3 * (c3 & Amask) + p4 * (c4 & Amask)) >> 7) & Amask;    \
-                                                                                                                           \
-                *(dst_row + x) = R | G | B | A;                                                                            \
-            }                                                                                                              \
-            sx += ctx; /* Incremental transformations */                                                                   \
-            sy -= sty;                                                                                                     \
-        }                                                                                                                  \
+#define TRANSFORM_AA(UintXX_T, DIV)                                                                                   \
+    using UintXX = UintXX_T;                                                                                          \
+    Sint32 const src_pitch = src->pitch / (DIV);                                                                      \
+    Sint32 const dst_pitch = dst->pitch / (DIV);                                                                      \
+    UintXX const* src_row = (UintXX*)src->pixels;                                                                     \
+    UintXX* dst_row;                                                                                                  \
+    UintXX c1, c2, c3, c4;                                                                                            \
+    Uint32 R, G, B, A = 0;                                                                                            \
+    UintXX Rmask = src->format->Rmask, Gmask = src->format->Gmask, Bmask = src->format->Bmask,                        \
+           Amask = src->format->Amask;                                                                                \
+    Uint32 wx, wy;                                                                                                    \
+    Uint32 p1, p2, p3, p4;                                                                                            \
+                                                                                                                      \
+    /*                                                                                             */                 \
+    /*  Interpolation:                                                                             */                 \
+    /*  We calculate the distances from our point to the four nearest pixels, d1..d4.              */                 \
+    /*  d(a,b) = sqrt(a²+b²) ~= 0.707(a+b)  (Pythagoras (Taylor) expanded around (0.5;0.5))        */               \
+    /*                                                                                             */                 \
+    /*    1  wx 2                                                                                  */                 \
+    /*     *-|-*  (+ = our point at (x,y))                                                         */                 \
+    /*     | | |  (* = the four nearest pixels)                                                    */                 \
+    /*  wy --+ |  wx = float(x) - int(x)                                                           */                 \
+    /*     |   |  wy = float(y) - int(y)                                                           */                 \
+    /*     *---*                                                                                   */                 \
+    /*    3     4                                                                                  */                 \
+    /*  d1 = d(wx,wy)  d2 = d(1-wx,wy)  d3 = d(wx,1-wy)  d4 = d(1-wx,1-wy)                         */                 \
+    /*  We now want to weight each pixels importance - it's vicinity to our point:                 */                 \
+    /*  w1=d4  w2=d3  w3=d2  w4=d1  (Yes it works... just think a bit about it)                    */                 \
+    /*                                                                                             */                 \
+    /*  If the pixels have the colors c1..c4 then our point should have the color                  */                 \
+    /*  c = (w1*c1 + w2*c2 + w3*c3 + w4*c4)/(w1+w2+w3+w4)   (the weighted average)                 */                 \
+    /*  but  w1+w2+w3+w4 = 4*0.707  so we might as well write it as                                */                 \
+    /*  c = p1*c1 + p2*c2 + p3*c3 + p4*c4  where  p1..p4 = (w1..w4)/(4*0.707)                      */                 \
+    /*                                                                                             */                 \
+    /*  But p1..p4 are fixed point so we can just divide the fixed point constant!                 */                 \
+    /*  8192/(4*0.71) = 2897  and we can skip 0.71 too (the division will cancel it everywhere)    */                 \
+    /*  8192/4 = 2048                                                                              */                 \
+    /*                                                                                             */                 \
+    /*  020102: I changed the fixed-point representation for the variables in the weighted average */                 \
+    /*          to 24.7 to avoid problems with 32bit colors. Everything else is still 18.13. This  */                 \
+    /*          does however not solve the problem with 32bit RGBA colors...                       */                 \
+    /*                                                                                             */                 \
+                                                                                                                      \
+    Sint32 const one = 2048 >> 6;     /* 1 in Fixed-point */                                                          \
+    Sint32 const two = 2 * 2048 >> 6; /* 2 in Fixed-point */                                                          \
+                                                                                                                      \
+    for(y = ymin; y < ymax; y++)                                                                                      \
+    {                                                                                                                 \
+        dy = y - qy;                                                                                                  \
+                                                                                                                      \
+        sx = Sint32(ctdx + stx * dy + mx); /* Compute source anchor points */                                         \
+        sy = Sint32(cty * dy - stdx + my);                                                                            \
+                                                                                                                      \
+        /* Calculate pointer to dst surface */                                                                        \
+        dst_row = (UintXX*)dst->pixels + y * dst_pitch;                                                               \
+                                                                                                                      \
+        for(x = xmin; x < xmax; x++)                                                                                  \
+        {                                                                                                             \
+            rx = Sint16(sx >> 13); /* Convert from fixed-point */                                                     \
+            ry = Sint16(sy >> 13);                                                                                    \
+                                                                                                                      \
+            /* Make sure the source pixel is actually in the source image. */                                         \
+            if((rx >= sxmin) && (rx + 1 <= sxmax) && (ry >= symin) && (ry + 1 <= symax))                              \
+            {                                                                                                         \
+                wx = (sx & 0x00001FFF) >> 8; /* (float(x) - int(x)) / 4 */                                            \
+                wy = (sy & 0x00001FFF) >> 8;                                                                          \
+                                                                                                                      \
+                p4 = wx + wy;                                                                                         \
+                p3 = one - wx + wy;                                                                                   \
+                p2 = wx + one - wy;                                                                                   \
+                p1 = two - wx - wy;                                                                                   \
+                                                                                                                      \
+                c1 = *(src_row + ry * src_pitch + rx);                                                                \
+                c2 = *(src_row + ry * src_pitch + rx + 1);                                                            \
+                c3 = *(src_row + (ry + 1) * src_pitch + rx);                                                          \
+                c4 = *(src_row + (ry + 1) * src_pitch + rx + 1);                                                      \
+                                                                                                                      \
+                /* Calculate the average */                                                                           \
+                R = ((p1 * (c1 & Rmask) + p2 * (c2 & Rmask) + p3 * (c3 & Rmask) + p4 * (c4 & Rmask)) >> 7) & Rmask;   \
+                G = ((p1 * (c1 & Gmask) + p2 * (c2 & Gmask) + p3 * (c3 & Gmask) + p4 * (c4 & Gmask)) >> 7) & Gmask;   \
+                B = ((p1 * (c1 & Bmask) + p2 * (c2 & Bmask) + p3 * (c3 & Bmask) + p4 * (c4 & Bmask)) >> 7) & Bmask;   \
+                if(Amask)                                                                                             \
+                    A =                                                                                               \
+                      ((p1 * (c1 & Amask) + p2 * (c2 & Amask) + p3 * (c3 & Amask) + p4 * (c4 & Amask)) >> 7) & Amask; \
+                                                                                                                      \
+                *(dst_row + x) = R | G | B | A;                                                                       \
+            }                                                                                                         \
+            sx += ctx; /* Incremental transformations */                                                              \
+            sy -= sty;                                                                                                \
+        }                                                                                                             \
     }
 
 #define TRANSFORM_GENERIC_AA                                                                          \
@@ -314,8 +317,8 @@ static void _calcRect(SDL_Surface* src, SDL_Surface* dst, float theta, float xsc
 // We get better performance if AA and normal rendering is seperated into two functions (better optimization).
 // sge_transform() is used as a wrapper.
 
-static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py,
-                                  Uint16 qx, Uint16 qy, Uint8 flags)
+static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale,
+                                  Uint16 px, Uint16 py, Uint16 qx, Uint16 qy, Uint8 flags)
 {
     Sint32 dy, sx, sy;
     Sint16 x, y, rx, ry;
@@ -382,7 +385,8 @@ static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angl
     }
 
     // Use the correct bpp
-    if(src->format->BytesPerPixel == dst->format->BytesPerPixel && src->format->BytesPerPixel != 3 && !(flags & SGE_TSAFE))
+    if(src->format->BytesPerPixel == dst->format->BytesPerPixel && src->format->BytesPerPixel != 3
+       && !(flags & SGE_TSAFE))
     {
         switch(src->format->BytesPerPixel)
         {
@@ -421,8 +425,8 @@ static SDL_Rect sge_transformNorm(SDL_Surface* src, SDL_Surface* dst, float angl
     return r;
 }
 
-static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py,
-                                Uint16 qx, Uint16 qy, Uint8 flags)
+static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px,
+                                Uint16 py, Uint16 qx, Uint16 qy, Uint8 flags)
 {
     Sint32 dy, sx, sy;
     Sint16 x, y, rx, ry;
@@ -489,7 +493,8 @@ static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle,
     }
 
     // Use the correct bpp
-    if(src->format->BytesPerPixel == dst->format->BytesPerPixel && src->format->BytesPerPixel != 3 && !(flags & SGE_TSAFE))
+    if(src->format->BytesPerPixel == dst->format->BytesPerPixel && src->format->BytesPerPixel != 3
+       && !(flags & SGE_TSAFE))
     {
         switch(src->format->BytesPerPixel)
         {
@@ -529,8 +534,8 @@ static SDL_Rect sge_transformAA(SDL_Surface* src, SDL_Surface* dst, float angle,
     return r;
 }
 
-SDL_Rect sge_transform(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px, Uint16 py, Uint16 qx,
-                       Uint16 qy, Uint8 flags)
+SDL_Rect sge_transform(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 px,
+                       Uint16 py, Uint16 qx, Uint16 qy, Uint8 flags)
 {
     if(flags & SGE_TTMAP)
         return sge_transform_tmap(src, dst, angle, xscale, yscale, qx, qy);
@@ -560,8 +565,8 @@ SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, f
     Sint16 qx = -xmin;
     Sint16 qy = -ymin;
 
-    SDL_Surface* dest = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, src->format->BitsPerPixel, src->format->Rmask, src->format->Gmask,
-                                             src->format->Bmask, src->format->Amask);
+    SDL_Surface* dest = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, src->format->BitsPerPixel, src->format->Rmask,
+                                             src->format->Gmask, src->format->Bmask, src->format->Amask);
     if(!dest)
         return nullptr;
 
@@ -575,7 +580,8 @@ SDL_Surface* sge_transform_surface(SDL_Surface* src, Uint32 bcol, float angle, f
 //==================================================================================
 // Rotate using texture mapping
 //==================================================================================
-SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 qx, Uint16 qy)
+SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, float xscale, float yscale, Uint16 qx,
+                            Uint16 qy)
 {
     double rad;
     double a = (sge_clip_xmax(src) - sge_clip_xmin(src)) / 2.0;
@@ -627,9 +633,9 @@ SDL_Rect sge_transform_tmap(SDL_Surface* src, SDL_Surface* dst, float angle, flo
     yt[3] = Sint16((asinv + bcosv) + qy);
 
     // Use a texture mapped rectangle
-    sge_TexturedRect(dst, xt[0], yt[0], xt[1], yt[1], xt[2], yt[2], xt[3], yt[3], src, sge_clip_xmin(src), sge_clip_ymin(src),
-                     sge_clip_xmax(src), sge_clip_ymin(src), sge_clip_xmin(src), sge_clip_ymax(src), sge_clip_xmax(src),
-                     sge_clip_ymax(src));
+    sge_TexturedRect(dst, xt[0], yt[0], xt[1], yt[1], xt[2], yt[2], xt[3], yt[3], src, sge_clip_xmin(src),
+                     sge_clip_ymin(src), sge_clip_xmax(src), sge_clip_ymin(src), sge_clip_xmin(src), sge_clip_ymax(src),
+                     sge_clip_xmax(src), sge_clip_ymax(src));
 
     // Or maybe two trigons...
     // sge_TexturedTrigon(dest,xt[0],yt[0],xt[1],yt[1],xt[2],yt[2],src, sge_clip_xmin(src),sge_clip_ymin(src),
