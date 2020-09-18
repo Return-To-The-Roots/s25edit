@@ -31,11 +31,11 @@ public:
     CButton(void callback(int), int clickedParam, Sint16 x = 0, Sint16 y = 0, Uint16 w = 20, Uint16 h = 20,
             int color = BUTTON_GREY, const char* text = nullptr, int button_picture = -1);
     // Access
-    int getX() { return x_; };
-    int getY() { return y_; };
+    int getX() const { return x_; };
+    int getY() const { return y_; };
     Point16 getPos() const { return {x_, y_}; }
-    int getW() { return w; };
-    int getH() { return h; };
+    int getW() const { return w; };
+    int getH() const { return h; };
     void setX(int x) { this->x_ = x; };
     void setY(int y) { this->y_ = y; };
     void setButtonPicture(int picture);

@@ -126,7 +126,7 @@ protected:
     bool warp_border;
 
     // Decode a warp pos rectangle
-    int get_warp(SDL_Rect rec, SDL_Rect& r1, SDL_Rect& r2, SDL_Rect& r3, SDL_Rect& r4);
+    int get_warp(SDL_Rect rec, SDL_Rect& r1, SDL_Rect& r2, SDL_Rect& r3, SDL_Rect& r4) const;
 
     // Helper functions
     void warp_draw();

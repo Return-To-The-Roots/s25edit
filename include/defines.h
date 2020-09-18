@@ -1208,7 +1208,7 @@ constexpr auto MAXMAPHEIGHT = 1024;
 //#define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
 //#define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
 //#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be
-//greater than 5
+// greater than 5
 
 enum TriangleTerrainType
 {

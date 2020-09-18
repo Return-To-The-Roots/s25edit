@@ -777,7 +777,7 @@ static void _FloodFillX(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
     Sint16 l, x1, x2, dy;
     Uint32 oc; /* old pixel color */
     std::array<seg, MAX> stack;
-    auto sp = stack.begin(); /* stack of filled segments */
+    auto* sp = stack.begin(); /* stack of filled segments */
 
     if(x < sge_clip_xmin(dst) || x > sge_clip_xmax(dst) || y < sge_clip_ymin(dst) || y > sge_clip_ymax(dst))
         return;
@@ -846,7 +846,7 @@ void DO_FILL(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color)
     Sint16 l, x1, x2, dy;
     Uint32 oc; /* old pixel color */
     std::array<seg, MAX> stack;
-    auto sp = stack.begin(); /* stack of filled segments */
+    auto* sp = stack.begin(); /* stack of filled segments */
     Uint16 pitch = dst->pitch / dst->format->BytesPerPixel;
     auto* row = (T*)dst->pixels + y * pitch;
     auto* pixel = row + x;

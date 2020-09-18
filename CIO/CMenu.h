@@ -13,5 +13,5 @@ public:
     CMenu(int pic_background);
     void setActive() { active = true; };
     void setInactive() { active = false; };
-    bool isActive() { return active; };
+    bool isActive() const { return active; };
 };

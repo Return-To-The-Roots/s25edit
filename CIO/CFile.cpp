@@ -1418,8 +1418,8 @@ bool CFile::read_bob07()
     }
 
     /**FOLLOWING COMMENTS ARE ABSOLUTLY TEMPORARY, UNTIL I KNOW HOW TO HANDLE SHADOWS WITH ALPHA-BLENDING AND THEN
-    *BLITTING
-    ***---THIS CODE IS NOT USEFUL.**/
+     *BLITTING
+     ***---THIS CODE IS NOT USEFUL.**/
     // We have to blit picture and shadow together and because of transparency we need to set the colorkey
     // SDL_SetColorKey(shadowArray->surface, SDL_SRCCOLORKEY, SDL_MapRGBA(shadowArray->surface->format, 0, 0, 0, 0));
     // SDL_BlitSurface(shadowArray->surface, nullptr, (shadowArray-1)->surface, nullptr);

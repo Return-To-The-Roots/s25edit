@@ -134,11 +134,11 @@ public:
         Surf_Map.reset();
     }
     void setMode(int mode) { this->mode = mode; }
-    int getMode() { return mode; }
+    int getMode() const { return mode; }
     void setModeContent(int modeContent) { this->modeContent = modeContent; }
     void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; }
-    int getModeContent() { return modeContent; }
-    int getModeContent2() { return modeContent2; }
+    int getModeContent() const { return modeContent; }
+    int getModeContent2() const { return modeContent2; }
     bobMAP* getMap() { return map.get(); }
     SDL_Surface* getSurface()
     {
@@ -164,31 +164,31 @@ public:
         ChangeSectionHexagonMode = HexagonMode;
         setupVerticesActivity();
     }
-    bool getHexagonMode() { return ChangeSectionHexagonMode; }
+    bool getHexagonMode() const { return ChangeSectionHexagonMode; }
     void setVertexFillRSU(bool fillRSU)
     {
         VertexFillRSU = fillRSU;
         setupVerticesActivity();
     }
-    bool getVertexFillRSU() { return VertexFillRSU; }
+    bool getVertexFillRSU() const { return VertexFillRSU; }
     void setVertexFillUSD(bool fillUSD)
     {
         VertexFillUSD = fillUSD;
         setupVerticesActivity();
     }
-    bool getVertexFillUSD() { return VertexFillUSD; }
+    bool getVertexFillUSD() const { return VertexFillUSD; }
     void setVertexFillRandom(bool fillRandom)
     {
         VertexFillRandom = fillRandom;
         setupVerticesActivity();
     }
-    bool getVertexFillRandom() { return VertexFillRandom; }
+    bool getVertexFillRandom() const { return VertexFillRandom; }
     void setVertexActivityRandom(bool activityRandom)
     {
         VertexActivityRandom = activityRandom;
         setupVerticesActivity();
     }
-    bool getVertexActivityRandom() { return VertexActivityRandom; }
+    bool getVertexActivityRandom() const { return VertexActivityRandom; }
 
 private:
     // this will calculate ALL vertices for the whole square

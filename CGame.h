@@ -76,7 +76,7 @@ public:
 
     void Render();
 
-    void RenderPresent();
+    void RenderPresent() const;
 
     CMenu* RegisterMenu(std::unique_ptr<CMenu> Menu);
     bool UnregisterMenu(CMenu* Menu);
@@ -87,6 +87,6 @@ public:
     void setMapObj(std::unique_ptr<CMap> MapObj);
     CMap* getMapObj();
     void delMapObj();
-    SDL_Surface* getDisplaySurface() { return Surf_Display.get(); };
-    auto getRes() { return GameResolution; }
+    SDL_Surface* getDisplaySurface() const const { return Surf_Display.get(); };
+    auto getRes() const const { return GameResolution; }
 };

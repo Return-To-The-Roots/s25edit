@@ -51,7 +51,7 @@ int CGame::Execute()
     return 0;
 }
 
-void CGame::RenderPresent()
+void CGame::RenderPresent() const
 {
     SDL_UpdateTexture(displayTexture_.get(), nullptr, Surf_Display->pixels, Surf_Display->w * sizeof(Uint32));
     SDL_RenderClear(renderer_.get());

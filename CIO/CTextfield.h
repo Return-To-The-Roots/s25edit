@@ -44,7 +44,7 @@ public:
     void setText(const std::string& text);
     void setActive() { active = true; }
     void setInactive() { active = false; }
-    bool isActive() { return active; }
+    bool isActive() const { return active; }
     bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
     void setKeyboardData(const SDL_KeyboardEvent& key);

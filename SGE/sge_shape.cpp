@@ -75,7 +75,7 @@ bool sge_surface::check_warp()
     return flag;
 }
 
-int sge_surface::get_warp(SDL_Rect rec, SDL_Rect& r1, SDL_Rect& r2, SDL_Rect& r3, SDL_Rect& r4)
+int sge_surface::get_warp(SDL_Rect rec, SDL_Rect& r1, SDL_Rect& r2, SDL_Rect& r3, SDL_Rect& r4) const
 {
     // We want to decode the pos rectangle into two or four rectangles.
 

@@ -24,10 +24,10 @@ private:
 public:
     CPicture(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, int picture = -1);
     // Access
-    int getX() { return x; };
-    int getY() { return y; };
-    int getW() { return w; };
-    int getH() { return h; };
+    int getX() const { return x; };
+    int getY() const { return y; };
+    int getW() const { return w; };
+    int getH() const { return h; };
     void setX(int x) { this->x = x; };
     void setY(int y) { this->y = y; };
     void setMouseData(const SDL_MouseMotionEvent& motion);

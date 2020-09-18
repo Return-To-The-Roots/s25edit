@@ -28,10 +28,10 @@ public:
     CFont(std::string text, unsigned x = 0, unsigned y = 0, FontSize fontsize = FontSize::Small,
           FontColor color = FontColor::Yellow);
     // Access
-    int getX() { return x_; };
-    int getY() { return y_; };
+    int getX() const const { return x_; };
+    int getY() const const { return y_; };
     void setPos(Position pos);
-    unsigned getW() { return w; };
+    unsigned getW() const const { return w; };
     unsigned getH() { return static_cast<unsigned>(fontsize_); };
     void setFontsize(FontSize fontsize);
     void setColor(FontColor color);

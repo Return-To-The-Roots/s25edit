@@ -675,9 +675,9 @@ void callback::EditorHelpMenu(int Param)
 
         case WINDOW_QUIT_MESSAGE: // this is the global window quit message, callback is explicit called with this
                                   // value, so destroy the window
-        case WINDOWQUIT: // this is the own window quit message of the callback
-        case MAP_QUIT:   // this is the global window quit message, callback is explicit called with this value, so
-                         // destroy the window
+        case WINDOWQUIT:          // this is the own window quit message of the callback
+        case MAP_QUIT: // this is the global window quit message, callback is explicit called with this value, so
+                       // destroy the window
             if(WNDHelp)
             {
                 WNDHelp->setWaste();
@@ -2755,7 +2755,7 @@ void callback::MinimapMenu(int Param)
                 width = map->width / scaleNum;
                 height = map->height / scaleNum;
                 //--> 12px is width of left and right window frame and 30px is height of the upper and lower window
-                //frame
+                // frame
                 if((global::s2->getDisplaySurface()->w - 12 < width)
                    || (global::s2->getDisplaySurface()->h - 30 < height))
                     break;
