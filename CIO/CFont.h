@@ -28,14 +28,14 @@ public:
     CFont(std::string text, unsigned x = 0, unsigned y = 0, FontSize fontsize = FontSize::Small,
           FontColor color = FontColor::Yellow);
     // Access
-    int getX() const const { return x_; };
-    int getY() const const { return y_; };
+    int getX() const { return x_; };
+    int getY() const { return y_; };
     void setPos(Position pos);
-    unsigned getW() const const { return w; };
-    unsigned getH() { return static_cast<unsigned>(fontsize_); };
+    unsigned getW() const { return w; };
+    unsigned getH() const { return static_cast<unsigned>(fontsize_); };
     void setFontsize(FontSize fontsize);
     void setColor(FontColor color);
-    FontColor getColor() { return color_; }
+    FontColor getColor() const { return color_; }
     void setText(std::string text);
     void setCallback(std::function<void(int)> callback, int param)
     {

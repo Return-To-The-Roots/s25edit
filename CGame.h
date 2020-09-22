@@ -87,6 +87,6 @@ public:
     void setMapObj(std::unique_ptr<CMap> MapObj);
     CMap* getMapObj();
     void delMapObj();
-    SDL_Surface* getDisplaySurface() const const { return Surf_Display.get(); };
-    auto getRes() const const { return GameResolution; }
+    SDL_Surface* getDisplaySurface() const { return Surf_Display.get(); };
+    auto getRes() const { return GameResolution; }
 };
