@@ -77,8 +77,6 @@ extern "C"
                                  Uint32* ctab, int start, int stop);
     DECLSPEC void sge_SetupRainbowPalette(SDL_Surface* Surface, Uint32* ctab, int intensity, int start, int stop);
     DECLSPEC void sge_SetupBWPalette(SDL_Surface* Surface, Uint32* ctab, int start, int stop);
-
-    DECLSPEC void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint32 color);
 #ifdef _SGE_C
 }
 #endif
@@ -89,5 +87,4 @@ DECLSPEC void sge_PutPixel(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Ui
 DECLSPEC void _PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
 DECLSPEC void sge_PutPixelAlpha(SDL_Surface* surface, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B, Uint8 alpha);
 DECLSPEC void sge_ClearSurface(SDL_Surface* Surface, Uint8 R, Uint8 G, Uint8 B);
-DECLSPEC void sge_FloodFill(SDL_Surface* dst, Sint16 x, Sint16 y, Uint8 R, Uint8 G, Uint8 B);
 #endif /* sge_C_ONLY */
