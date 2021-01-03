@@ -422,6 +422,7 @@ void CMap::loadMapPics()
             palFile = "GFX/PALETTE/PAL5.BBM";
             break;
     }
+    CFile::set_palArray(&global::palArray[PAL_MAPxx]);
     // load only the palette at this time from MAP0x.LST
     std::cout << "\nLoading palette from file: " << picFile << "...";
     if(!CFile::open_file(global::gameDataFilePath / picFile, LST, true))
@@ -444,6 +445,7 @@ void CMap::loadMapPics()
     //}
     // set back palette
     CFile::set_palActual(CFile::get_palArray());
+    CFile::set_palArray(&global::palArray[PAL_xBBM]);
     // load palette file for the map (for precalculated shading)
     std::cout << "\nLoading palette from file: " << palFile << "...";
     if(!CFile::open_file(global::gameDataFilePath / palFile, BBM, true))
