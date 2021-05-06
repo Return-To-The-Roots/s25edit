@@ -1,10 +1,18 @@
+<!--
+Copyright (C) 2000 - 2003 Anders LindstrÃ¶m & Johan E. Thelin
+Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
+Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+
+SPDX-License-Identifier: LGPL-2.1-or-later
+-->
+
 SDL Graphics Extension (SGE)
 ====================================================================================
 http://freshmeat.net/projects/sge/
 http://www.etek.chalmers.se/~e8cal1/sge/index.html
 http://www.digitalfanatics.org/cal/sge/index.html
 
-Author: Anders Lindström - email: cal@swipnet.se
+Author: Anders LindstrÃ¶m - email: cal@swipnet.se
 
 
 1. Intro
@@ -216,4 +224,4 @@ Read the html documentation and study the examples.
 
 
 
-/Anders Lindström - email: cal@swipnet.se
+/Anders Lindstrï¿½m - email: cal@swipnet.se

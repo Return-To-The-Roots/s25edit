@@ -1,19 +1,16 @@
+// Copyright (C) 1999 - 2003 Anders Lindström
+// Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
+// Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
  *	SDL Graphics Extension
  *	Rotation routines
  *
  *	Started 000625
- *
- *	License: LGPL v2+ (see the file LICENSE)
- *	(c)1999-2003 Anders Lindström
  */
 
-/*********************************************************************
- *  This library is free software; you can redistribute it and/or    *
- *  modify it under the terms of the GNU Library General Public      *
- *  License as published by the Free Software Foundation; either     *
- *  version 2 of the License, or (at your option) any later version. *
- *********************************************************************/
 #define _USE_MATH_DEFINES
 #define HAVE_M_PI 1
 #include "sge_rotation.h"
