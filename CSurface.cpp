@@ -235,6 +235,16 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     assert(displayRect.top < myMap.height_pixel);
     assert(displayRect.bottom > 0);
 
+    Uint8 maxH = 0;
+    for(int y = 0; y < height; ++y)
+    {
+        for(int x = 0; x < width; ++x)
+        {
+            maxH = std::max(myMap.getVertex(x, y).h, maxH);
+        }
+    }
+    const int additionalRows = TRIANGLE_INCREASE * std::max(0, maxH - 0x0A) / TRIANGLE_HEIGHT;
+
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
     for(int i = 0; i < 2; i++)
@@ -249,7 +259,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
 
             // at first call DrawTriangle for all triangles inside the map edges
             int row_start = std::max(displayRect.top, 2 * TRIANGLE_HEIGHT) / TRIANGLE_HEIGHT - 2;
-            int row_end = (displayRect.bottom) / TRIANGLE_HEIGHT + 8;
+            int row_end = (displayRect.bottom) / TRIANGLE_HEIGHT + additionalRows;
             int col_start = std::max<int>(displayRect.left, TRIANGLE_WIDTH) / TRIANGLE_WIDTH - 1;
             int col_end = (displayRect.right) / TRIANGLE_WIDTH + 1;
             bool view_outside_edges;
