@@ -64,11 +64,12 @@ void CGame::Render()
         CSurface::Draw(Surf_Display, MapObj->getSurface(), 0, 0);
         std::array<char, 100> textBuffer;
         // text for x and y of vertex (shown in upper left corner)
-        sprintf(textBuffer.data(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
+        std::snprintf(textBuffer.data(), textBuffer.size(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
         CFont::writeText(Surf_Display, textBuffer.data(), 20, 20);
         // text for MinReduceHeight and MaxRaiseHeight
-        sprintf(textBuffer.data(), "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
-                MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
+        std::snprintf(textBuffer.data(), textBuffer.size(),
+                      "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
+                      MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
         CFont::writeText(Surf_Display, textBuffer.data(), 100, 20);
         // text for MovementLocked
         if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
@@ -78,7 +79,7 @@ void CGame::Render()
             CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large,
                              FontColor::Orange);
         else if(MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Vertikal movement locked (F10 to unlock)", 20, 40, FontSize::Large,
+            CFont::writeText(Surf_Display, "Vertical movement locked (F10 to unlock)", 20, 40, FontSize::Large,
                              FontColor::Orange);
     }
 

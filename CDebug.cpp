@@ -115,7 +115,6 @@ void CDebug::sendParam(int Param)
 
 void CDebug::actualizeData()
 {
-    // some puffers to write texts with sprintf()
     if(!FrameCounterText)
         FrameCounterText = dbgWnd->addText("", 0, 10, fontsize);
     // write new FrameCounterText and draw it
