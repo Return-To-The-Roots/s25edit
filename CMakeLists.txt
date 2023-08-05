@@ -40,6 +40,7 @@ ENDIF()
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
 target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata endian::static Boost::nowide PUBLIC Boost::disable_autolinking)
 target_include_directories(s25edit PRIVATE include)
+target_compile_features(s25edit PRIVATE cxx_std_17)
 
 if(MINGW)
   target_link_libraries(s25edit PRIVATE -mconsole)

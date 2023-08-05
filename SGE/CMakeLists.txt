@@ -9,7 +9,7 @@ file(GLOB_RECURSE SGE_SOURCES *.cpp *.h)
 add_library(SGE STATIC ${SGE_SOURCES})
 target_link_libraries(SGE PUBLIC Boost::boost SDL2::SDL2)
 target_include_directories(SGE PRIVATE include/SGE PUBLIC include)
-target_compile_features(SGE PUBLIC cxx_std_14)
+target_compile_features(SGE PUBLIC cxx_std_17)
 set_target_properties(SGE PROPERTIES CXX_EXTENSIONS OFF)
 
 include(EnableWarnings)
