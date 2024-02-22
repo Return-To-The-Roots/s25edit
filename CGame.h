@@ -67,7 +67,7 @@ private:
     void SetAppIcon();
 
 public:
-    CGame();
+    CGame(Extent GameResolution_, bool fullscreen_);
     ~CGame();
 
     int Execute();

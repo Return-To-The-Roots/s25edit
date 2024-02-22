@@ -14,13 +14,17 @@
 #include <boost/nowide/cstdio.hpp>
 #include <iostream>
 #include <limits>
+#include <boost/program_options.hpp>
+#include <exception>
 
 namespace bfs = boost::filesystem;
 
 //#include <vld.h>
 
-CGame::CGame()
-    : GameResolution(1024, 768), fullscreen(false), Running(true), showLoadScreen(true),
+boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[]);
+
+CGame::CGame(Extent GameResolution_, bool fullscreen_)
+    : GameResolution(GameResolution_), fullscreen(fullscreen_), Running(true), showLoadScreen(true),
       lastFps("", 0, 0, FontSize::Medium)
 {
     global::bmpArray.resize(MAXBOBBMP);
@@ -200,8 +204,10 @@ bool checkWriteable(const bfs::path& folder)
 } // namespace
 
 #undef main
-int main(int /*argc*/, char* /*argv*/[])
+int main(int argc, char* argv[])
 {
+    auto programOptions = parse_cmdline_args(argc, argv);
+
     if(!RTTRCONFIG.Init())
     {
         std::cerr << "Failed to init program!" << std::endl;
@@ -242,7 +248,9 @@ int main(int /*argc*/, char* /*argv*/[])
     int result = 0;
     try
     {
-        auto s2 = std::make_unique<CGame>();
+        auto s2 = std::make_unique<CGame>(
+            Extent(programOptions["width"].as<unsigned>(),programOptions["height"].as<unsigned>()),
+            programOptions["fullscreen"].as<bool>());
         result = s2->Execute();
     } catch(...)
     {
@@ -252,5 +260,51 @@ int main(int /*argc*/, char* /*argv*/[])
     SDL_Quit();
 
     WaitForEnter();
+    return result;
+}
+
+boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[])
+{
+    using std::cout;
+    using std::endl;
+    using std::exception;
+    namespace po = boost::program_options;
+
+    po::variables_map result;
+
+    try
+    {
+        po::options_description desc("Options");
+        desc.add_options()
+            ("help",                                                   "Show help")
+            ("width",      po::value<unsigned>()->default_value(1024), "Set width")
+            ("height",     po::value<unsigned>()->default_value(768),  "Set height")
+            ("fullscreen", po::value<bool>()->default_value(false),    "Set fullscreen");
+
+        po::store(po::parse_command_line(argc, argv, desc), result);
+        po::notify(result);
+
+        if (result.count("help"))
+        {
+            cout << desc << endl;
+            exit(EXIT_SUCCESS);
+        }
+
+        cout << "Resolution set to: "
+             << result["width"].as<unsigned>() << "x" << result["height"].as<unsigned>()
+             << " " << (result["fullscreen"].as<bool>() ? "fullscreen" : "window") << "-mode"
+             << endl;
+    }
+    catch (exception& e)
+    {
+        cout << "error: " << e.what() << endl;
+        exit(EXIT_SUCCESS);
+    }
+    catch(...)
+    {
+        cout << "Exception of unknown type!" << endl;
+        exit(EXIT_SUCCESS);
+    }
+
     return result;
 }
