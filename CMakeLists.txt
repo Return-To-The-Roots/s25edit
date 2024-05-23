@@ -13,7 +13,7 @@ add_subdirectory(SGE)
 
 option(RTTR_EDITOR_ADMINMODE "In admin mode there are some key combos to open debugger, resource viewer and so on" OFF)
 if(RTTR_EDITOR_ADMINMODE)
-	add_definitions(-D_ADMINMODE)
+    add_definitions(-D_ADMINMODE)
 endif()
 
 file(GLOB MAIN_SOURCES *.cpp *.h include/*.h)
@@ -34,7 +34,7 @@ if(WIN32)
         SET(icon_RC ${CMAKE_CURRENT_BINARY_DIR}/s25edit.res.o)
     endif()
 ELSE()
-	SET(icon_RC "")
+    SET(icon_RC "")
 ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
@@ -43,11 +43,11 @@ target_include_directories(s25edit PRIVATE include)
 target_compile_features(s25edit PRIVATE cxx_std_17)
 
 if(MINGW)
-  target_link_libraries(s25edit PRIVATE -mconsole)
+    target_link_libraries(s25edit PRIVATE -mconsole)
 endif()
 
 if(RTTR_BINDIR)
-	INSTALL(TARGETS s25edit RUNTIME DESTINATION ${RTTR_BINDIR})
+    INSTALL(TARGETS s25edit RUNTIME DESTINATION ${RTTR_BINDIR})
 endif()
 
 if(ClangFormat_FOUND)
