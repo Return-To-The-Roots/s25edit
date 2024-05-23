@@ -12,10 +12,10 @@
 #include "globals.h"
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
-#include <iostream>
-#include <limits>
 #include <boost/program_options.hpp>
 #include <exception>
+#include <iostream>
+#include <limits>
 
 namespace bfs = boost::filesystem;
 
@@ -249,8 +249,8 @@ int main(int argc, char* argv[])
     try
     {
         auto s2 = std::make_unique<CGame>(
-            Extent(programOptions["width"].as<unsigned>(),programOptions["height"].as<unsigned>()),
-            programOptions["fullscreen"].as<bool>());
+          Extent(programOptions["width"].as<unsigned>(), programOptions["height"].as<unsigned>()),
+          programOptions["fullscreen"].as<bool>());
         result = s2->Execute();
     } catch(...)
     {
@@ -275,32 +275,30 @@ boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[])
     try
     {
         po::options_description desc("Options");
+        // clang-format off
         desc.add_options()
             ("help",                                                   "Show help")
             ("width",      po::value<unsigned>()->default_value(1024), "Set width")
             ("height",     po::value<unsigned>()->default_value(768),  "Set height")
             ("fullscreen", po::value<bool>()->default_value(false),    "Set fullscreen");
+        // clang-format on
 
         po::store(po::parse_command_line(argc, argv, desc), result);
         po::notify(result);
 
-        if (result.count("help"))
+        if(result.count("help"))
         {
             cout << desc << endl;
             exit(EXIT_SUCCESS);
         }
 
-        cout << "Resolution set to: "
-             << result["width"].as<unsigned>() << "x" << result["height"].as<unsigned>()
-             << " " << (result["fullscreen"].as<bool>() ? "fullscreen" : "window") << "-mode"
-             << endl;
-    }
-    catch (exception& e)
+        cout << "Resolution set to: " << result["width"].as<unsigned>() << "x" << result["height"].as<unsigned>() << " "
+             << (result["fullscreen"].as<bool>() ? "fullscreen" : "window") << "-mode" << endl;
+    } catch(exception& e)
     {
         cout << "error: " << e.what() << endl;
         exit(EXIT_SUCCESS);
-    }
-    catch(...)
+    } catch(...)
     {
         cout << "Exception of unknown type!" << endl;
         exit(EXIT_SUCCESS);
