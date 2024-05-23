@@ -18,8 +18,7 @@
 #include "CSurface.h"
 #include "globals.h"
 #include "helpers/format.hpp"
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #include <algorithm>
 
 namespace bfs = boost::filesystem;
