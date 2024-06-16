@@ -1,5 +1,5 @@
 // Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
-// Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+// Copyright (C) 2009 - 2024 Settlers Freaks <sf-team at siedler25.org>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -20,7 +20,6 @@ struct bobMAP;
 class CFile
 {
 private:
-    static FILE* fp;
     static bool loadPAL;
     static bobBMP* bmpArray;
     static bobSHADOW* shadowArray;
@@ -35,28 +34,28 @@ public:
 
 private:
     // Methods
-    static bool open_lst();
-    static bool open_bob(); // not implemented yet
+    static bool read_lst(FILE* fp);
+    static bool read_bob(FILE* fp); // not implemented yet
     static bool open_idx(const boost::filesystem::path& filepath);
-    static bool open_bbm();
-    static bool open_lbm(const boost::filesystem::path& filepath);
-    static bool open_gou();
-    static bobMAP* open_wld();
-    static bobMAP* open_swd();
-    static bool save_lst(void* data);                                          // not implemented yet
-    static bool save_bob(void* data);                                          // not implemented yet
-    static bool save_idx(void* data, const boost::filesystem::path& filepath); // not implemented yet
-    static bool save_bbm(void* data);                                          // not implemented yet
-    static bool save_lbm(void* data);                                          // not implemented yet
-    static bool save_wld(void* data);
-    static bool save_swd(void* data);
-    static bool read_bob01(); // not implemented yet
-    static bool read_bob02();
-    static bool read_bob03();
-    static bool read_bob04(int player_color = PLAYER_BLUE);
-    static bool read_bob05();
-    static bool read_bob07();
-    static bool read_bob14();
+    static bool read_bbm(FILE* fp);
+    static bool read_lbm(FILE* fp, const boost::filesystem::path& filepath);
+    static bool read_gou(FILE* fp);
+    static bobMAP* read_wld(FILE* fp);
+    static bobMAP* read_swd(FILE* fp);
+    static bool save_lst(FILE* fp, void* data); // not implemented yet
+    static bool save_bob(FILE* fp, void* data); // not implemented yet
+    static bool save_idx(FILE* fp, void* data); // not implemented yet
+    static bool save_bbm(FILE* fp, void* data); // not implemented yet
+    static bool save_lbm(FILE* fp, void* data); // not implemented yet
+    static bool save_wld(FILE* fp, void* data);
+    static bool save_swd(FILE* fp, void* data);
+    static bool read_bob01(FILE* fp); // not implemented yet
+    static bool read_bob02(FILE* fp);
+    static bool read_bob03(FILE* fp);
+    static bool read_bob04(FILE* fp, int player_color = PLAYER_BLUE);
+    static bool read_bob05(FILE* fp);
+    static bool read_bob07(FILE* fp);
+    static bool read_bob14(FILE* fp);
 
 public:
     static void init();

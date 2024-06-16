@@ -1,5 +1,5 @@
 // Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
-// Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+// Copyright (C) 2009 - 2024 Settlers Freaks <sf-team at siedler25.org>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -7,6 +7,7 @@
 #include "../CSurface.h"
 #include "../globals.h"
 #include "libendian/libendian.h"
+#include "s25util/file_handle.h"
 #include <boost/endian/conversion.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <iostream>
@@ -16,7 +17,6 @@
 //-V:fseek:303
 //-V:ftell:303
 
-FILE* CFile::fp = nullptr;
 bobBMP* CFile::bmpArray = nullptr;
 bobSHADOW* CFile::shadowArray = nullptr;
 bobPAL* CFile::palArray = nullptr;
@@ -32,7 +32,6 @@ bool CFile::loadPAL = false;
 
 void CFile::init()
 {
-    fp = nullptr;
     bmpArray = &global::bmpArray[0];
     shadowArray = &global::shadowArray[0];
     palArray = &global::palArray[0];
@@ -44,8 +43,10 @@ void* CFile::open_file(const boost::filesystem::path& filepath, char filetype, b
 {
     void* return_value = nullptr;
 
-    if(filepath.empty() || !bmpArray || !shadowArray || !palArray || !palActual
-       || !(fp = boost::nowide::fopen(filepath.string().c_str(), "rb")))
+    if(filepath.empty() || !bmpArray || !shadowArray || !palArray || !palActual)
+        return nullptr;
+    s25util::file_handle fh(boost::nowide::fopen(filepath.string().c_str(), "rb"));
+    if(!fh)
         return nullptr;
 
     if(only_loadPAL)
@@ -56,13 +57,13 @@ void* CFile::open_file(const boost::filesystem::path& filepath, char filetype, b
         switch(filetype)
         {
             case LST:
-                if(open_lst())
+                if(read_lst(*fh))
                     return_value = (void*)-1;
 
                 break;
 
             case BOB:
-                if(open_bob())
+                if(read_bob(*fh))
                     return_value = (void*)-1;
 
                 break;
@@ -74,26 +75,26 @@ void* CFile::open_file(const boost::filesystem::path& filepath, char filetype, b
                 break;
 
             case BBM:
-                if(open_bbm())
+                if(read_bbm(*fh))
                     return_value = (void*)-1;
 
                 break;
 
             case LBM:
-                if(open_lbm(filepath))
+                if(read_lbm(*fh, filepath))
                     return_value = (void*)-1;
 
                 break;
 
             case GOU:
-                if(open_gou())
+                if(read_gou(*fh))
                     return_value = (void*)-1;
 
                 break;
 
-            case WLD: return_value = open_wld(); break;
+            case WLD: return_value = read_wld(*fh); break;
 
-            case SWD: return_value = open_swd(); break;
+            case SWD: return_value = read_swd(*fh); break;
 
             default: // no valid data type
                 break;
@@ -103,18 +104,12 @@ void* CFile::open_file(const boost::filesystem::path& filepath, char filetype, b
         std::cerr << "Error while reading " << filepath << ": " << e.what() << std::endl;
     }
 
-    if(fp)
-    {
-        fclose(fp);
-        fp = nullptr;
-    }
-
     loadPAL = false;
 
     return return_value;
 }
 
-bool CFile::open_lst()
+bool CFile::read_lst(FILE* fp)
 {
     // type of entry (used or unused entry)
     Uint16 entrytype;
@@ -124,7 +119,7 @@ bool CFile::open_lst()
     // skip: id (2x 1 Bytes) + count (1x 4 Bytes) = 6 Bytes
     fseek(fp, 6, SEEK_SET);
 
-    // main loop for reading entrys
+    // main loop for reading entries
     while(!feof(fp))
     {
         // entry type (2 Bytes) - unused (=0x0000) or used (=0x0001) -
@@ -147,37 +142,37 @@ bool CFile::open_lst()
         switch(bobtype)
         {
             case BOBTYPE01:
-                if(!read_bob01())
+                if(!read_bob01(fp))
                     return false;
                 break;
 
             case BOBTYPE02:
-                if(!read_bob02())
+                if(!read_bob02(fp))
                     return false;
                 break;
 
             case BOBTYPE03:
-                if(!read_bob03())
+                if(!read_bob03(fp))
                     return false;
                 break;
 
             case BOBTYPE04:
-                if(!read_bob04(PLAYER_BLUE))
+                if(!read_bob04(fp, PLAYER_BLUE))
                     return false;
                 break;
 
             case BOBTYPE05:
-                if(!read_bob05())
+                if(!read_bob05(fp))
                     return false;
                 break;
 
             case BOBTYPE07:
-                if(!read_bob07())
+                if(!read_bob07(fp))
                     return false;
                 break;
 
             case BOBTYPE14:
-                if(!read_bob14())
+                if(!read_bob14(fp))
                     return false;
                 break;
 
@@ -189,125 +184,104 @@ bool CFile::open_lst()
     return true;
 }
 
-bool CFile::open_bob()
+bool CFile::read_bob(FILE*)
 {
     return false;
 }
 
 bool CFile::open_idx(const boost::filesystem::path& filepath)
 {
-    // temporary filepointer to save global fp until this function has finished
-    FILE* fp_tmp;
-    // pointer to '******.IDX'-File (cause we have to change the global pointer to point to the '.DAT'-File)
-    FILE* fp_idx;
-    // pointer to corresponding '******.DAT'-File
-    FILE* fp_dat;
     // starting adress of data in the corresponding '******.DAT'-File
     Uint32 offset;
     // bobtype of the entry
     Uint16 bobtype;
-    // bobtype is repeated in the corresponging '******.DAT'-File, so we have to check this is correct
+    // bobtype is repeated in the corresponding '******.DAT'-File, so we have to check this is correct
     Uint16 bobtype_check;
 
-    // save global filepointer
-    fp_tmp = fp;
-    // get a new filepointer to the '.IDX'-File
-    if(!(fp_idx = boost::nowide::fopen(filepath.string().c_str(), "rb")))
-        return false;
-    // following code will open the corresponding '******.DAT'-File
-    // allocate memory for new name
+    // '******.IDX'-File
+    const s25util::file_handle fh_idx(boost::nowide::fopen(filepath.string().c_str(), "rb"));
+    // corresponding '******.DAT'-File
     auto filename_dat = filepath;
     filename_dat.replace_extension(".DAT");
-    // get the filepointer of the corresponging '******.DAT'-File
-    if(!(fp_dat = boost::nowide::fopen(filename_dat.string().c_str(), "rb")))
+    const s25util::file_handle fh_dat(boost::nowide::fopen(filename_dat.string().c_str(), "rb"));
+    if(!fh_idx || !fh_dat)
         return false;
-    // we are finished opening the 'DAT'-File, now we can handle the content
+
+    // we are finished opening the files now we can handle the content
 
     // skip: unknown data (1x 4 Bytes) at the beginning of the file
-    fseek(fp_idx, 4, SEEK_SET);
+    fseek(*fh_idx, 4, SEEK_SET);
 
-    // main loop for reading entrys
-    while(!feof(fp_idx) && !feof(fp_dat))
+    // main loop for reading entries
+    while(!feof(*fh_idx) && !feof(*fh_dat))
     {
         // skip: name (1x 16 Bytes)
-        fseek(fp_idx, 16, SEEK_CUR);
+        fseek(*fh_idx, 16, SEEK_CUR);
         // offset (4 Bytes)
-        if(!libendian::le_read_ui(&offset, fp_idx))
+        if(!libendian::le_read_ui(&offset, *fh_idx))
         {
-            if(feof(fp_idx))
+            if(feof(*fh_idx))
                 break;
             CHECK_READ(false);
         }
         // skip unknown data (6x 1 Byte)
-        fseek(fp_idx, 6, SEEK_CUR);
+        fseek(*fh_idx, 6, SEEK_CUR);
         // bobtype (2 Bytes)
-        CHECK_READ(libendian::le_read_us(&bobtype, fp_idx));
+        CHECK_READ(libendian::le_read_us(&bobtype, *fh_idx));
         // set fp_dat to the position in 'offset'
-        fseek(fp_dat, offset, SEEK_SET);
+        fseek(*fh_dat, offset, SEEK_SET);
         // read bobtype again, now from 'DAT'-File
-        CHECK_READ(libendian::le_read_us(&bobtype_check, fp_dat));
+        CHECK_READ(libendian::le_read_us(&bobtype_check, *fh_dat));
         // check if data in 'DAT'-File is the data that it should be (bobtypes are equal)
         if(bobtype != bobtype_check)
             return false;
 
-        // set up the global filepointer fp to fp_dat, so the following functions will read from the '.DAT'-File
-        fp = fp_dat;
-
         switch(bobtype)
         {
             case BOBTYPE01:
-                if(!read_bob01())
+                if(!read_bob01(*fh_dat))
                     return false;
                 break;
 
             case BOBTYPE02:
-                if(!read_bob02())
+                if(!read_bob02(*fh_dat))
                     return false;
                 break;
 
             case BOBTYPE03:
-                if(!read_bob03())
+                if(!read_bob03(*fh_dat))
                     return false;
                 break;
 
             case BOBTYPE04:
-                if(!read_bob04())
+                if(!read_bob04(*fh_dat))
                     return false;
                 break;
 
             case BOBTYPE05:
-                if(!read_bob05())
+                if(!read_bob05(*fh_dat))
                     return false;
                 break;
 
             case BOBTYPE07:
-                if(!read_bob07())
+                if(!read_bob07(*fh_dat))
                     return false;
                 break;
 
             case BOBTYPE14:
-                if(!read_bob14())
+                if(!read_bob14(*fh_dat))
                     return false;
                 break;
 
             default: // Something is wrong? Maybe the last entry was really the LAST, so we should not return false
                 break;
         }
-
-        // set up the local filepointer fp_dat to fp for the next while loop
-        fp_dat = fp;
     }
-
-    // reset global filepointer to its original value
-    fp = fp_tmp;
-
-    fclose(fp_idx);
-    fclose(fp_dat);
 
     return true;
 }
 
-bool CFile::open_bbm()
+bool CFile::read_bbm(FILE* fp)
 {
     // skip header (48 Bytes)
     fseek(fp, 48, SEEK_CUR);
@@ -324,7 +298,7 @@ bool CFile::open_bbm()
     return true;
 }
 
-bool CFile::open_lbm(const boost::filesystem::path& filepath)
+bool CFile::read_lbm(FILE* fp, const boost::filesystem::path& filepath)
 {
     // IMPORTANT NOTE: LBM (also ILBM) is the Interchange File Format (IFF) and the 4-byte-blocks are originally
     // organized as Big Endian, so a convertion is needed
@@ -517,7 +491,7 @@ bool CFile::open_lbm(const boost::filesystem::path& filepath)
     return true;
 }
 
-bool CFile::open_gou()
+bool CFile::read_gou(FILE* fp)
 {
     static int internalArrayCtr = 0; // maximum is two cause there are only 3 GOUx.DAT-Files
 
@@ -530,7 +504,7 @@ bool CFile::open_gou()
     return true;
 }
 
-bobMAP* CFile::open_wld()
+bobMAP* CFile::read_wld(FILE* fp)
 {
     auto myMap = std::make_unique<bobMAP>();
     std::array<char, 20> tmpNameAuthor;
@@ -704,77 +678,60 @@ bobMAP* CFile::open_wld()
     return myMap.release();
 }
 
-bobMAP* CFile::open_swd()
+bobMAP* CFile::read_swd(FILE* fp)
 {
-    return open_wld();
+    return read_wld(fp);
 }
 
 bool CFile::save_file(const boost::filesystem::path& filepath, char filetype, void* data)
 {
-    bool return_value = false;
-
     if(filepath.empty() || !data)
-        return return_value;
+        return false;
 
-    if(!(fp = boost::nowide::fopen(filepath.string().c_str(), "wb")))
-        return return_value;
+    s25util::file_handle fh(boost::nowide::fopen(filepath.string().c_str(), "wb"));
+    if(!fh)
+        return false;
 
     switch(filetype)
     {
-        case LST: return_value = save_lst(data); break;
-
-        case BOB: return_value = save_bob(data); break;
-
-        case IDX: return_value = save_idx(data, filepath); break;
-
-        case BBM: return_value = save_bbm(data); break;
-
-        case LBM: return_value = save_lbm(data); break;
-
-        case WLD: return_value = save_wld(data); break;
-
-        case SWD: return_value = save_swd(data); break;
-
+        case LST: return save_lst(*fh, data);
+        case BOB: return save_bob(*fh, data);
+        case IDX: return save_idx(*fh, data);
+        case BBM: return save_bbm(*fh, data);
+        case LBM: return save_lbm(*fh, data);
+        case WLD: return save_wld(*fh, data);
+        case SWD: return save_swd(*fh, data);
         default: // no valid data type
-            return_value = false;
-            break;
+            return false;
     }
-
-    if(fp)
-    {
-        fclose(fp);
-        fp = nullptr;
-    }
-
-    return return_value;
 }
 
-bool CFile::save_lst(void*)
+bool CFile::save_lst(FILE*, void*)
 {
     return false;
 }
 
-bool CFile::save_bob(void*)
+bool CFile::save_bob(FILE*, void*)
 {
     return false;
 }
 
-bool CFile::save_idx(void*, const boost::filesystem::path&)
+bool CFile::save_idx(FILE*, void*)
 {
     return false;
 }
 
-bool CFile::save_bbm(void*)
+bool CFile::save_bbm(FILE*, void*)
 {
     return false;
 }
 
-bool CFile::save_lbm(void*)
+bool CFile::save_lbm(FILE*, void*)
 {
     return false;
 }
 
-bool CFile::save_wld(void* data)
+bool CFile::save_wld(FILE* fp, void* data)
 {
     char zero = 0; // to fill bytes
     char temp = 0; // to fill bytes
@@ -988,17 +945,17 @@ bool CFile::save_wld(void* data)
     return true;
 }
 
-bool CFile::save_swd(void* data)
+bool CFile::save_swd(FILE* fp, void* data)
 {
-    return save_wld(data);
+    return save_wld(fp, data);
 }
 
-bool CFile::read_bob01()
+bool CFile::read_bob01(FILE*)
 {
     return false;
 }
 
-bool CFile::read_bob02()
+bool CFile::read_bob02(FILE* fp)
 {
     // length of data block
     Uint32 length;
@@ -1120,21 +1077,16 @@ bool CFile::read_bob02()
     return true;
 }
 
-bool CFile::read_bob03()
+bool CFile::read_bob03(FILE* fp)
 {
-    // bobtype of the entry
-    Uint16 bobtype;
-    // player color
-    int player_color;
-    // save position of the filepointer to read the character again with another color
-    long int offset;
-
     // temporary skip x- and y-spacing (2x 1 Byte) --> we will handle this later
     fseek(fp, 2, SEEK_CUR);
 
     // read bobtype04 115 times (for 115 ansi chars)
     for(int i = 1; i <= 115; i++)
     {
+        // bobtype of the entry
+        Uint16 bobtype;
         // following data blocks are bobtype04 for some ascii chars, bobtype is repeated at the beginning of each data
         // block
         CHECK_READ(libendian::le_read_us(&bobtype, fp));
@@ -1152,22 +1104,14 @@ bool CFile::read_bob03()
         }
 
         // now read the picture for each player color
-        offset = ftell(fp);
-        for(int i = 0; i < 7; i++)
+        const auto offset = ftell(fp);
+        constexpr std::array<int, 7> player_colors{
+          PLAYER_BLUE, PLAYER_RED, PLAYER_ORANGE, PLAYER_GREEN, PLAYER_MINTGREEN, PLAYER_YELLOW, PLAYER_RED_BRIGHT,
+        };
+        for(const int player_color : player_colors)
         {
-            switch(i)
-            {
-                case 0: player_color = PLAYER_BLUE; break;
-                case 1: player_color = PLAYER_RED; break;
-                case 2: player_color = PLAYER_ORANGE; break;
-                case 3: player_color = PLAYER_GREEN; break;
-                case 4: player_color = PLAYER_MINTGREEN; break;
-                case 5: player_color = PLAYER_YELLOW; break;
-                case 6: player_color = PLAYER_RED_BRIGHT; break;
-                default: player_color = PLAYER_YELLOW; break;
-            }
             fseek(fp, offset, SEEK_SET);
-            if(!read_bob04(player_color))
+            if(!read_bob04(fp, player_color))
                 return false;
         }
     }
@@ -1175,7 +1119,7 @@ bool CFile::read_bob03()
     return true;
 }
 
-bool CFile::read_bob04(int player_color)
+bool CFile::read_bob04(FILE* fp, int player_color)
 {
     // length of data block
     Uint32 length;
@@ -1296,7 +1240,7 @@ bool CFile::read_bob04(int player_color)
     return true;
 }
 
-bool CFile::read_bob05()
+bool CFile::read_bob05(FILE* fp)
 {
     // skip: unknown data (1x 2 Bytes)
     fseek(fp, 2, SEEK_CUR);
@@ -1313,7 +1257,7 @@ bool CFile::read_bob05()
     return true;
 }
 
-bool CFile::read_bob07()
+bool CFile::read_bob07(FILE* fp)
 {
     // length of data block
     Uint32 length;
@@ -1437,7 +1381,7 @@ bool CFile::read_bob07()
     return true;
 }
 
-bool CFile::read_bob14()
+bool CFile::read_bob14(FILE* fp)
 {
     // length of data block
     Uint32 length;

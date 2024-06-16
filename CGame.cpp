@@ -1,5 +1,5 @@
 // Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
-// Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+// Copyright (C) 2009 - 2024 Settlers Freaks <sf-team at siedler25.org>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@
 #include "RttrConfig.h"
 #include "files.h"
 #include "globals.h"
+#include "s25util/file_handle.h"
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/program_options.hpp>
@@ -194,10 +195,10 @@ bool checkWriteable(const bfs::path& folder)
             return false;
     }
     bfs::path testFileName = folder / bfs::unique_path();
-    FILE* fp = boost::nowide::fopen(testFileName.string().c_str(), "wb");
+    s25util::file_handle fp(boost::nowide::fopen(testFileName.string().c_str(), "wb"));
     if(!fp)
         return false;
-    fclose(fp);
+    fp.reset();
     bfs::remove(testFileName);
     return true;
 }
