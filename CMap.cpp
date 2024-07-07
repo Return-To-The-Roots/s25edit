@@ -636,7 +636,7 @@ void CMap::setMouseData(const SDL_MouseButtonEvent& button)
         if(button.button == SDL_BUTTON_LEFT)
             modify = false;
         else if(button.button == SDL_BUTTON_RIGHT)
-            startScrollPos = boost::none;
+            startScrollPos = std::nullopt;
     }
 }
 
@@ -649,7 +649,7 @@ SavedVertex saveVertex(Position pt, const bobMAP& map)
     {
         for(int j = pt.y - SavedVertex::NODES_PER_DIR, l = 0; j <= pt.y + SavedVertex::NODES_PER_DIR; j++, l++)
         {
-            // i und j muessen wegen den mapraendern noch korrigiert werden!
+            // Correct i and j to take wrap around map borders into account
             int m = i;
             if(m < 0)
                 m += map.width;

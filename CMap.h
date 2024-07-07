@@ -7,12 +7,12 @@
 
 #include "defines.h"
 #include <boost/filesystem/path.hpp>
-#include <boost/optional.hpp>
 #include <Point.h>
 #include <SDL.h>
 #include <array>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 
 struct SavedVertex
@@ -103,7 +103,7 @@ private:
     // lock vertical or horizontal movement
     bool HorizontalMovementLocked;
     bool VerticalMovementLocked;
-    boost::optional<Position> startScrollPos;
+    std::optional<Position> startScrollPos;
 
 public:
     CMap(const boost::filesystem::path& filepath);
