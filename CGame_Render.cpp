@@ -1,5 +1,5 @@
 // Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
-// Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+// Copyright (C) 2009 - 2024 Settlers Freaks <sf-team at siedler25.org>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -13,12 +13,11 @@
 #include "globals.h"
 #ifdef _WIN32
 #    include "s25editResource.h"
-#    undef WIN32_LEAN_AND_MEAN
-#    include <SDL_syswm.h>
 #    ifndef WIN32_LEAN_AND_MEAN
 #        define WIN32_LEAN_AND_MEAN
 #    endif
 #    include <windows.h>
+#    include <SDL_syswm.h>
 #endif
 
 void CGame::SetAppIcon()
