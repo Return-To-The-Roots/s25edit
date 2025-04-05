@@ -1,9 +1,9 @@
 # Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
-# Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+# Copyright (C) 2009 - 2025 Settlers Freaks <sf-team at siedler25.org>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16..3.20)
 
 project(s25edit)
 
