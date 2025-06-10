@@ -52,10 +52,10 @@ public:
     virtual void clear(Uint32 color) = 0;                               // Clears to color
     virtual void clear(SDL_Surface* src, Sint16 srcX, Sint16 srcY) = 0; // Clears by blitting src
 
-    inline SDL_Rect get_pos() const { return current_pos; }   // Returns the current position
-    inline SDL_Rect get_last_pos() const { return last_pos; } // Returns the last updated position
+    SDL_Rect get_pos() const { return current_pos; }   // Returns the current position
+    SDL_Rect get_last_pos() const { return last_pos; } // Returns the last updated position
 
-    inline SDL_Surface* get_dest() const { return dest; }
+    SDL_Surface* get_dest() const { return dest; }
 
     /*
     //NW N NE
@@ -66,37 +66,37 @@ public:
     //
     //Returns some usefull coords in shape (current)
     */
-    inline Sint16 c_x() const { return current_pos.x + current_pos.w / 2; }
-    inline Sint16 c_y() const { return current_pos.y + current_pos.h / 2; }
+    Sint16 c_x() const { return current_pos.x + current_pos.w / 2; }
+    Sint16 c_y() const { return current_pos.y + current_pos.h / 2; }
 
-    inline Sint16 nw_x() const { return current_pos.x; }
-    inline Sint16 nw_y() const { return current_pos.y; }
+    Sint16 nw_x() const { return current_pos.x; }
+    Sint16 nw_y() const { return current_pos.y; }
 
-    inline Sint16 n_x() const { return current_pos.x + current_pos.w / 2; }
-    inline Sint16 n_y() const { return current_pos.y; }
+    Sint16 n_x() const { return current_pos.x + current_pos.w / 2; }
+    Sint16 n_y() const { return current_pos.y; }
 
-    inline Sint16 ne_x() const { return current_pos.x + current_pos.w - 1; }
-    inline Sint16 ne_y() const { return current_pos.y; }
+    Sint16 ne_x() const { return current_pos.x + current_pos.w - 1; }
+    Sint16 ne_y() const { return current_pos.y; }
 
-    inline Sint16 e_x() const { return current_pos.x + current_pos.w - 1; }
-    inline Sint16 e_y() const { return current_pos.y + current_pos.h / 2; }
+    Sint16 e_x() const { return current_pos.x + current_pos.w - 1; }
+    Sint16 e_y() const { return current_pos.y + current_pos.h / 2; }
 
-    inline Sint16 se_x() const { return current_pos.x + current_pos.w - 1; }
-    inline Sint16 se_y() const { return current_pos.y + current_pos.h - 1; }
+    Sint16 se_x() const { return current_pos.x + current_pos.w - 1; }
+    Sint16 se_y() const { return current_pos.y + current_pos.h - 1; }
 
-    inline Sint16 s_x() const { return current_pos.x + current_pos.w / 2; }
-    inline Sint16 s_y() const { return current_pos.y + current_pos.h - 1; }
+    Sint16 s_x() const { return current_pos.x + current_pos.w / 2; }
+    Sint16 s_y() const { return current_pos.y + current_pos.h - 1; }
 
-    inline Sint16 sw_x() const { return current_pos.x; }
-    inline Sint16 sw_y() const { return current_pos.y + current_pos.h - 1; }
+    Sint16 sw_x() const { return current_pos.x; }
+    Sint16 sw_y() const { return current_pos.y + current_pos.h - 1; }
 
-    inline Sint16 w_x() const { return current_pos.x; }
-    inline Sint16 w_y() const { return current_pos.y + current_pos.h / 2; }
+    Sint16 w_x() const { return current_pos.x; }
+    Sint16 w_y() const { return current_pos.y + current_pos.h / 2; }
 
-    inline Sint16 get_xpos() const { return current_pos.x; }
-    inline Sint16 get_ypos() const { return current_pos.y; }
-    inline Uint16 get_w() const { return current_pos.w; }
-    inline Uint16 get_h() const { return current_pos.h; }
+    Sint16 get_xpos() const { return current_pos.x; }
+    Sint16 get_ypos() const { return current_pos.y; }
+    Uint16 get_w() const { return current_pos.w; }
+    Uint16 get_h() const { return current_pos.h; }
 };
 
 //==================================================================================
