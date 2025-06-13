@@ -384,7 +384,7 @@ void sge_ssprite::skip_frame(int skips)
 bool sge_ssprite::update()
 {
     move(xvel, yvel);
-    return !((xvel == 0) && (yvel == 0));
+    return (xvel != 0) || (yvel != 0);
 }
 
 void sge_ssprite::set_seq(int start, int stop, playing_mode mode)

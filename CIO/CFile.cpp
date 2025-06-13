@@ -32,10 +32,10 @@ bool CFile::loadPAL = false;
 
 void CFile::init()
 {
-    bmpArray = &global::bmpArray[0];
-    shadowArray = &global::shadowArray[0];
-    palArray = &global::palArray[0];
-    palActual = &global::palArray[0];
+    bmpArray = global::bmpArray.data();
+    shadowArray = global::shadowArray.data();
+    palArray = global::palArray.data();
+    palActual = global::palArray.data();
     loadPAL = false;
 }
 

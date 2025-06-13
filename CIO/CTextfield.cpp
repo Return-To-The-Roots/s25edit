@@ -110,7 +110,7 @@ void CTextfield::setY(int y)
 
 void CTextfield::setText(const std::string& text)
 {
-    char* txtPtr = &this->text_[0];
+    char* txtPtr = this->text_.data();
     int col_ctr = 1, row_ctr = 1;
 
     for(char c : text)
