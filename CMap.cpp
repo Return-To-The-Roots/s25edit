@@ -995,26 +995,17 @@ void CMap::storeVerticesFromMouse(Position mousePos, Uint8 /*MouseState*/)
 
     // get X
     // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor)
-    // we subtract "triangleWidth/2"  Xeven = (MouseX + displayRect.left) / triangleWidth;
+    // we subtract "triangleWidth/2"  Xeven = (mousePos.x + displayRect.left) / triangleWidth;
     Xeven = (mousePos.x + displayRect.left - triangleWidth / 2) / triangleWidth;
-    if(Xeven < 0)
-        Xeven += (map->width);
-    else if(Xeven > map->width - 1)
-        Xeven -= (map->width - 1);
+    Xeven = ((Xeven % map->width) + map->width) % map->width;
     // Add rows are already shifted by triangleWidth / 2
     Xodd = (mousePos.x + displayRect.left) / triangleWidth;
     // Xodd = (mousePos.x + displayRect.left) / triangleWidth;
-    if(Xodd < 0)
-        Xodd += (map->width - 1);
-    else if(Xodd > map->width - 1)
-        Xodd -= (map->width);
+    Xodd = ((Xodd % (map->width - 1)) + (map->width - 1)) % (map->width - 1);
 
     MousePosY = mousePos.y + displayRect.top;
     // correct mouse position Y if displayRect is outside map edges
-    if(MousePosY < 0)
-        MousePosY += map->height_pixel;
-    else if(MousePosY > map->height_pixel)
-        MousePosY = mousePos.y - (map->height_pixel - displayRect.top);
+    MousePosY = ((MousePosY % map->height_pixel) + map->height_pixel) % map->height_pixel;
 
     // get Y
     for(int j = 0; j < map->height; j++)
