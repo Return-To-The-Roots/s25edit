@@ -1079,9 +1079,8 @@ void CMap::render()
         else
             Surf_Map = makeRGBSurface(displayRect.getSize().x, displayRect.getSize().y);
     }
-    // else
-    // clear the surface before drawing new (in normal case not needed)
-    // SDL_FillRect( Surf_Map, nullptr, SDL_MapRGB(Surf_Map->format,0,0,0) );
+    // Clear the surface before drawing so areas not covered by triangles stay black
+    SDL_FillRect(Surf_Map.get(), nullptr, SDL_MapRGBA(Surf_Map->format, 0, 0, 0, 0));
 
     // touch vertex data if user modifies it
     if(modify)
