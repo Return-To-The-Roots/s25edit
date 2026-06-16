@@ -6,6 +6,7 @@
 #pragma once
 
 #include "CIO/CFont.h"
+#include "CSurfaceGL.h"
 #include "SdlSurface.h"
 #include <Point.h>
 #include <memory>
@@ -26,9 +27,12 @@ public:
     bool Running;
     bool showLoadScreen;
     SdlSurface Surf_Display;
-    SdlTexture displayTexture_;
-    SdlRenderer renderer_;
     SdlWindow window_;
+    void* glContext_;
+    /// Persistent OpenGL texture for uploading the software overlay surface
+    EditorGLTexture displayGLTex_;
+    /// Persistent OpenGL texture for the final UI overlay (used by RenderPresent)
+    EditorGLTexture uiOverlayTex_;
 
 private:
 #ifdef _ADMINMODE
@@ -42,6 +46,8 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
+    /// Does the composited UI surface (Surf_Display) need re-uploading?
+    bool uiDirty_ = true;
 
     // structure for mouse cursor
     struct
@@ -81,7 +87,10 @@ public:
 
     void Render();
 
-    void RenderPresent() const;
+    void RenderPresent();
+    /// Upload Surf_Display content to OpenGL and present it.
+    /// Used by callbacks that render to Surf_Display directly (e.g. "Please wait").
+    void FlushSurfaceToGL();
 
     CMenu* RegisterMenu(std::unique_ptr<CMenu> Menu);
     bool UnregisterMenu(CMenu* Menu);
@@ -94,4 +103,5 @@ public:
     void delMapObj();
     SDL_Surface* getDisplaySurface() const { return Surf_Display.get(); };
     auto getRes() const { return GameResolution; }
+    auto getCursorPos() const { return Cursor.pos; }
 };

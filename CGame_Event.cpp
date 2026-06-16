@@ -8,6 +8,7 @@
 #include "CIO/CWindow.h"
 #include "CMap.h"
 #include "CSurface.h"
+#include "TerrainRenderer.h"
 #include "callbacks.h"
 #include "globals.h"
 
@@ -146,6 +147,7 @@ void CGame::EventHandling(SDL_Event* Event)
             {
                 Cursor.pos = Position(Event->motion.x, Event->motion.y);
             }
+            uiDirty_ = true;
             /*
                         //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the
                switch and stop
@@ -238,6 +240,7 @@ void CGame::EventHandling(SDL_Event* Event)
                 Cursor.button.left = true;
             else if(Event->button.button == SDL_BUTTON_RIGHT)
                 Cursor.button.right = true;
+            uiDirty_ = true;
 
             // clicking a mouse button will close the S2 loading screen if it is shown
             if(showLoadScreen)
@@ -309,6 +312,7 @@ void CGame::EventHandling(SDL_Event* Event)
         {
             // setup mouse cursor data
             Cursor.clicked = false;
+            uiDirty_ = true;
 
             // NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the switch and
             // stop

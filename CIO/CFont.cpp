@@ -293,12 +293,6 @@ void CFont::writeText()
 bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, FontSize fontsize,
                       FontColor color, FontAlign align)
 {
-    // data for necessary counting pixels depending on alignment
-    unsigned pixel_ctr_w = 0;
-    // counter for the drawed pixels (cause we dont want to draw outside of the surface)
-    unsigned pos_x = x;
-    unsigned pos_y = y;
-
     if(!Surf_Dest || string.empty())
         return false;
 
@@ -306,58 +300,20 @@ bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigne
     if(Surf_Dest->h < static_cast<int>(y + static_cast<unsigned>(fontsize)))
         return false;
 
-    // in case of right or middle alignment we must count the pixels first
-    auto pixel_count_loop = (align == FontAlign::Middle) || (align == FontAlign::Right);
+    // Render to a temporary surface first.
+    CFont font(string, 0, 0, fontsize, color);
+    font.writeText();
+    SDL_Surface* fontSurf = font.getSurface();
+    if(!fontSurf)
+        return false;
 
-    // now lets draw the chiffres
-    auto chiffre = string.begin();
-    while(chiffre != string.end())
-    {
-        const auto charW = getCharWidth(*chiffre, fontsize, color);
-        // if we only count pixels in this round
-        if(pixel_count_loop)
-        {
-            pixel_ctr_w += charW;
+    // Calculate horizontal position based on alignment.
+    int pos_x = x;
+    if(align == FontAlign::Middle)
+        pos_x = x - fontSurf->w / 2;
+    else if(align == FontAlign::Right)
+        pos_x = Surf_Dest->w - fontSurf->w;
 
-            // if text is to long to go further left, stop loop and begin writing at x=0
-            if((align == FontAlign::Middle && pixel_ctr_w / 2 > x) || static_cast<int>(pixel_ctr_w) >= Surf_Dest->w)
-            {
-                pos_x = 0;
-                chiffre = string.begin();
-                pixel_count_loop = false;
-                continue;
-            }
-
-            ++chiffre;
-
-            // if this was the last chiffre go in normal mode and write the text to the specified position
-            if(chiffre == string.end())
-            {
-                chiffre = string.begin();
-
-                if(align == FontAlign::Middle)
-                    pos_x = x - pixel_ctr_w / 2;
-                else if(align == FontAlign::Right)
-                    pos_x = Surf_Dest->w - pixel_ctr_w;
-
-                pixel_count_loop = false;
-            }
-            continue;
-        }
-
-        // if right end of surface is reached, stop drawing chiffres
-        if(Surf_Dest->w < static_cast<int>(pos_x + charW))
-            break;
-
-        // draw the chiffre to the destination
-        CSurface::Draw(Surf_Dest, global::bmpArray[getIndexForChar(*chiffre, fontsize, color)].surface, pos_x, pos_y);
-
-        // set position for next chiffre
-        pos_x += charW;
-
-        // go to next chiffre
-        ++chiffre;
-    }
-
+    CSurface::Draw(Surf_Dest, fontSurf, pos_x, y);
     return true;
 }

@@ -7,32 +7,52 @@
 #include "CIO/CFile.h"
 #include "CMap.h"
 #include "CSurface.h"
-#include "SGE/sge_blib.h"
-#include "SGE/sge_surface.h"
+#include "CSurfaceGL.h"
+#include "TerrainRenderer.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
+#include <glad/glad.h>
 #include <iostream>
 #include <vector>
 
 bool CGame::ReCreateWindow()
 {
-    displayTexture_.reset();
-    renderer_.reset();
+    displayGLTex_ = EditorGLTexture();
+    uiOverlayTex_ = EditorGLTexture();
     window_.reset();
+
+    unsigned windowFlags = fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+
+    // Create window with OpenGL support (hard requirement, like s25client)
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
                                    SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+                                   windowFlags | SDL_WINDOW_OPENGL));
     if(!window_)
         return false;
-    renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
-    if(!renderer_)
+
+    glContext_ = SDL_GL_CreateContext(window_.get());
+    if(!glContext_ || !gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
+    {
+        std::cerr << "Failed to create OpenGL context!\n";
         return false;
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
-                                     GameResolution.y);
+    }
+
+    std::cout << "OpenGL " << GLVersion.major << "." << GLVersion.minor << " initialized\n";
+    CSurfaceGL::init(GameResolution.x, GameResolution.y); // GL state setup (once)
+    TerrainRenderer::Init(GameResolution);                // renderer init (once)
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SwapWindow(window_.get());
+
+    // Software surface for legacy rendering (text overlay, callbacks).
+    // RGBA so the UI overlay can be composited on top of the map.
     Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
-    if(!displayTexture_ || !Surf_Display)
+    if(!Surf_Display)
         return false;
+    uiDirty_ = true;
+
+    if(MapObj)
+        MapObj->setOverlayDirty();
 
     SetAppIcon();
     return true;
@@ -50,7 +70,6 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-    sge_Lock_OFF();
     CFile::init();
 
     /*NOTE: its important to load a palette at first,
@@ -80,12 +99,8 @@ bool CGame::Init()
 
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
-    // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-    auto& surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-    sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1,
-                     Surf_Display->h - 1, surfSplash.get(), 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1,
-                     surfSplash->w - 1, surfSplash->h - 1);
-    RenderPresent();
+    // Render the loading screen once so the user sees something during loading
+    Render();
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())

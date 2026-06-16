@@ -482,6 +482,11 @@ bool CFile::read_lbm(FILE* fp, const boost::filesystem::path& filepath)
             CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface);
         } else
             bmpArray--;
+    } else
+    {
+        // Convert non-texture sprites to RGBA so we can use the alpha channel
+        // instead of a black sentinel for transparency.
+        bmpArray->surface = CSurface::ConvertToRgba(bmpArray->surface.get());
     }
 
     // we are finished, the surface is filled
@@ -1069,6 +1074,9 @@ bool CFile::read_bob02(FILE* fp)
         return false;
     }
 
+    // Convert to RGBA so transparency is encoded in the alpha channel.
+    bmpArray->surface = CSurface::ConvertToRgba(bmpArray->surface.get());
+
     // increment bmpArray for the next picture
     bmpArray++;
 
@@ -1231,6 +1239,9 @@ bool CFile::read_bob04(FILE* fp, int player_color)
         fseek(fp, (long int)next_entry, SEEK_SET);
         // return false;
     }
+
+    // Convert to RGBA so transparency is encoded in the alpha channel.
+    bmpArray->surface = CSurface::ConvertToRgba(bmpArray->surface.get());
 
     // increment bmpArray for the next picture
     bmpArray++;
@@ -1444,6 +1455,9 @@ bool CFile::read_bob14(FILE* fp)
     // we are finished, the surface is filled
     // fp should now point to nx again, so set it to the next entry in the file
     fseek(fp, (long int)next_entry, SEEK_SET);
+
+    // Convert to RGBA so transparency is encoded in the alpha channel.
+    bmpArray->surface = CSurface::ConvertToRgba(bmpArray->surface.get());
 
     // increment bmpArray for the next picture
     bmpArray++;

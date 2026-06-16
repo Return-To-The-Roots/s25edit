@@ -13,23 +13,13 @@ struct SdlSurfaceDeleter
 {
     void operator()(SDL_Surface* p) { SDL_FreeSurface(p); }
 };
-struct SdlTextureDeleter
-{
-    void operator()(SDL_Texture* p) { SDL_DestroyTexture(p); }
-};
 struct SDLWindowDestroyer
 {
     void operator()(SDL_Window* p) const { SDL_DestroyWindow(p); }
 };
-struct SDLRendererDestroyer
-{
-    void operator()(SDL_Renderer* p) const { SDL_DestroyRenderer(p); }
-};
 
-using SdlRenderer = std::unique_ptr<SDL_Renderer, SDLRendererDestroyer>;
 using SdlWindow = std::unique_ptr<SDL_Window, SDLWindowDestroyer>;
 using SdlSurface = std::unique_ptr<SDL_Surface, SdlSurfaceDeleter>;
-using SdlTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>;
 
 inline SdlSurface makeRGBSurface(int width, int height, bool withAlpha = false)
 {
@@ -41,9 +31,4 @@ inline SdlSurface makePalSurface(int width, int height, const std::array<SDL_Col
     if(surf)
         SDL_SetPaletteColors(surf->format->palette, palette.data(), 0, palette.size());
     return surf;
-}
-
-inline SdlTexture makeSdlTexture(const SdlRenderer& renderer, Uint32 format, int access, int w, int h)
-{
-    return SdlTexture(SDL_CreateTexture(renderer.get(), format, access, w, h));
 }
