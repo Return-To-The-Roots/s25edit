@@ -142,17 +142,17 @@ void CGame::EventHandling(SDL_Event* Event)
 
         case SDL_MOUSEMOTION:
         {
-            // setup mouse cursor data
-            if(MapObj && MapObj->isActive())
+            // Avoid duplicate events especially when warping the mouse back during panning
             {
-                if((Event->motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) == 0)
-                {
-                    Cursor.pos = Position(Event->motion.x, Event->motion.y);
-                }
-            } else
-            {
-                Cursor.pos = Position(Event->motion.x, Event->motion.y);
+                static Position lastMousePos = Position::Invalid();
+                const Position newPos(Event->motion.x, Event->motion.y);
+                if(newPos == lastMousePos)
+                    break;
+                lastMousePos = newPos;
             }
+
+            // setup mouse cursor data
+            Cursor.pos = Position(Event->motion.x, Event->motion.y);
             /*
                         //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the
                switch and stop
