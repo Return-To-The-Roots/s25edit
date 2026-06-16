@@ -17,6 +17,14 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <cstdio>
+#include <csignal>
+#ifdef _WIN32
+#    ifndef WIN32_LEAN_AND_MEAN
+#        define WIN32_LEAN_AND_MEAN
+#    endif
+#    include <windows.h>
+#endif
 
 namespace bfs = boost::filesystem;
 
@@ -170,19 +178,91 @@ void CGame::GameLoop()
 }
 
 namespace {
+
+#ifdef _WIN32
+BOOL WINAPI ConsoleSignalHandler(DWORD dwCtrlType)
+{
+    switch(dwCtrlType)
+    {
+        case CTRL_BREAK_EVENT:
+        case CTRL_CLOSE_EVENT:
+        case CTRL_C_EVENT:
+        {
+            if(global::s2)
+                global::s2->Running = false;
+            return TRUE;
+        }
+        break;
+    }
+    return FALSE;
+}
+#else
+static bool killme = false;
+void ConsoleSignalHandler(int /*sig*/)
+{
+    if(!killme)
+        std::cout << "Do you really want to terminate the program (y/n) : " << std::flush;
+    else
+        std::cout << "Do you really want to kill the program (y/n) : " << std::flush;
+
+    int c = getchar();
+    if(c == 'j' || c == 'y' || c == 1079565930)
+    {
+        if(killme)
+            exit(1);
+
+        killme = true;
+        if(global::s2)
+            global::s2->Running = false;
+    }
+}
+#endif
+
 void WaitForEnter()
 {
-#ifndef NDEBUG
-
     static bool waited = false;
     if(waited)
         return;
     waited = true;
-    std::cout << "\n\nPress ENTER *twice* to close this window . . ." << std::endl;
+    std::cout << "\n\nPress ENTER to close this window . . ." << std::endl;
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
-#endif // !NDEBUG
+}
+
+void InstallSignalHandlers()
+{
+#ifdef _WIN32
+    SetConsoleCtrlHandler(ConsoleSignalHandler, TRUE);
+#else
+    struct sigaction sa;
+    sa.sa_handler = ConsoleSignalHandler;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, nullptr);
+#endif
+}
+
+void UninstallSignalHandlers()
+{
+#ifdef _WIN32
+    SetConsoleCtrlHandler(ConsoleSignalHandler, FALSE);
+#else
+    struct sigaction sa;
+    sa.sa_handler = SIG_DFL;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, nullptr);
+#endif
+}
+
+void ExitHandler()
+{
+    UninstallSignalHandlers();
+
+#ifdef _DEBUG
+    WaitForEnter();
+#endif
 }
 
 bool checkWriteable(const bfs::path& folder)
@@ -246,6 +326,8 @@ int main(int argc, char* argv[])
         return 1;
     }
     std::cout << "done\n";
+    InstallSignalHandlers();
+    atexit(ExitHandler);
     int result = 0;
     try
     {
@@ -259,8 +341,10 @@ int main(int argc, char* argv[])
         result = 1;
     }
     SDL_Quit();
+    UninstallSignalHandlers();
 
-    WaitForEnter();
+    if(result)
+        WaitForEnter();
     return result;
 }
 
