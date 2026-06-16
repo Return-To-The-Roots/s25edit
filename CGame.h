@@ -74,7 +74,7 @@ public:
 
     bool Init();
     bool ReCreateWindow();
-    void UpdateDisplaySize(unsigned width, unsigned height);
+    void UpdateDisplaySize(const Extent& newSize);
 
     void EventHandling(SDL_Event* Event);
 
