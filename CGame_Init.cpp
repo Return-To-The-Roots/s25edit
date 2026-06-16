@@ -5,6 +5,8 @@
 
 #include "CGame.h"
 #include "CIO/CFile.h"
+#include "CIO/CMenu.h"
+#include "CIO/CWindow.h"
 #include "CMap.h"
 #include "CSurface.h"
 #include "SGE/sge_blib.h"
@@ -22,7 +24,7 @@ bool CGame::ReCreateWindow()
     window_.reset();
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
                                    SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+                                   fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE));
     if(!window_)
         return false;
     renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
@@ -36,6 +38,19 @@ bool CGame::ReCreateWindow()
 
     SetAppIcon();
     return true;
+}
+
+void CGame::UpdateDisplaySize(unsigned width, unsigned height)
+{
+    GameResolution.x = width;
+    GameResolution.y = height;
+    displayTexture_.reset();
+    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+    Surf_Display = makeRGBSurface(width, height, true);
+    for(auto& menu : Menus)
+        menu->resetSurface();
+    for(auto& wnd : Windows)
+        wnd->resetSurface();
 }
 
 bool CGame::Init()

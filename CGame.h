@@ -74,6 +74,7 @@ public:
 
     bool Init();
     bool ReCreateWindow();
+    void UpdateDisplaySize(unsigned width, unsigned height);
 
     void EventHandling(SDL_Event* Event);
 
