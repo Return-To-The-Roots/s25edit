@@ -1,0 +1,55 @@
+# Copyright (C) 2025 Settlers Freaks <sf-team at siedler25.org>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# CI for s25edit.
+#
+# Mirrors the static checks used by the parent project
+# (Return-To-The-Roots/s25client).  The clang-format action and the
+# include-guard script are the same ones the parent repo uses.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ format('s25edit-{0}:{1}', github.repository, github.ref) }}
+  cancel-in-progress: true
+
+jobs:
+  static-analysis:
+    name: Static analysis
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install REUSE
+        run: |
+          pip install --user reuse
+
+      # ── 1. Formatting ───────────────────────────────────────────────
+      # Uses the same clang-format version (10) and the same action as
+      # the parent s25client project.
+      - name: Formatting
+        uses: DoozyX/clang-format-lint-action@c71d0bf4e21876ebec3e5647491186f8797fde31 # v0.18.2
+        with:
+          source: "."
+          clangFormatVersion: 10
+
+      # ── 2. Include guards ────────────────────────────────────────────
+      # SGE is a vendored third-party library; it uses traditional
+      # #ifndef guards instead of #pragma once, so we skip it.
+      # Uses the same per-file script as the parent repo.
+      - name: Check include guards (#pragma once)
+        run: |
+          find . -path ./.git -prune -false \
+            -o -path ./build -prune -false \
+            -o -path ./SGE -prune -false \
+            -o \( -name '*.hpp' -o -name '*.h' \) \
+            -print0 | xargs -0 -n1 tools/ci/checkIncludeGuards.sh
+
+      # ── 3. REUSE compliance ──────────────────────────────────────────
+      - name: Check licensing (REUSE)
+        run: reuse lint

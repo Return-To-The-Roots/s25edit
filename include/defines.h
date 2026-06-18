@@ -24,7 +24,7 @@ struct TerrainDesc;
 
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
 // in admin mode, there are some key combos to open debugger, resource viewer and so on
-//#define _ADMINMODE
+// #define _ADMINMODE
 
 // callback parameters
 enum
@@ -1210,9 +1210,9 @@ constexpr auto MAXMAPHEIGHT = 1024;
 
 // triangle values
 // these values are now handled in globals.h and globals.cpp, cause they must be changeable for the zoom mode
-//#define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
-//#define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
-//#define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be
+// #define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
+// #define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
+// #define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be
 // greater than 5
 
 enum TriangleTerrainType
