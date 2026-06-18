@@ -14,11 +14,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/program_options.hpp>
+#include <csignal>
+#include <cstdio>
 #include <exception>
 #include <iostream>
 #include <limits>
-#include <cstdio>
-#include <csignal>
 #ifdef _WIN32
 #    ifndef WIN32_LEAN_AND_MEAN
 #        define WIN32_LEAN_AND_MEAN

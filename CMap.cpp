@@ -45,27 +45,27 @@ void bobMAP::initVertexCoords()
 
 void bobMAP::updateVertexCoords()
 {
-    width_pixel = width * TRIANGLE_WIDTH;
-    height_pixel = height * TRIANGLE_HEIGHT;
+    width_pixel = width * triangleWidth;
+    height_pixel = height * triangleHeight;
 
     Sint32 b = 0;
     for(unsigned j = 0; j < height; j++)
     {
         Sint32 a;
         if(j % 2u == 0u)
-            a = TRIANGLE_WIDTH / 2u;
+            a = triangleWidth / 2u;
         else
-            a = TRIANGLE_WIDTH;
+            a = triangleWidth;
 
         for(unsigned i = 0; i < width; i++)
         {
             MapNode& curVertex = getVertex(i, j);
             curVertex.x = a;
-            curVertex.y = b - TRIANGLE_INCREASE * (curVertex.h - 0x0A);
-            curVertex.z = TRIANGLE_INCREASE * (curVertex.h - 0x0A);
-            a += TRIANGLE_WIDTH;
+            curVertex.y = b - triangleIncrease * (curVertex.h - 0x0A);
+            curVertex.z = triangleIncrease * (curVertex.h - 0x0A);
+            a += triangleWidth;
         }
-        b += TRIANGLE_HEIGHT;
+        b += triangleHeight;
     }
 }
 
@@ -992,15 +992,15 @@ void CMap::storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseSta
 
     // get X
     // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor)
-    // we subtract "TRIANGLE_WIDTH/2"  Xeven = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
-    Xeven = (MouseX + displayRect.left - TRIANGLE_WIDTH / 2) / TRIANGLE_WIDTH;
+    // we subtract "triangleWidth/2"  Xeven = (MouseX + displayRect.left) / triangleWidth;
+    Xeven = (MouseX + displayRect.left - triangleWidth / 2) / triangleWidth;
     if(Xeven < 0)
         Xeven += (map->width);
     else if(Xeven > map->width - 1)
         Xeven -= (map->width - 1);
-    // Add rows are already shifted by TRIANGLE_WIDTH / 2
-    Xodd = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
-    // Xodd = (MouseX + displayRect.left) / TRIANGLE_WIDTH;
+    // Add rows are already shifted by triangleWidth / 2
+    Xodd = (MouseX + displayRect.left) / triangleWidth;
+    // Xodd = (MouseX + displayRect.left) / triangleWidth;
     if(Xodd < 0)
         Xodd += (map->width - 1);
     else if(Xodd > map->width - 1)
@@ -1018,8 +1018,8 @@ void CMap::storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseSta
     {
         if(j % 2 == 0)
         {
-            // subtract "TRIANGLE_HEIGHT/2" is for tolerance, we did the same for X
-            if((MousePosY - TRIANGLE_HEIGHT / 2) > map->getVertex(Xeven, j).y)
+            // subtract "triangleHeight/2" is for tolerance, we did the same for X
+            if((MousePosY - triangleHeight / 2) > map->getVertex(Xeven, j).y)
                 Y++;
             else
             {
@@ -1028,7 +1028,7 @@ void CMap::storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseSta
             }
         } else
         {
-            if((MousePosY - TRIANGLE_HEIGHT / 2) > map->getVertex(Xodd, j).y)
+            if((MousePosY - triangleHeight / 2) > map->getVertex(Xodd, j).y)
                 Y++;
             else
             {
@@ -1430,9 +1430,9 @@ void CMap::drawMinimap(SDL_Surface* Window)
 
     // draw the arrow --> 6px is width of left window frame and 20px is the height of the upper window frame
     CSurface::Draw(Window, global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].surface,
-                   6 + (displayRect.left + displayRect.getSize().x / 2) / TRIANGLE_WIDTH / num_x
+                   6 + (displayRect.left + displayRect.getSize().x / 2) / triangleWidth / num_x
                      - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
-                   20 + (displayRect.top + displayRect.getSize().y / 2) / TRIANGLE_HEIGHT / num_y
+                   20 + (displayRect.top + displayRect.getSize().y / 2) / triangleHeight / num_y
                      - global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny);
 }
 
@@ -1552,18 +1552,18 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
         even = true;
 
     // DO IT
-    if(tempP->z >= TRIANGLE_INCREASE * (MaxRaiseHeight - 0x0A)) // user specified maximum reached
+    if(tempP->z >= triangleIncrease * (MaxRaiseHeight - 0x0A)) // user specified maximum reached
         return;
 
-    if(tempP->z >= TRIANGLE_INCREASE * (0x3C - 0x0A)) // maximum reached (0x3C is max)
+    if(tempP->z >= triangleIncrease * (0x3C - 0x0A)) // maximum reached (0x3C is max)
         return;
 
-    tempP->y -= TRIANGLE_INCREASE;
-    tempP->z += TRIANGLE_INCREASE;
+    tempP->y -= triangleIncrease;
+    tempP->z += triangleIncrease;
     tempP->h += 0x01;
     CSurface::update_shading(*map, VertexX, VertexY);
 
-    // after (5*TRIANGLE_INCREASE) pixel all vertices around will be raised too
+    // after (5*triangleIncrease) pixel all vertices around will be raised too
     // update first vertex left upside
     X = VertexX - (even ? 1 : 0);
     if(X < 0)
@@ -1573,7 +1573,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
         Y += map->height;
     // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
     // lines before)
-    if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE)) //-V807
+    if(map->getVertex(X, Y).z < tempP->z - (5 * triangleIncrease)) //-V807
         modifyHeightRaise(X, Y);
     // update second vertex right upside
     X = VertexX + (even ? 0 : 1);
@@ -1584,7 +1584,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
         Y += map->height;
     // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
     // lines before)
-    if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z < tempP->z - (5 * triangleIncrease))
         modifyHeightRaise(X, Y);
     // update third point bottom left
     X = VertexX - 1;
@@ -1593,7 +1593,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     Y = VertexY;
     // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
     // lines before)
-    if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z < tempP->z - (5 * triangleIncrease))
         modifyHeightRaise(X, Y);
     // update fourth point bottom right
     X = VertexX + 1;
@@ -1602,7 +1602,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
     Y = VertexY;
     // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
     // lines before)
-    if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z < tempP->z - (5 * triangleIncrease))
         modifyHeightRaise(X, Y);
     // update fifth point down left
     X = VertexX - (even ? 1 : 0);
@@ -1613,7 +1613,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
         Y -= map->height;
     // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
     // lines before)
-    if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z < tempP->z - (5 * triangleIncrease))
         modifyHeightRaise(X, Y);
     // update sixth point down right
     X = VertexX + (even ? 0 : 1);
@@ -1624,7 +1624,7 @@ void CMap::modifyHeightRaise(int VertexX, int VertexY)
         Y -= map->height;
     // only modify if the other point is lower than the middle point of the hexagon (-5 cause point was raised a few
     // lines before)
-    if(map->getVertex(X, Y).z < tempP->z - (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z < tempP->z - (5 * triangleIncrease))
         modifyHeightRaise(X, Y);
 
     // at least setup the possible building and shading at the vertex and 2 sections around
@@ -1649,17 +1649,17 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
         even = true;
 
     // DO IT
-    if(tempP->z <= TRIANGLE_INCREASE * (MinReduceHeight - 0x0A)) // user specified minimum reached
+    if(tempP->z <= triangleIncrease * (MinReduceHeight - 0x0A)) // user specified minimum reached
         return;
 
-    if(tempP->z <= TRIANGLE_INCREASE * (0x00 - 0x0A)) // minimum reached (0x00 is min)
+    if(tempP->z <= triangleIncrease * (0x00 - 0x0A)) // minimum reached (0x00 is min)
         return;
 
-    tempP->y += TRIANGLE_INCREASE;
-    tempP->z -= TRIANGLE_INCREASE;
+    tempP->y += triangleIncrease;
+    tempP->z -= triangleIncrease;
     tempP->h -= 0x01;
     CSurface::update_shading(*map, VertexX, VertexY);
-    // after (5*TRIANGLE_INCREASE) pixel all vertices around will be reduced too
+    // after (5*triangleIncrease) pixel all vertices around will be reduced too
     // update first vertex left upside
     X = VertexX - (even ? 1 : 0);
     if(X < 0)
@@ -1669,7 +1669,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
         Y += map->height;
     // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
     // lines before)
-    if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE)) //-V807
+    if(map->getVertex(X, Y).z > tempP->z + (5 * triangleIncrease)) //-V807
         modifyHeightReduce(X, Y);
     // update second vertex right upside
     X = VertexX + (even ? 0 : 1);
@@ -1680,7 +1680,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
         Y += map->height;
     // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
     // lines before)
-    if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z > tempP->z + (5 * triangleIncrease))
         modifyHeightReduce(X, Y);
     // update third point bottom left
     X = VertexX - 1;
@@ -1689,7 +1689,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     Y = VertexY;
     // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
     // lines before)
-    if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z > tempP->z + (5 * triangleIncrease))
         modifyHeightReduce(X, Y);
     // update fourth point bottom right
     X = VertexX + 1;
@@ -1698,7 +1698,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
     Y = VertexY;
     // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
     // lines before)
-    if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z > tempP->z + (5 * triangleIncrease))
         modifyHeightReduce(X, Y);
     // update fifth point down left
     X = VertexX - (even ? 1 : 0);
@@ -1709,7 +1709,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
         Y -= map->height;
     // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
     // lines before)
-    if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z > tempP->z + (5 * triangleIncrease))
         modifyHeightReduce(X, Y);
     // update sixth point down right
     X = VertexX + (even ? 0 : 1);
@@ -1720,7 +1720,7 @@ void CMap::modifyHeightReduce(int VertexX, int VertexY)
         Y -= map->height;
     // only modify if the other point is higher than the middle point of the hexagon (+5 cause point was reduced a few
     // lines before)
-    if(map->getVertex(X, Y).z > tempP->z + (5 * TRIANGLE_INCREASE))
+    if(map->getVertex(X, Y).z > tempP->z + (5 * triangleIncrease))
         modifyHeightReduce(X, Y);
 
     // at least setup the possible building and shading at the vertex and 2 sections around
