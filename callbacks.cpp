@@ -239,21 +239,21 @@ void callback::submenuOptions(int Param)
         case INITIALIZING_CALL:
             SubMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_SUBMENU3));
             // add button for "back to main menu"
-            SubMenu->addButton(submenuOptions, MAINMENU, Point16(static_cast<int>(global::s2->GameResolution.x / 2 - 100), 440),
+            SubMenu->addButton(submenuOptions, MAINMENU, Point16(global::s2->GameResolution.x / 2 - 100, 440),
                                Extent16(200, 20), BUTTON_RED1, "back");
             // add menu title
-            SubMenu->addText("Options", Point16(static_cast<int>(global::s2->GameResolution.x / 2 - 20), 10), FontSize::Large);
+            SubMenu->addText("Options", Point16(global::s2->GameResolution.x / 2 - 20, 10), FontSize::Large);
             // add screen resolution
             if(TextResolution)
                 SubMenu->delText(TextResolution);
             TextResolution = SubMenu->addText(
               helpers::format("Game Resolution: %d*%d / %s", global::s2->GameResolution.x, global::s2->GameResolution.y,
                               (global::s2->fullscreen ? "Fullscreen" : "Window")),
-              Point16(static_cast<int>(global::s2->GameResolution.x / 2 - 110), 50), FontSize::Medium);
+              Point16(global::s2->GameResolution.x / 2 - 110, 50), FontSize::Medium);
             if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen = SubMenu->addButton(
-              submenuOptions, FULLSCREEN, Point16(static_cast<int>(global::s2->GameResolution.x / 2 - 100), 190),
+              submenuOptions, FULLSCREEN, Point16(global::s2->GameResolution.x / 2 - 100, 190),
               Extent16(200, 20), BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
             SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 120), Extent16(200, 110),
                                                  FontSize::Medium, FontColor::Yellow, BUTTON_GREY);
