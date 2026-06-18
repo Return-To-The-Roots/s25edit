@@ -4,9 +4,9 @@
 #
 # CI for s25edit.
 #
-# Same static checks the parent project
-# (Return-To-The-Roots/s25client) runs on external/s25edit, so
-# contributors can catch issues before updating the submodule pointer.
+# Mirrors the static checks used by the parent project
+# (Return-To-The-Roots/s25client).  The clang-format action and the
+# include-guard script are the same ones the parent repo uses.
 
 name: CI
 
@@ -25,43 +25,30 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Install tools
+      - name: Install REUSE
         run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-            clang-format-18 \
-            python3-pip \
-          && sudo pip3 install --no-cache-dir reuse \
-          && sudo rm -rf /var/lib/apt/lists/*
+          pip install --user reuse
 
-      # ── 1. Include guards ────────────────────────────────────────────
+      # ── 1. Formatting ───────────────────────────────────────────────
+      # Uses the same clang-format version (10) and the same action as
+      # the parent s25client project.
+      - name: Formatting
+        uses: DoozyX/clang-format-lint-action@c71d0bf4e21876ebec3e5647491186f8797fde31 # v0.18.2
+        with:
+          source: "."
+          clangFormatVersion: 10
+
+      # ── 2. Include guards ────────────────────────────────────────────
       # SGE is a vendored third-party library; it uses traditional
       # #ifndef guards instead of #pragma once, so we skip it.
+      # Uses the same per-file script as the parent repo.
       - name: Check include guards (#pragma once)
         run: |
-          errors=0
-          while IFS= read -r -d '' f; do
-            while IFS= read -r line; do
-              if [[ "$line" =~ ^// ]] || [[ "$line" =~ ^$ ]]; then continue; fi
-              if [[ "$line" =~ ^/\* ]] || [[ "$line" =~ ^\* ]]; then continue; fi
-              if [[ "$line" != "#pragma once" ]]; then
-                echo "::error file=$f::Missing or misplaced #pragma once"
-                errors=$((errors+1))
-              fi
-              break
-            done < "$f"
-          done < <(find . -path ./.git -prune -false \
+          find . -path ./.git -prune -false \
             -o -path ./build -prune -false \
             -o -path ./SGE -prune -false \
-            -o \( -name '*.hpp' -o -name '*.h' \) -print0)
-          exit $errors
-
-      # ── 2. Formatting (clang-format) ────────────────────────────────
-      - name: Check formatting (clang-format-18)
-        run: |
-          find . \( -path ./.git -o -path ./build -o -path ./LICENSES \) \
-            -prune -false \
-            -o \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) \
-            -exec clang-format-18 -n --Werror {} \+
+            -o \( -name '*.hpp' -o -name '*.h' \) \
+            -print0 | xargs -0 -n1 tools/ci/checkIncludeGuards.sh
 
       # ── 3. REUSE compliance ──────────────────────────────────────────
       - name: Check licensing (REUSE)
