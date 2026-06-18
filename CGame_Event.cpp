@@ -383,13 +383,9 @@ void CGame::EventHandling(SDL_Event* Event)
 
         case SDL_WINDOWEVENT:
         {
-            switch(Event->window.event)
+            if(Event->window.event == SDL_WINDOWEVENT_RESIZED)
             {
-                case SDL_WINDOWEVENT_RESIZED:
-                {
-                    UpdateDisplaySize(Extent(Event->window.data1, Event->window.data2));
-                }
-                break;
+                UpdateDisplaySize(Extent(Event->window.data1, Event->window.data2));
             }
             break;
         }
