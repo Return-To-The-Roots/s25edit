@@ -6,6 +6,7 @@
 #pragma once
 
 #include "SdlSurface.h"
+#include "defines.h"
 
 class CPicture
 {
@@ -14,10 +15,8 @@ class CPicture
 private:
     SdlSurface Surf_Picture;
     bool needRender;
-    Uint16 x;
-    Uint16 y;
-    Uint16 w;
-    Uint16 h;
+    Point16 pos_;
+    Extent16 size_;
     int picture_;
     bool marked;
     bool clicked;
@@ -27,14 +26,14 @@ private:
     int motionLeaveParam;
 
 public:
-    CPicture(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, int picture = -1);
+    CPicture(void callback(int), int clickedParam, Point16 pos = {0, 0}, int picture = -1);
     // Access
-    int getX() const { return x; };
-    int getY() const { return y; };
-    int getW() const { return w; };
-    int getH() const { return h; };
-    void setX(int x) { this->x = x; };
-    void setY(int y) { this->y = y; };
+    int getX() const { return pos_.x; };
+    int getY() const { return pos_.y; };
+    int getW() const { return size_.x; };
+    int getH() const { return size_.y; };
+    void setX(int x) { pos_.x = x; };
+    void setY(int y) { pos_.y = y; };
     void setMouseData(const SDL_MouseMotionEvent& motion);
     void setMouseData(const SDL_MouseButtonEvent& button);
     bool render();

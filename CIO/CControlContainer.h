@@ -69,16 +69,16 @@ public:
     void setWaste() { waste = true; }
     bool isWaste() const { return waste; }
     // Methods
-    CButton* addButton(void callback(int), int clickedParam, Uint16 x = 0, Uint16 y = 0, Uint16 w = 20, Uint16 h = 20,
+    CButton* addButton(void callback(int), int clickedParam, Point16 pos = {0, 0}, Extent16 size = {20, 20},
                        int color = BUTTON_GREY, const char* text = nullptr, int picture = -1);
     bool delButton(CButton* ButtonToDelete);
-    CFont* addText(std::string string, int x, int y, FontSize fontsize, FontColor color = FontColor::Yellow);
+    CFont* addText(std::string string, Point16 pos, FontSize fontsize, FontColor color = FontColor::Yellow);
     bool delText(CFont* TextToDelete);
-    CPicture* addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture);
+    CPicture* addPicture(void callback(int), int clickedParam, Point16 pos, int picture);
     bool delPicture(CPicture* PictureToDelete);
-    int addStaticPicture(int x, int y, int picture);
+    int addStaticPicture(Point16 pos, int picture);
     bool delStaticPicture(int picId);
-    CTextfield* addTextfield(Uint16 x = 0, Uint16 y = 0, Uint16 cols = 10, Uint16 rows = 1,
+    CTextfield* addTextfield(Point16 pos = {0, 0}, Uint16 cols = 10, Uint16 rows = 1,
                              FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
                              int bg_color = -1, bool button_style = false);
     bool delTextfield(CTextfield* TextfieldToDelete);

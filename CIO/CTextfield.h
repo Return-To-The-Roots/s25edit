@@ -19,8 +19,7 @@ private:
     SdlSurface Surf_Text;
     std::unique_ptr<CFont> textObj;
     bool needRender;
-    Uint16 w;
-    Uint16 h;
+    Extent16 size_;
     Uint16 cols;
     Uint16 rows;
     int pic_background;
@@ -35,13 +34,13 @@ private:
 
 public:
     // Constructor - Destructor
-    CTextfield(Sint16 x = 0, Sint16 y = 0, Uint16 cols = 10, Uint16 rows = 1, FontSize fontsize = FontSize::Large,
+    CTextfield(Point16 pos = {0, 0}, Uint16 cols = 10, Uint16 rows = 1, FontSize fontsize = FontSize::Large,
                FontColor text_color = FontColor::Yellow, int bg_color = -1, bool button_style = false);
     // Access
     int getX() const;
     int getY() const;
-    int getW() const { return w; }
-    int getH() const { return h; }
+    int getW() const { return size_.x; }
+    int getH() const { return size_.y; }
     int getCols() const { return cols; }
     int getRows() const { return rows; }
     void setX(int x);

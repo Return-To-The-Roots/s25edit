@@ -87,13 +87,12 @@ bool CControlContainer::eraseElement(T& collection, const U* element)
     return false;
 }
 
-CButton* CControlContainer::addButton(void callback(int), int clickedParam, Uint16 x, Uint16 y, Uint16 w, Uint16 h,
+CButton* CControlContainer::addButton(void callback(int), int clickedParam, Point16 pos, Extent16 size,
                                       int color, const char* text, int picture)
 {
-    x += borderBeginSize.x;
-    y += borderBeginSize.y;
+    pos = pos + borderBeginSize;
 
-    buttons.emplace_back(std::make_unique<CButton>(callback, clickedParam, x, y, w, h, color, text, picture));
+    buttons.emplace_back(std::make_unique<CButton>(callback, clickedParam, pos, size, color, text, picture));
     needRender = true;
     return buttons.back().get();
 }
@@ -103,12 +102,11 @@ bool CControlContainer::delButton(CButton* ButtonToDelete)
     return eraseElement(buttons, ButtonToDelete);
 }
 
-CFont* CControlContainer::addText(std::string string, int x, int y, FontSize fontsize, FontColor color)
+CFont* CControlContainer::addText(std::string string, Point16 pos, FontSize fontsize, FontColor color)
 {
-    x += borderBeginSize.x;
-    y += borderBeginSize.y;
+    pos = pos + borderBeginSize;
 
-    texts.emplace_back(std::make_unique<CFont>(std::move(string), x, y, fontsize, color));
+    texts.emplace_back(std::make_unique<CFont>(std::move(string), pos, fontsize, color));
     needRender = true;
     return texts.back().get();
 }
@@ -118,12 +116,11 @@ bool CControlContainer::delText(CFont* TextToDelete)
     return eraseElement(texts, TextToDelete);
 }
 
-CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
+CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Point16 pos, int picture)
 {
-    x += borderBeginSize.x;
-    y += borderBeginSize.y;
+    pos = pos + borderBeginSize;
 
-    pictures.emplace_back(std::make_unique<CPicture>(callback, clickedParam, x, y, picture));
+    pictures.emplace_back(std::make_unique<CPicture>(callback, clickedParam, pos, picture));
     needRender = true;
     return pictures.back().get();
 }
@@ -133,15 +130,14 @@ bool CControlContainer::delPicture(CPicture* PictureToDelete)
     return eraseElement(pictures, PictureToDelete);
 }
 
-int CControlContainer::addStaticPicture(int x, int y, int picture)
+int CControlContainer::addStaticPicture(Point16 pos, int picture)
 {
     if(picture < 0)
         return -1;
-    Position pos{x, y};
-    pos += Position(borderBeginSize);
+    pos = pos + borderBeginSize;
 
     unsigned id = static_pictures.empty() ? 0u : static_pictures.back().id + 1u;
-    static_pictures.emplace_back(Picture{pos, picture, id});
+    static_pictures.emplace_back(Picture{Position(pos), picture, id});
     needRender = true;
     return id;
 }
@@ -161,14 +157,13 @@ bool CControlContainer::delStaticPicture(int picId)
     return false;
 }
 
-CTextfield* CControlContainer::addTextfield(Uint16 x, Uint16 y, Uint16 cols, Uint16 rows, FontSize fontsize,
+CTextfield* CControlContainer::addTextfield(Point16 pos, Uint16 cols, Uint16 rows, FontSize fontsize,
                                             FontColor text_color, int bg_color, bool button_style)
 {
-    x += borderBeginSize.x;
-    y += borderBeginSize.y;
+    pos = pos + borderBeginSize;
 
     textfields.emplace_back(
-      std::make_unique<CTextfield>(x, y, cols, rows, fontsize, text_color, bg_color, button_style));
+      std::make_unique<CTextfield>(pos, cols, rows, fontsize, text_color, bg_color, button_style));
     needRender = true;
     return textfields.back().get();
 }

@@ -68,7 +68,7 @@ private:
     std::list<SavedVertex> undoBuffer;
     std::list<SavedVertex> redoBuffer;
     // get the number of the triangle nearest to cursor and save it to VertexX and VertexY
-    void storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 MouseState);
+    void storeVerticesFromMouse(Position mousePos, Uint8 MouseState);
     // blitting coords for the mouse cursor
     Position MouseBlit;
     // counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor
@@ -206,23 +206,23 @@ private:
     //          X=14    X=5     X=6     X=15
     //              X=16    X=17    X=18
     template<size_t T_size>
-    void calculateVerticesAround(std::array<Point32, T_size>& newVertices, int x, int y);
+    void calculateVerticesAround(std::array<Point32, T_size>& newVertices, Position pos);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
     Position correctMouseBlit(Position vertexPos) const;
     void modifyVertex();
-    void modifyHeightRaise(int VertexX, int VertexY);
-    void modifyHeightReduce(int VertexX, int VertexY);
-    void modifyHeightPlane(int VertexX, int VertexY, Uint8 h);
-    void modifyHeightMakeBigHouse(int VertexX, int VertexY);
-    void modifyShading(int VertexX, int VertexY);
-    void modifyTexture(int VertexX, int VertexY, bool rsu, bool usd);
-    void modifyTextureMakeHarbour(int VertexX, int VertexY);
-    void modifyObject(int x, int y);
-    void modifyAnimal(int VertexX, int VertexY);
-    void modifyBuild(int x, int y);
-    void modifyResource(int x, int y);
-    void modifyPlayer(int VertexX, int VertexY);
+    void modifyHeightRaise(Position pos);
+    void modifyHeightReduce(Position pos);
+    void modifyHeightPlane(Position pos, Uint8 h);
+    void modifyHeightMakeBigHouse(Position pos);
+    void modifyShading(Position pos);
+    void modifyTexture(Position pos, bool rsu, bool usd);
+    void modifyTextureMakeHarbour(Position pos);
+    void modifyObject(Position pos);
+    void modifyAnimal(Position pos);
+    void modifyBuild(Position pos);
+    void modifyResource(Position pos);
+    void modifyPlayer(Position pos);
     void rotateMap();
     void MirrorMapOnXAxis();
     void MirrorMapOnYAxis();

@@ -44,7 +44,7 @@ public:
                              MapType type, const MapNode& P1, const MapNode& P2, const MapNode& P3);
 
     static void get_nodeVectors(bobMAP& myMap);
-    static void update_shading(bobMAP& myMap, int VertexX, int VertexY);
+    static void update_shading(bobMAP& myMap, Position pos);
 
 private:
     // to decide what to draw, triangle-textures or objects and texture-borders
@@ -56,9 +56,9 @@ private:
     static Sint32 get_LightIntensity(const vector& node);
     static float absf(float a);
     // update flatVectors around a vertex
-    static void update_flatVectors(bobMAP& myMap, int VertexX, int VertexY);
+    static void update_flatVectors(bobMAP& myMap, Position pos);
     // update nodeVector based on new flatVectors around it
-    static void update_nodeVector(bobMAP& myMap, int VertexX, int VertexY);
+    static void update_nodeVector(bobMAP& myMap, Position pos);
     static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
                                         Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
                                         Point16& right2);

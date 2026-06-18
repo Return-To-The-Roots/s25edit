@@ -8,7 +8,7 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color,
+CTextfield::CTextfield(Point16 pos, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color,
                        int bg_color, bool button_style)
 {
     active = false;
@@ -16,9 +16,9 @@ CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, FontSize fo
     this->rows = (rows < 1 ? 1 : rows);
     // calc width by maximum number of chiffres (cols) + one blinking chiffre * average pixel_width of a chiffre
     // (fontsize-3) + tolerance for borders
-    this->w = (this->cols + 1) * (static_cast<unsigned>(fontsize) - 3) + 4;
+    this->size_.x = (this->cols + 1) * (static_cast<unsigned>(fontsize) - 3) + 4;
     // calc height ----------------| this is the row_separator from CFont.cpp    |----        + tolerance for borders
-    this->h = this->rows * getLineHeight(fontsize) + 4;
+    this->size_.y = this->rows * getLineHeight(fontsize) + 4;
     setColor(bg_color);
     // allocate memory for the text: chiffres (cols) + '\n' for each line * rows + blinking chiffre + '\0'
     text_.resize((this->cols + 1) * this->rows + 2);
@@ -26,7 +26,7 @@ CTextfield::CTextfield(Sint16 x, Sint16 y, Uint16 cols, Uint16 rows, FontSize fo
     needRender = true;
     rendered = false;
     this->button_style = button_style;
-    textObj = std::make_unique<CFont>("", x, y, fontsize, text_color);
+    textObj = std::make_unique<CFont>("", pos, fontsize, text_color);
 }
 
 int CTextfield::getX() const
@@ -144,7 +144,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            active = (button.x >= getX()) && (button.x < getX() + w) && (button.y >= getY()) && (button.y < getY() + h);
+            active = (button.x >= getX()) && (button.x < getX() + size_.x) && (button.y >= getY()) && (button.y < getY() + size_.y);
         }
     }
     needRender = true;
@@ -274,7 +274,7 @@ bool CTextfield::render()
     // if we need a new surface
     if(!Surf_Text)
     {
-        Surf_Text = makeRGBSurface(w, h);
+        Surf_Text = makeRGBSurface(size_.x, size_.y);
         if(!Surf_Text)
             return false;
     }
@@ -290,13 +290,13 @@ bool CTextfield::render()
             pic = pic_foreground;
 
         // at first completly fill the background (not the fastest way, but simplier)
-        if(w <= global::bmpArray[pic].w)
-            pic_w = w;
+        if(size_.x <= global::bmpArray[pic].w)
+            pic_w = size_.x;
         else
             pic_w = global::bmpArray[pic].w;
 
-        if(h <= global::bmpArray[pic].h)
-            pic_h = h;
+        if(size_.y <= global::bmpArray[pic].h)
+            pic_h = size_.y;
         else
             pic_h = global::bmpArray[pic].h;
 
@@ -339,55 +339,55 @@ bool CTextfield::render()
                 // black frame is left and up
                 // draw vertical line
                 pos_x = 0;
-                for(int y = 0; y < h; y++)
+                for(int y = 0; y < size_.y; y++)
                     CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
 
                 // draw vertical line
                 pos_x = 1;
-                for(int y = 0; y < h - 1; y++)
+                for(int y = 0; y < size_.y - 1; y++)
                     CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
 
                 // draw horizontal line
                 pos_y = 0;
-                for(int x = 0; x < w; x++)
+                for(int x = 0; x < size_.x; x++)
                     CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
 
                 // draw horizontal line
                 pos_y = 1;
-                for(int x = 0; x < w - 1; x++)
+                for(int x = 0; x < size_.x - 1; x++)
                     CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
             } else
             {
                 // black frame is right and down
                 // draw vertical line
-                pos_x = w - 1;
-                for(int y = 0; y < h; y++)
+                pos_x = size_.x - 1;
+                for(int y = 0; y < size_.y; y++)
                     CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
 
                 // draw vertical line
-                pos_x = w - 2;
-                for(int y = 1; y < h; y++)
+                pos_x = size_.x - 2;
+                for(int y = 1; y < size_.y; y++)
                     CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
 
                 // draw horizontal line
-                pos_y = h - 1;
-                for(int x = 0; x < w; x++)
+                pos_y = size_.y - 1;
+                for(int x = 0; x < size_.x; x++)
                     CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
 
                 // draw horizontal line
-                pos_y = h - 2;
-                for(int x = 1; x < w; x++)
+                pos_y = size_.y - 2;
+                for(int x = 1; x < size_.x; x++)
                     CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
             }
 
             // draw the foreground --> at first the color (marked or unmarked) and then the picture or text
-            if(w <= global::bmpArray[pic_foreground].w)
-                pic_w = w;
+            if(size_.x <= global::bmpArray[pic_foreground].w)
+                pic_w = size_.x;
             else
                 pic_w = global::bmpArray[pic_foreground].w;
 
-            if(h <= global::bmpArray[pic_foreground].h)
-                pic_h = h;
+            if(size_.y <= global::bmpArray[pic_foreground].h)
+                pic_h = size_.y;
             else
                 pic_h = global::bmpArray[pic_foreground].h;
 

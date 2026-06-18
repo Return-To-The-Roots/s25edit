@@ -16,8 +16,8 @@ CSelectBox::CSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor 
 
     // button position is relative to the selectbox
     ScrollUpButton =
-      std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, 0, 20, 20, BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
-    ScrollDownButton = std::make_unique<CButton>(nullptr, 0, size_.x - 1 - 20, size_.y - 1 - 20, 20, 20, BUTTON_GREY,
+      std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, 0), Extent16(20, 20), BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
+    ScrollDownButton = std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, size_.y - 1 - 20), Extent16(20, 20), BUTTON_GREY,
                                                  nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
@@ -26,7 +26,7 @@ void CSelectBox::addOption(const std::string& string, std::function<void(int)> c
     // explanation: row_height = row_separator + fontsize
     const unsigned row_height = getLineHeight(fontsize);
 
-    auto Entry = std::make_unique<CFont>(string, 10, last_text_pos_y, fontsize, FontColor::Yellow);
+    auto Entry = std::make_unique<CFont>(string, Point16(10, last_text_pos_y), fontsize, FontColor::Yellow);
     Entry->setCallback(std::move(callback), param);
     Entries.emplace_back(std::move(Entry));
     last_text_pos_y += row_height;

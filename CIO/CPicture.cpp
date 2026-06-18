@@ -7,18 +7,17 @@
 #include "../CSurface.h"
 #include "../globals.h"
 
-CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int picture)
+CPicture::CPicture(void callback(int), int clickedParam, Point16 pos, int picture)
 {
     marked = false;
     clicked = false;
-    this->x = x;
-    this->y = y;
+    this->pos_ = pos;
     if(picture >= 0)
         this->picture_ = picture;
     else
         this->picture_ = 0;
-    this->w = global::bmpArray[picture].w;
-    this->h = global::bmpArray[picture].h;
+    this->size_.x = global::bmpArray[picture].w;
+    this->size_.y = global::bmpArray[picture].h;
     this->callback = callback;
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
@@ -29,7 +28,7 @@ CPicture::CPicture(void callback(int), int clickedParam, Uint16 x, Uint16 y, int
 void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the picture
-    if((motion.x >= x) && (motion.x < x + w) && (motion.y >= y) && (motion.y < y + h))
+    if((motion.x >= pos_.x) && (motion.x < pos_.x + size_.x) && (motion.y >= pos_.y) && (motion.y < pos_.y + size_.y))
     {
         if(motion.state == SDL_RELEASED)
         {
@@ -53,8 +52,8 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= x) && (button.x < x + w) && (button.y >= y)
-           && (button.y < y + h))
+        if((button.state == SDL_PRESSED) && (button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y)
+           && (button.y < pos_.y + size_.y))
         {
             marked = true;
             clicked = true;
@@ -78,7 +77,7 @@ bool CPicture::render()
     // if we need a new surface
     if(!Surf_Picture)
     {
-        Surf_Picture = makeRGBSurface(w, h);
+        Surf_Picture = makeRGBSurface(size_.x, size_.y);
         if(!Surf_Picture)
             return false;
         SDL_SetColorKey(Surf_Picture.get(), SDL_TRUE, SDL_MapRGB(Surf_Picture->format, 0, 0, 0));
