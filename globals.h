@@ -31,8 +31,22 @@ extern boost::filesystem::path userMapsPath;
 extern WorldDescription worldDesc;
 } // namespace global
 
-extern unsigned char TRIANGLE_HEIGHT;
-extern unsigned char TRIANGLE_WIDTH;
-extern unsigned char TRIANGLE_INCREASE;
+extern unsigned char triangleHeight;
+extern unsigned char triangleWidth;
+extern unsigned char triangleIncrease;
+
+// Default / reset values for zoom
+constexpr unsigned char TRIANGLE_HEIGHT_DEFAULT = 28;
+constexpr unsigned char TRIANGLE_WIDTH_DEFAULT = 56;
+constexpr unsigned char TRIANGLE_INCREASE_DEFAULT = 5;
+
+// Zoom step increments/decrements
+constexpr unsigned char ZOOM_STEP_HEIGHT = 5;
+constexpr unsigned char ZOOM_STEP_WIDTH = 11;
+constexpr unsigned char ZOOM_STEP_INCREASE = 1;
+
+// Zoom boundaries (based on triangleIncrease)
+constexpr unsigned char ZOOM_INCREASE_MAX = 9;
+constexpr unsigned char ZOOM_INCREASE_MIN = 1;
 
 extern Uint8 gouData[3][256][256];

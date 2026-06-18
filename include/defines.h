@@ -1208,13 +1208,6 @@ constexpr auto MAXPLAYERS = 16;
 constexpr auto MAXMAPWIDTH = 1024;
 constexpr auto MAXMAPHEIGHT = 1024;
 
-// triangle values
-// these values are now handled in globals.h and globals.cpp, cause they must be changeable for the zoom mode
-// #define TRIANGLE_HEIGHT             28  //30 --> old value, 28 is the right
-// #define TRIANGLE_WIDTH              56  //54 --> old value, 56 is the right
-// #define TRIANGLE_INCREASE            5  //depends on TRIANGLE_HEIGHT --> TRIANGLE_HEIGHT/TRIANGLE_INCREASE must be
-// greater than 5
-
 enum TriangleTerrainType
 {
     TRIANGLE_TEXTURE_STEPPE_MEADOW1 = 0x00,

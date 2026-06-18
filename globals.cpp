@@ -19,9 +19,9 @@ boost::filesystem::path global::gameDataFilePath(".");
 boost::filesystem::path global::userMapsPath;
 WorldDescription global::worldDesc;
 
-unsigned char TRIANGLE_HEIGHT = 28;
-unsigned char TRIANGLE_WIDTH = 56;
-unsigned char TRIANGLE_INCREASE = 5;
+unsigned char triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
+unsigned char triangleWidth = TRIANGLE_WIDTH_DEFAULT;
+unsigned char triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
 
 // three-dimensional array for the GOUx.DAT-Files (3 files * 256 * 256 values)
 Uint8 gouData[3][256][256];

@@ -77,12 +77,12 @@ void CGame::EventHandling(SDL_Event* Event)
 #endif
                 // F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
                 case SDLK_F5:
-                    if(TRIANGLE_INCREASE < 10 && MapObj->getMap())
+                    if(triangleIncrease < ZOOM_INCREASE_MAX && MapObj->getMap())
                     {
                         callback::PleaseWait(INITIALIZING_CALL);
-                        TRIANGLE_HEIGHT += 5;
-                        TRIANGLE_WIDTH += 11;
-                        TRIANGLE_INCREASE += 1;
+                        triangleHeight += ZOOM_STEP_HEIGHT;
+                        triangleWidth += ZOOM_STEP_WIDTH;
+                        triangleIncrease += ZOOM_STEP_INCREASE;
                         bobMAP* myMap = MapObj->getMap();
                         myMap->updateVertexCoords();
                         CSurface::get_nodeVectors(*myMap);
@@ -94,9 +94,9 @@ void CGame::EventHandling(SDL_Event* Event)
                     if(MapObj->getMap())
                     {
                         callback::PleaseWait(INITIALIZING_CALL);
-                        TRIANGLE_HEIGHT = 28;
-                        TRIANGLE_WIDTH = 56;
-                        TRIANGLE_INCREASE = 5;
+                        triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
+                        triangleWidth = TRIANGLE_WIDTH_DEFAULT;
+                        triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
                         bobMAP* myMap = MapObj->getMap();
                         myMap->updateVertexCoords();
                         CSurface::get_nodeVectors(*myMap);
@@ -105,12 +105,12 @@ void CGame::EventHandling(SDL_Event* Event)
                 }
                 break;
                 case SDLK_F7:
-                    if(TRIANGLE_INCREASE > 1 && MapObj->getMap())
+                    if(triangleIncrease > ZOOM_INCREASE_MIN && MapObj->getMap())
                     {
                         callback::PleaseWait(INITIALIZING_CALL);
-                        TRIANGLE_HEIGHT -= 5;
-                        TRIANGLE_WIDTH -= 11;
-                        TRIANGLE_INCREASE -= 1;
+                        triangleHeight -= ZOOM_STEP_HEIGHT;
+                        triangleWidth -= ZOOM_STEP_WIDTH;
+                        triangleIncrease -= ZOOM_STEP_INCREASE;
                         bobMAP* myMap = MapObj->getMap();
                         myMap->updateVertexCoords();
                         CSurface::get_nodeVectors(*myMap);
