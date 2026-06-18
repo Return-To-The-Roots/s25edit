@@ -15,10 +15,10 @@ CSelectBox::CSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor 
     setColor(bg_color);
 
     // button position is relative to the selectbox
-    ScrollUpButton =
-      std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, 0), Extent16(20, 20), BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
-    ScrollDownButton = std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, size_.y - 1 - 20), Extent16(20, 20), BUTTON_GREY,
-                                                 nullptr, PICTURE_SMALL_ARROW_DOWN);
+    ScrollUpButton = std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, 0), Extent16(20, 20), BUTTON_GREY,
+                                               nullptr, PICTURE_SMALL_ARROW_UP);
+    ScrollDownButton = std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, size_.y - 1 - 20),
+                                                 Extent16(20, 20), BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
 void CSelectBox::addOption(const std::string& string, std::function<void(int)> callback, int param)

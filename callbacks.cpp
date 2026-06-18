@@ -142,9 +142,11 @@ void callback::mainmenu(int Param)
             MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU));
             MainMenu->addButton(mainmenu, ENDGAME, Point16(50, 400), Extent16(200, 20), BUTTON_RED1, "Quit program");
 #ifdef _ADMINMODE
-            MainMenu->addButton(submenu1, INITIALIZING_CALL, Point16(50, 200), Extent16(200, 20), BUTTON_GREY, "Submenu_1");
+            MainMenu->addButton(submenu1, INITIALIZING_CALL, Point16(50, 200), Extent16(200, 20), BUTTON_GREY,
+                                "Submenu_1");
 #endif
-            MainMenu->addButton(mainmenu, STARTEDITOR, Point16(50, 160), Extent16(200, 20), BUTTON_RED1, "Start editor");
+            MainMenu->addButton(mainmenu, STARTEDITOR, Point16(50, 160), Extent16(200, 20), BUTTON_RED1,
+                                "Start editor");
             MainMenu->addButton(mainmenu, OPTIONS, Point16(50, 370), Extent16(200, 20), BUTTON_GREEN2, "Options");
             break;
 
@@ -250,9 +252,9 @@ void callback::submenuOptions(int Param)
               Point16((int)(global::s2->GameResolution.x / 2 - 110), 50), FontSize::Medium);
             if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
-            ButtonFullscreen =
-              SubMenu->addButton(submenuOptions, FULLSCREEN, Point16((int)(global::s2->GameResolution.x / 2 - 100), 190),
-                                 Extent16(200, 20), BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
+            ButtonFullscreen = SubMenu->addButton(
+              submenuOptions, FULLSCREEN, Point16((int)(global::s2->GameResolution.x / 2 - 100), 190),
+              Extent16(200, 20), BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
             SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 120), Extent16(200, 110),
                                                  FontSize::Medium, FontColor::Yellow, BUTTON_GREY);
             SelectBoxRes->addOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
@@ -716,7 +718,8 @@ void callback::EditorMainMenu(int Param)
             WNDMain->addButton(EditorMainMenu, LOADMENU, Point16(8, 100), Extent16(190, 20), BUTTON_GREEN2, "Load map");
             WNDMain->addButton(EditorMainMenu, SAVEMENU, Point16(8, 125), Extent16(190, 20), BUTTON_GREEN2, "Save map");
 
-            WNDMain->addButton(EditorMainMenu, QUITMENU, Point16(8, 260), Extent16(190, 20), BUTTON_GREEN2, "Leave editor");
+            WNDMain->addButton(EditorMainMenu, QUITMENU, Point16(8, 260), Extent16(190, 20), BUTTON_GREEN2,
+                               "Leave editor");
             break;
 
         case WINDOWQUIT:
@@ -866,7 +869,8 @@ void callback::EditorSaveMenu(int Param)
                 TXTF_Author = WNDSave->addTextfield(Point16(10, 87), 19, 1);
                 TXTF_Author->setText(MapObj->getAuthor());
                 WNDSave->addButton(EditorSaveMenu, SAVEMAP, Point16(170, 120), Extent16(90, 20), BUTTON_GREY, "Save");
-                WNDSave->addButton(EditorSaveMenu, WINDOWQUIT, Point16(170, 145), Extent16(90, 20), BUTTON_RED1, "Abort");
+                WNDSave->addButton(EditorSaveMenu, WINDOWQUIT, Point16(170, 145), Extent16(90, 20), BUTTON_RED1,
+                                   "Abort");
                 break;
             }
         case WINDOWQUIT:
@@ -923,8 +927,10 @@ void callback::EditorQuitMenu(int Param)
                 break;
             WNDBackToMainMenu = global::s2->RegisterWindow(
               std::make_unique<CWindow>(EditorQuitMenu, WINDOWQUIT, WindowPos::Center, Extent(212, 110), "Exit?"));
-            WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, Point16(0, 0), Extent16(100, 80), BUTTON_GREEN2, nullptr, PICTURE_SMALL_TICK);
-            WNDBackToMainMenu->addButton(EditorQuitMenu, NOTBACKTOMAIN, Point16(100, 0), Extent16(100, 80), BUTTON_RED1, nullptr, PICTURE_SMALL_CROSS);
+            WNDBackToMainMenu->addButton(EditorQuitMenu, BACKTOMAIN, Point16(0, 0), Extent16(100, 80), BUTTON_GREEN2,
+                                         nullptr, PICTURE_SMALL_TICK);
+            WNDBackToMainMenu->addButton(EditorQuitMenu, NOTBACKTOMAIN, Point16(100, 0), Extent16(100, 80), BUTTON_RED1,
+                                         nullptr, PICTURE_SMALL_CROSS);
             break;
 
         case BACKTOMAIN:
@@ -1435,35 +1441,46 @@ void callback::EditorLandscapeMenu(int Param)
             {
                 case MAP_GREENLAND:
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Point16(2, 2), PICTURE_LANDSCAPE_GRANITE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Point16(36, 2), PICTURE_LANDSCAPE_TREE_DEAD);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Point16(36, 2),
+                                             PICTURE_LANDSCAPE_TREE_DEAD);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Point16(70, 2), PICTURE_LANDSCAPE_STONE);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICCACTUS, Point16(2, 36), PICTURE_LANDSCAPE_CACTUS);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Point16(36, 36), PICTURE_LANDSCAPE_PEBBLE);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, Point16(70, 36), PICTURE_LANDSCAPE_BUSH);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, Point16(2, 70), PICTURE_LANDSCAPE_SHRUB);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Point16(36, 70), PICTURE_LANDSCAPE_BONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Point16(70, 70), PICTURE_LANDSCAPE_MUSHROOM);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Point16(70, 70),
+                                             PICTURE_LANDSCAPE_MUSHROOM);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Point16(5, 107), MAPPIC_FLOWERS);
                     break;
                 case MAP_WASTELAND:
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Point16(2, 2), PICTURE_LANDSCAPE_GRANITE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Point16(36, 2), PICTURE_LANDSCAPE_TREE_DEAD);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Point16(36, 2),
+                                             PICTURE_LANDSCAPE_TREE_DEAD);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Point16(70, 2), PICTURE_LANDSCAPE_STONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTALAGMITE, Point16(2, 36), PICTURE_LANDSCAPE_STALAGMITE);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTALAGMITE, Point16(2, 36),
+                                             PICTURE_LANDSCAPE_STALAGMITE);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Point16(36, 36), PICTURE_LANDSCAPE_PEBBLE);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, Point16(70, 36), PICTURE_LANDSCAPE_BUSH);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, Point16(2, 70), PICTURE_LANDSCAPE_SHRUB);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Point16(36, 70), PICTURE_LANDSCAPE_BONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Point16(70, 70), PICTURE_LANDSCAPE_MUSHROOM);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Point16(70, 70),
+                                             PICTURE_LANDSCAPE_MUSHROOM);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Point16(5, 107), MAPPIC_FLOWERS);
                     break;
                 case MAP_WINTERLAND:
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Point16(2, 2), PICTURE_LANDSCAPE_GRANITE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Point16(36, 2), PICTURE_LANDSCAPE_TREE_DEAD_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Point16(70, 2), PICTURE_LANDSCAPE_STONE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Point16(2, 36), PICTURE_LANDSCAPE_PEBBLE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Point16(36, 36), PICTURE_LANDSCAPE_BONE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Point16(70, 36), PICTURE_LANDSCAPE_MUSHROOM_WINTER);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Point16(2, 2),
+                                             PICTURE_LANDSCAPE_GRANITE_WINTER);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Point16(36, 2),
+                                             PICTURE_LANDSCAPE_TREE_DEAD_WINTER);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Point16(70, 2),
+                                             PICTURE_LANDSCAPE_STONE_WINTER);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Point16(2, 36),
+                                             PICTURE_LANDSCAPE_PEBBLE_WINTER);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Point16(36, 36),
+                                             PICTURE_LANDSCAPE_BONE_WINTER);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Point16(70, 36),
+                                             PICTURE_LANDSCAPE_MUSHROOM_WINTER);
                     WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Point16(73, 73), MAPPIC_FLOWERS);
                     break;
                 default: // should not happen
@@ -1844,8 +1861,10 @@ void callback::EditorCursorMenu(int Param)
                                         WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
 
-            CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, Point16(2, 2), Extent16(96, 32), BUTTON_GREY, "Hexagon");
-            CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Point16(2, 34), Extent16(196, 32), BUTTON_GREY, "Cursor-Activity: static");
+            CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, Point16(2, 2), Extent16(96, 32),
+                                                    BUTTON_GREY, "Hexagon");
+            CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Point16(2, 34), Extent16(196, 32),
+                                                      BUTTON_GREY, "Cursor-Activity: static");
             WNDCursor->addButton(EditorCursorMenu, TRIANGLE, Point16(2, 66), Extent16(32, 32), BUTTON_GREY, nullptr);
             trianglePictureArrowUp = WNDCursor->addStaticPicture(Point16(8, 74), CURSOR_SYMBOL_ARROW_UP);
             trianglePictureArrowDown = WNDCursor->addStaticPicture(Point16(17, 77), CURSOR_SYMBOL_ARROW_DOWN);
@@ -1928,13 +1947,13 @@ void callback::EditorCursorMenu(int Param)
             }
             if(MapObj->getHexagonMode())
             {
-                CursorModeButton =
-                  WNDCursor->addButton(EditorCursorMenu, CURSORMODE, Point16(2, 2), Extent16(96, 32), BUTTON_GREY, "Square");
+                CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, Point16(2, 2), Extent16(96, 32),
+                                                        BUTTON_GREY, "Square");
                 MapObj->setHexagonMode(false);
             } else
             {
-                CursorModeButton =
-                  WNDCursor->addButton(EditorCursorMenu, CURSORMODE, Point16(2, 2), Extent16(96, 32), BUTTON_GREY, "Hexagon");
+                CursorModeButton = WNDCursor->addButton(EditorCursorMenu, CURSORMODE, Point16(2, 2), Extent16(96, 32),
+                                                        BUTTON_GREY, "Hexagon");
                 MapObj->setHexagonMode(true);
             }
             break;
@@ -1946,11 +1965,13 @@ void callback::EditorCursorMenu(int Param)
             }
             if(MapObj->getVertexActivityRandom())
             {
-                CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Point16(2, 34), Extent16(196, 32), BUTTON_GREY, "Cursor-Activity: static");
+                CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Point16(2, 34),
+                                                          Extent16(196, 32), BUTTON_GREY, "Cursor-Activity: static");
                 MapObj->setVertexActivityRandom(false);
             } else
             {
-                CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Point16(2, 34), Extent16(196, 32), BUTTON_GREY, "Cursor-Activity: random");
+                CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Point16(2, 34),
+                                                          Extent16(196, 32), BUTTON_GREY, "Cursor-Activity: random");
                 MapObj->setVertexActivityRandom(true);
             }
             break;
@@ -2041,42 +2062,62 @@ void callback::EditorCreateMenu(int Param)
             MapObj = global::s2->getMapObj();
 
             WNDCreate->addText("Width", Point16(95, 4), FontSize::Small, FontColor::Yellow);
-            WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_128, Point16(0, 15), Extent16(35, 20), BUTTON_GREY, "128<-");
-            WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_16, Point16(35, 15), Extent16(35, 20), BUTTON_GREY, "16<-");
-            WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_2, Point16(70, 15), Extent16(25, 20), BUTTON_GREY, "2<-");
+            WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_128, Point16(0, 15), Extent16(35, 20), BUTTON_GREY,
+                                 "128<-");
+            WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_16, Point16(35, 15), Extent16(35, 20), BUTTON_GREY,
+                                 "16<-");
+            WNDCreate->addButton(EditorCreateMenu, REDUCE_WIDTH_2, Point16(70, 15), Extent16(25, 20), BUTTON_GREY,
+                                 "2<-");
             TextWidth = WNDCreate->addText(std::to_string(width), Point16(105, 17), FontSize::Large, FontColor::Yellow);
-            WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_2, Point16(143, 15), Extent16(25, 20), BUTTON_GREY, "->2");
-            WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_16, Point16(168, 15), Extent16(35, 20), BUTTON_GREY, "->16");
-            WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_128, Point16(203, 15), Extent16(35, 20), BUTTON_GREY, "->128");
+            WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_2, Point16(143, 15), Extent16(25, 20), BUTTON_GREY,
+                                 "->2");
+            WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_16, Point16(168, 15), Extent16(35, 20), BUTTON_GREY,
+                                 "->16");
+            WNDCreate->addButton(EditorCreateMenu, RAISE_WIDTH_128, Point16(203, 15), Extent16(35, 20), BUTTON_GREY,
+                                 "->128");
 
             WNDCreate->addText("Height", Point16(100, 40), FontSize::Small, FontColor::Yellow);
-            WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_128, Point16(0, 49), Extent16(35, 20), BUTTON_GREY, "128<-");
-            WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_16, Point16(35, 49), Extent16(35, 20), BUTTON_GREY, "16<-");
-            WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_2, Point16(70, 49), Extent16(25, 20), BUTTON_GREY, "2<-");
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
-            WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_2, Point16(143, 49), Extent16(25, 20), BUTTON_GREY, "->2");
-            WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_16, Point16(168, 49), Extent16(35, 20), BUTTON_GREY, "->16");
-            WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_128, Point16(203, 49), Extent16(35, 20), BUTTON_GREY, "->128");
+            WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_128, Point16(0, 49), Extent16(35, 20), BUTTON_GREY,
+                                 "128<-");
+            WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_16, Point16(35, 49), Extent16(35, 20), BUTTON_GREY,
+                                 "16<-");
+            WNDCreate->addButton(EditorCreateMenu, REDUCE_HEIGHT_2, Point16(70, 49), Extent16(25, 20), BUTTON_GREY,
+                                 "2<-");
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_2, Point16(143, 49), Extent16(25, 20), BUTTON_GREY,
+                                 "->2");
+            WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_16, Point16(168, 49), Extent16(35, 20), BUTTON_GREY,
+                                 "->16");
+            WNDCreate->addButton(EditorCreateMenu, RAISE_HEIGHT_128, Point16(203, 49), Extent16(35, 20), BUTTON_GREY,
+                                 "->128");
 
             WNDCreate->addText("Landscape", Point16(85, 80), FontSize::Small, FontColor::Yellow);
-            ButtonLandscape = WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, Point16(64, 93), Extent16(110, 20), BUTTON_GREY, (LandscapeType == 0 ? "Greenland" : (LandscapeType == 1 ? "Wasteland" : "Winterworld")));
+            ButtonLandscape = WNDCreate->addButton(
+              EditorCreateMenu, CHANGE_LANDSCAPE, Point16(64, 93), Extent16(110, 20), BUTTON_GREY,
+              (LandscapeType == 0 ? "Greenland" : (LandscapeType == 1 ? "Wasteland" : "Winterworld")));
 
             WNDCreate->addText("Main area", Point16(82, 120), FontSize::Small, FontColor::Yellow);
-            WNDCreate->addButton(EditorCreateMenu, TEXTURE_PREVIOUS, Point16(45, 139), Extent16(35, 20), BUTTON_GREY, "-");
+            WNDCreate->addButton(EditorCreateMenu, TEXTURE_PREVIOUS, Point16(45, 139), Extent16(35, 20), BUTTON_GREY,
+                                 "-");
             PicTextureIndex = WNDCreate->addStaticPicture(Point16(102, 133), PicTextureIndexGlobal);
             WNDCreate->addButton(EditorCreateMenu, TEXTURE_NEXT, Point16(158, 139), Extent16(35, 20), BUTTON_GREY, "+");
 
             WNDCreate->addText("Border size", Point16(103, 175), FontSize::Small, FontColor::Yellow);
             WNDCreate->addButton(EditorCreateMenu, REDUCE_BORDER, Point16(45, 186), Extent16(35, 20), BUTTON_GREY, "-");
-            TextBorder = WNDCreate->addText(std::to_string(border), Point16(112, 188), FontSize::Large, FontColor::Yellow);
+            TextBorder =
+              WNDCreate->addText(std::to_string(border), Point16(112, 188), FontSize::Large, FontColor::Yellow);
             WNDCreate->addButton(EditorCreateMenu, RAISE_BORDER, Point16(158, 186), Extent16(35, 20), BUTTON_GREY, "+");
 
             WNDCreate->addText("Border area", Point16(65, 215), FontSize::Small, FontColor::Yellow);
-            WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_PREVIOUS, Point16(45, 234), Extent16(35, 20), BUTTON_GREY, "-");
+            WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_PREVIOUS, Point16(45, 234), Extent16(35, 20),
+                                 BUTTON_GREY, "-");
             PicBorderTextureIndex = WNDCreate->addStaticPicture(Point16(102, 228), PicBorderTextureIndexGlobal);
-            WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_NEXT, Point16(158, 234), Extent16(35, 20), BUTTON_GREY, "+");
+            WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_NEXT, Point16(158, 234), Extent16(35, 20),
+                                 BUTTON_GREY, "+");
 
-            WNDCreate->addButton(EditorCreateMenu, CREATE_WORLD, Point16(44, 275), Extent16(150, 40), BUTTON_GREY, "Create world");
+            WNDCreate->addButton(EditorCreateMenu, CREATE_WORLD, Point16(44, 275), Extent16(150, 40), BUTTON_GREY,
+                                 "Create world");
             break;
 
         case CALL_FROM_GAMELOOP: break;
@@ -2135,7 +2176,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = 32;
             WNDCreate->delText(TextHeight);
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
             break;
         case REDUCE_HEIGHT_16:
             if(height - 16 >= 32)
@@ -2143,7 +2185,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = 32;
             WNDCreate->delText(TextHeight);
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
             break;
         case REDUCE_HEIGHT_2:
             if(height - 2 >= 32)
@@ -2151,7 +2194,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = 32;
             WNDCreate->delText(TextHeight);
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
             break;
         case RAISE_HEIGHT_2:
             if(height + 2 <= MAXMAPHEIGHT)
@@ -2159,7 +2203,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = MAXMAPHEIGHT;
             WNDCreate->delText(TextHeight);
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
             break;
         case RAISE_HEIGHT_16:
             if(height + 16 <= MAXMAPHEIGHT)
@@ -2167,7 +2212,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = MAXMAPHEIGHT;
             WNDCreate->delText(TextHeight);
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
             break;
         case RAISE_HEIGHT_128:
             if(height + 128 <= MAXMAPHEIGHT)
@@ -2175,7 +2221,8 @@ void callback::EditorCreateMenu(int Param)
             else
                 height = MAXMAPHEIGHT;
             WNDCreate->delText(TextHeight);
-            TextHeight = WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
+            TextHeight =
+              WNDCreate->addText(std::to_string(height), Point16(105, 51), FontSize::Large, FontColor::Yellow);
             break;
 
         case CHANGE_LANDSCAPE:
@@ -2183,7 +2230,9 @@ void callback::EditorCreateMenu(int Param)
             if(LandscapeType > 2)
                 LandscapeType = 0;
             WNDCreate->delButton(ButtonLandscape);
-            ButtonLandscape = WNDCreate->addButton(EditorCreateMenu, CHANGE_LANDSCAPE, Point16(64, 93), Extent16(110, 20), BUTTON_GREY, (LandscapeType == 0 ? "Greenland" : (LandscapeType == 1 ? "Wasteland" : "Winterworld")));
+            ButtonLandscape = WNDCreate->addButton(
+              EditorCreateMenu, CHANGE_LANDSCAPE, Point16(64, 93), Extent16(110, 20), BUTTON_GREY,
+              (LandscapeType == 0 ? "Greenland" : (LandscapeType == 1 ? "Wasteland" : "Winterworld")));
             switch(LandscapeType)
             {
                 case 0:
@@ -2414,12 +2463,14 @@ void callback::EditorCreateMenu(int Param)
         case REDUCE_BORDER:
             border = std::max(0, border - 1);
             WNDCreate->delText(TextBorder);
-            TextBorder = WNDCreate->addText(std::to_string(border), Point16(112, 188), FontSize::Large, FontColor::Yellow);
+            TextBorder =
+              WNDCreate->addText(std::to_string(border), Point16(112, 188), FontSize::Large, FontColor::Yellow);
             break;
         case RAISE_BORDER:
             border = std::min(12, border + 1);
             WNDCreate->delText(TextBorder);
-            TextBorder = WNDCreate->addText(std::to_string(border), Point16(112, 188), FontSize::Large, FontColor::Yellow);
+            TextBorder =
+              WNDCreate->addText(std::to_string(border), Point16(112, 188), FontSize::Large, FontColor::Yellow);
             break;
 
         case BORDER_TEXTURE_PREVIOUS:
@@ -2965,11 +3016,17 @@ void callback::submenu1(int Param)
         case INITIALIZING_CALL:
             SubMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_SUBMENU1));
             SubMenu->addButton(submenu1, MAINMENU, Point16(400, 440), Extent16(200, 20), BUTTON_RED1, "back");
-            greatMoon = SubMenu->addButton(submenu1, GREATMOON, Point16(100, 100), Extent16(200, 200), BUTTON_STONE, nullptr, MOON);
+            greatMoon = SubMenu->addButton(submenu1, GREATMOON, Point16(100, 100), Extent16(200, 200), BUTTON_STONE,
+                                           nullptr, MOON);
             greatMoon->setMotionParams(GREATMOONENTRY, GREATMOONLEAVE);
-            SubMenu->addButton(submenu1, SMALLMOON, Point16(100, 350), Extent16(global::bmpArray[MOON].w, global::bmpArray[MOON].h), BUTTON_STONE, nullptr, MOON);
-            SubMenu->addButton(submenu1, TOOSMALL, Point16(100, 400), Extent16(global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1), BUTTON_STONE, nullptr, MOON);
-            SubMenu->addButton(submenu1, CREATEWINDOW, Point16(500, 10), Extent16(130, 30), BUTTON_GREEN1, "Create window");
+            SubMenu->addButton(submenu1, SMALLMOON, Point16(100, 350),
+                               Extent16(global::bmpArray[MOON].w, global::bmpArray[MOON].h), BUTTON_STONE, nullptr,
+                               MOON);
+            SubMenu->addButton(submenu1, TOOSMALL, Point16(100, 400),
+                               Extent16(global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1), BUTTON_STONE,
+                               nullptr, MOON);
+            SubMenu->addButton(submenu1, CREATEWINDOW, Point16(500, 10), Extent16(130, 30), BUTTON_GREEN1,
+                               "Create window");
             picObject = SubMenu->addPicture(submenu1, PICOBJECT, Point16(200, 30), MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
             // text block with \n
@@ -3010,7 +3067,9 @@ void callback::submenu1(int Param)
 
         case GREATMOON:
             SubMenu->addText("Title!", Point16(300, 10), FontSize::Large);
-            SubMenu->addText(helpers::format("Window X: %d Window Y: %d", global::s2->GameResolution.x, global::s2->GameResolution.y), Point16(10, 10), FontSize::Large);
+            SubMenu->addText(
+              helpers::format("Window X: %d Window Y: %d", global::s2->GameResolution.x, global::s2->GameResolution.y),
+              Point16(10, 10), FontSize::Large);
             break;
 
         case SMALLMOON:
@@ -3031,8 +3090,10 @@ void callback::submenu1(int Param)
                   submenu1, TESTWINDOWQUITMESSAGE, Position(5, 5), Extent(350, 240), "Window", WINDOW_GREEN1,
                   WINDOW_CLOSE | WINDOW_MOVE | WINDOW_MINIMIZE | WINDOW_RESIZE));
                 testWindow->addText("Text inside the window", Point16(10, 10), FontSize::Large);
-                testWindow->addButton(submenu1, -10, Point16(150, 100), Extent16(210, 30), BUTTON_GREEN2, "Button inside the window");
-                testWindowPicture = testWindow->addPicture(submenu1, TESTWINDOWPICTURE, Point16(10, 60), MIS2BOBS_FORTRESS);
+                testWindow->addButton(submenu1, -10, Point16(150, 100), Extent16(210, 30), BUTTON_GREEN2,
+                                      "Button inside the window");
+                testWindowPicture =
+                  testWindow->addPicture(submenu1, TESTWINDOWPICTURE, Point16(10, 60), MIS2BOBS_FORTRESS);
                 testWindowPicture->setMotionParams(TESTWINDOWPICTUREENTRY, TESTWINDOWPICTURELEAVE);
                 testTextfield_testWindow =
                   testWindow->addTextfield(Point16(130, 30), 10, 3, FontSize::Large, FontColor::Red, BUTTON_GREY, true);
@@ -3136,7 +3197,8 @@ void callback::submenu1(int Param)
                 }
                 if(!counterText)
                 {
-                    counterText = SubMenu->addText(helpers::format("counter: %d", counter), Point16(100, 20), FontSize::Small);
+                    counterText =
+                      SubMenu->addText(helpers::format("counter: %d", counter), Point16(100, 20), FontSize::Small);
                 }
 
                 if(TextFrom_testTextfield)
@@ -3144,7 +3206,8 @@ void callback::submenu1(int Param)
                     SubMenu->delText(TextFrom_testTextfield);
                     TextFrom_testTextfield = nullptr;
                 }
-                TextFrom_testTextfield = SubMenu->addText("Der Text im Textfeld lautet: " + testTextfield->getText(), Point16(200, 400), FontSize::Large);
+                TextFrom_testTextfield = SubMenu->addText("Der Text im Textfeld lautet: " + testTextfield->getText(),
+                                                          Point16(200, 400), FontSize::Large);
             }
             counter++;
             break;

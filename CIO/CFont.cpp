@@ -9,7 +9,8 @@
 #include <cassert>
 
 CFont::CFont(std::string text, Point16 pos, FontSize fontsize, FontColor color)
-    : x_(pos.x), y_(pos.y), string_(std::move(text)), fontsize_(fontsize), color_(color), initialColor_(color), clickedParam(0)
+    : x_(pos.x), y_(pos.y), string_(std::move(text)), fontsize_(fontsize), color_(color), initialColor_(color),
+      clickedParam(0)
 {}
 
 void CFont::setPos(Position pos)

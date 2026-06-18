@@ -87,8 +87,8 @@ bool CControlContainer::eraseElement(T& collection, const U* element)
     return false;
 }
 
-CButton* CControlContainer::addButton(void callback(int), int clickedParam, Point16 pos, Extent16 size,
-                                      int color, const char* text, int picture)
+CButton* CControlContainer::addButton(void callback(int), int clickedParam, Point16 pos, Extent16 size, int color,
+                                      const char* text, int picture)
 {
     pos = pos + borderBeginSize;
 

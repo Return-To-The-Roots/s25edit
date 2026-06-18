@@ -8,8 +8,8 @@
 #include "../globals.h"
 #include "CFont.h"
 
-CButton::CButton(void callback(int), int clickedParam, Point16 pos, Extent16 size, int color,
-                 const char* text, int button_picture)
+CButton::CButton(void callback(int), int clickedParam, Point16 pos, Extent16 size, int color, const char* text,
+                 int button_picture)
 {
     marked = false;
     clicked = false;
@@ -115,8 +115,8 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y)
-           && (button.y < pos_.y + size_.y))
+        if((button.state == SDL_PRESSED) && (button.x >= pos_.x) && (button.x < pos_.x + size_.x)
+           && (button.y >= pos_.y) && (button.y < pos_.y + size_.y))
         {
             marked = true;
             clicked = true;
@@ -310,8 +310,8 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, Position((int)size_.x / 2, (int)((size_.y - 11) / 2)), FontSize::Medium, button_text_color,
-                         FontAlign::Middle);
+        CFont::writeText(Surf_Button, button_text, Position((int)size_.x / 2, (int)((size_.y - 11) / 2)),
+                         FontSize::Medium, button_text_color, FontAlign::Middle);
 
     return true;
 }
