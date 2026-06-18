@@ -28,8 +28,6 @@
 
 namespace bfs = boost::filesystem;
 
-//#include <vld.h>
-
 boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[]);
 
 CGame::CGame(Extent GameResolution_, bool fullscreen_)

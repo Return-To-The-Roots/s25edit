@@ -1,0 +1,68 @@
+# Copyright (C) 2025 Settlers Freaks <sf-team at siedler25.org>
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# CI for s25edit.
+#
+# Same static checks the parent project
+# (Return-To-The-Roots/s25client) runs on external/s25edit, so
+# contributors can catch issues before updating the submodule pointer.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ format('s25edit-{0}:{1}', github.repository, github.ref) }}
+  cancel-in-progress: true
+
+jobs:
+  static-analysis:
+    name: Static analysis
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+            clang-format-18 \
+            python3-pip \
+          && sudo pip3 install --no-cache-dir reuse \
+          && sudo rm -rf /var/lib/apt/lists/*
+
+      # ── 1. Include guards ────────────────────────────────────────────
+      # SGE is a vendored third-party library; it uses traditional
+      # #ifndef guards instead of #pragma once, so we skip it.
+      - name: Check include guards (#pragma once)
+        run: |
+          errors=0
+          while IFS= read -r -d '' f; do
+            while IFS= read -r line; do
+              if [[ "$line" =~ ^// ]] || [[ "$line" =~ ^$ ]]; then continue; fi
+              if [[ "$line" =~ ^/\* ]] || [[ "$line" =~ ^\* ]]; then continue; fi
+              if [[ "$line" != "#pragma once" ]]; then
+                echo "::error file=$f::Missing or misplaced #pragma once"
+                errors=$((errors+1))
+              fi
+              break
+            done < "$f"
+          done < <(find . -path ./.git -prune -false \
+            -o -path ./build -prune -false \
+            -o -path ./SGE -prune -false \
+            -o \( -name '*.hpp' -o -name '*.h' \) -print0)
+          exit $errors
+
+      # ── 2. Formatting (clang-format) ────────────────────────────────
+      - name: Check formatting (clang-format-18)
+        run: |
+          find . \( -path ./.git -o -path ./build -o -path ./LICENSES \) \
+            -prune -false \
+            -o \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) \
+            -exec clang-format-18 -n --Werror {} \+
+
+      # ── 3. REUSE compliance ──────────────────────────────────────────
+      - name: Check licensing (REUSE)
+        run: reuse lint
