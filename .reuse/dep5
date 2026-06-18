@@ -1,0 +1,19 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: s25edit
+Upstream-Contact: Settlers Freaks <sf-team at siedler25.org>
+Source: https://github.com/Return-To-The-Roots/s25edit
+
+# Build artifacts
+Files: build/*
+Copyright: 2025 Settlers Freaks <sf-team at siedler25.org>
+License: GPL-3.0-or-later
+
+# Performance profiling data
+Files: perf.data
+Copyright: 2025 Settlers Freaks <sf-team at siedler25.org>
+License: GPL-3.0-or-later
+
+# Temporary / prompt files
+Files: prompt.txt
+Copyright: 2025 Settlers Freaks <sf-team at siedler25.org>
+License: GPL-3.0-or-later
