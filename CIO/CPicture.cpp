@@ -8,8 +8,7 @@
 #include "../globals.h"
 #include "CollisionDetection.h"
 
-CPicture::CPicture(void callback(int), int clickedParam, Point16 pos, int picture)
-    : pos_(pos)
+CPicture::CPicture(void callback(int), int clickedParam, Point16 pos, int picture) : pos_(pos)
 {
     marked = false;
     clicked = false;
@@ -53,7 +52,8 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
+        if((button.state == SDL_PRESSED)
+           && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
         {
             marked = true;
             clicked = true;

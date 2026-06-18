@@ -115,7 +115,8 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
+        if((button.state == SDL_PRESSED)
+           && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
         {
             marked = true;
             clicked = true;
@@ -309,8 +310,8 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, Position(size_.x / 2, (size_.y - 11) / 2),
-                         FontSize::Medium, button_text_color, FontAlign::Middle);
+        CFont::writeText(Surf_Button, button_text, Position(size_.x / 2, (size_.y - 11) / 2), FontSize::Medium,
+                         button_text_color, FontAlign::Middle);
 
     return true;
 }
