@@ -7,14 +7,14 @@
 #include "../CSurface.h"
 #include "../globals.h"
 #include "CFont.h"
+#include "CollisionDetection.h"
 
 CButton::CButton(void callback(int), int clickedParam, Point16 pos, Extent16 size, int color, const char* text,
                  int button_picture)
+    : pos_(pos), size_(size)
 {
     marked = false;
     clicked = false;
-    this->pos_ = pos;
-    this->size_ = size;
     setColor(color);
     this->button_picture = button_picture;
     button_text = text;
@@ -91,7 +91,7 @@ void CButton::setColor(int color)
 void CButton::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the button (and mouse button not pressed while moving on the button)
-    if((motion.x >= pos_.x) && (motion.x < pos_.x + size_.x) && (motion.y >= pos_.y) && (motion.y < pos_.y + size_.y))
+    if(IsPointInRect(Position(motion.x, motion.y), Rect(Position(pos_), Extent(size_))))
     {
         if(motion.state == SDL_RELEASED)
         {
@@ -115,8 +115,7 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= pos_.x) && (button.x < pos_.x + size_.x)
-           && (button.y >= pos_.y) && (button.y < pos_.y + size_.y))
+        if((button.state == SDL_PRESSED) && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
         {
             marked = true;
             clicked = true;
@@ -310,7 +309,7 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, Position((int)size_.x / 2, (int)((size_.y - 11) / 2)),
+        CFont::writeText(Surf_Button, button_text, Position(static_cast<int>(size_.x) / 2, static_cast<int>(size_.y - 11) / 2),
                          FontSize::Medium, button_text_color, FontAlign::Middle);
 
     return true;

@@ -7,6 +7,7 @@
 #include "../CSurface.h"
 #include "../globals.h"
 #include "CFont.h"
+#include "CollisionDetection.h"
 
 CTextfield::CTextfield(Point16 pos, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color, int bg_color,
                        bool button_style)
@@ -144,8 +145,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            active = (button.x >= getX()) && (button.x < getX() + size_.x) && (button.y >= getY())
-                     && (button.y < getY() + size_.y);
+            active = IsPointInRect(Position(button.x, button.y), Rect(Position(getX(), getY()), Extent(size_)));
         }
     }
     needRender = true;

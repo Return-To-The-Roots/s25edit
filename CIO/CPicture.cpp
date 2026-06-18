@@ -6,12 +6,13 @@
 #include "CPicture.h"
 #include "../CSurface.h"
 #include "../globals.h"
+#include "CollisionDetection.h"
 
 CPicture::CPicture(void callback(int), int clickedParam, Point16 pos, int picture)
+    : pos_(pos)
 {
     marked = false;
     clicked = false;
-    this->pos_ = pos;
     if(picture >= 0)
         this->picture_ = picture;
     else
@@ -28,7 +29,7 @@ CPicture::CPicture(void callback(int), int clickedParam, Point16 pos, int pictur
 void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the picture
-    if((motion.x >= pos_.x) && (motion.x < pos_.x + size_.x) && (motion.y >= pos_.y) && (motion.y < pos_.y + size_.y))
+    if(IsPointInRect(Position(motion.x, motion.y), Rect(Position(pos_), Extent(size_))))
     {
         if(motion.state == SDL_RELEASED)
         {
@@ -52,8 +53,7 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED) && (button.x >= pos_.x) && (button.x < pos_.x + size_.x)
-           && (button.y >= pos_.y) && (button.y < pos_.y + size_.y))
+        if((button.state == SDL_PRESSED) && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
         {
             marked = true;
             clicked = true;
