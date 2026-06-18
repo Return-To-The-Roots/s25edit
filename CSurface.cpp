@@ -243,7 +243,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             maxH = std::max(myMap.getVertex(x, y).h, maxH);
         }
     }
-    const int additionalRows = TRIANGLE_INCREASE * std::max(0, maxH - 0x0A) / TRIANGLE_HEIGHT;
+    const int additionalRows = triangleIncrease * std::max(0, maxH - 0x0A) / triangleHeight;
 
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
@@ -258,10 +258,10 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             // IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
 
             // at first call DrawTriangle for all triangles inside the map edges
-            int row_start = std::max(displayRect.top, 2 * TRIANGLE_HEIGHT) / TRIANGLE_HEIGHT - 2;
-            int row_end = (displayRect.bottom) / TRIANGLE_HEIGHT + additionalRows;
-            int col_start = std::max<int>(displayRect.left, TRIANGLE_WIDTH) / TRIANGLE_WIDTH - 1;
-            int col_end = (displayRect.right) / TRIANGLE_WIDTH + 1;
+            int row_start = std::max(displayRect.top, 2 * triangleHeight) / triangleHeight - 2;
+            int row_end = (displayRect.bottom) / triangleHeight + additionalRows;
+            int col_start = std::max<int>(displayRect.left, triangleWidth) / triangleWidth - 1;
+            int col_end = (displayRect.right) / triangleWidth + 1;
             bool view_outside_edges;
 
             if(k > 0)
@@ -274,22 +274,22 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // at first call DrawTriangle for all triangles up or down outside
                     if(displayRect.top < 0)
                     {
-                        row_start = std::max(0, height - 1 - (-displayRect.top / TRIANGLE_HEIGHT) - 1);
+                        row_start = std::max(0, height - 1 - (-displayRect.top / triangleHeight) - 1);
                         row_end = height - 1;
                         view_outside_edges = true;
                     } else if(displayRect.bottom > myMap.height_pixel)
                     {
                         row_start = 0;
-                        row_end = (displayRect.bottom - myMap.height_pixel) / TRIANGLE_HEIGHT + 8;
+                        row_end = (displayRect.bottom - myMap.height_pixel) / triangleHeight + 8;
                         view_outside_edges = true;
-                    } else if(displayRect.top <= 2 * TRIANGLE_HEIGHT)
+                    } else if(displayRect.top <= 2 * triangleHeight)
                     {
                         // this is for draw triangles that are reduced under the lower map edge (have bigger y-coords as
                         // myMap.height_pixel)
                         row_start = height - 3;
                         row_end = height - 1;
                         view_outside_edges = true;
-                    } else if(displayRect.bottom >= (myMap.height_pixel - 8 * TRIANGLE_HEIGHT))
+                    } else if(displayRect.bottom >= (myMap.height_pixel - 8 * triangleHeight))
                     {
                         // this is for draw triangles that are raised over the upper map edge (have negative y-coords)
                         row_start = 0;
@@ -303,10 +303,10 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // now call DrawTriangle for all triangles left or right outside
                     if(displayRect.left <= 0)
                     {
-                        col_start = std::max(0, width - 1 - (-displayRect.left / TRIANGLE_WIDTH) - 1);
+                        col_start = std::max(0, width - 1 - (-displayRect.left / triangleWidth) - 1);
                         col_end = width - 1;
                         view_outside_edges = true;
-                    } else if(displayRect.left < TRIANGLE_WIDTH)
+                    } else if(displayRect.left < triangleWidth)
                     {
                         col_start = width - 2;
                         col_end = width - 1;
@@ -314,7 +314,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     } else if(displayRect.right > myMap.width_pixel)
                     {
                         col_start = 0;
-                        col_end = (displayRect.right - myMap.width_pixel) / TRIANGLE_WIDTH + 1;
+                        col_end = (displayRect.right - myMap.width_pixel) / triangleWidth + 1;
                         view_outside_edges = true;
                     }
                 }
@@ -349,7 +349,7 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     }
                     // last UpSideDown
                     tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + TRIANGLE_WIDTH;
+                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
                     DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
                                  myMap.getVertex(width - 1, y), tempP3);
                 } else
@@ -365,14 +365,14 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     }
                     // last RightSideUp
                     tempP3 = myMap.getVertex(0, y + 1);
-                    tempP3.x = myMap.getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
+                    tempP3.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
                     DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y),
                                  myMap.getVertex(width - 1, y + 1), tempP3);
                     // last UpSideDown
                     tempP1 = myMap.getVertex(0, y + 1);
-                    tempP1.x = myMap.getVertex(width - 1, y + 1).x + TRIANGLE_WIDTH;
+                    tempP1.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
                     tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + TRIANGLE_WIDTH;
+                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
                     DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
                 }
             }
@@ -382,13 +382,13 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             {
                 // RightSideUp
                 tempP2 = myMap.getVertex(x, 0);
-                tempP2.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x, 0).y;
+                tempP2.y = height * triangleHeight + myMap.getVertex(x, 0).y;
                 tempP3 = myMap.getVertex(x + 1, 0);
-                tempP3.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x + 1, 0).y;
+                tempP3.y = height * triangleHeight + myMap.getVertex(x + 1, 0).y;
                 DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, height - 1), tempP2, tempP3);
                 // UpSideDown
                 tempP1 = myMap.getVertex(x + 1, 0);
-                tempP1.y = height * TRIANGLE_HEIGHT + myMap.getVertex(x + 1, 0).y;
+                tempP1.y = height * triangleHeight + myMap.getVertex(x + 1, 0).y;
                 DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1),
                              myMap.getVertex(x + 1, height - 1));
             }
@@ -396,17 +396,17 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
 
         // last RightSideUp
         tempP2 = myMap.getVertex(width - 1, 0);
-        tempP2.y += height * TRIANGLE_HEIGHT;
+        tempP2.y += height * triangleHeight;
         tempP3 = myMap.getVertex(0, 0);
-        tempP3.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
-        tempP3.y += height * TRIANGLE_HEIGHT;
+        tempP3.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
+        tempP3.y += height * triangleHeight;
         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
         // last UpSideDown
         tempP1 = myMap.getVertex(0, 0);
-        tempP1.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
-        tempP1.y += height * TRIANGLE_HEIGHT;
+        tempP1.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
+        tempP1.y += height * triangleHeight;
         tempP3 = myMap.getVertex(0, height - 1);
-        tempP3.x = myMap.getVertex(width - 1, height - 1).x + TRIANGLE_WIDTH;
+        tempP3.x = myMap.getVertex(width - 1, height - 1).x + triangleWidth;
         DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, height - 1), tempP3);
     }
 }
@@ -479,10 +479,10 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
                 p3.x -= myMap.width_pixel;
                 triangle_shown = true;
             }
-        } else if(displayRect.left < TRIANGLE_WIDTH)
+        } else if(displayRect.left < triangleWidth)
         {
             int outside_left = displayRect.left;
-            int outside_right = displayRect.left + TRIANGLE_WIDTH;
+            int outside_right = displayRect.left + triangleWidth;
             if(isInRange(p1.x - myMap.width_pixel, outside_left, outside_right)
                || isInRange(p2.x - myMap.width_pixel, outside_left, outside_right)
                || isInRange(p3.x - myMap.width_pixel, outside_left, outside_right))
@@ -1207,7 +1207,7 @@ void CSurface::get_nodeVectors(bobMAP& myMap)
                   get_flatVector(myMap.getVertex(i, j), myMap.getVertex(i, j + 1), myMap.getVertex(i + 1, j + 1));
 
             // vector of last triangle
-            tempP3.x = myMap.getVertex(width - 1, j + 1).x + TRIANGLE_WIDTH;
+            tempP3.x = myMap.getVertex(width - 1, j + 1).x + triangleWidth;
             tempP3.y = myMap.getVertex(0, j + 1).y;
             tempP3.z = myMap.getVertex(0, j + 1).z;
             myMap.getVertex(width - 1, j).flatVector =
@@ -1218,16 +1218,16 @@ void CSurface::get_nodeVectors(bobMAP& myMap)
     for(int i = 0; i < width - 1; i++)
     {
         tempP2 = myMap.getVertex(i, 0);
-        tempP2.y += height * TRIANGLE_HEIGHT;
+        tempP2.y += height * triangleHeight;
         tempP3 = myMap.getVertex(i + 1, 0);
-        tempP3.y += height * TRIANGLE_HEIGHT;
+        tempP3.y += height * triangleHeight;
         myMap.getVertex(i, height - 1).flatVector = get_flatVector(myMap.getVertex(i, height - 1), tempP2, tempP3);
     }
     // vector of last Triangle
     tempP2 = myMap.getVertex(width - 1, 0);
-    tempP2.y += height * TRIANGLE_HEIGHT;
-    tempP3.x = myMap.getVertex(width - 1, 0).x + TRIANGLE_WIDTH;
-    tempP3.y = height * TRIANGLE_HEIGHT + myMap.getVertex(0, 0).y;
+    tempP2.y += height * triangleHeight;
+    tempP3.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
+    tempP3.y = height * triangleHeight + myMap.getVertex(0, 0).y;
     tempP3.z = myMap.getVertex(0, 0).z;
     myMap.getVertex(width - 1, height - 1).flatVector =
       get_flatVector(myMap.getVertex(width - 1, height - 1), tempP2, tempP3);

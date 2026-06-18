@@ -615,8 +615,7 @@ void callback::EditorHelpMenu(int Param)
               "Window/"
               "Fullscreen........................................................................................F2");
             SelectBoxHelp->addOption(
-              "Zoom in/normal/out "
-              "(experimental)..............................................................F5/F6/"
+              "Zoom in/normal/out......................................................................F5/F6/"
               "F7");
             SelectBoxHelp->addOption(
               "Scroll..........................................................................................."
@@ -1779,7 +1778,7 @@ void callback::EditorPlayerMenu(int Param)
             {
                 tempRect = MapObj->getDisplayRect();
                 tempRect.setOrigin(Position(PlayerHQx[PlayerIdx], PlayerHQy[PlayerIdx])
-                                     * Position(TRIANGLE_WIDTH, TRIANGLE_HEIGHT)
+                                     * Position(triangleWidth, triangleHeight)
                                    - tempRect.getSize() / 2);
                 MapObj->setDisplayRect(tempRect);
             }
@@ -2802,7 +2801,7 @@ void callback::MinimapMenu(int Param)
                         displayRect.setOrigin((mouse - WNDMinimap->getRect().getOrigin() - Position(6, 20)
                                                - Position(global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
                                                           global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny))
-                                              * Position(TRIANGLE_WIDTH, TRIANGLE_HEIGHT) * scaleNum);
+                                              * Position(triangleWidth, triangleHeight) * scaleNum);
                         MapObj->setDisplayRect(displayRect);
                     }
                 }
