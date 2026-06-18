@@ -201,9 +201,9 @@ static bool killme = false;
 void ConsoleSignalHandler(int /*sig*/)
 {
     if(!killme)
-        std::cout << "Do you really want to terminate the program (y/n) : " << std::flush;
+        std::cerr << "Do you really want to terminate the program (y/n) : ";
     else
-        std::cout << "Do you really want to kill the program (y/n) : " << std::flush;
+        std::cerr << "Do you really want to kill the program (y/n) : ";
 
     int c = getchar();
     if(c == 'j' || c == 'y' || c == 1079565930)
@@ -224,7 +224,7 @@ void WaitForEnter()
     if(waited)
         return;
     waited = true;
-    std::cout << "\n\nPress ENTER to close this window . . ." << std::endl;
+    std::cerr << "\n\nPress ENTER to close this window . . .\n";
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
@@ -240,28 +240,6 @@ void InstallSignalHandlers()
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
     sigaction(SIGINT, &sa, nullptr);
-#endif
-}
-
-void UninstallSignalHandlers()
-{
-#ifdef _WIN32
-    SetConsoleCtrlHandler(ConsoleSignalHandler, FALSE);
-#else
-    struct sigaction sa;
-    sa.sa_handler = SIG_DFL;
-    sa.sa_flags = 0;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGINT, &sa, nullptr);
-#endif
-}
-
-void ExitHandler()
-{
-    UninstallSignalHandlers();
-
-#ifdef _DEBUG
-    WaitForEnter();
 #endif
 }
 
@@ -327,7 +305,6 @@ int main(int argc, char* argv[])
     }
     std::cout << "done\n";
     InstallSignalHandlers();
-    atexit(ExitHandler);
     int result = 0;
     try
     {
@@ -341,7 +318,6 @@ int main(int argc, char* argv[])
         result = 1;
     }
     SDL_Quit();
-    UninstallSignalHandlers();
 
     if(result)
         WaitForEnter();
