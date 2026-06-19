@@ -6,6 +6,7 @@
 #include "CSurface.h"
 #include "CGame.h"
 #include "CMap.h"
+#include "Geometry.h"
 #include "Rect.h"
 #include "SGE/sge_blib.h"
 #include "SGE/sge_surface.h"
@@ -401,8 +402,9 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
                                      myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1),
-                                     myMap.getVertex(x - 1, y), myMap.getVertex(x, y));
+                        const auto usd = clientUsdTriangleVertices(x - 1, y);
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(usd.p1x, usd.p1y),
+                                     myMap.getVertex(usd.p2x, usd.p2y), myMap.getVertex(usd.p3x, usd.p3y));
                     }
                     // last UpSideDown
                     tempP3 = myMap.getVertex(0, y);
@@ -417,8 +419,9 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
                                      myMap.getVertex(x, y + 1), myMap.getVertex(x + 1, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1),
-                                     myMap.getVertex(x, y), myMap.getVertex(x + 1, y));
+                        const auto usd = clientUsdTriangleVertices(x, y);
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(usd.p1x, usd.p1y),
+                                     myMap.getVertex(usd.p2x, usd.p2y), myMap.getVertex(usd.p3x, usd.p3y));
                     }
                     // last RightSideUp
                     tempP3 = myMap.getVertex(0, y + 1);

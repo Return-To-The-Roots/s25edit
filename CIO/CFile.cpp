@@ -570,10 +570,15 @@ bobMAP* CFile::read_wld(FILE* fp)
     // go to texture information for UpSideDown-Triangles
     fseek(fp, 16, SEEK_CUR);
 
+    // Read usdTexture: file → memory (s25client convention).
+    //   memory(i, j) = file(i - !(j&1), j)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            CHECK_READ(libendian::read(&myMap->getVertex(i, j).usdTexture, 1, fp));
+        {
+            const int dest_i = (i + !(j & 1)) % myMap->width;
+            CHECK_READ(libendian::read(&myMap->getVertex(dest_i, j).usdTexture, 1, fp));
+        }
     }
 
     // go to road data
@@ -833,10 +838,14 @@ bool CFile::save_wld(FILE* fp, void* data)
     // go to texture information for UpSideDown-Triangles
     libendian::write(map_data_header, fp);
 
+    // Write usdTexture: file(i, j) = memory(i + !(j&1), j)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            libendian::write(&myMap->getVertex(i, j).usdTexture, 1, fp);
+        {
+            const int src_i = (i + !(j & 1)) % myMap->width;
+            libendian::write(&myMap->getVertex(src_i, j).usdTexture, 1, fp);
+        }
     }
 
     // go to road data

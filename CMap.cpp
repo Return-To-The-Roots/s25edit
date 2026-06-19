@@ -8,6 +8,7 @@
 #include "CIO/CFile.h"
 #include "CIO/CFont.h"
 #include "CSurface.h"
+#include "Geometry.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "gameData/LandscapeDesc.h"
@@ -258,7 +259,7 @@ std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, T
     {
         for(int i = 0; i < myMap->width; i++)
         {
-            MapNode& curVertex = myMap->getVertex(i, j);
+            MapNode& curVertex = myMap->getVertex(clientUsdVertexPos(i, j));
             curVertex.h = 0x0A;
 
             if((j < border || myMap->height - j <= border) || (i < border || myMap->width - i <= border))
@@ -1774,6 +1775,7 @@ void CMap::modifyShading(Position pos)
 
 void CMap::modifyTexture(Position pos, bool rsu, bool usd)
 {
+    MapNode& vertex = map->getVertex(clientUsdVertexPos(pos));
     if(modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED || modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
     {
         int newContent = rand() % 3;
@@ -1797,15 +1799,15 @@ void CMap::modifyTexture(Position pos, bool rsu, bool usd)
                 newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
         }
         if(rsu)
-            map->getVertex(pos.x, pos.y).rsuTexture = newContent;
+            vertex.rsuTexture = newContent;
         if(usd)
-            map->getVertex(pos.x, pos.y).usdTexture = newContent;
+            vertex.usdTexture = newContent;
     } else
     {
         if(rsu)
-            map->getVertex(pos.x, pos.y).rsuTexture = modeContent;
+            vertex.rsuTexture = modeContent;
         if(usd)
-            map->getVertex(pos.x, pos.y).usdTexture = modeContent;
+            vertex.usdTexture = modeContent;
     }
 
     // at least setup the possible building and the resources at the vertex and 1 section/2 sections around
@@ -2025,7 +2027,7 @@ void CMap::modifyBuild(Position pos)
     const Uint8 height = curVertex.h;
     std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
-        mapVertices[i] = &map->getVertex(tempVertices[i]);
+        mapVertices[i] = &map->getVertex(clientUsdVertexPos(tempVertices[i].x, tempVertices[i].y));
 
     // calculate the building using the height of the vertices
     // this building is a mine
@@ -2292,7 +2294,7 @@ void CMap::modifyResource(Position pos)
     MapNode& curVertex = map->getVertex(pos.x, pos.y);
     std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
-        mapVertices[i] = &map->getVertex(tempVertices[i]);
+        mapVertices[i] = &map->getVertex(clientUsdVertexPos(tempVertices[i].x, tempVertices[i].y));
 
     // SPECIAL CASE: test if we should set water only
     // test if vertex is surrounded by meadow and meadow-like textures
