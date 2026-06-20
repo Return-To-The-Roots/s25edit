@@ -20,6 +20,7 @@
 #include "helpers/format.hpp"
 #include <boost/filesystem.hpp>
 #include <algorithm>
+#include <cctype>
 
 namespace bfs = boost::filesystem;
 
@@ -773,6 +774,13 @@ void callback::EditorLoadMenu(int Param)
             {
                 if(is_regular_file(itFile.status()))
                 {
+                    // filter to supported map file extensions
+                    std::string ext = itFile.path().extension().string();
+                    for(auto& c : ext)
+                        c = tolower(c);
+                    if(ext != ".swd" && ext != ".wld")
+                        continue;
+
                     const std::string filename = itFile.path().filename().string();
                     CB_Filename->addOption(filename, [filename](int) { curFilename = filename; });
                 }
