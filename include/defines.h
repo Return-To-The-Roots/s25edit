@@ -44,7 +44,9 @@ enum
     // this will happen every time the user clicks anywhere on the window
     WINDOW_CLICKED_CALL = -5,
     // this window quit message is ONLY usable to call a callback function explicit with this value
-    WINDOW_QUIT_MESSAGE = -6
+    WINDOW_QUIT_MESSAGE = -6,
+    // this will happen every time the window is resized
+    WINDOW_RESIZED_CALL = -7
 };
 
 // BOBTYPES

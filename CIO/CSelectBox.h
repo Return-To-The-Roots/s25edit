@@ -55,4 +55,6 @@ public:
         needRender = true;
     }
     void addOption(const std::string& string, std::function<void(int)> callback = nullptr, int param = 0);
+    void setSize(Extent size);
+    void setPos(Position pos);
 };

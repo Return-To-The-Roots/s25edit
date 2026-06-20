@@ -747,6 +747,9 @@ void callback::EditorMainMenu(int Param)
 void callback::EditorLoadMenu(int Param)
 {
     static CWindow* WNDLoad = nullptr;
+    static CSelectBox* CB_Filename = nullptr;
+    static CButton* BtnLoad = nullptr;
+    static CButton* BtnAbort = nullptr;
     static std::string curFilename;
 
     enum
@@ -761,10 +764,10 @@ void callback::EditorLoadMenu(int Param)
         {
             if(WNDLoad)
                 break;
-            WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT,
-                                                                           WindowPos::Center, Extent(280, 320), "Load",
-                                                                           WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE));
-            auto* CB_Filename = WNDLoad->addSelectBox(Position(10, 5), Extent(160, 280), FontSize::Medium);
+            WNDLoad = global::s2->RegisterWindow(
+              std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320), "Load",
+                                        WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE));
+            CB_Filename = WNDLoad->addSelectBox(Position(10, 5), Extent(160, 280), FontSize::Medium);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
             {
@@ -774,8 +777,10 @@ void callback::EditorLoadMenu(int Param)
                     CB_Filename->addOption(filename, [filename](int) { curFilename = filename; });
                 }
             }
-            WNDLoad->addButton(EditorLoadMenu, LOADMAP, Position(175, 140), Extent(90, 20), BUTTON_GREY, "Load");
-            WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, Position(175, 165), Extent(90, 20), BUTTON_RED1, "Abort");
+            BtnLoad =
+              WNDLoad->addButton(EditorLoadMenu, LOADMAP, Position(175, 140), Extent(90, 20), BUTTON_GREY, "Load");
+            BtnAbort =
+              WNDLoad->addButton(EditorLoadMenu, WINDOWQUIT, Position(175, 165), Extent(90, 20), BUTTON_RED1, "Abort");
             break;
         }
         case WINDOWQUIT:
@@ -784,8 +789,60 @@ void callback::EditorLoadMenu(int Param)
             {
                 WNDLoad->setWaste();
                 WNDLoad = nullptr;
+                CB_Filename = nullptr;
+                BtnLoad = nullptr;
+                BtnAbort = nullptr;
             }
             break;
+
+        case WINDOW_RESIZED_CALL:
+        {
+            if(!WNDLoad || !CB_Filename || !BtnLoad || !BtnAbort)
+                break;
+
+            int borderL = global::bmpArray[WINDOW_LEFT_FRAME].w;
+            int borderR = global::bmpArray[WINDOW_RIGHT_FRAME].w;
+            int borderT = global::bmpArray[WINDOW_UPPER_FRAME].h;
+            int borderB = global::bmpArray[WINDOW_LOWER_FRAME].h;
+
+            int window_w = WNDLoad->getW();
+            int window_h = WNDLoad->getH();
+            int client_w = window_w - borderL - borderR;
+            int client_h = window_h - borderT - borderB;
+
+            // minimum size
+            if(client_w < 200)
+                client_w = 200;
+            if(client_h < 150)
+                client_h = 150;
+
+            // selectbox: fills most of the client area
+            const int btn_w = 90;
+            const int margin = 10;
+            const int gap = 5;
+
+            int sb_x = borderL + margin;
+            int sb_y = borderT + gap;
+            int sb_w = client_w - margin - gap - btn_w - margin; // left margin + gap to buttons + button + right margin
+            int sb_h = client_h - gap - gap;                     // top gap + bottom gap
+            if(sb_w < 50)
+                sb_w = 50;
+            if(sb_h < 50)
+                sb_h = 50;
+
+            CB_Filename->setPos(Position(sb_x, sb_y));
+            CB_Filename->setSize(Extent(sb_w, sb_h));
+
+            // buttons: same Y as original (140/165 + borderT),
+            // X just right of the selectbox with a gap
+            int btn_x = sb_x + sb_w + gap;
+
+            BtnLoad->setX(btn_x);
+            BtnAbort->setX(btn_x);
+
+            WNDLoad->setDirty();
+            break;
+        }
 
         case LOADMAP:
         {
