@@ -715,9 +715,9 @@ void callback::EditorMainMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDMain)
                 break;
-            WNDMain = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorMainMenu, WINDOWQUIT,
-                                                                           WindowPos::Center, Extent(220, 320),
-                                                                           "Main menu", WINDOW_GREEN1, WINDOW_CLOSE));
+            WNDMain = global::s2->RegisterWindow(
+              std::make_unique<CWindow>(EditorMainMenu, WINDOWQUIT, WindowPos::Center, Extent(220, 320), "Main menu",
+                                        WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE));
             WNDMain->addButton(EditorMainMenu, LOADMENU, Position(8, 100), Extent(190, 20), BUTTON_GREEN2, "Load map");
             WNDMain->addButton(EditorMainMenu, SAVEMENU, Position(8, 125), Extent(190, 20), BUTTON_GREEN2, "Save map");
 
@@ -761,8 +761,9 @@ void callback::EditorLoadMenu(int Param)
         {
             if(WNDLoad)
                 break;
-            WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(
-              EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320), "Load", WINDOW_GREEN1, WINDOW_CLOSE));
+            WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorLoadMenu, WINDOWQUIT,
+                                                                           WindowPos::Center, Extent(280, 320), "Load",
+                                                                           WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE));
             auto* CB_Filename = WNDLoad->addSelectBox(Position(10, 5), Extent(160, 280), FontSize::Medium);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
@@ -853,9 +854,9 @@ void callback::EditorSaveMenu(int Param)
             if(WNDSave)
                 break;
             {
-                WNDSave = global::s2->RegisterWindow(std::make_unique<CWindow>(EditorSaveMenu, WINDOWQUIT,
-                                                                               WindowPos::Center, Extent(280, 200),
-                                                                               "Save", WINDOW_GREEN1, WINDOW_CLOSE));
+                WNDSave = global::s2->RegisterWindow(
+                  std::make_unique<CWindow>(EditorSaveMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 200), "Save",
+                                            WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MOVE));
                 MapObj = global::s2->getMapObj();
 
                 WNDSave->addText("Filename", Position(100, 2), FontSize::Small);
