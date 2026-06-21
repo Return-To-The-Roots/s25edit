@@ -5,8 +5,10 @@
 
 #include "CMap.h"
 #include "CGame.h"
+#include "CIO/CButton.h"
 #include "CIO/CFile.h"
 #include "CIO/CFont.h"
+#include "CIO/CTextfield.h"
 #include "CSurface.h"
 #include "callbacks.h"
 #include "globals.h"
@@ -15,6 +17,30 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+
+namespace {
+// Width of the elevation rate control panel (text field + gap + arrow + padding)
+constexpr int ELEVATION_RATE_PANEL_WIDTH = 67;
+constexpr int ELEVATION_RATE_PANEL_HEIGHT = 50;
+constexpr int ELEVATION_RATE_TEXTFIELD_LEFT = 6;
+constexpr int ELEVATION_RATE_TEXTFIELD_TOP = 20;
+constexpr int ELEVATION_RATE_TEXTFIELD_GAP = 4;
+constexpr int ELEVATION_RATE_MIN = 1;
+constexpr int ELEVATION_RATE_MAX = 20;
+
+void elevationRateBtnCallback(int param)
+{
+    auto* map = global::s2 ? global::s2->getMapObj() : nullptr;
+    if(!map)
+        return;
+    int val = map->getElevationRateTextValue();
+    if(param > 0 && val < ELEVATION_RATE_MAX)
+        val++;
+    else if(param < 0 && val > ELEVATION_RATE_MIN)
+        val--;
+    map->setElevationRateText(std::to_string(val));
+}
+} // namespace
 
 void bobMAP::setName(const std::string& newName)
 {
@@ -154,6 +180,9 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
     MaxRaiseHeight = 0x3C;
     MinReduceHeight = 0x00;
     saveCurrentVertices = false;
+    lastModifyTime_ = 0;
+    elevationRate_ = 10;
+    showElevationRateControl_ = false;
     undoBuffer.clear();
     redoBuffer.clear();
 
@@ -508,6 +537,39 @@ void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
     }
 
     storeVerticesFromMouse(motion.x, motion.y, motion.state);
+
+    // Hover detection for elevation rate control
+    // Only the icon itself (37x32) triggers opening.
+    // Once open, the panel area keeps it open so the cursor can reach the arrows.
+    const Point32 ds(displayRect.getSize());
+    const int iconLeft = ds.x / 2 - 236;
+    const int iconRight = ds.x / 2 - 199;
+    const int iconTop = ds.y - 36;
+    const int iconBot = ds.y - 3;
+    const bool overIcon = motion.x >= iconLeft && motion.x < iconRight && motion.y >= iconTop && motion.y < iconBot;
+    const int panelLeft = iconLeft;
+    const int panelRight = iconLeft + ELEVATION_RATE_PANEL_WIDTH;
+    const int panelTop = ds.y - 36 - ELEVATION_RATE_PANEL_HEIGHT - 2;
+    const bool overPanel = showElevationRateControl_ && motion.x >= panelLeft && motion.x < panelRight
+                           && motion.y >= panelTop && motion.y < iconTop;
+    bool wasShowing = showElevationRateControl_;
+    showElevationRateControl_ = overIcon || overPanel;
+    // When panel closes, commit pending edit and destroy controls
+    if(wasShowing && !showElevationRateControl_)
+    {
+        if(elevationRateTextfield_ && elevationRateTextfield_->isActive())
+            commitElevationRateText();
+        elevationRateTextfield_.reset();
+        elevationRateUpBtn_.reset();
+        elevationRateDownBtn_.reset();
+    }
+
+    // Forward motion events to arrow buttons (for hover highlighting)
+    if(showElevationRateControl_ && elevationRateUpBtn_ && elevationRateDownBtn_)
+    {
+        elevationRateUpBtn_->setMouseData(motion);
+        elevationRateDownBtn_->setMouseData(motion);
+    }
 }
 
 void CMap::onLeftMouseDown(const Point32& pos)
@@ -613,6 +675,17 @@ void CMap::onLeftMouseDown(const Point32& pos)
     {
         // the cursor picture was clicked
         callback::EditorCursorMenu(INITIALIZING_CALL);
+    }
+    // Elevation rate control: panel click sets height mode (arrows handled via callbacks)
+    else if(showElevationRateControl_)
+    {
+        const int panelX = displaySize.x / 2 - 236;
+        const int panelY = displaySize.y - 36 - ELEVATION_RATE_PANEL_HEIGHT - 2;
+        if(pos.x >= panelX && pos.x < panelX + ELEVATION_RATE_PANEL_WIDTH && pos.y >= panelY
+           && pos.y < panelY + ELEVATION_RATE_PANEL_HEIGHT)
+        {
+            mode = EDITOR_MODE_HEIGHT_RAISE;
+        }
     } else
     {
         // no picture was clicked
@@ -624,6 +697,18 @@ void CMap::onLeftMouseDown(const Point32& pos)
 
 void CMap::setMouseData(const SDL_MouseButtonEvent& button)
 {
+    // Forward mouse events to the elevation rate controls when the panel is shown
+    if(showElevationRateControl_)
+    {
+        if(elevationRateTextfield_)
+            elevationRateTextfield_->setMouseData(button);
+        // Forward button events to arrow buttons (for press/release visual feedback)
+        if(elevationRateUpBtn_)
+            elevationRateUpBtn_->setMouseData(button);
+        if(elevationRateDownBtn_)
+            elevationRateDownBtn_->setMouseData(button);
+    }
+
     if(button.state == SDL_PRESSED)
     {
         if(button.button == SDL_BUTTON_LEFT)
@@ -692,6 +777,20 @@ void restoreVertex(const SavedVertex& vertex, bobMAP& map)
 
 void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 {
+    // Forward keyboard events to the elevation rate text field when active
+    if(showElevationRateControl_ && elevationRateTextfield_ && elevationRateTextfield_->isActive())
+    {
+        // Commit on Enter and close the panel
+        if(key.type == SDL_KEYDOWN && (key.keysym.sym == SDLK_RETURN || key.keysym.sym == SDLK_KP_ENTER))
+        {
+            commitElevationRateText();
+            showElevationRateControl_ = false;
+            return;
+        }
+        elevationRateTextfield_->setKeyboardData(key);
+        return;
+    }
+
     if(key.type == SDL_KEYDOWN)
     {
         switch(key.keysym.sym)
@@ -1089,9 +1188,17 @@ void CMap::render()
     // clear the surface before drawing new (in normal case not needed)
     // SDL_FillRect( Surf_Map, nullptr, SDL_MapRGB(Surf_Map->format,0,0,0) );
 
-    // touch vertex data if user modifies it
+    // touch vertex data if user modifies it (rate-limited)
     if(modify)
-        modifyVertex();
+    {
+        Uint32 now = SDL_GetTicks();
+        Uint32 interval = 1000 / std::max(elevationRate_, 1);
+        if(now - lastModifyTime_ >= interval)
+        {
+            modifyVertex();
+            lastModifyTime_ = now;
+        }
+    }
 
     if(!map->vertex.empty())
         CSurface::DrawTriangleField(Surf_Map.get(), displayRect, *map);
@@ -1277,6 +1384,106 @@ void CMap::render()
     // bugkill picture for quicksave with text
     CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 200));
     CFont::writeText(Surf_Map, "Save", rightMenubarPos.x - 35, rightMenubarPos.y + 231);
+}
+
+void CMap::drawElevationRateControl(SDL_Surface* target)
+{
+    if(!showElevationRateControl_)
+        return;
+
+    const Point32 ds(displayRect.getSize());
+    const Position menubarPos = Position(ds.x / 2, ds.y);
+
+    // Panel positioned above the elevation icon (first icon in bottom menu)
+    const int panelX = menubarPos.x - 236;
+    const int panelY = menubarPos.y - 36 - ELEVATION_RATE_PANEL_HEIGHT - 2; // 2px gap above icon
+
+    // Lazy-create controls (persist across frames, destroyed on close)
+    constexpr int arrowW = 16, arrowH = 11;
+    if(!elevationRateTextfield_)
+    {
+        elevationRateTextfield_ =
+          std::make_unique<CTextfield>(0, 0, 2, 1, FontSize::Large, FontColor::Yellow, -1, false);
+        elevationRateTextfield_->setText(std::to_string(elevationRate_));
+        elevationRateUpBtn_ = std::make_unique<CButton>(elevationRateBtnCallback, 1, 0, 0, arrowW, arrowH, BUTTON_GREY,
+                                                        nullptr, PICTURE_SMALL_ARROW_UP);
+        elevationRateDownBtn_ = std::make_unique<CButton>(elevationRateBtnCallback, -1, 0, 0, arrowW, arrowH,
+                                                          BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
+        // Set positions once (they don't change while panel is open)
+        const int tfX = panelX + ELEVATION_RATE_TEXTFIELD_LEFT;
+        const int tfY = panelY + ELEVATION_RATE_TEXTFIELD_TOP;
+        elevationRateTextfield_->setX(tfX);
+        elevationRateTextfield_->setY(tfY);
+        const int arrowsX = tfX + elevationRateTextfield_->getW() + ELEVATION_RATE_TEXTFIELD_GAP;
+        elevationRateUpBtn_->setX(arrowsX);
+        elevationRateUpBtn_->setY(tfY);
+        elevationRateDownBtn_->setX(arrowsX);
+        elevationRateDownBtn_->setY(tfY + arrowH);
+    }
+    // Positions are stable after creation
+    const int tfX = panelX + ELEVATION_RATE_TEXTFIELD_LEFT;
+    const int tfY = panelY + ELEVATION_RATE_TEXTFIELD_TOP;
+    const int arrowsX = tfX + elevationRateTextfield_->getW() + ELEVATION_RATE_TEXTFIELD_GAP;
+
+    // Calculate panel width to fit content
+    // Draw panel background (solid dark rect matching tooltip style)
+    SDL_Rect bgRect = {panelX, panelY, ELEVATION_RATE_PANEL_WIDTH, ELEVATION_RATE_PANEL_HEIGHT};
+    SDL_FillRect(target, &bgRect, SDL_MapRGB(target->format, 20, 20, 20));
+    // Draw a subtle border
+    SDL_Rect borderRect = {panelX, panelY, ELEVATION_RATE_PANEL_WIDTH, 1};
+    SDL_FillRect(target, &borderRect, SDL_MapRGB(target->format, 60, 60, 60));
+    borderRect = {panelX, panelY + ELEVATION_RATE_PANEL_HEIGHT - 1, ELEVATION_RATE_PANEL_WIDTH, 1};
+    SDL_FillRect(target, &borderRect, SDL_MapRGB(target->format, 60, 60, 60));
+
+    // Draw "Rate:" label (above the text field)
+    CFont::writeText(target, "Rate:", panelX + 4, panelY + 4, FontSize::Small, FontColor::Yellow);
+
+    // Blit the CTextfield surface onto the panel
+    CSurface::Draw(target, elevationRateTextfield_->getSurface(), tfX, tfY);
+
+    // Blit the arrow button surfaces (they render themselves with proper button look)
+    CSurface::Draw(target, elevationRateUpBtn_->getSurface(), arrowsX, tfY);
+    CSurface::Draw(target, elevationRateDownBtn_->getSurface(), arrowsX, tfY + arrowH);
+}
+
+int CMap::getElevationRateTextValue() const
+{
+    if(!elevationRateTextfield_)
+        return elevationRate_;
+    std::string text = elevationRateTextfield_->getText();
+    if(text.empty())
+        return elevationRate_;
+    try
+    {
+        return std::stoi(text);
+    } catch(...)
+    {
+        return elevationRate_;
+    }
+}
+
+void CMap::setElevationRateText(const std::string& text)
+{
+    if(elevationRateTextfield_)
+        elevationRateTextfield_->setText(text);
+}
+
+void CMap::commitElevationRateText()
+{
+    if(!elevationRateTextfield_)
+        return;
+    std::string text = elevationRateTextfield_->getText();
+    if(!text.empty())
+    {
+        try
+        {
+            int val = std::stoi(text);
+            elevationRate_ = std::max(ELEVATION_RATE_MIN, std::min(ELEVATION_RATE_MAX, val));
+        } catch(...)
+        {}
+    }
+    elevationRateTextfield_->setText(std::to_string(elevationRate_));
+    elevationRateTextfield_->setInactive();
 }
 
 static void getTriangleColor(TriangleTerrainType terrainType, MapType mapType, Sint16& r, Sint16& g, Sint16& b)

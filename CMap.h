@@ -15,6 +15,9 @@
 #include <optional>
 #include <string>
 
+class CButton;
+class CTextfield;
+
 struct SavedVertex
 {
     template<typename T>
@@ -104,6 +107,12 @@ private:
     bool HorizontalMovementLocked;
     bool VerticalMovementLocked;
     std::optional<Position> startScrollPos;
+    Uint32 lastModifyTime_ = 0;
+    int elevationRate_ = 10;
+    bool showElevationRateControl_ = false;
+    std::unique_ptr<CTextfield> elevationRateTextfield_;
+    std::unique_ptr<CButton> elevationRateUpBtn_;
+    std::unique_ptr<CButton> elevationRateDownBtn_;
 
 public:
     CMap(const boost::filesystem::path& filepath);
@@ -128,6 +137,8 @@ public:
     int getVertexY() const { return Vertex_.y; }
     auto getMaxRaiseHeight() const { return MaxRaiseHeight; }
     auto getMinReduceHeight() const { return MinReduceHeight; }
+    int getElevationRate() const { return elevationRate_; }
+    void setElevationRate(int rate) { elevationRate_ = rate; }
     bool isHorizontalMovementLocked() const { return HorizontalMovementLocked; }
     bool isVerticalMovementLocked() const { return VerticalMovementLocked; }
     bool getRenderBuildHelp() const { return RenderBuildHelp; }
@@ -161,6 +172,10 @@ public:
     std::string getAuthor() const { return map->getAuthor(); }
     void setAuthor(const std::string& author) { map->setAuthor(author); }
 
+    void drawElevationRateControl(SDL_Surface* target);
+    int getElevationRateTextValue() const;
+    void setElevationRateText(const std::string& text);
+    void commitElevationRateText();
     void drawMinimap(SDL_Surface* Window);
     void render();
     // get and set some variables necessary for cursor behavior
