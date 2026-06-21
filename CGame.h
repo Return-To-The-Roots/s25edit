@@ -67,6 +67,9 @@ private:
     void SetAppIcon();
 
 public:
+    void LoadSettings();
+    void SaveSettings() const;
+
     CGame(Extent GameResolution_, bool fullscreen_);
     ~CGame();
 

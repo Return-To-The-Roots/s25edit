@@ -317,6 +317,7 @@ void callback::submenuOptions(int Param)
 
         case GRAPHICS_CHANGE:
             assert(SubMenu);
+            global::s2->SaveSettings();
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;

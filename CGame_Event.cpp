@@ -63,7 +63,10 @@ void CGame::EventHandling(SDL_Event* Event)
 
             switch(Event->key.keysym.sym)
             {
-                case SDLK_F2: fullscreen = !fullscreen; break;
+                case SDLK_F2:
+                    fullscreen = !fullscreen;
+                    SaveSettings();
+                    break;
 
 #ifdef _ADMINMODE
                 case SDLK_F3: // if CTRL and ALT are pressed
