@@ -251,9 +251,9 @@ void callback::submenuOptions(int Param)
             if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen =
-              SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 190, 200,
+              SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 410, 200,
                                  20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 120), Extent16(200, 110),
+            SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 340), Extent16(200, 330),
                                                  FontSize::Medium, FontColor::Yellow, BUTTON_GREY);
             SelectBoxRes->addOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->addOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
