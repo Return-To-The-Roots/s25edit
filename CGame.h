@@ -7,6 +7,7 @@
 
 #include "CIO/CFont.h"
 #include "SdlSurface.h"
+#include <boost/filesystem/path.hpp>
 #include <Point.h>
 #include <memory>
 #include <vector>
@@ -92,6 +93,7 @@ public:
     void setMapObj(std::unique_ptr<CMap> MapObj);
     CMap* getMapObj();
     void delMapObj();
+    void enterEditor(const boost::filesystem::path& filepath);
     SDL_Surface* getDisplaySurface() const { return Surf_Display.get(); };
     auto getRes() const { return GameResolution; }
 };

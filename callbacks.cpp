@@ -133,6 +133,7 @@ void callback::mainmenu(int Param)
     {
         ENDGAME = 1,
         STARTEDITOR,
+        LOADMAP,
         OPTIONS
     };
 
@@ -142,9 +143,10 @@ void callback::mainmenu(int Param)
             MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU));
             MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Quit program");
 #ifdef _ADMINMODE
-            MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 200, 200, 20, BUTTON_GREY, "Submenu_1");
+            MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 240, 200, 20, BUTTON_GREY, "Submenu_1");
 #endif
             MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Start editor");
+            MainMenu->addButton(mainmenu, LOADMAP, 50, 200, 200, 20, BUTTON_GREEN2, "Load map");
             MainMenu->addButton(mainmenu, OPTIONS, 50, 370, 200, 20, BUTTON_GREEN2, "Options");
             break;
 
@@ -157,13 +159,11 @@ void callback::mainmenu(int Param)
             global::s2->Running = false;
             break;
 
-        case STARTEDITOR:
+        case STARTEDITOR: global::s2->enterEditor(""); break;
+
+        case LOADMAP:
             assert(MainMenu);
-            PleaseWait(INITIALIZING_CALL);
-            global::s2->setMapObj(std::make_unique<CMap>(""));
-            MainMenu->setWaste();
-            MainMenu = nullptr;
-            PleaseWait(WINDOW_QUIT_MESSAGE);
+            EditorLoadMenu(INITIALIZING_CALL);
             break;
 
         case OPTIONS:
@@ -788,17 +788,21 @@ void callback::EditorLoadMenu(int Param)
                 return;
             PleaseWait(INITIALIZING_CALL);
 
-            // we have to close the windows and initialize them again to prevent failures
-            EditorCursorMenu(MAP_QUIT);
-            EditorTextureMenu(MAP_QUIT);
-            EditorTreeMenu(MAP_QUIT);
-            EditorLandscapeMenu(MAP_QUIT);
-            MinimapMenu(MAP_QUIT);
-            EditorResourceMenu(MAP_QUIT);
-            EditorAnimalMenu(MAP_QUIT);
-            EditorPlayerMenu(MAP_QUIT);
+            if(MapObj)
+            {
+                // we have to close the windows and initialize them again to prevent failures
+                EditorCursorMenu(MAP_QUIT);
+                EditorTextureMenu(MAP_QUIT);
+                EditorTreeMenu(MAP_QUIT);
+                EditorLandscapeMenu(MAP_QUIT);
+                MinimapMenu(MAP_QUIT);
+                EditorResourceMenu(MAP_QUIT);
+                EditorAnimalMenu(MAP_QUIT);
+                EditorPlayerMenu(MAP_QUIT);
 
-            MapObj->destructMap();
+                MapObj->destructMap();
+            }
+
             bfs::path filepath = global::userMapsPath / curFilename;
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");
@@ -806,7 +810,14 @@ void callback::EditorLoadMenu(int Param)
                 filepath.replace_extension("WLD");
             if(!bfs::exists(filepath))
                 filepath.replace_extension("SWD");
-            MapObj->constructMap(filepath);
+
+            if(MapObj)
+            {
+                MapObj->constructMap(filepath);
+            } else
+            {
+                global::s2->enterEditor(filepath);
+            }
 
             // we need to check which of these windows was active before
             /*
