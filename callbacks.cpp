@@ -229,7 +229,8 @@ void callback::submenuOptions(int Param)
         SELECTBOX_1920_1400,
         SELECTBOX_1920_1440,
         SELECTBOX_2048_1152,
-        SELECTBOX_2048_1536
+        SELECTBOX_2048_1536,
+        SELECTBOX_3840_2160
     };
 
     switch(Param)
@@ -297,6 +298,7 @@ void callback::submenuOptions(int Param)
             SelectBoxRes->addOption("1920 x 1440", submenuOptions, SELECTBOX_1920_1440);
             SelectBoxRes->addOption("2048 x 1152 (QWXGA)", submenuOptions, SELECTBOX_2048_1152);
             SelectBoxRes->addOption("2048 x 1536 (SUXGA)", submenuOptions, SELECTBOX_2048_1536);
+            SelectBoxRes->addOption("3840 x 2160 (4K UHD)", submenuOptions, SELECTBOX_3840_2160);
             break;
 
         case MAINMENU:
@@ -575,6 +577,12 @@ void callback::submenuOptions(int Param)
         case SELECTBOX_2048_1536:
             global::s2->GameResolution.x = 2048;
             global::s2->GameResolution.y = 1536;
+            submenuOptions(GRAPHICS_CHANGE);
+            break;
+
+        case SELECTBOX_3840_2160:
+            global::s2->GameResolution.x = 3840;
+            global::s2->GameResolution.y = 2160;
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
