@@ -45,8 +45,7 @@ class CMap
 
 private:
     boost::filesystem::path filepath_;
-    SdlSurface Surf_Map;
-    SdlSurface Surf_RightMenubar;
+    SdlSurface Surf_UI;
     std::unique_ptr<bobMAP> map;
     DisplayRectangle displayRect;
     bool active;
@@ -63,6 +62,8 @@ private:
     int modeContent2;
     // is the user currently modifying?
     bool modify;
+    // does the UI overlay surface need re-rendering and re-uploading?
+    bool overlayDirty_ = true;
     // necessary for "undo"- and "do"-function
     bool saveCurrentVertices;
     std::list<SavedVertex> undoBuffer;
@@ -104,6 +105,10 @@ private:
     bool HorizontalMovementLocked;
     bool VerticalMovementLocked;
     std::optional<Position> startScrollPos;
+    // Unwrapped world position of the mouse cursor, used to place the brush on
+    // the correct wrapped copy of the map.
+    Position cursorWorldPos_;
+    Position lastCursorScreenPos_ = Position::Invalid();
 
 public:
     CMap(const boost::filesystem::path& filepath);
@@ -136,22 +141,43 @@ public:
     void setBitsPerPixel(int bbp)
     {
         BitsPerPixel = bbp;
-        Surf_Map.reset();
+        Surf_UI.reset();
+        overlayDirty_ = true;
     }
-    void setMode(int mode) { this->mode = mode; }
+    void setMode(int mode)
+    {
+        this->mode = mode;
+        overlayDirty_ = true;
+    }
     int getMode() const { return mode; }
-    void setModeContent(int modeContent) { this->modeContent = modeContent; }
-    void setModeContent2(int modeContent2) { this->modeContent2 = modeContent2; }
+    void setModeContent(int modeContent)
+    {
+        this->modeContent = modeContent;
+        overlayDirty_ = true;
+    }
+    void setModeContent2(int modeContent2)
+    {
+        this->modeContent2 = modeContent2;
+        overlayDirty_ = true;
+    }
     int getModeContent() const { return modeContent; }
     int getModeContent2() const { return modeContent2; }
     bobMAP* getMap() { return map.get(); }
     SDL_Surface* getSurface()
     {
-        render();
-        return Surf_Map.get();
+        if(overlayDirty_)
+            render();
+        return Surf_UI.get();
     }
+    bool isOverlayDirty() const { return overlayDirty_; }
+    void markOverlayClean() { overlayDirty_ = false; }
+    void setOverlayDirty() { overlayDirty_ = true; }
     DisplayRectangle getDisplayRect() { return displayRect; }
-    void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
+    void setDisplayRect(const DisplayRectangle& displayRect)
+    {
+        this->displayRect = displayRect;
+        overlayDirty_ = true;
+    }
     auto& getPlayerHQx() { return PlayerHQx; }
     auto& getPlayerHQy() { return PlayerHQy; }
     const boost::filesystem::path& getFilepath() const { return filepath_; }
@@ -168,30 +194,35 @@ public:
     {
         ChangeSectionHexagonMode = HexagonMode;
         setupVerticesActivity();
+        overlayDirty_ = true;
     }
     bool getHexagonMode() const { return ChangeSectionHexagonMode; }
     void setVertexFillRSU(bool fillRSU)
     {
         VertexFillRSU = fillRSU;
         setupVerticesActivity();
+        overlayDirty_ = true;
     }
     bool getVertexFillRSU() const { return VertexFillRSU; }
     void setVertexFillUSD(bool fillUSD)
     {
         VertexFillUSD = fillUSD;
         setupVerticesActivity();
+        overlayDirty_ = true;
     }
     bool getVertexFillUSD() const { return VertexFillUSD; }
     void setVertexFillRandom(bool fillRandom)
     {
         VertexFillRandom = fillRandom;
         setupVerticesActivity();
+        overlayDirty_ = true;
     }
     bool getVertexFillRandom() const { return VertexFillRandom; }
     void setVertexActivityRandom(bool activityRandom)
     {
         VertexActivityRandom = activityRandom;
         setupVerticesActivity();
+        overlayDirty_ = true;
     }
     bool getVertexActivityRandom() const { return VertexActivityRandom; }
 

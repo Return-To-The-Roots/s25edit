@@ -8,13 +8,39 @@
 #include "CIO/CFile.h"
 #include "CIO/CFont.h"
 #include "CSurface.h"
+#include "GameWorldView.h"
+#include "TerrainRenderer.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "gameData/LandscapeDesc.h"
 #include "gameData/TerrainDesc.h"
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <string>
+
+namespace {
+// Fill the button rectangle with opaque black and then tile the background
+// sprite on top.  This guarantees the button is fully opaque even if the
+// background sprite has transparent areas.
+void drawButtonBackground(SdlSurface& dest, int x, int y, int w, int h, int bgPic)
+{
+    SDL_Rect r{x, y, w, h};
+    SDL_FillRect(dest.get(), &r, SDL_MapRGBA(dest->format, 0, 0, 0, 255));
+
+    auto& bg = global::bmpArray[bgPic];
+    for(int posX = 0; posX < w; posX += bg.w)
+    {
+        int drawW = std::min<int>(bg.w, w - posX);
+        for(int posY = 0; posY < h; posY += bg.h)
+        {
+            int drawH = std::min<int>(bg.h, h - posY);
+            CSurface::Draw(dest, bg.surface, x + posX, y + posY, 0, 0, drawW, drawH);
+        }
+    }
+}
+} // namespace
 
 void bobMAP::setName(const std::string& newName)
 {
@@ -83,11 +109,12 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
                         TriangleTerrainType texture, int border, int border_texture)
 {
     map = nullptr;
-    Surf_Map.reset();
-    Surf_RightMenubar.reset();
+    Surf_UI.reset();
+    overlayDirty_ = true;
     displayRect.left = 0;
     displayRect.top = 0;
     displayRect.setSize(global::s2->GameResolution);
+    cursorWorldPos_ = displayRect.getOrigin() + Position(displayRect.getSize().x / 2, displayRect.getSize().y / 2);
 
     if(!filepath.empty())
     {
@@ -118,7 +145,7 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
         }
     }
 
-    Surf_Map.reset();
+    Surf_UI.reset();
     active = true;
     Vertex_ = {10, 10};
     RenderBuildHelp = false;
@@ -217,6 +244,8 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
             map->s2IdToTerrain[t.s2Id] = i;
         }
     }
+
+    TerrainRenderer::invalidateTerrain();
 }
 void CMap::destructMap()
 {
@@ -224,8 +253,8 @@ void CMap::destructMap()
     unloadMapPics();
     undoBuffer.clear();
     redoBuffer.clear();
-    Surf_Map.reset();
-    Surf_RightMenubar.reset();
+    Surf_UI.reset();
+    overlayDirty_ = true;
     // free vertex array
     Vertices.clear();
     // free map structure memory
@@ -475,6 +504,7 @@ void CMap::unloadMapPics()
 void CMap::moveMap(Position offset)
 {
     displayRect.setOrigin(displayRect.getOrigin() + offset);
+    overlayDirty_ = true;
     // reset coords of displayRects when end of map is reached
     if(displayRect.left >= map->width_pixel)
         displayRect.move(Position(-map->width_pixel, 0));
@@ -489,6 +519,7 @@ void CMap::moveMap(Position offset)
 
 void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
 {
+    overlayDirty_ = true;
     // following code important for blitting the right field of the map
     // Are we scrolling?
     if(startScrollPos)
@@ -505,9 +536,17 @@ void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
         SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
         SDL_WarpMouseInWindow(nullptr, startScrollPos->x, startScrollPos->y);
         SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
-    }
 
-    storeVerticesFromMouse(motion.x, motion.y, motion.state);
+        // After warping the cursor the logical vertex under the cursor must be
+        // recomputed from the *warped* screen position and the updated display
+        // rectangle.  Using the pre-warp motion coordinates would place the
+        // brush at the old cursor location, making it drift away from the
+        // actual cursor while panning.
+        storeVerticesFromMouse(startScrollPos->x, startScrollPos->y, motion.state);
+    } else
+    {
+        storeVerticesFromMouse(motion.x, motion.y, motion.state);
+    }
 }
 
 void CMap::onLeftMouseDown(const Point32& pos)
@@ -624,6 +663,7 @@ void CMap::onLeftMouseDown(const Point32& pos)
 
 void CMap::setMouseData(const SDL_MouseButtonEvent& button)
 {
+    overlayDirty_ = true;
     if(button.state == SDL_PRESSED)
     {
         if(button.button == SDL_BUTTON_LEFT)
@@ -692,6 +732,7 @@ void restoreVertex(const SavedVertex& vertex, bobMAP& map)
 
 void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 {
+    overlayDirty_ = true;
     if(key.type == SDL_KEYDOWN)
     {
         switch(key.keysym.sym)
@@ -987,6 +1028,10 @@ void CMap::storeVerticesFromMouse(Uint16 MouseX, Uint16 MouseY, Uint8 /*MouseSta
     // if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE) )
     // return;
 
+    // Remember the unwrapped world coordinate of the cursor so the brush can be
+    // drawn on the wrapped copy of the map that is actually under the mouse.
+    cursorWorldPos_ = Position(MouseX + displayRect.left, MouseY + displayRect.top);
+
     int X = 0, Xeven = 0, Xodd = 0;
     int Y = 0, MousePosY = 0;
 
@@ -1054,16 +1099,25 @@ Position CMap::correctMouseBlit(Position vertexPos) const
 {
     const auto& vertex = map->getVertex(vertexPos);
     Position newBlit(vertex.x, vertex.y);
-    if(newBlit.x < displayRect.left)
-        newBlit.x += map->width_pixel;
-    else if(newBlit.x > displayRect.right)
-        newBlit.x -= map->width_pixel;
-    if(newBlit.y < displayRect.top)
-        newBlit.y += map->height_pixel;
-    else if(newBlit.y > displayRect.bottom)
-        newBlit.y -= map->height_pixel;
-    newBlit -= displayRect.getOrigin();
 
+    // Pick the wrapped copy of the vertex that is closest to the unwrapped
+    // cursor world position.  This keeps the brush on the same visible copy of
+    // the map as the mouse even when the view crosses a wrap seam or the map
+    // is zoomed out so far that it repeats many times.
+    if(map->width_pixel > 0)
+    {
+        int kx =
+          static_cast<int>(std::floor((cursorWorldPos_.x - vertex.x) / static_cast<double>(map->width_pixel) + 0.5));
+        newBlit.x += kx * map->width_pixel;
+    }
+    if(map->height_pixel > 0)
+    {
+        int ky =
+          static_cast<int>(std::floor((cursorWorldPos_.y - vertex.y) / static_cast<double>(map->height_pixel) + 0.5));
+        newBlit.y += ky * map->height_pixel;
+    }
+
+    newBlit -= displayRect.getOrigin();
     return newBlit;
 }
 
@@ -1073,28 +1127,91 @@ void CMap::render()
     if(displayRect.getSize() != global::s2->GameResolution)
     {
         displayRect.setSize(global::s2->GameResolution);
-        Surf_Map.reset();
+        Surf_UI.reset();
+        overlayDirty_ = true;
     }
 
     // if we need a new surface
-    if(!Surf_Map)
+    if(!Surf_UI)
     {
-        if(BitsPerPixel == 8)
-            Surf_Map =
-              makePalSurface(displayRect.getSize().x, displayRect.getSize().y, global::palArray[PAL_xBBM].colors);
-        else
-            Surf_Map = makeRGBSurface(displayRect.getSize().x, displayRect.getSize().y);
+        Surf_UI = makeRGBSurface(displayRect.getSize().x, displayRect.getSize().y, true);
+        overlayDirty_ = true;
     }
-    // else
-    // clear the surface before drawing new (in normal case not needed)
-    // SDL_FillRect( Surf_Map, nullptr, SDL_MapRGB(Surf_Map->format,0,0,0) );
+
+    // Skip re-rendering if nothing changed since last frame.
+    // The dirty flag is set by any method that modifies overlay state
+    // (mouse/keyboard events, mode changes, scrolling, etc.).
+    if(!overlayDirty_)
+    {
+        // Still need to process vertex modifications when user is actively editing
+        if(modify)
+            modifyVertex();
+        return;
+    }
+
+    // Make sure the cursor world position is current.  When the mouse itself
+    // moved we also recompute the logical vertex under the cursor.  We only do
+    // the latter on actual cursor movement so that random cursor fill does not
+    // get re-rolled every frame while scrolling.
+    {
+        Position cursorScreen = global::s2->getCursorPos();
+        if(cursorScreen != lastCursorScreenPos_)
+        {
+            storeVerticesFromMouse(cursorScreen.x, cursorScreen.y, 0);
+            lastCursorScreenPos_ = cursorScreen;
+        } else
+        {
+            // The view may have scrolled; keep the unwrapped cursor position in
+            // sync with the current display rectangle and recompute the brush
+            // blit positions so the cursor highlight stays on the right wrapped
+            // copy.  We do not recompute the logical vertex here so random fill
+            // does not flicker every frame while panning.
+            cursorWorldPos_ = cursorScreen + displayRect.getOrigin();
+            for(auto& v : Vertices)
+                v.blit = correctMouseBlit(v);
+        }
+    }
+
+    // Clear to fully transparent (0,0,0,0).  Transparent sprite pixels leave
+    // the overlay see-through in GL.
+    SDL_FillRect(Surf_UI.get(), nullptr, SDL_MapRGBA(Surf_UI->format, 0, 0, 0, 0));
 
     // touch vertex data if user modifies it
     if(modify)
         modifyVertex();
 
+    // Terrain and coastline borders are rendered by TerrainRenderer::Draw.
+    // Editor overlay sprites (trees, resources, buildings, animals) are drawn
+    // by EditorWorldView, aligned with s25client::GameWorldView.
     if(!map->vertex.empty())
-        CSurface::DrawTriangleField(Surf_Map.get(), displayRect, *map);
+    {
+        if(!TerrainRenderer::isTerrainValid())
+        {
+            SDL_Surface* tilesetSurface = nullptr;
+            switch(map->type)
+            {
+                case MAP_GREENLAND:
+                default:
+                    tilesetSurface =
+                      global::bmpArray[BitsPerPixel == 8 ? TILESET_GREENLAND_8BPP : TILESET_GREENLAND_32BPP]
+                        .surface.get();
+                    break;
+                case MAP_WASTELAND:
+                    tilesetSurface =
+                      global::bmpArray[BitsPerPixel == 8 ? TILESET_WASTELAND_8BPP : TILESET_WASTELAND_32BPP]
+                        .surface.get();
+                    break;
+                case MAP_WINTERLAND:
+                    tilesetSurface =
+                      global::bmpArray[BitsPerPixel == 8 ? TILESET_WINTERLAND_8BPP : TILESET_WINTERLAND_32BPP]
+                        .surface.get();
+                    break;
+            }
+            if(tilesetSurface)
+                TerrainRenderer::GenerateOpenGL(*map, tilesetSurface);
+        }
+        EditorWorldView::Draw(Surf_UI.get(), displayRect, *map);
+    }
 
     // draw pictures to cursor position
     int symbol_index, symbol_index2 = -1;
@@ -1123,58 +1240,58 @@ void CMap::render()
     {
         if(Vertices[i].active)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, Vertices[i].blit - Position::all(10));
+            CSurface::Draw(Surf_UI, global::bmpArray[symbol_index].surface, Vertices[i].blit - Position::all(10));
             if(symbol_index2 >= 0)
-                CSurface::Draw(Surf_Map, global::bmpArray[symbol_index2].surface, Vertices[i].blit - Position(0, 7));
+                CSurface::Draw(Surf_UI, global::bmpArray[symbol_index2].surface, Vertices[i].blit - Position(0, 7));
         }
     }
 
     // draw the frame
     if(displayRect.getSize() == Extent(640, 480))
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface);
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface);
     else if(displayRect.getSize() == Extent(800, 600))
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_800_600].surface);
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_800_600].surface);
     else if(displayRect.getSize() == Extent(1024, 768))
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_1024_768].surface);
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_1024_768].surface);
     else if(displayRect.getSize() == Extent(1280, 1024))
     {
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_LEFT_1280_1024].surface);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_RIGHT_1280_1024].surface, Position(640, 0));
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_LEFT_1280_1024].surface);
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_RIGHT_1280_1024].surface, Position(640, 0));
     } else
     {
         // draw the corners
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0, 0, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.getSize().y - 150, 0,
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, 0, 0, 0, 0, 150, 150);
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.getSize().y - 150, 0,
                        480 - 150, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, 0,
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, 0,
                        640 - 150, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150,
+        CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150,
                        displayRect.getSize().y - 150, 640 - 150, 480 - 150, 150, 150);
         // draw the edges
         unsigned x = 150, y = 150;
         while(x + 150 < displayRect.getSize().x)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, 0, 150, 0, 150, 12);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.getSize().y - 12, 150,
+            CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, x, 0, 150, 0, 150, 12);
+            CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.getSize().y - 12, 150,
                            0, 150, 12);
             x += 150;
         }
         while(y + 150 < displayRect.getSize().y)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, y, 0, 150, 12, 150);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 12, y, 0,
+            CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, 0, y, 0, 150, 12, 150);
+            CSurface::Draw(Surf_UI, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 12, y, 0,
                            150, 12, 150);
             y += 150;
         }
     }
 
     // draw the statues at the frame
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_LEFT].surface, Position(12, 12));
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_RIGHT].surface,
+    CSurface::Draw(Surf_UI, global::bmpArray[STATUE_UP_LEFT].surface, Position(12, 12));
+    CSurface::Draw(Surf_UI, global::bmpArray[STATUE_UP_RIGHT].surface,
                    Position(displayRect.getSize().x - global::bmpArray[STATUE_UP_RIGHT].w - 12, 12));
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_LEFT].surface,
+    CSurface::Draw(Surf_UI, global::bmpArray[STATUE_DOWN_LEFT].surface,
                    Position(12, displayRect.getSize().y - global::bmpArray[STATUE_DOWN_LEFT].h - 12));
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_RIGHT].surface,
+    CSurface::Draw(Surf_UI, global::bmpArray[STATUE_DOWN_RIGHT].surface,
                    displayRect.getSize()
                      - Position(global::bmpArray[STATUE_DOWN_RIGHT].w, global::bmpArray[STATUE_DOWN_RIGHT].h)
                      - Position::all(12));
@@ -1182,101 +1299,68 @@ void CMap::render()
     // lower menubar
     const Position menubarPos = Position(displayRect.getSize().x / 2, displayRect.getSize().y);
     // draw lower menubar
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR].surface,
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR].surface,
                    menubarPos - Extent(global::bmpArray[MENUBAR].w / 2, global::bmpArray[MENUBAR].h));
 
     // draw pictures to lower menubar
-    // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 236, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 199, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 162, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 125, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 88, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 51, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 14, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 92, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 129, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 166, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 203, menubarPos.y - 36, 0, 0,
-                   37, 32);
+    // The button face sprite has transparent areas; blitting it onto the RGBA
+    // Surf_UI leaves those pixels see-through.  Draw an opaque background
+    // first so every button is square and opaque, then blit the face on top.
+    const int lowerBtnW = 37, lowerBtnH = 32;
+    const int lowerBtnX[] = {-236, -199, -162, -125, -88, -51, -14, 92, 129, 166, 203};
+    for(int offsetX : lowerBtnX)
+    {
+        int x = menubarPos.x + offsetX;
+        int y = menubarPos.y - 36;
+        drawButtonBackground(Surf_UI, x, y, lowerBtnW, lowerBtnH, BUTTON_GREEN1_BACKGROUND);
+        CSurface::Draw(Surf_UI, global::bmpArray[BUTTON_GREEN1_DARK].surface, x, y, 0, 0, lowerBtnW, lowerBtnH);
+    }
     // pictures
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, menubarPos - Extent(232, 35));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, menubarPos - Extent(195, 35));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TREE].surface, menubarPos - Extent(158, 37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_RESOURCE].surface, menubarPos - Extent(121, 32));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_LANDSCAPE].surface, menubarPos - Extent(84, 37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_ANIMAL].surface, menubarPos - Extent(48, 36));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_PLAYER].surface, menubarPos - Extent(10, 34));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_HEIGHT].surface, menubarPos - Extent(232, 35));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_TEXTURE].surface, menubarPos - Extent(195, 35));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_TREE].surface, menubarPos - Extent(158, 37));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_RESOURCE].surface, menubarPos - Extent(121, 32));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_LANDSCAPE].surface, menubarPos - Extent(84, 37));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_ANIMAL].surface, menubarPos - Extent(48, 36));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_PLAYER].surface, menubarPos - Extent(10, 34));
 
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, menubarPos + Position(96, -35));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, menubarPos + Position(131, -37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_NEWWORLD].surface, menubarPos + Position(166, -37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, menubarPos + Position(207, -35));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_BUILDHELP].surface, menubarPos + Position(96, -35));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_MINIMAP].surface, menubarPos + Position(131, -37));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_NEWWORLD].surface, menubarPos + Position(166, -37));
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_COMPUTER].surface, menubarPos + Position(207, -35));
 
     // right menubar
-    // do we need a surface?
-    if(!Surf_RightMenubar)
-    {
-        // we permute width and height, cause we want to rotate the menubar 90 degrees
-        if((Surf_RightMenubar = makePalSurface(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w,
-                                               global::palArray[PAL_RESOURCE].colors))
-           != nullptr)
-        {
-            SDL_SetColorKey(Surf_RightMenubar.get(), SDL_TRUE, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
-            CSurface::Draw(Surf_RightMenubar, global::bmpArray[MENUBAR].surface, 0, 0, 270);
-        }
-    }
-    // draw right menubar (remember permutation of width and height)
     const Position rightMenubarPos = Position(displayRect.getSize().x, displayRect.getSize().y / 2);
-    CSurface::Draw(Surf_Map, Surf_RightMenubar,
-                   rightMenubarPos - Extent(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w / 2));
+    // draw the menubar rotated 90 degrees directly into the overlay
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR].surface, rightMenubarPos.x - global::bmpArray[MENUBAR].h,
+                   rightMenubarPos.y - global::bmpArray[MENUBAR].w / 2, 270);
 
     // draw pictures to right menubar
-    // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 239, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 202, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 165, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 128, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 22, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 15, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 52, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 89, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 126, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 163, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 200, 0, 0, 32, 37);
+    // Draw an opaque background first so the button faces are square and
+    // opaque over the terrain.
+    const int rightBtnW = 32, rightBtnH = 37;
+    const int rightBtnY[] = {-239, -202, -165, -128, -22, 15, 52, 89, 126, 163, 200};
+    for(int offsetY : rightBtnY)
+    {
+        int x = rightMenubarPos.x - 36;
+        int y = rightMenubarPos.y + offsetY;
+        drawButtonBackground(Surf_UI, x, y, rightBtnW, rightBtnH, BUTTON_GREEN1_BACKGROUND);
+        CSurface::Draw(Surf_UI, global::bmpArray[BUTTON_GREEN1_DARK].surface, x, y, 0, 0, rightBtnW, rightBtnH);
+    }
     // pictures
     // four cursor menu pictures
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(33, 237));
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, rightMenubarPos - Extent(20, 235));
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, rightMenubarPos - Extent(33, 220));
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(20, 220));
+    CSurface::Draw(Surf_UI, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(33, 237));
+    CSurface::Draw(Surf_UI, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, rightMenubarPos - Extent(20, 235));
+    CSurface::Draw(Surf_UI, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, rightMenubarPos - Extent(33, 220));
+    CSurface::Draw(Surf_UI, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(20, 220));
     // bugkill picture for quickload with text
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 162));
-    CFont::writeText(Surf_Map, "Load", rightMenubarPos.x - 35, rightMenubarPos.y + 193);
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 162));
+    CFont::writeText(Surf_UI, "Load", rightMenubarPos.x - 35, rightMenubarPos.y + 193);
     // bugkill picture for quicksave with text
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 200));
-    CFont::writeText(Surf_Map, "Save", rightMenubarPos.x - 35, rightMenubarPos.y + 231);
+    CSurface::Draw(Surf_UI, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 200));
+    CFont::writeText(Surf_UI, "Save", rightMenubarPos.x - 35, rightMenubarPos.y + 231);
+
+    overlayDirty_ = false;
 }
 
 static void getTriangleColor(TriangleTerrainType terrainType, MapType mapType, Sint16& r, Sint16& g, Sint16& b)
@@ -1536,6 +1620,10 @@ void CMap::modifyVertex()
     {
         modifyPlayer(Vertex_.x, Vertex_.y);
     }
+
+    // Height/texture/shading edits changed the underlying map data, so the
+    // GL terrain cache must be rebuilt on the next frame.
+    TerrainRenderer::invalidateTerrain();
 }
 
 void CMap::modifyHeightRaise(int VertexX, int VertexY)

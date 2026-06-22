@@ -8,9 +8,11 @@
 #include "CIO/CWindow.h"
 #include "CMap.h"
 #include "RttrConfig.h"
+#include "TerrainRenderer.h"
 #include "files.h"
 #include "globals.h"
 #include "s25util/file_handle.h"
+#include <glad/glad.h>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/program_options.hpp>
@@ -41,6 +43,11 @@ CGame::CGame(Extent GameResolution_, bool fullscreen_)
 
 CGame::~CGame()
 {
+    if(glContext_)
+    {
+        SDL_GL_DeleteContext(static_cast<SDL_GLContext>(glContext_));
+        glContext_ = nullptr;
+    }
     global::s2 = nullptr;
 }
 
@@ -67,12 +74,21 @@ int CGame::Execute()
     return 0;
 }
 
-void CGame::RenderPresent() const
+void CGame::RenderPresent()
 {
-    SDL_UpdateTexture(displayTexture_.get(), nullptr, Surf_Display->pixels, Surf_Display->w * sizeof(Uint32));
-    SDL_RenderClear(renderer_.get());
-    SDL_RenderCopy(renderer_.get(), displayTexture_.get(), nullptr, nullptr);
-    SDL_RenderPresent(renderer_.get());
+    // Upload Surf_Display to GL and draw (used by loading screen and callbacks)
+    if(uiOverlayTex_.valid())
+        uiOverlayTex_.updateFromSurface(Surf_Display.get());
+    else
+        uiOverlayTex_.createFromSurface(Surf_Display.get());
+    if(uiOverlayTex_.valid())
+        uiOverlayTex_.draw(0, 0);
+    SDL_GL_SwapWindow(window_.get());
+}
+
+void CGame::FlushSurfaceToGL()
+{
+    RenderPresent();
 }
 
 CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)
@@ -82,6 +98,7 @@ CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)
 
     Menu->setActive();
     Menus.emplace_back(std::move(Menu));
+    uiDirty_ = true;
 
     return Menus.back().get();
 }
@@ -94,6 +111,7 @@ bool CGame::UnregisterMenu(CMenu* Menu)
     if(it != Menus.begin())
         it[-1]->setActive();
     Menus.erase(it);
+    uiDirty_ = true;
     return true;
 }
 
@@ -111,6 +129,7 @@ CWindow* CGame::RegisterWindow(std::unique_ptr<CWindow> Window)
     Window->setActive();
     Window->setPriority(highestPriority + 1);
     Windows.emplace_back(std::move(Window));
+    uiDirty_ = true;
 
     return Windows.back().get();
 }
@@ -123,6 +142,7 @@ bool CGame::UnregisterWindow(CWindow* Window)
     if(it != Windows.begin())
         it[-1]->setActive();
     Windows.erase(it);
+    uiDirty_ = true;
     return true;
 }
 
@@ -141,9 +161,12 @@ bool CGame::UnregisterCallback(void (*callback)(int))
     return true;
 }
 
-void CGame::setMapObj(std::unique_ptr<CMap> MapObj)
+void CGame::setMapObj(std::unique_ptr<CMap> map)
 {
-    this->MapObj = std::move(MapObj);
+    this->MapObj = std::move(map);
+    // Force terrain regeneration on new map. CMap::Draw will call
+    // GenerateOpenGL on the next frame when it sees the terrain is invalid.
+    TerrainRenderer::invalidateTerrain();
 }
 
 CMap* CGame::getMapObj()
