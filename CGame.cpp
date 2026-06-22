@@ -164,7 +164,7 @@ void CGame::LoadSettings()
     libsiedler2::Archiv settings;
     if(libsiedler2::Load(settingsPath, settings) != 0)
         return;
-    const auto* ini = static_cast<const libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
+    const auto* ini = dynamic_cast<const libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
     if(!ini)
         return;
     GameResolution.x = ini->getValue("width", static_cast<int>(GameResolution.x));
@@ -177,7 +177,7 @@ void CGame::SaveSettings() const
     libsiedler2::Archiv settings;
     settings.alloc(1);
     settings.set(0, std::make_unique<libsiedler2::ArchivItem_Ini>("editor"));
-    auto* ini = static_cast<libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
+    auto* ini = dynamic_cast<libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
     if(!ini)
         return;
     ini->setValue("width", GameResolution.x);
