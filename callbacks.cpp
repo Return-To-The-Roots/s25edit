@@ -740,7 +740,6 @@ void callback::EditorMainMenu(int Param)
 void callback::EditorLoadMenu(int Param)
 {
     static CWindow* WNDLoad = nullptr;
-    static CMap* MapObj = nullptr;
     static std::string curFilename;
 
     enum
@@ -757,8 +756,6 @@ void callback::EditorLoadMenu(int Param)
                 break;
             WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(
               EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320), "Load", WINDOW_GREEN1, WINDOW_CLOSE));
-            MapObj = global::s2->getMapObj();
-
             auto* CB_Filename = WNDLoad->addSelectBox(Point16(10, 5), Extent16(160, 280), FontSize::Medium);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
@@ -788,20 +785,15 @@ void callback::EditorLoadMenu(int Param)
                 return;
             PleaseWait(INITIALIZING_CALL);
 
-            if(MapObj)
-            {
-                // we have to close the windows and initialize them again to prevent failures
-                EditorCursorMenu(MAP_QUIT);
-                EditorTextureMenu(MAP_QUIT);
-                EditorTreeMenu(MAP_QUIT);
-                EditorLandscapeMenu(MAP_QUIT);
-                MinimapMenu(MAP_QUIT);
-                EditorResourceMenu(MAP_QUIT);
-                EditorAnimalMenu(MAP_QUIT);
-                EditorPlayerMenu(MAP_QUIT);
-
-                MapObj->destructMap();
-            }
+            // we have to close the windows and initialize them again to prevent failures
+            EditorCursorMenu(MAP_QUIT);
+            EditorTextureMenu(MAP_QUIT);
+            EditorTreeMenu(MAP_QUIT);
+            EditorLandscapeMenu(MAP_QUIT);
+            MinimapMenu(MAP_QUIT);
+            EditorResourceMenu(MAP_QUIT);
+            EditorAnimalMenu(MAP_QUIT);
+            EditorPlayerMenu(MAP_QUIT);
 
             bfs::path filepath = global::userMapsPath / curFilename;
             if(!filepath.has_extension())
@@ -811,13 +803,7 @@ void callback::EditorLoadMenu(int Param)
             if(!bfs::exists(filepath))
                 filepath.replace_extension("SWD");
 
-            if(MapObj)
-            {
-                MapObj->constructMap(filepath);
-            } else
-            {
-                global::s2->enterEditor(filepath);
-            }
+            global::s2->enterEditor(filepath);
 
             // we need to check which of these windows was active before
             /*
