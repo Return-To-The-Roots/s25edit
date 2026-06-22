@@ -30,9 +30,7 @@ bool CGame::ReCreateWindow()
     renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
     if(!renderer_)
         return false;
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
-                                     GameResolution.y);
-    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+    RecreateDisplayResources();
     if(!displayTexture_ || !Surf_Display)
         return false;
 
@@ -40,13 +38,18 @@ bool CGame::ReCreateWindow()
     return true;
 }
 
+void CGame::RecreateDisplayResources()
+{
+    displayTexture_.reset();
+    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
+                                     GameResolution.y);
+    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+}
+
 void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
-    displayTexture_.reset();
-    displayTexture_ =
-      makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, newSize.x, newSize.y);
-    Surf_Display = makeRGBSurface(newSize.x, newSize.y, true);
+    RecreateDisplayResources();
     for(auto& menu : Menus)
         menu->resetSurface();
     for(auto& wnd : Windows)

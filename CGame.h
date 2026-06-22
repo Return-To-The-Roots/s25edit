@@ -65,6 +65,7 @@ private:
     std::unique_ptr<CMap> MapObj;
 
     void SetAppIcon();
+    void RecreateDisplayResources();
 
 public:
     CGame(Extent GameResolution_, bool fullscreen_);
