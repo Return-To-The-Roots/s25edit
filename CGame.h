@@ -42,6 +42,7 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
+    unsigned suppressResizeEvents_ = 0;
 
     // structure for mouse cursor
     struct

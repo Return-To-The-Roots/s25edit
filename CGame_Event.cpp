@@ -385,6 +385,11 @@ void CGame::EventHandling(SDL_Event* Event)
         {
             if(Event->window.event == SDL_WINDOWEVENT_RESIZED)
             {
+                if(suppressResizeEvents_ > 0)
+                {
+                    suppressResizeEvents_--;
+                    break; // Skip stale event from our own window recreation
+                }
                 UpdateDisplaySize(Extent(Event->window.data1, Event->window.data2));
             }
             break;

@@ -19,6 +19,7 @@
 
 bool CGame::ReCreateWindow()
 {
+    suppressResizeEvents_ = 3;
     displayTexture_.reset();
     renderer_.reset();
     window_.reset();
