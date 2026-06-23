@@ -9,12 +9,18 @@
 #include "Rect.h"
 #include "SGE/sge_blib.h"
 #include "SGE/sge_rotation.h"
+#include "SGE/sge_surface.h"
 #include "globals.h"
 #include "gameData/EdgeDesc.h"
 #include "gameData/TerrainDesc.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+
+// Disable SGE's internal surface locking once at startup; terrain drawing is
+// the only remaining consumer of SGE functions and the caller already handles
+// locking. Was originally called in CGame::Init().
+static bool sgeLockOff = (sge_Lock_OFF(), true);
 
 namespace {
 SDL_Rect rect2SDL_Rect(const Rect& rect)
@@ -146,6 +152,27 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest
 bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize)
 {
     return Draw(Surf_Dest, Surf_Src.get(), dest, srcOffset, srcSize);
+}
+
+void CSurface::DrawStretched(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src)
+{
+    if(!Surf_Dest || !Surf_Src)
+        return;
+
+    // Convert to 32-bit RGB to handle 8-bit paletted sources and drop any
+    // implicit alpha from LBM palette entries (which have a=0).
+    SDL_Surface* converted = SDL_ConvertSurfaceFormat(Surf_Src, SDL_PIXELFORMAT_RGB888, 0);
+    if(!converted)
+        return;
+
+    // Stretch full source to fill full destination
+    SDL_BlitScaled(converted, nullptr, Surf_Dest, nullptr);
+    SDL_FreeSurface(converted);
+}
+
+void CSurface::DrawStretched(SdlSurface& Surf_Dest, SdlSurface& Surf_Src)
+{
+    DrawStretched(Surf_Dest.get(), Surf_Src.get());
 }
 
 // this is the example function from the SDL-documentation to draw pixels
