@@ -133,6 +133,7 @@ void callback::mainmenu(int Param)
     {
         ENDGAME = 1,
         STARTEDITOR,
+        LOADMAP,
         OPTIONS
     };
 
@@ -141,11 +142,12 @@ void callback::mainmenu(int Param)
         case INITIALIZING_CALL:
             MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU));
             MainMenu->addButton(mainmenu, ENDGAME, Position(50, 400), Extent(200, 20), BUTTON_RED1, "Quit program");
+            MainMenu->addButton(mainmenu, STARTEDITOR, Position(50, 160), Extent(200, 20), BUTTON_RED1, "Start editor");
+            MainMenu->addButton(mainmenu, LOADMAP, Position(50, 200), Extent(200, 20), BUTTON_GREEN2, "Load map");
 #ifdef _ADMINMODE
-            MainMenu->addButton(submenu1, INITIALIZING_CALL, Position(50, 200), Extent(200, 20), BUTTON_GREY,
+            MainMenu->addButton(submenu1, INITIALIZING_CALL, Position(50, 240), Extent(200, 20), BUTTON_GREY,
                                 "Submenu_1");
 #endif
-            MainMenu->addButton(mainmenu, STARTEDITOR, Position(50, 160), Extent(200, 20), BUTTON_RED1, "Start editor");
             MainMenu->addButton(mainmenu, OPTIONS, Position(50, 370), Extent(200, 20), BUTTON_GREEN2, "Options");
             break;
 
@@ -158,14 +160,9 @@ void callback::mainmenu(int Param)
             global::s2->Running = false;
             break;
 
-        case STARTEDITOR:
-            assert(MainMenu);
-            PleaseWait(INITIALIZING_CALL);
-            global::s2->setMapObj(std::make_unique<CMap>(""));
-            MainMenu->setWaste();
-            MainMenu = nullptr;
-            PleaseWait(WINDOW_QUIT_MESSAGE);
-            break;
+        case STARTEDITOR: global::s2->enterEditor(""); break;
+
+        case LOADMAP: EditorLoadMenu(INITIALIZING_CALL); break;
 
         case OPTIONS:
             assert(MainMenu);
@@ -230,7 +227,8 @@ void callback::submenuOptions(int Param)
         SELECTBOX_1920_1400,
         SELECTBOX_1920_1440,
         SELECTBOX_2048_1152,
-        SELECTBOX_2048_1536
+        SELECTBOX_2048_1536,
+        SELECTBOX_3840_2160
     };
 
     switch(Param)
@@ -252,9 +250,9 @@ void callback::submenuOptions(int Param)
             if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen =
-              SubMenu->addButton(submenuOptions, FULLSCREEN, Position(global::s2->GameResolution.x / 2 - 100, 190),
+              SubMenu->addButton(submenuOptions, FULLSCREEN, Position(global::s2->GameResolution.x / 2 - 100, 410),
                                  Extent(200, 20), BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Position(0, 120), Extent(200, 110),
+            SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Position(0, 340), Extent(200, 330),
                                                  FontSize::Medium, FontColor::Yellow, BUTTON_GREY);
             SelectBoxRes->addOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->addOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
@@ -298,6 +296,7 @@ void callback::submenuOptions(int Param)
             SelectBoxRes->addOption("1920 x 1440", submenuOptions, SELECTBOX_1920_1440);
             SelectBoxRes->addOption("2048 x 1152 (QWXGA)", submenuOptions, SELECTBOX_2048_1152);
             SelectBoxRes->addOption("2048 x 1536 (SUXGA)", submenuOptions, SELECTBOX_2048_1536);
+            SelectBoxRes->addOption("3840 x 2160 (4K UHD)", submenuOptions, SELECTBOX_3840_2160);
             break;
 
         case MAINMENU:
@@ -318,6 +317,7 @@ void callback::submenuOptions(int Param)
 
         case GRAPHICS_CHANGE:
             assert(SubMenu);
+            global::s2->SaveSettings();
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;
@@ -578,6 +578,12 @@ void callback::submenuOptions(int Param)
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
+        case SELECTBOX_3840_2160:
+            global::s2->GameResolution.x = 3840;
+            global::s2->GameResolution.y = 2160;
+            submenuOptions(GRAPHICS_CHANGE);
+            break;
+
         default: break;
     }
 }
@@ -611,7 +617,7 @@ void callback::EditorHelpMenu(int Param)
                                      "..............................F1");
             SelectBoxHelp->addOption(
               "Window/"
-              "Fullscreen........................................................................................F2");
+              "Fullscreen...................................................................................Alt+Enter");
             SelectBoxHelp->addOption(
               "Zoom in/normal/out......................................................................F5/F6/"
               "F7");
@@ -741,7 +747,6 @@ void callback::EditorMainMenu(int Param)
 void callback::EditorLoadMenu(int Param)
 {
     static CWindow* WNDLoad = nullptr;
-    static CMap* MapObj = nullptr;
     static std::string curFilename;
 
     enum
@@ -758,8 +763,6 @@ void callback::EditorLoadMenu(int Param)
                 break;
             WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(
               EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320), "Load", WINDOW_GREEN1, WINDOW_CLOSE));
-            MapObj = global::s2->getMapObj();
-
             auto* CB_Filename = WNDLoad->addSelectBox(Position(10, 5), Extent(160, 280), FontSize::Medium);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
@@ -799,7 +802,6 @@ void callback::EditorLoadMenu(int Param)
             EditorAnimalMenu(MAP_QUIT);
             EditorPlayerMenu(MAP_QUIT);
 
-            MapObj->destructMap();
             bfs::path filepath = global::userMapsPath / curFilename;
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");
@@ -807,7 +809,8 @@ void callback::EditorLoadMenu(int Param)
                 filepath.replace_extension("WLD");
             if(!bfs::exists(filepath))
                 filepath.replace_extension("SWD");
-            MapObj->constructMap(filepath);
+
+            global::s2->enterEditor(filepath);
 
             // we need to check which of these windows was active before
             /*

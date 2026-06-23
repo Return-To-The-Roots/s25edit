@@ -39,6 +39,7 @@ void CGame::SetAppIcon()
 
 void CGame::Render()
 {
+    suppressResizeEvents_ = 0;
     if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution
        || fullscreen != ((SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0))
     {

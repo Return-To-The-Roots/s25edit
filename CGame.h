@@ -7,6 +7,7 @@
 
 #include "CIO/CFont.h"
 #include "SdlSurface.h"
+#include <boost/filesystem/path.hpp>
 #include <Point.h>
 #include <memory>
 #include <vector>
@@ -42,6 +43,7 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
+    unsigned suppressResizeEvents_ = 0;
 
     // structure for mouse cursor
     struct
@@ -65,8 +67,12 @@ private:
     std::unique_ptr<CMap> MapObj;
 
     void SetAppIcon();
+    void RecreateDisplayResources();
 
 public:
+    void LoadSettings();
+    void SaveSettings() const;
+
     CGame(Extent GameResolution_, bool fullscreen_);
     ~CGame();
 
@@ -74,6 +80,7 @@ public:
 
     bool Init();
     bool ReCreateWindow();
+    void UpdateDisplaySize(const Extent& newSize);
 
     void EventHandling(SDL_Event* Event);
 
@@ -92,6 +99,7 @@ public:
     void setMapObj(std::unique_ptr<CMap> MapObj);
     CMap* getMapObj();
     void delMapObj();
+    void enterEditor(const boost::filesystem::path& filepath);
     SDL_Surface* getDisplaySurface() const { return Surf_Display.get(); };
     auto getRes() const { return GameResolution; }
 };

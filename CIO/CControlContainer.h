@@ -68,6 +68,11 @@ public:
     }
     void setWaste() { waste = true; }
     bool isWaste() const { return waste; }
+    void resetSurface()
+    {
+        surface.reset();
+        needRender = true;
+    }
     // Methods
     CButton* addButton(void callback(int), int clickedParam, Position pos = {0, 0}, Extent size = {20, 20},
                        int color = BUTTON_GREY, const char* text = nullptr, int picture = -1);
