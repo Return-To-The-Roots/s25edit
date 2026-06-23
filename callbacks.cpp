@@ -18,6 +18,7 @@
 #include "CSurface.h"
 #include "globals.h"
 #include "helpers/format.hpp"
+#include "s25util/strAlgos.h"
 #include <boost/filesystem.hpp>
 #include <algorithm>
 #include <cctype>
@@ -775,9 +776,7 @@ void callback::EditorLoadMenu(int Param)
                 if(is_regular_file(itFile.status()))
                 {
                     // filter to supported map file extensions
-                    std::string ext = itFile.path().extension().string();
-                    for(auto& c : ext)
-                        c = tolower(c);
+                    const std::string ext = s25util::toLower(itFile.path().extension().string());
                     if(ext != ".swd" && ext != ".wld")
                         continue;
 
