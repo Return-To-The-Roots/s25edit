@@ -8,7 +8,6 @@
 #include "CMap.h"
 #include "Rect.h"
 #include "SGE/sge_blib.h"
-#include "SGE/sge_rotation.h"
 #include "SGE/sge_surface.h"
 #include "globals.h"
 #include "gameData/EdgeDesc.h"
@@ -98,26 +97,57 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y,
     if(!Surf_Dest || !Surf_Src)
         return false;
 
-    Uint16 px, py;
+    if(angle != 90 && angle != 180 && angle != 270)
+        return false;
 
-    switch(angle)
+    // Simple software rotation for 90/180/270 degrees
+    // 90/270 swap width and height; 180 keeps original dimensions
+    int rotW = (angle == 180) ? Surf_Src->w : Surf_Src->h;
+    int rotH = (angle == 180) ? Surf_Src->h : Surf_Src->w;
+    SDL_Surface* rotated =
+      SDL_CreateRGBSurface(0, rotW, rotH, Surf_Src->format->BitsPerPixel, Surf_Src->format->Rmask,
+                           Surf_Src->format->Gmask, Surf_Src->format->Bmask, Surf_Src->format->Amask);
+    if(!rotated)
+        return false;
+    // Copy palette for 8-bit surfaces
+    if(Surf_Src->format->palette && rotated->format->palette)
+        SDL_SetPaletteColors(rotated->format->palette, Surf_Src->format->palette->colors, 0, 256);
+    SDL_LockSurface(Surf_Src);
+    SDL_LockSurface(rotated);
+    int srcW = Surf_Src->w, srcH = Surf_Src->h, bpp = Surf_Src->format->BytesPerPixel;
+    for(int sy = 0; sy < srcH; sy++)
     {
-        case 90:
-            px = 0;
-            py = Surf_Src->h - 1;
-            break;
-        case 180:
-            px = Surf_Src->w - 1;
-            py = Surf_Src->h - 1;
-            break;
-        case 270:
-            px = Surf_Src->w - 1;
-            py = 0;
-            break;
-        default: return false;
+        for(int sx = 0; sx < srcW; sx++)
+        {
+            int dx, dy;
+            switch(angle)
+            {
+                case 90:
+                    dx = srcH - 1 - sy;
+                    dy = sx;
+                    break;
+                case 180:
+                    dx = srcW - 1 - sx;
+                    dy = srcH - 1 - sy;
+                    break;
+                case 270:
+                    dx = sy;
+                    dy = srcW - 1 - sx;
+                    break;
+                default:
+                    dx = sx;
+                    dy = sy;
+                    break;
+            }
+            memcpy((Uint8*)rotated->pixels + dy * rotated->pitch + dx * bpp,
+                   (Uint8*)Surf_Src->pixels + sy * Surf_Src->pitch + sx * bpp, bpp);
+        }
     }
-
-    sge_transform(Surf_Src, Surf_Dest, (float)angle, 1.0, 1.0, px, py, X, Y, SGE_TSAFE);
+    SDL_UnlockSurface(rotated);
+    SDL_UnlockSurface(Surf_Src);
+    SDL_Rect dst = {(Sint16)X, (Sint16)Y, 0, 0};
+    SDL_BlitSurface(rotated, nullptr, Surf_Dest, &dst);
+    SDL_FreeSurface(rotated);
 
     return true;
 }
