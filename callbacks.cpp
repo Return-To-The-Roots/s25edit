@@ -226,7 +226,8 @@ void callback::submenuOptions(int Param)
         SELECTBOX_1920_1400,
         SELECTBOX_1920_1440,
         SELECTBOX_2048_1152,
-        SELECTBOX_2048_1536
+        SELECTBOX_2048_1536,
+        SELECTBOX_3840_2160
     };
 
     switch(Param)
@@ -248,9 +249,9 @@ void callback::submenuOptions(int Param)
             if(ButtonFullscreen)
                 SubMenu->delButton(ButtonFullscreen);
             ButtonFullscreen =
-              SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 190, 200,
+              SubMenu->addButton(submenuOptions, FULLSCREEN, (int)(global::s2->GameResolution.x / 2 - 100), 410, 200,
                                  20, BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
-            SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 120), Extent16(200, 110),
+            SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Point16(0, 340), Extent16(200, 330),
                                                  FontSize::Medium, FontColor::Yellow, BUTTON_GREY);
             SelectBoxRes->addOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
             SelectBoxRes->addOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
@@ -294,6 +295,7 @@ void callback::submenuOptions(int Param)
             SelectBoxRes->addOption("1920 x 1440", submenuOptions, SELECTBOX_1920_1440);
             SelectBoxRes->addOption("2048 x 1152 (QWXGA)", submenuOptions, SELECTBOX_2048_1152);
             SelectBoxRes->addOption("2048 x 1536 (SUXGA)", submenuOptions, SELECTBOX_2048_1536);
+            SelectBoxRes->addOption("3840 x 2160 (4K UHD)", submenuOptions, SELECTBOX_3840_2160);
             break;
 
         case MAINMENU:
@@ -314,6 +316,7 @@ void callback::submenuOptions(int Param)
 
         case GRAPHICS_CHANGE:
             assert(SubMenu);
+            global::s2->SaveSettings();
             SubMenu->setWaste();
             TextResolution = nullptr;
             ButtonFullscreen = nullptr;
@@ -574,6 +577,12 @@ void callback::submenuOptions(int Param)
             submenuOptions(GRAPHICS_CHANGE);
             break;
 
+        case SELECTBOX_3840_2160:
+            global::s2->GameResolution.x = 3840;
+            global::s2->GameResolution.y = 2160;
+            submenuOptions(GRAPHICS_CHANGE);
+            break;
+
         default: break;
     }
 }
@@ -608,7 +617,7 @@ void callback::EditorHelpMenu(int Param)
                                      "..............................F1");
             SelectBoxHelp->addOption(
               "Window/"
-              "Fullscreen........................................................................................F2");
+              "Fullscreen...................................................................................Alt+Enter");
             SelectBoxHelp->addOption(
               "Zoom in/normal/out......................................................................F5/F6/"
               "F7");

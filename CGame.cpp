@@ -11,6 +11,8 @@
 #include "files.h"
 #include "globals.h"
 #include "s25util/file_handle.h"
+#include <libsiedler2/ArchivItem_Ini.h>
+#include <libsiedler2/libsiedler2.h>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/program_options.hpp>
@@ -161,6 +163,32 @@ void CGame::enterEditor(const boost::filesystem::path& filepath)
     for(auto& menu : Menus)
         menu->setWaste();
     setMapObj(std::make_unique<CMap>(filepath));
+}
+
+void CGame::LoadSettings()
+{
+    const bfs::path settingsPath = RTTRCONFIG.ExpandPath("<RTTR_USERDATA>/s25edit.ini");
+    libsiedler2::Archiv settings;
+    if(libsiedler2::Load(settingsPath, settings) != 0)
+        return;
+    const auto* ini = dynamic_cast<const libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
+    if(!ini)
+        return;
+    GameResolution.x = ini->getValue("width", static_cast<int>(GameResolution.x));
+    GameResolution.y = ini->getValue("height", static_cast<int>(GameResolution.y));
+    fullscreen = ini->getValue("fullscreen", fullscreen);
+}
+
+void CGame::SaveSettings() const
+{
+    libsiedler2::Archiv settings;
+    settings.push(std::make_unique<libsiedler2::ArchivItem_Ini>("editor"));
+    auto& ini = dynamic_cast<libsiedler2::ArchivItem_Ini&>(*settings.find("editor"));
+    ini.setValue("width", GameResolution.x);
+    ini.setValue("height", GameResolution.y);
+    ini.setValue("fullscreen", static_cast<int>(fullscreen));
+    const bfs::path settingsPath = RTTRCONFIG.ExpandPath("<RTTR_USERDATA>/s25edit.ini");
+    libsiedler2::Write(settingsPath, settings);
 }
 
 void CGame::GameLoop()
@@ -316,6 +344,7 @@ int main(int argc, char* argv[])
         auto s2 = std::make_unique<CGame>(
           Extent(programOptions["width"].as<unsigned>(), programOptions["height"].as<unsigned>()),
           programOptions["fullscreen"].as<bool>());
+        s2->LoadSettings();
         result = s2->Execute();
     } catch(...)
     {

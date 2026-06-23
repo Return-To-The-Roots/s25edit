@@ -63,7 +63,14 @@ void CGame::EventHandling(SDL_Event* Event)
 
             switch(Event->key.keysym.sym)
             {
-                case SDLK_F2: fullscreen = !fullscreen; break;
+                case SDLK_RETURN:
+                case SDLK_KP_ENTER:
+                    if(Event->key.keysym.mod & KMOD_ALT)
+                    {
+                        fullscreen = !fullscreen;
+                        SaveSettings();
+                    }
+                    break;
 
 #ifdef _ADMINMODE
                 case SDLK_F3: // if CTRL and ALT are pressed
@@ -373,6 +380,20 @@ void CGame::EventHandling(SDL_Event* Event)
             {
                 if(Menu->isActive() && !Menu->isWaste())
                     Menu->setMouseData(Event->button);
+            }
+            break;
+        }
+
+        case SDL_WINDOWEVENT:
+        {
+            if(Event->window.event == SDL_WINDOWEVENT_RESIZED)
+            {
+                if(suppressResizeEvents_ > 0)
+                {
+                    suppressResizeEvents_--;
+                    break; // Skip stale event from our own window recreation
+                }
+                UpdateDisplaySize(Extent(Event->window.data1, Event->window.data2));
             }
             break;
         }
