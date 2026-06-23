@@ -42,6 +42,7 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
+    unsigned suppressResizeEvents_ = 0;
 
     // structure for mouse cursor
     struct
@@ -65,6 +66,7 @@ private:
     std::unique_ptr<CMap> MapObj;
 
     void SetAppIcon();
+    void RecreateDisplayResources();
 
 public:
     void LoadSettings();
@@ -77,6 +79,7 @@ public:
 
     bool Init();
     bool ReCreateWindow();
+    void UpdateDisplaySize(const Extent& newSize);
 
     void EventHandling(SDL_Event* Event);
 
