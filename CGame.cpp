@@ -169,19 +169,17 @@ void CGame::LoadSettings()
         return;
     GameResolution.x = ini->getValue("width", static_cast<int>(GameResolution.x));
     GameResolution.y = ini->getValue("height", static_cast<int>(GameResolution.y));
-    fullscreen = ini->getValue("fullscreen", static_cast<int>(fullscreen)) != 0;
+    fullscreen = ini->getValue("fullscreen", fullscreen);
 }
 
 void CGame::SaveSettings() const
 {
     libsiedler2::Archiv settings;
     settings.push(std::make_unique<libsiedler2::ArchivItem_Ini>("editor"));
-    auto* ini = dynamic_cast<libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
-    if(!ini)
-        return;
-    ini->setValue("width", GameResolution.x);
-    ini->setValue("height", GameResolution.y);
-    ini->setValue("fullscreen", static_cast<int>(fullscreen));
+    auto& ini = dynamic_cast<libsiedler2::ArchivItem_Ini&>(*settings.find("editor"));
+    ini.setValue("width", GameResolution.x);
+    ini.setValue("height", GameResolution.y);
+    ini.setValue("fullscreen", static_cast<int>(fullscreen));
     const bfs::path settingsPath = RTTRCONFIG.ExpandPath("<RTTR_USERDATA>/s25edit.ini");
     libsiedler2::Write(settingsPath, settings);
 }
