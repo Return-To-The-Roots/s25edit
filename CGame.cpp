@@ -158,6 +158,13 @@ void CGame::delMapObj()
     MapObj.reset();
 }
 
+void CGame::enterEditor(const boost::filesystem::path& filepath)
+{
+    for(auto& menu : Menus)
+        menu->setWaste();
+    setMapObj(std::make_unique<CMap>(filepath));
+}
+
 void CGame::LoadSettings()
 {
     const bfs::path settingsPath = RTTRCONFIG.ExpandPath("<RTTR_USERDATA>/s25edit.ini");

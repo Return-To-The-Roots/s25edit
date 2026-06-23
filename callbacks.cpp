@@ -133,6 +133,7 @@ void callback::mainmenu(int Param)
     {
         ENDGAME = 1,
         STARTEDITOR,
+        LOADMAP,
         OPTIONS
     };
 
@@ -141,10 +142,11 @@ void callback::mainmenu(int Param)
         case INITIALIZING_CALL:
             MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU));
             MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Quit program");
-#ifdef _ADMINMODE
-            MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 200, 200, 20, BUTTON_GREY, "Submenu_1");
-#endif
             MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Start editor");
+            MainMenu->addButton(mainmenu, LOADMAP, 50, 200, 200, 20, BUTTON_GREEN2, "Load map");
+#ifdef _ADMINMODE
+            MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 240, 200, 20, BUTTON_GREY, "Submenu_1");
+#endif
             MainMenu->addButton(mainmenu, OPTIONS, 50, 370, 200, 20, BUTTON_GREEN2, "Options");
             break;
 
@@ -157,14 +159,9 @@ void callback::mainmenu(int Param)
             global::s2->Running = false;
             break;
 
-        case STARTEDITOR:
-            assert(MainMenu);
-            PleaseWait(INITIALIZING_CALL);
-            global::s2->setMapObj(std::make_unique<CMap>(""));
-            MainMenu->setWaste();
-            MainMenu = nullptr;
-            PleaseWait(WINDOW_QUIT_MESSAGE);
-            break;
+        case STARTEDITOR: global::s2->enterEditor(""); break;
+
+        case LOADMAP: EditorLoadMenu(INITIALIZING_CALL); break;
 
         case OPTIONS:
             assert(MainMenu);
@@ -749,7 +746,6 @@ void callback::EditorMainMenu(int Param)
 void callback::EditorLoadMenu(int Param)
 {
     static CWindow* WNDLoad = nullptr;
-    static CMap* MapObj = nullptr;
     static std::string curFilename;
 
     enum
@@ -766,8 +762,6 @@ void callback::EditorLoadMenu(int Param)
                 break;
             WNDLoad = global::s2->RegisterWindow(std::make_unique<CWindow>(
               EditorLoadMenu, WINDOWQUIT, WindowPos::Center, Extent(280, 320), "Load", WINDOW_GREEN1, WINDOW_CLOSE));
-            MapObj = global::s2->getMapObj();
-
             auto* CB_Filename = WNDLoad->addSelectBox(Point16(10, 5), Extent16(160, 280), FontSize::Medium);
             curFilename.clear();
             for(const auto& itFile : bfs::directory_iterator(global::userMapsPath))
@@ -807,7 +801,6 @@ void callback::EditorLoadMenu(int Param)
             EditorAnimalMenu(MAP_QUIT);
             EditorPlayerMenu(MAP_QUIT);
 
-            MapObj->destructMap();
             bfs::path filepath = global::userMapsPath / curFilename;
             if(!filepath.has_extension())
                 filepath.replace_extension("SWD");
@@ -815,7 +808,8 @@ void callback::EditorLoadMenu(int Param)
                 filepath.replace_extension("WLD");
             if(!bfs::exists(filepath))
                 filepath.replace_extension("SWD");
-            MapObj->constructMap(filepath);
+
+            global::s2->enterEditor(filepath);
 
             // we need to check which of these windows was active before
             /*
