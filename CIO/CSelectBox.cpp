@@ -205,12 +205,10 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 
 bool CSelectBox::render()
 {
-    // position in the Surface 'Surf_Button'
-    unsigned pos_x = 0;
-    unsigned pos_y = 0;
+    // position in the Surface 'Surf_SelectBox'
+    Position pos{0, 0};
     // width and height of the button color source picture
-    unsigned pic_w = 0;
-    unsigned pic_h = 0;
+    Extent pic{0, 0};
 
     // if we don't need to render, all is up to date, return true
     if(!needRender)
@@ -231,46 +229,44 @@ bool CSelectBox::render()
 
         // at first completly fill the background (not the fastest way, but simplier)
         if(size_.x <= global::bmpArray[pic].w)
-            pic_w = size_.x;
+            pic.x = size_.x;
         else
-            pic_w = global::bmpArray[pic].w;
+            pic.x = global::bmpArray[pic].w;
 
         if(size_.y <= global::bmpArray[pic].h)
-            pic_h = size_.y;
+            pic.y = size_.y;
         else
-            pic_h = global::bmpArray[pic].h;
+            pic.y = global::bmpArray[pic].h;
 
-        while(pos_x + pic_w <= static_cast<unsigned>(Surf_SelectBox->w))
+        while(pos.x + pic.x <= static_cast<unsigned>(Surf_SelectBox->w))
         {
-            while(pos_y + pic_h <= static_cast<unsigned>(Surf_SelectBox->h))
+            while(pos.y + pic.y <= static_cast<unsigned>(Surf_SelectBox->h))
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface,
-                               Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
-                               Extent(pic_w, pic_h));
-                pos_y += pic_h;
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos, Position(0, 0), pic);
+                pos.y += pic.y;
             }
 
-            if(pos_y < static_cast<unsigned>(Surf_SelectBox->h))
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, static_cast<int>(pos_x),
-                               static_cast<int>(pos_y), 0, 0, pic_w, static_cast<unsigned>(Surf_SelectBox->h - pos_y));
+            if(pos.y < Surf_SelectBox->h)
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0, pic.x,
+                               static_cast<unsigned>(Surf_SelectBox->h - pos.y));
 
-            pos_y = 0;
-            pos_x += pic_w;
+            pos.y = 0;
+            pos.x += pic.x;
         }
 
-        if(pos_x < static_cast<unsigned>(Surf_SelectBox->w))
+        if(pos.x < Surf_SelectBox->w)
         {
-            while(pos_y + pic_h <= static_cast<unsigned>(Surf_SelectBox->h))
+            while(pos.y + pic.y <= static_cast<unsigned>(Surf_SelectBox->h))
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, static_cast<int>(pos_x),
-                               static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_SelectBox->w - pos_x), pic_h);
-                pos_y += pic_h;
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0,
+                               static_cast<unsigned>(Surf_SelectBox->w - pos.x), pic.y);
+                pos.y += pic.y;
             }
 
-            if(pos_y < static_cast<unsigned>(Surf_SelectBox->h))
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, static_cast<int>(pos_x),
-                               static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_SelectBox->w - pos_x),
-                               static_cast<unsigned>(Surf_SelectBox->h - pos_y));
+            if(pos.y < Surf_SelectBox->h)
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0,
+                               static_cast<unsigned>(Surf_SelectBox->w - pos.x),
+                               static_cast<unsigned>(Surf_SelectBox->h - pos.y));
         }
     } else
         SDL_FillRect(Surf_SelectBox.get(), nullptr, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));

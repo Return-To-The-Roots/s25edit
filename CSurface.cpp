@@ -121,7 +121,7 @@ bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, i
     return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, angle);
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Extent srcOffset, Extent srcSize)
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Position srcOffset, Extent srcSize)
 {
     if(!Surf_Dest || !Surf_Src)
         return false;
@@ -133,8 +133,8 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest
 
     SDL_Rect SrcR;
 
-    SrcR.x = static_cast<int>(srcOffset.x);
-    SrcR.y = static_cast<int>(srcOffset.y);
+    SrcR.x = srcOffset.x;
+    SrcR.y = srcOffset.y;
     SrcR.w = static_cast<int>(srcSize.x);
     SrcR.h = static_cast<int>(srcSize.y);
 
@@ -143,7 +143,7 @@ bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest
     return true;
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Extent srcOffset, Extent srcSize)
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize)
 {
     return Draw(Surf_Dest, Surf_Src.get(), dest, srcOffset, srcSize);
 }

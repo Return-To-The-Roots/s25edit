@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include "Point.h"
 #include "SdlSurface.h"
-#include "defines.h"
 
 class CPicture
 {

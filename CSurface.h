@@ -25,16 +25,16 @@ public:
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle);
     static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle);
     // blits rectangle from source on destination
-    static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Extent srcOffset, Extent srcSize);
-    static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Extent srcOffset, Extent srcSize);
-    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, Position dest, Extent srcOffset, Extent srcSize)
+    static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Position srcOffset, Extent srcSize);
+    static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize);
+    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize)
     {
         return Draw(Surf_Dest.get(), Surf_Src.get(), dest, srcOffset, srcSize);
     }
     // convenience overload for non-UI callers
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
     {
-        return Draw(Surf_Dest, Surf_Src, Position(X, Y), Extent(static_cast<unsigned>(X2), static_cast<unsigned>(Y2)),
+        return Draw(Surf_Dest, Surf_Src, Position(X, Y), Position(X2, Y2),
                     Extent(static_cast<unsigned>(W), static_cast<unsigned>(H)));
     }
     static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)

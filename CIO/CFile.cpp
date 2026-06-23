@@ -1006,8 +1006,8 @@ bool CFile::read_bob02(FILE* fp)
     starts = new Uint16[bmpArray->h];
 
     // read start addresses
-    for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
-        CHECK_READ(libendian::le_read_us(&starts[pos.y], fp));
+    for(int y = 0; y < bmpArray->h; y++)
+        CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, palActual->colors)) == nullptr)
@@ -1166,8 +1166,8 @@ bool CFile::read_bob04(FILE* fp, int player_color)
     starts = new Uint16[bmpArray->h];
 
     // read start addresses
-    for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
-        CHECK_READ(libendian::le_read_us(&starts[pos.y], fp));
+    for(int y = 0; y < bmpArray->h; y++)
+        CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, palActual->colors)) == nullptr)
@@ -1306,8 +1306,8 @@ bool CFile::read_bob07(FILE* fp)
     starts = new Uint16[shadowArray->h];
 
     // read start addresses
-    for(Position pos{0, 0}; pos.y < shadowArray->h; pos.y++)
-        CHECK_READ(libendian::le_read_us(&starts[pos.y], fp));
+    for(int y = 0; y < shadowArray->h; y++)
+        CHECK_READ(libendian::le_read_us(&starts[y], fp));
 
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((shadowArray->surface = makePalSurface(shadowArray->w, shadowArray->h, palActual->colors)) == nullptr)
