@@ -9,7 +9,7 @@
 #include "CFont.h"
 #include "CollisionDetection.h"
 
-CTextfield::CTextfield(Point16 pos, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color, int bg_color,
+CTextfield::CTextfield(Position pos, Uint16 cols, Uint16 rows, FontSize fontsize, FontColor text_color, int bg_color,
                        bool button_style)
 {
     active = false;
@@ -145,7 +145,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            active = IsPointInRect(Position(button.x, button.y), Rect(Position(getX(), getY()), Extent(size_)));
+            active = IsPointInRect(Position(button.x, button.y), Rect(Position(getX(), getY()), size_));
         }
     }
     needRender = true;
@@ -246,11 +246,11 @@ void CTextfield::setKeyboardData(const SDL_KeyboardEvent& key)
 bool CTextfield::render()
 {
     // position in the Surface 'Surf_Button'
-    Uint16 pos_x = 0;
-    Uint16 pos_y = 0;
+    unsigned pos_x = 0;
+    unsigned pos_y = 0;
     // width and height of the button color source picture
-    Uint16 pic_w = 0;
-    Uint16 pic_h = 0;
+    unsigned pic_w = 0;
+    unsigned pic_h = 0;
     // we save the time to let a chiffre blink
     static Uint32 currentTime;
     static Uint32 lastTime = SDL_GetTicks();
@@ -301,34 +301,37 @@ bool CTextfield::render()
         else
             pic_h = global::bmpArray[pic].h;
 
-        while(pos_x + pic_w <= Surf_Text->w)
+        while(pos_x + pic_w <= static_cast<unsigned>(Surf_Text->w))
         {
-            while(pos_y + pic_h <= Surf_Text->h)
+            while(pos_y + pic_h <= static_cast<unsigned>(Surf_Text->h))
             {
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface,
+                               Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                               Extent(pic_w, pic_h));
                 pos_y += pic_h;
             }
 
-            if(Surf_Text->h - pos_y > 0)
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w,
-                               Surf_Text->h - pos_y);
+            if(pos_y < static_cast<unsigned>(Surf_Text->h))
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, static_cast<int>(pos_x),
+                               static_cast<int>(pos_y), 0, 0, pic_w, static_cast<unsigned>(Surf_Text->h - pos_y));
 
             pos_y = 0;
             pos_x += pic_w;
         }
 
-        if(Surf_Text->w - pos_x > 0)
+        if(pos_x < static_cast<unsigned>(Surf_Text->w))
         {
-            while(pos_y + pic_h <= Surf_Text->h)
+            while(pos_y + pic_h <= static_cast<unsigned>(Surf_Text->h))
             {
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_Text->w - pos_x,
-                               pic_h);
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, static_cast<int>(pos_x),
+                               static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_Text->w - pos_x), pic_h);
                 pos_y += pic_h;
             }
 
-            if(Surf_Text->h - pos_y > 0)
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, Surf_Text->w - pos_x,
-                               Surf_Text->h - pos_y);
+            if(pos_y < static_cast<unsigned>(Surf_Text->h))
+                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, static_cast<int>(pos_x),
+                               static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_Text->w - pos_x),
+                               static_cast<unsigned>(Surf_Text->h - pos_y));
         }
 
         // if not button_style, we are finished, otherwise continue drawing
@@ -340,45 +343,45 @@ bool CTextfield::render()
                 // black frame is left and up
                 // draw vertical line
                 pos_x = 0;
-                for(int y = 0; y < size_.y; y++)
-                    CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
+                for(unsigned y = 0; y < size_.y; y++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(pos_x, y), 0, 0, 0);
 
                 // draw vertical line
                 pos_x = 1;
-                for(int y = 0; y < size_.y - 1; y++)
-                    CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
+                for(unsigned y = 0; y < size_.y - 1; y++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(pos_x, y), 0, 0, 0);
 
                 // draw horizontal line
                 pos_y = 0;
-                for(int x = 0; x < size_.x; x++)
-                    CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
+                for(unsigned x = 0; x < size_.x; x++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(x, pos_y), 0, 0, 0);
 
                 // draw horizontal line
                 pos_y = 1;
-                for(int x = 0; x < size_.x - 1; x++)
-                    CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
+                for(unsigned x = 0; x < size_.x - 1; x++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(x, pos_y), 0, 0, 0);
             } else
             {
                 // black frame is right and down
                 // draw vertical line
                 pos_x = size_.x - 1;
-                for(int y = 0; y < size_.y; y++)
-                    CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
+                for(unsigned y = 0; y < size_.y; y++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(pos_x, y), 0, 0, 0);
 
                 // draw vertical line
                 pos_x = size_.x - 2;
-                for(int y = 1; y < size_.y; y++)
-                    CSurface::DrawPixel_RGB(Surf_Text, pos_x, y, 0, 0, 0);
+                for(unsigned y = 1; y < size_.y; y++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(pos_x, y), 0, 0, 0);
 
                 // draw horizontal line
                 pos_y = size_.y - 1;
-                for(int x = 0; x < size_.x; x++)
-                    CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
+                for(unsigned x = 0; x < size_.x; x++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(x, pos_y), 0, 0, 0);
 
                 // draw horizontal line
                 pos_y = size_.y - 2;
-                for(int x = 1; x < size_.x; x++)
-                    CSurface::DrawPixel_RGB(Surf_Text, x, pos_y, 0, 0, 0);
+                for(unsigned x = 1; x < size_.x; x++)
+                    CSurface::DrawPixel_RGB(Surf_Text, Position(x, pos_y), 0, 0, 0);
             }
 
             // draw the foreground --> at first the color (marked or unmarked) and then the picture or text
@@ -397,35 +400,38 @@ bool CTextfield::render()
             pos_y = 2;
 
             // '-2' follows a few times, this means: beware overdrawing the right and lower frame
-            while(pos_x + pic_w <= Surf_Text->w - 2)
+            while(pos_x + pic_w <= static_cast<unsigned>(Surf_Text->w - 2))
             {
-                while(pos_y + pic_h <= Surf_Text->h - 2)
+                while(pos_y + pic_h <= static_cast<unsigned>(Surf_Text->h - 2))
                 {
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0, pic_w,
-                                   pic_h);
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, static_cast<int>(pos_x),
+                                   static_cast<int>(pos_y), 0, 0, pic_w, pic_h);
                     pos_y += pic_h;
                 }
 
-                if(Surf_Text->h - 2 - pos_y > 0)
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0, pic_w,
-                                   Surf_Text->h - 2 - pos_y);
+                if(pos_y + 2 < static_cast<unsigned>(Surf_Text->h))
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, static_cast<int>(pos_x),
+                                   static_cast<int>(pos_y), 0, 0, pic_w,
+                                   static_cast<unsigned>(Surf_Text->h - 2 - pos_y));
 
                 pos_y = 2;
                 pos_x += pic_w;
             }
 
-            if(Surf_Text->w - 2 - pos_x > 0)
+            if(pos_x + 2 < static_cast<unsigned>(Surf_Text->w))
             {
-                while(pos_y + pic_h <= Surf_Text->h - 2)
+                while(pos_y + pic_h <= static_cast<unsigned>(Surf_Text->h - 2))
                 {
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0,
-                                   Surf_Text->w - 2 - pos_x, pic_h);
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, static_cast<int>(pos_x),
+                                   static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_Text->w - 2 - pos_x),
+                                   pic_h);
                     pos_y += pic_h;
                 }
 
-                if(Surf_Text->h - 2 - pos_y > 0)
-                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, pos_x, pos_y, 0, 0,
-                                   Surf_Text->w - 2 - pos_x, Surf_Text->h - 2 - pos_y);
+                if(pos_y + 2 < static_cast<unsigned>(Surf_Text->h))
+                    CSurface::Draw(Surf_Text, global::bmpArray[pic_foreground].surface, static_cast<int>(pos_x),
+                                   static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_Text->w - 2 - pos_x),
+                                   static_cast<unsigned>(Surf_Text->h - 2 - pos_y));
             }
         }
     } else

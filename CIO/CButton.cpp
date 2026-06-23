@@ -9,7 +9,7 @@
 #include "CFont.h"
 #include "CollisionDetection.h"
 
-CButton::CButton(void callback(int), int clickedParam, Point16 pos, Extent16 size, int color, const char* text,
+CButton::CButton(void callback(int), int clickedParam, Position pos, Extent size, int color, const char* text,
                  int button_picture)
     : pos_(pos), size_(size)
 {
@@ -91,7 +91,7 @@ void CButton::setColor(int color)
 void CButton::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the button (and mouse button not pressed while moving on the button)
-    if(IsPointInRect(Position(motion.x, motion.y), Rect(Position(pos_), Extent(size_))))
+    if(IsPointInRect(Position(motion.x, motion.y), Rect(pos_, size_)))
     {
         if(motion.state == SDL_RELEASED)
         {
@@ -115,8 +115,7 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if((button.state == SDL_PRESSED)
-           && IsPointInRect(Position(button.x, button.y), Rect(Position(pos_), Extent(size_))))
+        if((button.state == SDL_PRESSED) && IsPointInRect(Position(button.x, button.y), Rect(pos_, size_)))
         {
             marked = true;
             clicked = true;
@@ -134,11 +133,11 @@ void CButton::setMouseData(const SDL_MouseButtonEvent& button)
 bool CButton::render()
 {
     // position in the Surface 'Surf_Button'
-    Uint16 pos_x = 0;
-    Uint16 pos_y = 0;
+    unsigned pos_x = 0;
+    unsigned pos_y = 0;
     // width and height of the button color source picture
-    Uint16 pic_w = 0;
-    Uint16 pic_h = 0;
+    unsigned pic_w = 0;
+    unsigned pic_h = 0;
     // foreground of the button --> marked or unmarked, NOT the picture
     int foreground;
 
@@ -164,34 +163,40 @@ bool CButton::render()
     else
         pic_h = global::bmpArray[pic_background].h;
 
-    while(pos_x + pic_w <= Surf_Button->w)
+    while(pos_x + pic_w <= static_cast<unsigned>(Surf_Button->w))
     {
-        while(pos_y + pic_h <= Surf_Button->h)
+        while(pos_y + pic_h <= static_cast<unsigned>(Surf_Button->h))
         {
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
+            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(pic_w, pic_h));
             pos_y += pic_h;
         }
 
-        if(Surf_Button->h - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0, pic_w,
-                           Surf_Button->h - pos_y);
+        if(pos_y < static_cast<unsigned>(Surf_Button->h))
+            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(pic_w, static_cast<unsigned>(Surf_Button->h - pos_y)));
 
         pos_y = 0;
         pos_x += pic_w;
     }
 
-    if(Surf_Button->w - pos_x > 0)
+    if(pos_x < static_cast<unsigned>(Surf_Button->w))
     {
-        while(pos_y + pic_h <= Surf_Button->h)
+        while(pos_y + pic_h <= static_cast<unsigned>(Surf_Button->h))
         {
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0,
-                           Surf_Button->w - pos_x, pic_h);
+            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(static_cast<unsigned>(Surf_Button->w - pos_x), pic_h));
             pos_y += pic_h;
         }
 
-        if(Surf_Button->h - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[pic_background].surface, pos_x, pos_y, 0, 0,
-                           Surf_Button->w - pos_x, Surf_Button->h - pos_y);
+        if(pos_y < static_cast<unsigned>(Surf_Button->h))
+            CSurface::Draw(
+              Surf_Button, global::bmpArray[pic_background].surface,
+              Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+              Extent(static_cast<unsigned>(Surf_Button->w - pos_x), static_cast<unsigned>(Surf_Button->h - pos_y)));
     }
 
     // draw partial black frame
@@ -200,45 +205,45 @@ bool CButton::render()
         // black frame is left and up
         // draw vertical line
         pos_x = 0;
-        for(int y = 0; y < size_.y; y++)
-            CSurface::DrawPixel_RGB(Surf_Button, pos_x, y, 0, 0, 0);
+        for(unsigned y = 0; y < size_.y; y++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(pos_x, y), 0, 0, 0);
 
         // draw vertical line
         pos_x = 1;
-        for(int y = 0; y < size_.y - 1; y++)
-            CSurface::DrawPixel_RGB(Surf_Button, pos_x, y, 0, 0, 0);
+        for(unsigned y = 0; y < size_.y - 1; y++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(pos_x, y), 0, 0, 0);
 
         // draw horizontal line
         pos_y = 0;
-        for(int x = 0; x < size_.x; x++)
-            CSurface::DrawPixel_RGB(Surf_Button, x, pos_y, 0, 0, 0);
+        for(unsigned x = 0; x < size_.x; x++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(x, pos_y), 0, 0, 0);
 
         // draw horizontal line
         pos_y = 1;
-        for(int x = 0; x < size_.x - 1; x++)
-            CSurface::DrawPixel_RGB(Surf_Button, x, pos_y, 0, 0, 0);
+        for(unsigned x = 0; x < size_.x - 1; x++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(x, pos_y), 0, 0, 0);
     } else
     {
         // black frame is right and down
         // draw vertical line
         pos_x = size_.x - 1;
-        for(int y = 0; y < size_.y; y++)
-            CSurface::DrawPixel_RGB(Surf_Button, pos_x, y, 0, 0, 0);
+        for(unsigned y = 0; y < size_.y; y++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(pos_x, y), 0, 0, 0);
 
         // draw vertical line
         pos_x = size_.x - 2;
-        for(int y = 1; y < size_.y; y++)
-            CSurface::DrawPixel_RGB(Surf_Button, pos_x, y, 0, 0, 0);
+        for(unsigned y = 1; y < size_.y; y++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(pos_x, y), 0, 0, 0);
 
         // draw horizontal line
         pos_y = size_.y - 1;
-        for(int x = 0; x < size_.x; x++)
-            CSurface::DrawPixel_RGB(Surf_Button, x, pos_y, 0, 0, 0);
+        for(unsigned x = 0; x < size_.x; x++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(x, pos_y), 0, 0, 0);
 
         // draw horizontal line
         pos_y = size_.y - 2;
-        for(int x = 1; x < size_.x; x++)
-            CSurface::DrawPixel_RGB(Surf_Button, x, pos_y, 0, 0, 0);
+        for(unsigned x = 1; x < size_.x; x++)
+            CSurface::DrawPixel_RGB(Surf_Button, Position(x, pos_y), 0, 0, 0);
     }
 
     // draw the foreground --> at first the color (marked or unmarked) and then the picture or text
@@ -263,41 +268,47 @@ bool CButton::render()
         foreground = pic_normal;
 
     // '-2' follows a few times, this means: beware overdrawing the right and lower frame
-    while(pos_x + pic_w <= Surf_Button->w - 2)
+    while(pos_x + pic_w <= static_cast<unsigned>(Surf_Button->w - 2))
     {
-        while(pos_y + pic_h <= Surf_Button->h - 2)
+        while(pos_y + pic_h <= static_cast<unsigned>(Surf_Button->h - 2))
         {
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(pic_w, pic_h));
             pos_y += pic_h;
         }
 
-        if(Surf_Button->h - 2 - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0, pic_w,
-                           Surf_Button->h - 2 - pos_y);
+        if(pos_y + 2 < static_cast<unsigned>(Surf_Button->h))
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(pic_w, static_cast<unsigned>(Surf_Button->h - pos_y)));
 
         pos_y = 2;
         pos_x += pic_w;
     }
 
-    if(Surf_Button->w - 2 - pos_x > 0)
+    if(pos_x + 2 < static_cast<unsigned>(Surf_Button->w))
     {
-        while(pos_y + pic_h <= Surf_Button->h - 2)
+        while(pos_y + pic_h <= static_cast<unsigned>(Surf_Button->h - 2))
         {
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0,
-                           Surf_Button->w - 2 - pos_x, pic_h);
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(static_cast<unsigned>(Surf_Button->w - 2 - pos_x), pic_h));
             pos_y += pic_h;
         }
 
-        if(Surf_Button->h - 2 - pos_y > 0)
-            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface, pos_x, pos_y, 0, 0,
-                           Surf_Button->w - 2 - pos_x, Surf_Button->h - 2 - pos_y);
+        if(pos_y + 2 < static_cast<unsigned>(Surf_Button->h))
+            CSurface::Draw(Surf_Button, global::bmpArray[foreground].surface,
+                           Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                           Extent(static_cast<unsigned>(Surf_Button->w - 2 - pos_x),
+                                  static_cast<unsigned>(Surf_Button->h - 2 - pos_y)));
     }
 
     // positioning the picture or write text
     if(button_picture >= 0)
     {
         // picture may not be bigger than the button
-        if(global::bmpArray[button_picture].w <= Surf_Button->w && global::bmpArray[button_picture].h <= Surf_Button->h)
+        if(size_.x <= static_cast<unsigned>(Surf_Button->w) && size_.y <= static_cast<unsigned>(Surf_Button->h))
         {
             // get coordinates of the left upper corner where to positionate the picture
             Position leftup = Position(Surf_Button->w, Surf_Button->h) / 2
@@ -310,8 +321,9 @@ bool CButton::render()
             button_text = "PIC";
         }
     } else if(button_text)
-        CFont::writeText(Surf_Button, button_text, Position(size_.x / 2, (size_.y - 11) / 2), FontSize::Medium,
-                         button_text_color, FontAlign::Middle);
+        CFont::writeText(Surf_Button, button_text,
+                         Position(static_cast<int>(size_.x / 2), static_cast<int>((size_.y - 11) / 2)),
+                         FontSize::Medium, button_text_color, FontAlign::Middle);
 
     return true;
 }

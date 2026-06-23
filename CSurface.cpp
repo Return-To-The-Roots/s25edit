@@ -121,39 +121,39 @@ bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, i
     return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, angle);
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Extent srcOffset, Extent srcSize)
 {
     if(!Surf_Dest || !Surf_Src)
         return false;
 
     SDL_Rect DestR;
 
-    DestR.x = X;
-    DestR.y = Y;
+    DestR.x = dest.x;
+    DestR.y = dest.y;
 
     SDL_Rect SrcR;
 
-    SrcR.x = X2;
-    SrcR.y = Y2;
-    SrcR.w = W;
-    SrcR.h = H;
+    SrcR.x = static_cast<int>(srcOffset.x);
+    SrcR.y = static_cast<int>(srcOffset.y);
+    SrcR.w = static_cast<int>(srcSize.x);
+    SrcR.h = static_cast<int>(srcSize.y);
 
     SDL_BlitSurface(Surf_Src, &SrcR, Surf_Dest, &DestR);
 
     return true;
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Extent srcOffset, Extent srcSize)
 {
-    return Draw(Surf_Dest, Surf_Src.get(), X, Y, X2, Y2, W, H);
+    return Draw(Surf_Dest, Surf_Src.get(), dest, srcOffset, srcSize);
 }
 
 // this is the example function from the SDL-documentation to draw pixels
-void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
+void CSurface::DrawPixel_Color(SDL_Surface* screen, Position pos, Uint32 color)
 {
     int bpp = screen->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
-    Uint8* p = (Uint8*)screen->pixels + y * screen->pitch + x * bpp;
+    Uint8* p = (Uint8*)screen->pixels + static_cast<int>(pos.y) * screen->pitch + static_cast<int>(pos.x) * bpp;
 
     if(SDL_MUSTLOCK(screen))
         SDL_LockSurface(screen);
@@ -186,21 +186,21 @@ void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
 }
 
 // this is the example function from the sdl-documentation to draw pixels
-void CSurface::DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
+void CSurface::DrawPixel_RGB(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B)
 {
-    DrawPixel_Color(screen, x, y, SDL_MapRGB(screen->format, R, G, B));
+    DrawPixel_Color(screen, pos, SDL_MapRGB(screen->format, R, G, B));
 }
 
-void CSurface::DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
+void CSurface::DrawPixel_RGBA(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
 {
-    DrawPixel_Color(screen, x, y, SDL_MapRGBA(screen->format, R, G, B, A));
+    DrawPixel_Color(screen, pos, SDL_MapRGBA(screen->format, R, G, B, A));
 }
 
-Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
+Uint32 CSurface::GetPixel(SDL_Surface* surface, Position pos)
 {
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
-    Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
+    Uint8* p = (Uint8*)surface->pixels + static_cast<int>(pos.y) * surface->pitch + static_cast<int>(pos.x) * bpp;
     switch(bpp)
     {
         case 1: return *p;

@@ -21,8 +21,8 @@ class CSelectBox
 private:
     SdlSurface Surf_SelectBox;
     std::vector<std::unique_ptr<CFont>> Entries;
-    Point16 pos_;
-    Extent16 size_;
+    Position pos_;
+    Extent size_;
     FontSize fontsize;
     int pic_background;
     int pic_foreground;
@@ -35,10 +35,10 @@ private:
     bool needRender = true;
 
 public:
-    CSelectBox(Point16 pos, Extent16 size, FontSize fontsize = FontSize::Large,
-               FontColor text_color = FontColor::Yellow, int bg_color = -1);
-    const Point16& getPos() const { return pos_; }
-    const Extent16& getSize() const { return size_; }
+    CSelectBox(Position pos, Extent size, FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
+               int bg_color = -1);
+    const Position& getPos() const { return pos_; }
+    const Extent& getSize() const { return size_; }
     bool hasRendered();
     void setMouseData(SDL_MouseButtonEvent button);
     void setMouseData(SDL_MouseMotionEvent motion);

@@ -17,8 +17,8 @@ class CFont
 
 private:
     SdlSurface Surf_Font;
-    Sint16 x_;
-    Sint16 y_;
+    int x_;
+    int y_;
     Uint16 w;
     Uint16 h;
     std::string string_;
@@ -30,7 +30,7 @@ private:
     void writeText();
 
 public:
-    CFont(std::string text, Point16 pos = {0, 0}, FontSize fontsize = FontSize::Small,
+    CFont(std::string text, Position pos = {0, 0}, FontSize fontsize = FontSize::Small,
           FontColor color = FontColor::Yellow);
     // Access
     int getX() const { return x_; };

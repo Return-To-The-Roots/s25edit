@@ -9,16 +9,17 @@
 #include "CButton.h"
 #include "CFont.h"
 
-CSelectBox::CSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor text_color, int bg_color)
+CSelectBox::CSelectBox(Position pos, Extent size, FontSize fontsize, FontColor text_color, int bg_color)
     : pos_(pos), size_(size), fontsize(fontsize), text_color(text_color)
 {
     setColor(bg_color);
 
     // button position is relative to the selectbox
-    ScrollUpButton = std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, 0), Extent16(20, 20), BUTTON_GREY,
-                                               nullptr, PICTURE_SMALL_ARROW_UP);
-    ScrollDownButton = std::make_unique<CButton>(nullptr, 0, Point16(size_.x - 1 - 20, size_.y - 1 - 20),
-                                                 Extent16(20, 20), BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
+    ScrollUpButton = std::make_unique<CButton>(nullptr, 0, Position(static_cast<int>(size_.x) - 1 - 20, 0),
+                                               Extent(20, 20), BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_UP);
+    ScrollDownButton = std::make_unique<CButton>(
+      nullptr, 0, Position(static_cast<int>(size_.x) - 1 - 20, static_cast<int>(size_.y) - 1 - 20), Extent(20, 20),
+      BUTTON_GREY, nullptr, PICTURE_SMALL_ARROW_DOWN);
 }
 
 void CSelectBox::addOption(const std::string& string, std::function<void(int)> callback, int param)
@@ -26,7 +27,7 @@ void CSelectBox::addOption(const std::string& string, std::function<void(int)> c
     // explanation: row_height = row_separator + fontsize
     const unsigned row_height = getLineHeight(fontsize);
 
-    auto Entry = std::make_unique<CFont>(string, Point16(10, last_text_pos_y), fontsize, FontColor::Yellow);
+    auto Entry = std::make_unique<CFont>(string, Position(10, last_text_pos_y), fontsize, FontColor::Yellow);
     Entry->setCallback(std::move(callback), param);
     Entries.emplace_back(std::move(Entry));
     last_text_pos_y += row_height;
@@ -108,16 +109,17 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the selectbox
         if(button.state == SDL_PRESSED)
         {
-            if((button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y)
-               && (button.y < pos_.y + size_.y))
+            if((button.x >= pos_.x) && (button.x < pos_.x + static_cast<int>(size_.x)) && (button.y >= pos_.y)
+               && (button.y < pos_.y + static_cast<int>(size_.y)))
             {
                 // scroll up button
-                if((button.x > pos_.x + size_.x - 20) && (button.y < pos_.y + 20))
+                if((button.x > pos_.x + static_cast<int>(size_.x) - 20) && (button.y < pos_.y + 20))
                 {
                     scroll_up_button_marked = true;
                 }
                 // scroll down button
-                else if((button.x > pos_.x + size_.x - 20) && (button.y > pos_.y + size_.y - 20))
+                else if((button.x > pos_.x + static_cast<int>(size_.x) - 20)
+                        && (button.y > pos_.y + static_cast<int>(size_.y) - 20))
                 {
                     scroll_down_button_marked = true;
                 }
@@ -136,13 +138,13 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
             }
         } else if(button.state == SDL_RELEASED)
         {
-            if((button.x >= pos_.x) && (button.x < pos_.x + size_.x) && (button.y >= pos_.y)
-               && (button.y < pos_.y + size_.y))
+            if((button.x >= pos_.x) && (button.x < pos_.x + static_cast<int>(size_.x)) && (button.y >= pos_.y)
+               && (button.y < pos_.y + static_cast<int>(size_.y)))
             {
                 // scroll up button
                 if(scroll_up_button_marked)
                 {
-                    if((button.x > pos_.x + size_.x - 20) && (button.y < pos_.y + 20))
+                    if((button.x > pos_.x + static_cast<int>(size_.x) - 20) && (button.y < pos_.y + 20))
                     {
                         // test if first entry is on the most upper position
                         if(!Entries.empty() && Entries.front()->getY() < 10)
@@ -157,10 +159,11 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                 // scroll down button
                 else if(scroll_down_button_marked)
                 {
-                    if((button.x > pos_.x + size_.x - 20) && (button.y > pos_.y + size_.y - 20))
+                    if((button.x > pos_.x + static_cast<int>(size_.x) - 20)
+                       && (button.y > pos_.y + static_cast<int>(size_.y) - 20))
                     {
                         // test if last entry is on the most lower position
-                        if(!Entries.empty() && Entries.back()->getY() > size_.y - 10)
+                        if(!Entries.empty() && Entries.back()->getY() > static_cast<int>(size_.y) - 10)
                         {
                             for(auto& entry : Entries)
                             {
@@ -203,11 +206,11 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
 bool CSelectBox::render()
 {
     // position in the Surface 'Surf_Button'
-    Uint16 pos_x = 0;
-    Uint16 pos_y = 0;
+    unsigned pos_x = 0;
+    unsigned pos_y = 0;
     // width and height of the button color source picture
-    Uint16 pic_w = 0;
-    Uint16 pic_h = 0;
+    unsigned pic_w = 0;
+    unsigned pic_h = 0;
 
     // if we don't need to render, all is up to date, return true
     if(!needRender)
@@ -237,34 +240,37 @@ bool CSelectBox::render()
         else
             pic_h = global::bmpArray[pic].h;
 
-        while(pos_x + pic_w <= Surf_SelectBox->w)
+        while(pos_x + pic_w <= static_cast<unsigned>(Surf_SelectBox->w))
         {
-            while(pos_y + pic_h <= Surf_SelectBox->h)
+            while(pos_y + pic_h <= static_cast<unsigned>(Surf_SelectBox->h))
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w, pic_h);
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface,
+                               Position(static_cast<int>(pos_x), static_cast<int>(pos_y)), Extent(0, 0),
+                               Extent(pic_w, pic_h));
                 pos_y += pic_h;
             }
 
-            if(Surf_SelectBox->h - pos_y > 0)
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0, pic_w,
-                               Surf_SelectBox->h - pos_y);
+            if(pos_y < static_cast<unsigned>(Surf_SelectBox->h))
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, static_cast<int>(pos_x),
+                               static_cast<int>(pos_y), 0, 0, pic_w, static_cast<unsigned>(Surf_SelectBox->h - pos_y));
 
             pos_y = 0;
             pos_x += pic_w;
         }
 
-        if(Surf_SelectBox->w - pos_x > 0)
+        if(pos_x < static_cast<unsigned>(Surf_SelectBox->w))
         {
-            while(pos_y + pic_h <= Surf_SelectBox->h)
+            while(pos_y + pic_h <= static_cast<unsigned>(Surf_SelectBox->h))
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0,
-                               Surf_SelectBox->w - pos_x, pic_h);
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, static_cast<int>(pos_x),
+                               static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_SelectBox->w - pos_x), pic_h);
                 pos_y += pic_h;
             }
 
-            if(Surf_SelectBox->h - pos_y > 0)
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos_x, pos_y, 0, 0,
-                               Surf_SelectBox->w - pos_x, Surf_SelectBox->h - pos_y);
+            if(pos_y < static_cast<unsigned>(Surf_SelectBox->h))
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, static_cast<int>(pos_x),
+                               static_cast<int>(pos_y), 0, 0, static_cast<unsigned>(Surf_SelectBox->w - pos_x),
+                               static_cast<unsigned>(Surf_SelectBox->h - pos_y));
         }
     } else
         SDL_FillRect(Surf_SelectBox.get(), nullptr, SDL_MapRGB(Surf_SelectBox->format, 0, 0, 0));
@@ -274,8 +280,9 @@ bool CSelectBox::render()
         CSurface::Draw(Surf_SelectBox, entry->getSurface(), entry->getX(), entry->getY());
     }
 
-    CSurface::Draw(Surf_SelectBox, ScrollUpButton->getSurface(), size_.x - 1 - 20, 0);
-    CSurface::Draw(Surf_SelectBox, ScrollDownButton->getSurface(), size_.x - 1 - 20, size_.y - 1 - 20);
+    CSurface::Draw(Surf_SelectBox, ScrollUpButton->getSurface(), static_cast<int>(size_.x) - 1 - 20, 0);
+    CSurface::Draw(Surf_SelectBox, ScrollDownButton->getSurface(), static_cast<int>(size_.x) - 1 - 20,
+                   static_cast<int>(size_.y) - 1 - 20);
 
     rendered = true;
 

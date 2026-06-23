@@ -14,9 +14,9 @@
 #include "helpers/containerUtils.h"
 
 CControlContainer::CControlContainer(int pic_background)
-    : CControlContainer(pic_background, Extent16::all(0), Extent16::all(0))
+    : CControlContainer(pic_background, Extent::all(0), Extent::all(0))
 {}
-CControlContainer::CControlContainer(int pic_background, Extent16 borderBeginSize, Extent16 borderEndSize)
+CControlContainer::CControlContainer(int pic_background, Extent borderBeginSize, Extent borderEndSize)
     : borderBeginSize(borderBeginSize), borderEndSize(borderEndSize), pic_background(pic_background)
 {}
 
@@ -87,7 +87,7 @@ bool CControlContainer::eraseElement(T& collection, const U* element)
     return false;
 }
 
-CButton* CControlContainer::addButton(void callback(int), int clickedParam, Point16 pos, Extent16 size, int color,
+CButton* CControlContainer::addButton(void callback(int), int clickedParam, Position pos, Extent size, int color,
                                       const char* text, int picture)
 {
     pos = pos + borderBeginSize;
@@ -102,7 +102,7 @@ bool CControlContainer::delButton(CButton* ButtonToDelete)
     return eraseElement(buttons, ButtonToDelete);
 }
 
-CFont* CControlContainer::addText(std::string string, Point16 pos, FontSize fontsize, FontColor color)
+CFont* CControlContainer::addText(std::string string, Position pos, FontSize fontsize, FontColor color)
 {
     pos = pos + borderBeginSize;
 
@@ -116,7 +116,7 @@ bool CControlContainer::delText(CFont* TextToDelete)
     return eraseElement(texts, TextToDelete);
 }
 
-CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Point16 pos, int picture)
+CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Position pos, int picture)
 {
     pos = pos + borderBeginSize;
 
@@ -130,14 +130,14 @@ bool CControlContainer::delPicture(CPicture* PictureToDelete)
     return eraseElement(pictures, PictureToDelete);
 }
 
-int CControlContainer::addStaticPicture(Point16 pos, int picture)
+int CControlContainer::addStaticPicture(Position pos, int picture)
 {
     if(picture < 0)
         return -1;
     pos = pos + borderBeginSize;
 
     unsigned id = static_pictures.empty() ? 0u : static_pictures.back().id + 1u;
-    static_pictures.emplace_back(Picture{Position(pos), picture, id});
+    static_pictures.emplace_back(Picture{pos, picture, id});
     needRender = true;
     return id;
 }
@@ -157,7 +157,7 @@ bool CControlContainer::delStaticPicture(int picId)
     return false;
 }
 
-CTextfield* CControlContainer::addTextfield(Point16 pos, Uint16 cols, Uint16 rows, FontSize fontsize,
+CTextfield* CControlContainer::addTextfield(Position pos, Uint16 cols, Uint16 rows, FontSize fontsize,
                                             FontColor text_color, int bg_color, bool button_style)
 {
     pos = pos + borderBeginSize;
@@ -173,10 +173,10 @@ bool CControlContainer::delTextfield(CTextfield* TextfieldToDelete)
     return eraseElement(textfields, TextfieldToDelete);
 }
 
-CSelectBox* CControlContainer::addSelectBox(Point16 pos, Extent16 size, FontSize fontsize, FontColor text_color,
+CSelectBox* CControlContainer::addSelectBox(Position pos, Extent size, FontSize fontsize, FontColor text_color,
                                             int bg_color)
 {
-    pos += Point16(borderBeginSize);
+    pos += Position(borderBeginSize);
 
     selectboxes.emplace_back(std::make_unique<CSelectBox>(pos, size, fontsize, text_color, bg_color));
     needRender = true;
@@ -197,7 +197,7 @@ void CControlContainer::renderElements()
     for(const auto& textfield : textfields)
         CSurface::Draw(surface, textfield->getSurface(), textfield->getX(), textfield->getY());
     for(const auto& selectbox : selectboxes)
-        CSurface::Draw(surface, selectbox->getSurface(), Position(selectbox->getPos()));
+        CSurface::Draw(surface, selectbox->getSurface(), selectbox->getPos());
     for(const auto& button : buttons)
         CSurface::Draw(surface, button->getSurface(), button->getX(), button->getY());
     for(const auto& static_picture : static_pictures)

@@ -31,13 +31,14 @@ using SdlWindow = std::unique_ptr<SDL_Window, SDLWindowDestroyer>;
 using SdlSurface = std::unique_ptr<SDL_Surface, SdlSurfaceDeleter>;
 using SdlTexture = std::unique_ptr<SDL_Texture, SdlTextureDeleter>;
 
-inline SdlSurface makeRGBSurface(int width, int height, bool withAlpha = false)
+inline SdlSurface makeRGBSurface(unsigned width, unsigned height, bool withAlpha = false)
 {
-    return SdlSurface(SDL_CreateRGBSurface(0, width, height, 32, 0xFF0000, 0xFF00, 0xFF, withAlpha ? 0xFF000000 : 0));
+    return SdlSurface(SDL_CreateRGBSurface(0, static_cast<int>(width), static_cast<int>(height), 32, 0xFF0000, 0xFF00,
+                                           0xFF, withAlpha ? 0xFF000000 : 0));
 }
-inline SdlSurface makePalSurface(int width, int height, const std::array<SDL_Color, 256>& palette)
+inline SdlSurface makePalSurface(unsigned width, unsigned height, const std::array<SDL_Color, 256>& palette)
 {
-    auto surf = SdlSurface(SDL_CreateRGBSurface(0, width, height, 8, 0, 0, 0, 0));
+    auto surf = SdlSurface(SDL_CreateRGBSurface(0, static_cast<int>(width), static_cast<int>(height), 8, 0, 0, 0, 0));
     if(surf)
         SDL_SetPaletteColors(surf->format->palette, palette.data(), 0, palette.size());
     return surf;
