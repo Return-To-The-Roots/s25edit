@@ -81,6 +81,9 @@ void CGame::Render()
         else if(MapObj->isVerticalMovementLocked())
             CFont::writeText(Surf_Display, "Vertical movement locked (F10 to unlock)", 20, 40, FontSize::Large,
                              FontColor::Orange);
+
+        // Draw elevation rate control panel (hover above elevation tool icon)
+        MapObj->drawElevationRateControl(Surf_Display.get());
     }
 
     // render active menus
