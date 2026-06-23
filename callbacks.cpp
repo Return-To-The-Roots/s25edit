@@ -161,10 +161,7 @@ void callback::mainmenu(int Param)
 
         case STARTEDITOR: global::s2->enterEditor(""); break;
 
-        case LOADMAP:
-            assert(MainMenu);
-            EditorLoadMenu(INITIALIZING_CALL);
-            break;
+        case LOADMAP: EditorLoadMenu(INITIALIZING_CALL); break;
 
         case OPTIONS:
             assert(MainMenu);
