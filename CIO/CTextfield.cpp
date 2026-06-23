@@ -282,33 +282,29 @@ bool CTextfield::render()
     if(pic_background >= 0 && pic_foreground >= 0)
     {
         // in case the textfield should look like a button, we do it, otherwise we use pic_foreground for the background
-        int pic;
-        if(button_style)
-            pic = pic_background;
-        else
-            pic = pic_foreground;
+        const int bmpIdx = button_style ? pic_background : pic_foreground;
 
         // at first completly fill the background (not the fastest way, but simplier)
-        if(size_.x <= global::bmpArray[pic].w)
+        if(size_.x <= global::bmpArray[bmpIdx].w)
             pic.x = size_.x;
         else
-            pic.x = global::bmpArray[pic].w;
+            pic.x = global::bmpArray[bmpIdx].w;
 
-        if(size_.y <= global::bmpArray[pic].h)
+        if(size_.y <= global::bmpArray[bmpIdx].h)
             pic.y = size_.y;
         else
-            pic.y = global::bmpArray[pic].h;
+            pic.y = global::bmpArray[bmpIdx].h;
 
         while(pos.x + pic.x <= static_cast<unsigned>(Surf_Text->w))
         {
             while(pos.y + pic.y <= static_cast<unsigned>(Surf_Text->h))
             {
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos, Position(0, 0), pic);
+                CSurface::Draw(Surf_Text, global::bmpArray[bmpIdx].surface, pos, Position(0, 0), pic);
                 pos.y += pic.y;
             }
 
             if(pos.y < Surf_Text->h)
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0, pic.x,
+                CSurface::Draw(Surf_Text, global::bmpArray[bmpIdx].surface, pos.x, pos.y, 0, 0, pic.x,
                                static_cast<unsigned>(Surf_Text->h - pos.y));
 
             pos.y = 0;
@@ -319,13 +315,13 @@ bool CTextfield::render()
         {
             while(pos.y + pic.y <= static_cast<unsigned>(Surf_Text->h))
             {
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0,
+                CSurface::Draw(Surf_Text, global::bmpArray[bmpIdx].surface, pos.x, pos.y, 0, 0,
                                static_cast<unsigned>(Surf_Text->w - pos.x), pic.y);
                 pos.y += pic.y;
             }
 
             if(pos.y < Surf_Text->h)
-                CSurface::Draw(Surf_Text, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0,
+                CSurface::Draw(Surf_Text, global::bmpArray[bmpIdx].surface, pos.x, pos.y, 0, 0,
                                static_cast<unsigned>(Surf_Text->w - pos.x),
                                static_cast<unsigned>(Surf_Text->h - pos.y));
         }

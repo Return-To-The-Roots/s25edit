@@ -224,30 +224,27 @@ bool CSelectBox::render()
     // draw the pictures for background and foreground or, if not set, fill with black color
     if(pic_background >= 0 && pic_foreground >= 0)
     {
-        int pic;
-        pic = pic_foreground;
-
         // at first completly fill the background (not the fastest way, but simplier)
-        if(size_.x <= global::bmpArray[pic].w)
+        if(size_.x <= global::bmpArray[pic_foreground].w)
             pic.x = size_.x;
         else
-            pic.x = global::bmpArray[pic].w;
+            pic.x = global::bmpArray[pic_foreground].w;
 
-        if(size_.y <= global::bmpArray[pic].h)
+        if(size_.y <= global::bmpArray[pic_foreground].h)
             pic.y = size_.y;
         else
-            pic.y = global::bmpArray[pic].h;
+            pic.y = global::bmpArray[pic_foreground].h;
 
         while(pos.x + pic.x <= static_cast<unsigned>(Surf_SelectBox->w))
         {
             while(pos.y + pic.y <= static_cast<unsigned>(Surf_SelectBox->h))
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos, Position(0, 0), pic);
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic_foreground].surface, pos, Position(0, 0), pic);
                 pos.y += pic.y;
             }
 
             if(pos.y < Surf_SelectBox->h)
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0, pic.x,
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic_foreground].surface, pos.x, pos.y, 0, 0, pic.x,
                                static_cast<unsigned>(Surf_SelectBox->h - pos.y));
 
             pos.y = 0;
@@ -258,13 +255,13 @@ bool CSelectBox::render()
         {
             while(pos.y + pic.y <= static_cast<unsigned>(Surf_SelectBox->h))
             {
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0,
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic_foreground].surface, pos.x, pos.y, 0, 0,
                                static_cast<unsigned>(Surf_SelectBox->w - pos.x), pic.y);
                 pos.y += pic.y;
             }
 
             if(pos.y < Surf_SelectBox->h)
-                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic].surface, pos.x, pos.y, 0, 0,
+                CSurface::Draw(Surf_SelectBox, global::bmpArray[pic_foreground].surface, pos.x, pos.y, 0, 0,
                                static_cast<unsigned>(Surf_SelectBox->w - pos.x),
                                static_cast<unsigned>(Surf_SelectBox->h - pos.y));
         }
