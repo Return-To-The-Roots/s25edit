@@ -142,11 +142,11 @@ void callback::mainmenu(int Param)
         case INITIALIZING_CALL:
             MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU));
             MainMenu->addButton(mainmenu, ENDGAME, 50, 400, 200, 20, BUTTON_RED1, "Quit program");
+            MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Start editor");
+            MainMenu->addButton(mainmenu, LOADMAP, 50, 200, 200, 20, BUTTON_GREEN2, "Load map");
 #ifdef _ADMINMODE
             MainMenu->addButton(submenu1, INITIALIZING_CALL, 50, 240, 200, 20, BUTTON_GREY, "Submenu_1");
 #endif
-            MainMenu->addButton(mainmenu, STARTEDITOR, 50, 160, 200, 20, BUTTON_RED1, "Start editor");
-            MainMenu->addButton(mainmenu, LOADMAP, 50, 200, 200, 20, BUTTON_GREEN2, "Load map");
             MainMenu->addButton(mainmenu, OPTIONS, 50, 370, 200, 20, BUTTON_GREEN2, "Options");
             break;
 
