@@ -66,7 +66,10 @@ void CGame::EventHandling(SDL_Event* Event)
                 case SDLK_RETURN:
                 case SDLK_KP_ENTER:
                     if(Event->key.keysym.mod & KMOD_ALT)
+                    {
                         fullscreen = !fullscreen;
+                        SaveSettings();
+                    }
                     break;
 
 #ifdef _ADMINMODE
