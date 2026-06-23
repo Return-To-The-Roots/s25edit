@@ -175,8 +175,7 @@ void CGame::LoadSettings()
 void CGame::SaveSettings() const
 {
     libsiedler2::Archiv settings;
-    settings.alloc(1);
-    settings.set(0, std::make_unique<libsiedler2::ArchivItem_Ini>("editor"));
+    settings.push(std::make_unique<libsiedler2::ArchivItem_Ini>("editor"));
     auto* ini = dynamic_cast<libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
     if(!ini)
         return;
