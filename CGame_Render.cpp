@@ -65,22 +65,22 @@ void CGame::Render()
         std::array<char, 100> textBuffer;
         // text for x and y of vertex (shown in upper left corner)
         std::snprintf(textBuffer.data(), textBuffer.size(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
-        CFont::writeText(Surf_Display, textBuffer.data(), 20, 20);
+        CFont::writeText(Surf_Display, textBuffer.data(), Position(20, 20));
         // text for MinReduceHeight and MaxRaiseHeight
         std::snprintf(textBuffer.data(), textBuffer.size(),
                       "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
                       MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
-        CFont::writeText(Surf_Display, textBuffer.data(), 100, 20);
+        CFont::writeText(Surf_Display, textBuffer.data(), Position(100, 20));
         // text for MovementLocked
         if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", 20, 40, FontSize::Large,
+            CFont::writeText(Surf_Display, "Movement locked (F9 or F10 to unlock)", Position(20, 40), FontSize::Large,
                              FontColor::Orange);
         else if(MapObj->isHorizontalMovementLocked())
-            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large,
-                             FontColor::Orange);
+            CFont::writeText(Surf_Display, "Horizontal movement locked (F9 to unlock)", Position(20, 40),
+                             FontSize::Large, FontColor::Orange);
         else if(MapObj->isVerticalMovementLocked())
-            CFont::writeText(Surf_Display, "Vertical movement locked (F10 to unlock)", 20, 40, FontSize::Large,
-                             FontColor::Orange);
+            CFont::writeText(Surf_Display, "Vertical movement locked (F10 to unlock)", Position(20, 40),
+                             FontSize::Large, FontColor::Orange);
     }
 
     // render active menus

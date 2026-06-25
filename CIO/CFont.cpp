@@ -8,8 +8,9 @@
 #include "../globals.h"
 #include <cassert>
 
-CFont::CFont(std::string text, unsigned x, unsigned y, FontSize fontsize, FontColor color)
-    : x_(x), y_(y), string_(std::move(text)), fontsize_(fontsize), color_(color), initialColor_(color), clickedParam(0)
+CFont::CFont(std::string text, Position pos, FontSize fontsize, FontColor color)
+    : x_(pos.x), y_(pos.y), string_(std::move(text)), fontsize_(fontsize), color_(color), initialColor_(color),
+      clickedParam(0)
 {}
 
 void CFont::setPos(Position pos)

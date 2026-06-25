@@ -121,39 +121,39 @@ bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, i
     return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, angle);
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Position srcOffset, Extent srcSize)
 {
     if(!Surf_Dest || !Surf_Src)
         return false;
 
     SDL_Rect DestR;
 
-    DestR.x = X;
-    DestR.y = Y;
+    DestR.x = dest.x;
+    DestR.y = dest.y;
 
     SDL_Rect SrcR;
 
-    SrcR.x = X2;
-    SrcR.y = Y2;
-    SrcR.w = W;
-    SrcR.h = H;
+    SrcR.x = srcOffset.x;
+    SrcR.y = srcOffset.y;
+    SrcR.w = static_cast<int>(srcSize.x);
+    SrcR.h = static_cast<int>(srcSize.y);
 
     SDL_BlitSurface(Surf_Src, &SrcR, Surf_Dest, &DestR);
 
     return true;
 }
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize)
 {
-    return Draw(Surf_Dest, Surf_Src.get(), X, Y, X2, Y2, W, H);
+    return Draw(Surf_Dest, Surf_Src.get(), dest, srcOffset, srcSize);
 }
 
 // this is the example function from the SDL-documentation to draw pixels
-void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
+void CSurface::DrawPixel_Color(SDL_Surface* screen, Position pos, Uint32 color)
 {
     int bpp = screen->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
-    Uint8* p = (Uint8*)screen->pixels + y * screen->pitch + x * bpp;
+    Uint8* p = (Uint8*)screen->pixels + static_cast<int>(pos.y) * screen->pitch + static_cast<int>(pos.x) * bpp;
 
     if(SDL_MUSTLOCK(screen))
         SDL_LockSurface(screen);
@@ -186,21 +186,21 @@ void CSurface::DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color)
 }
 
 // this is the example function from the sdl-documentation to draw pixels
-void CSurface::DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
+void CSurface::DrawPixel_RGB(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B)
 {
-    DrawPixel_Color(screen, x, y, SDL_MapRGB(screen->format, R, G, B));
+    DrawPixel_Color(screen, pos, SDL_MapRGB(screen->format, R, G, B));
 }
 
-void CSurface::DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
+void CSurface::DrawPixel_RGBA(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
 {
-    DrawPixel_Color(screen, x, y, SDL_MapRGBA(screen->format, R, G, B, A));
+    DrawPixel_Color(screen, pos, SDL_MapRGBA(screen->format, R, G, B, A));
 }
 
-Uint32 CSurface::GetPixel(SDL_Surface* surface, int x, int y)
+Uint32 CSurface::GetPixel(SDL_Surface* surface, Position pos)
 {
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
-    Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
+    Uint8* p = (Uint8*)surface->pixels + static_cast<int>(pos.y) * surface->pitch + static_cast<int>(pos.x) * bpp;
     switch(bpp)
     {
         case 1: return *p;
@@ -1330,66 +1330,66 @@ vector CSurface::get_flatVector(const IntVector& P1, const IntVector& P2, const 
     return cross;
 }
 
-void CSurface::update_shading(bobMAP& myMap, int VertexX, int VertexY)
+void CSurface::update_shading(bobMAP& myMap, Position pos)
 {
     // vertex count for the points
     int X, Y;
 
     bool even = false;
-    if(VertexY % 2 == 0)
+    if(pos.y % 2 == 0)
         even = true;
 
-    update_flatVectors(myMap, VertexX, VertexY);
-    update_nodeVector(myMap, VertexX, VertexY);
+    update_flatVectors(myMap, pos);
+    update_nodeVector(myMap, pos);
 
-    // now update all nodeVectors around VertexX and VertexY
+    // now update all nodeVectors around pos
     // update first vertex left upside
-    X = VertexX - (even ? 1 : 0);
+    X = pos.x - (even ? 1 : 0);
     if(X < 0)
         X += myMap.width;
-    Y = VertexY - 1;
+    Y = pos.y - 1;
     if(Y < 0)
         Y += myMap.height;
-    update_nodeVector(myMap, X, Y);
+    update_nodeVector(myMap, Position(X, Y));
     // update second vertex right upside
-    X = VertexX + (even ? 0 : 1);
+    X = pos.x + (even ? 0 : 1);
     if(X >= myMap.width)
         X -= myMap.width;
-    Y = VertexY - 1;
+    Y = pos.y - 1;
     if(Y < 0)
         Y += myMap.height;
-    update_nodeVector(myMap, X, Y);
+    update_nodeVector(myMap, Position(X, Y));
     // update third point bottom left
-    X = VertexX - 1;
+    X = pos.x - 1;
     if(X < 0)
         X += myMap.width;
-    Y = VertexY;
-    update_nodeVector(myMap, X, Y);
+    Y = pos.y;
+    update_nodeVector(myMap, Position(X, Y));
     // update fourth point bottom right
-    X = VertexX + 1;
+    X = pos.x + 1;
     if(X >= myMap.width)
         X -= myMap.width;
-    Y = VertexY;
-    update_nodeVector(myMap, X, Y);
+    Y = pos.y;
+    update_nodeVector(myMap, Position(X, Y));
     // update fifth point down left
-    X = VertexX - (even ? 1 : 0);
+    X = pos.x - (even ? 1 : 0);
     if(X < 0)
         X += myMap.width;
-    Y = VertexY + 1;
+    Y = pos.y + 1;
     if(Y >= myMap.height)
         Y -= myMap.height;
-    update_nodeVector(myMap, X, Y);
+    update_nodeVector(myMap, Position(X, Y));
     // update sixth point down right
-    X = VertexX + (even ? 0 : 1);
+    X = pos.x + (even ? 0 : 1);
     if(X >= myMap.width)
         X -= myMap.width;
-    Y = VertexY + 1;
+    Y = pos.y + 1;
     if(Y >= myMap.height)
         Y -= myMap.height;
-    update_nodeVector(myMap, X, Y);
+    update_nodeVector(myMap, Position(X, Y));
 }
 
-void CSurface::update_flatVectors(bobMAP& myMap, int VertexX, int VertexY)
+void CSurface::update_flatVectors(bobMAP& myMap, Position pos)
 {
     // point structures for the triangles, Pmiddle is the point in the middle of the hexagon we will update
     MapNode *P1, *P2, *P3, *Pmiddle;
@@ -1397,66 +1397,66 @@ void CSurface::update_flatVectors(bobMAP& myMap, int VertexX, int VertexY)
     int P1x, P1y, P2x, P2y, P3x, P3y;
 
     bool even = false;
-    if(VertexY % 2 == 0)
+    if(pos.y % 2 == 0)
         even = true;
 
-    Pmiddle = &myMap.getVertex(VertexX, VertexY);
+    Pmiddle = &myMap.getVertex(pos.x, pos.y);
 
     // update first triangle left upside
-    P1x = VertexX - (even ? 1 : 0);
+    P1x = pos.x - (even ? 1 : 0);
     if(P1x < 0)
         P1x += myMap.width;
-    P1y = VertexY - 1;
+    P1y = pos.y - 1;
     if(P1y < 0)
         P1y += myMap.height;
     P1 = &myMap.getVertex(P1x, P1y);
-    P2x = VertexX - 1;
+    P2x = pos.x - 1;
     if(P2x < 0)
         P2x += myMap.width;
-    P2y = VertexY;
+    P2y = pos.y;
     P2 = &myMap.getVertex(P2x, P2y);
     P3 = Pmiddle;
     P1->flatVector = get_flatVector(*P1, *P2, *P3);
 
     // update second triangle right upside
-    P1x = VertexX + (even ? 0 : 1);
+    P1x = pos.x + (even ? 0 : 1);
     if(P1x >= myMap.width)
         P1x -= myMap.width;
-    P1y = VertexY - 1;
+    P1y = pos.y - 1;
     if(P1y < 0)
         P1y += myMap.height;
     P1 = &myMap.getVertex(P1x, P1y);
     P2 = Pmiddle;
-    P3x = VertexX + 1;
+    P3x = pos.x + 1;
     if(P3x >= myMap.width)
         P3x -= myMap.width;
-    P3y = VertexY;
+    P3y = pos.y;
     P3 = &myMap.getVertex(P3x, P3y);
     P1->flatVector = get_flatVector(*P1, *P2, *P3);
 
     // update third triangle down middle
     P1 = Pmiddle;
-    P2x = VertexX - (even ? 1 : 0);
+    P2x = pos.x - (even ? 1 : 0);
     if(P2x < 0)
         P2x += myMap.width;
-    P2y = VertexY + 1;
+    P2y = pos.y + 1;
     if(P2y >= myMap.height)
         P2y -= myMap.height;
     P2 = &myMap.getVertex(P2x, P2y);
-    P3x = VertexX + (even ? 0 : 1);
+    P3x = pos.x + (even ? 0 : 1);
     if(P3x >= myMap.width)
         P3x -= myMap.width;
-    P3y = VertexY + 1;
+    P3y = pos.y + 1;
     if(P3y >= myMap.height)
         P3y -= myMap.height;
     P3 = &myMap.getVertex(P3x, P3y);
     P1->flatVector = get_flatVector(*P1, *P2, *P3);
 }
 
-void CSurface::update_nodeVector(bobMAP& myMap, int VertexX, int VertexY)
+void CSurface::update_nodeVector(bobMAP& myMap, Position pos)
 {
-    int j = VertexY;
-    int i = VertexX;
+    int j = pos.y;
+    int i = pos.x;
     int width = myMap.width;
     int height = myMap.height;
 

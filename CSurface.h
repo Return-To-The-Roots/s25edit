@@ -24,27 +24,42 @@ public:
     // blits from source on destination to position X,Y and rotates (angle --> degrees --> 90, 180, 270)
     static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle);
     static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle);
-    // blits rectangle (X2,Y2,W,H) from source on destination to position X,Y
-    static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H);
-    static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H);
+    // blits rectangle from source on destination
+    static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Position srcOffset, Extent srcSize);
+    static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize);
+    static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize)
+    {
+        return Draw(Surf_Dest.get(), Surf_Src.get(), dest, srcOffset, srcSize);
+    }
+    // convenience overload for non-UI callers
+    static bool Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+    {
+        return Draw(Surf_Dest, Surf_Src, Position(X, Y), Position(X2, Y2),
+                    Extent(static_cast<unsigned>(W), static_cast<unsigned>(H)));
+    }
+    static bool Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
+    {
+        return Draw(Surf_Dest, Surf_Src.get(), X, Y, X2, Y2, W, H);
+    }
     static bool Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int X2, int Y2, int W, int H)
     {
         return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, X2, Y2, W, H);
     }
-    static void DrawPixel_Color(SDL_Surface* screen, int x, int y, Uint32 color);
-    static void DrawPixel_RGB(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B);
-    static void DrawPixel_RGB(SdlSurface& screen, int x, int y, Uint8 R, Uint8 G, Uint8 B)
+
+    static void DrawPixel_Color(SDL_Surface* screen, Position pos, Uint32 color);
+    static void DrawPixel_RGB(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B);
+    static void DrawPixel_RGB(SdlSurface& screen, Position pos, Uint8 R, Uint8 G, Uint8 B)
     {
-        DrawPixel_RGB(screen.get(), x, y, R, G, B);
+        DrawPixel_RGB(screen.get(), pos, R, G, B);
     }
-    static void DrawPixel_RGBA(SDL_Surface* screen, int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
-    static Uint32 GetPixel(SDL_Surface* surface, int x, int y);
+    static void DrawPixel_RGBA(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
+    static Uint32 GetPixel(SDL_Surface* surface, Position pos);
     static void DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap);
     static void DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap,
                              MapType type, const MapNode& P1, const MapNode& P2, const MapNode& P3);
 
     static void get_nodeVectors(bobMAP& myMap);
-    static void update_shading(bobMAP& myMap, int VertexX, int VertexY);
+    static void update_shading(bobMAP& myMap, Position pos);
 
 private:
     // to decide what to draw, triangle-textures or objects and texture-borders
@@ -56,9 +71,9 @@ private:
     static Sint32 get_LightIntensity(const vector& node);
     static float absf(float a);
     // update flatVectors around a vertex
-    static void update_flatVectors(bobMAP& myMap, int VertexX, int VertexY);
+    static void update_flatVectors(bobMAP& myMap, Position pos);
     // update nodeVector based on new flatVectors around it
-    static void update_nodeVector(bobMAP& myMap, int VertexX, int VertexY);
+    static void update_nodeVector(bobMAP& myMap, Position pos);
     static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
                                         Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
                                         Point16& right2);

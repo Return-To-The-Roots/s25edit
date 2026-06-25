@@ -34,7 +34,7 @@ boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[])
 
 CGame::CGame(Extent GameResolution_, bool fullscreen_)
     : GameResolution(GameResolution_), fullscreen(fullscreen_), Running(true), showLoadScreen(true),
-      lastFps("", 0, 0, FontSize::Medium)
+      lastFps("", Position{0, 0}, FontSize::Medium)
 {
     global::bmpArray.resize(MAXBOBBMP);
     global::shadowArray.resize(MAXBOBSHADOW);

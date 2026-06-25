@@ -15,10 +15,8 @@ class CButton
 private:
     SdlSurface Surf_Button;
     bool needRender;
-    Sint16 x_;
-    Sint16 y_;
-    Uint16 w;
-    Uint16 h;
+    Position pos_;
+    Extent size_;
     int pic_normal;
     int pic_marked;
     int pic_background;
@@ -33,16 +31,15 @@ private:
     int motionLeaveParam;
 
 public:
-    CButton(void callback(int), int clickedParam, Sint16 x = 0, Sint16 y = 0, Uint16 w = 20, Uint16 h = 20,
+    CButton(void callback(int), int clickedParam, Position pos = {0, 0}, Extent size = {20, 20},
             int color = BUTTON_GREY, const char* text = nullptr, int button_picture = -1);
     // Access
-    int getX() const { return x_; };
-    int getY() const { return y_; };
-    Point16 getPos() const { return {x_, y_}; }
-    int getW() const { return w; };
-    int getH() const { return h; };
-    void setX(int x) { this->x_ = x; };
-    void setY(int y) { this->y_ = y; };
+    int getX() const { return pos_.x; };
+    int getY() const { return pos_.y; };
+    const Position& getPos() const { return pos_; }
+    const Extent& getSize() const { return size_; };
+    void setX(int x) { pos_.x = x; };
+    void setY(int y) { pos_.y = y; };
     void setButtonPicture(int picture);
     void setButtonText(const char* text);
     void setMouseData(const SDL_MouseMotionEvent& motion);
