@@ -10,6 +10,7 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
+#include <glad/glad.h>
 #ifdef _WIN32
 #    include "s25editResource.h"
 #    ifndef WIN32_LEAN_AND_MEAN
@@ -39,6 +40,21 @@ void CGame::SetAppIcon()
 void CGame::Render()
 {
     suppressResizeEvents_ = 0;
+
+    // Ensure viewport and ortho projection match current window size (handles resize)
+    glViewport(0, 0, GameResolution.x, GameResolution.y);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Clear the framebuffer and the software overlay surface.
+    // GL draws (backgrounds) and the final Surf_Display overlay are
+    // composited via blending.
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_FillRect(Surf_Display.get(), nullptr, SDL_MapRGBA(Surf_Display->format, 0, 0, 0, 0));
+
     if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution
        || fullscreen != ((SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0))
     {
@@ -49,7 +65,7 @@ void CGame::Render()
     if(showLoadScreen)
     {
         CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
-        RenderPresent();
+        SDL_GL_SwapWindow(window_.get());
         return;
     }
 
@@ -82,7 +98,13 @@ void CGame::Render()
     for(auto& Menu : Menus)
     {
         if(Menu->isActive())
+        {
+            // Draw menu background via OpenGL
+            auto& bgBmp = global::bmpArray[Menu->getBackground()];
+            CSurface::DrawStretched(Surf_Display, bgBmp.surface);
+            // Draw UI overlay on top
             CSurface::Draw(Surf_Display, Menu->getSurface(), 0, 0);
+        }
     }
 
     // render windows ordered by priority
@@ -103,7 +125,7 @@ void CGame::Render()
         }
     }
 
-    // render mouse cursor
+    // render mouse cursor (drawn in RenderPresent via GL to stay on top of all overlays)
     if(Cursor.clicked)
     {
         if(Cursor.button.right)

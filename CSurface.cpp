@@ -12,9 +12,11 @@
 #include "globals.h"
 #include "gameData/EdgeDesc.h"
 #include "gameData/TerrainDesc.h"
+#include <glad/glad.h>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <unordered_map>
 
 // Disable SGE's internal surface locking once at startup; terrain drawing is
 // the only remaining consumer of SGE functions and the caller already handles
@@ -189,6 +191,64 @@ void CSurface::DrawStretched(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src)
     if(!Surf_Dest || !Surf_Src)
         return;
 
+    // When drawing to the display surface, use OpenGL directly (no SDL blit).
+    // This is the path used by the loading screen and splash.
+    if(global::s2 && Surf_Dest == global::s2->getDisplaySurface())
+    {
+        // Cache GL textures for static background images (created once, reused each frame)
+        static std::unordered_map<SDL_Surface*, GLuint> s_bgTexCache;
+
+        auto it = s_bgTexCache.find(Surf_Src);
+        if(it == s_bgTexCache.end())
+        {
+            // Convert to match destination format (BGRA8888 on little-endian)
+            SDL_Surface* converted = SDL_ConvertSurface(Surf_Src, Surf_Dest->format, 0);
+            if(!converted)
+                return;
+
+            // LBM palette entries often have alpha=0; force full opacity
+            if(Surf_Dest->format->Amask)
+            {
+                SDL_LockSurface(converted);
+                for(int y = 0; y < converted->h; y++)
+                {
+                    auto* row = (Uint32*)((Uint8*)converted->pixels + y * converted->pitch);
+                    for(int x = 0; x < converted->w; x++)
+                        row[x] |= Surf_Dest->format->Amask;
+                }
+                SDL_UnlockSurface(converted);
+            }
+
+            GLuint tex;
+            glGenTextures(1, &tex);
+            glBindTexture(GL_TEXTURE_2D, tex);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, converted->w, converted->h, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+                         converted->pixels);
+            SDL_FreeSurface(converted);
+
+            it = s_bgTexCache.emplace(Surf_Src, tex).first;
+        }
+
+        // Draw stretched full-screen using cached texture (screen already cleared by caller)
+        glBindTexture(GL_TEXTURE_2D, it->second);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0, 0);
+        glVertex2i(0, 0);
+        glTexCoord2f(1, 0);
+        glVertex2i(Surf_Dest->w, 0);
+        glTexCoord2f(1, 1);
+        glVertex2i(Surf_Dest->w, Surf_Dest->h);
+        glTexCoord2f(0, 1);
+        glVertex2i(0, Surf_Dest->h);
+        glEnd();
+        return;
+    }
+
+    // Fallback: SDL blit for intermediate compositing surfaces (e.g. menus).
     // Convert to 32-bit RGB to handle 8-bit paletted sources and drop any
     // implicit alpha from LBM palette entries (which have a=0).
     SDL_Surface* converted = SDL_ConvertSurfaceFormat(Surf_Src, SDL_PIXELFORMAT_RGB888, 0);
@@ -203,6 +263,68 @@ void CSurface::DrawStretched(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src)
 void CSurface::DrawStretched(SdlSurface& Surf_Dest, SdlSurface& Surf_Src)
 {
     DrawStretched(Surf_Dest.get(), Surf_Src.get());
+}
+
+void CSurface::DrawGL(SDL_Surface* surface, int x, int y)
+{
+    if(!surface || !surface->format->palette)
+        return;
+
+    static std::unordered_map<SDL_Surface*, GLuint> s_texCache;
+
+    auto it = s_texCache.find(surface);
+    if(it == s_texCache.end())
+    {
+        const int cw = surface->w, ch = surface->h;
+        std::vector<Uint32> pixels(static_cast<size_t>(cw) * ch);
+
+        SDL_Palette* pal = surface->format->palette;
+        Uint32 ck;
+        const bool hasCK = (SDL_GetColorKey(surface, &ck) == 0);
+        const Uint8 ckIdx = hasCK ? static_cast<Uint8>(ck & 0xFF) : 0;
+
+        SDL_LockSurface(surface);
+        for(int row = 0; row < ch; row++)
+        {
+            const auto* src = (const Uint8*)surface->pixels + row * surface->pitch;
+            for(int col = 0; col < cw; col++)
+            {
+                const Uint8 idx = src[col];
+                if(hasCK && idx == ckIdx)
+                    pixels[row * cw + col] = 0;
+                else
+                {
+                    const SDL_Color& c = pal->colors[idx];
+                    pixels[row * cw + col] = (0xFFu << 24) | (Uint32(c.r) << 16) | (Uint32(c.g) << 8) | Uint32(c.b);
+                }
+            }
+        }
+        SDL_UnlockSurface(surface);
+
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cw, ch, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels.data());
+
+        it = s_texCache.emplace(surface, tex).first;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, it->second);
+    const int cw = surface->w, ch = surface->h;
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(x, y);
+    glTexCoord2f(1, 0);
+    glVertex2i(x + cw, y);
+    glTexCoord2f(1, 1);
+    glVertex2i(x + cw, y + ch);
+    glTexCoord2f(0, 1);
+    glVertex2i(x, y + ch);
+    glEnd();
 }
 
 // this is the example function from the SDL-documentation to draw pixels

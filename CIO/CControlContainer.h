@@ -49,9 +49,9 @@ protected:
     void renderElements();
     auto& getTextFields() { return textfields; }
     const auto& getTextFields() const { return textfields; }
-    int getBackground() const { return pic_background; }
 
 public:
+    int getBackground() const { return pic_background; }
     CControlContainer(int pic_background);
     CControlContainer(int pic_background, Extent borderBeginSize, Extent borderEndSize);
     ~CControlContainer() noexcept;

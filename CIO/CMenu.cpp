@@ -5,7 +5,6 @@
 
 #include "CMenu.h"
 #include "../CGame.h"
-#include "../CSurface.h"
 #include "../globals.h"
 
 CMenu::CMenu(int pic_background) : CControlContainer(pic_background) {}
@@ -22,12 +21,12 @@ bool CMenu::render()
     // if we need a new surface
     if(!surface)
     {
-        surface = makeRGBSurface(global::s2->getRes().x, global::s2->getRes().y);
+        surface = makeRGBSurface(global::s2->getRes().x, global::s2->getRes().y, true);
         if(!surface)
             return false;
     }
 
-    CSurface::DrawStretched(surface, global::bmpArray[getBackground()].surface);
+    // Background is drawn via OpenGL in CGame::Render(); only draw UI elements here.
     renderElements();
     return true;
 }

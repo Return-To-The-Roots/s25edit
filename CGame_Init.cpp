@@ -41,8 +41,11 @@ bool CGame::ReCreateWindow()
         return false;
 
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 1);
+    glViewport(0, 0, GameResolution.x, GameResolution.y);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
@@ -126,8 +129,9 @@ bool CGame::Init()
 
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
+    glClear(GL_COLOR_BUFFER_BIT);
     CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
-    RenderPresent();
+    SDL_GL_SwapWindow(window_.get());
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())
