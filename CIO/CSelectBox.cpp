@@ -203,6 +203,24 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
     needRender = true;
 }
 
+void CSelectBox::setSize(Extent size)
+{
+    if(size_ != size)
+    {
+        size_ = size;
+        Surf_SelectBox.reset();
+        needRender = true;
+        // update scroll down button position
+        ScrollDownButton->setY(size_.y - 1 - 20);
+    }
+}
+
+void CSelectBox::setPos(Position pos)
+{
+    pos_ = pos;
+    needRender = true;
+}
+
 bool CSelectBox::render()
 {
     // position in the Surface 'Surf_SelectBox'

@@ -142,6 +142,9 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
 
                 // the window has resized, so we need a new surface
                 surface.reset();
+
+                // notify the callback that the window has been resized
+                callback_(WINDOW_RESIZED_CALL);
             }
         }
     }
