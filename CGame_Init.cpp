@@ -12,25 +12,45 @@
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
+#include <glad/glad.h>
 #include <iostream>
 #include <vector>
 
 bool CGame::ReCreateWindow()
 {
     suppressResizeEvents_ = 3;
-    displayTexture_.reset();
-    renderer_.reset();
+    if(displayTex_)
+    {
+        glDeleteTextures(1, &displayTex_);
+        displayTex_ = 0;
+    }
+    if(glContext_)
+    {
+        SDL_GL_DeleteContext(glContext_);
+        glContext_ = nullptr;
+    }
     window_.reset();
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
                                    SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE));
+                                   (fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE) | SDL_WINDOW_OPENGL));
     if(!window_)
         return false;
-    renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
-    if(!renderer_)
+
+    glContext_ = SDL_GL_CreateContext(window_.get());
+    if(!glContext_ || !gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
         return false;
+
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    glClearColor(0, 0, 0, 1);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
     RecreateDisplayResources();
-    if(!displayTexture_ || !Surf_Display)
+    if(!displayTex_ || !Surf_Display)
         return false;
 
     SetAppIcon();
@@ -39,10 +59,20 @@ bool CGame::ReCreateWindow()
 
 void CGame::RecreateDisplayResources()
 {
-    displayTexture_.reset();
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
-                                     GameResolution.y);
+    if(displayTex_)
+    {
+        glDeleteTextures(1, &displayTex_);
+        displayTex_ = 0;
+    }
     Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+
+    glGenTextures(1, &displayTex_);
+    glBindTexture(GL_TEXTURE_2D, displayTex_);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GameResolution.x, GameResolution.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
 }
 
 void CGame::UpdateDisplaySize(const Extent& newSize)

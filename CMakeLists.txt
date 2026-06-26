@@ -9,6 +9,26 @@ project(s25edit)
 
 find_package(Boost 1.64 REQUIRED)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libutil/cmake")
+
+# glad: OpenGL loader (reused from s25client)
+if(NOT TARGET glad)
+    set(RTTR_OGL_MAJOR 2)
+    set(RTTR_OGL_MINOR 0)
+    set(RTTR_OGL_ES 0)
+    set(RTTR_OGL_COMPAT 1)
+    set(RTTR_OGL_GL4ES 0)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../glad/openglCfg.hpp.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/openglCfg.hpp @ONLY)
+
+    set(GLAD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../glad/OpenGL2.0Compat/src/glad.c)
+    set(GLAD_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../glad/OpenGL2.0Compat/include)
+    add_library(glad STATIC ${GLAD_SRC})
+    target_include_directories(glad PUBLIC ${GLAD_INCLUDE} ${CMAKE_CURRENT_BINARY_DIR}/include)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_link_libraries(glad PUBLIC ${CMAKE_DL_LIBS})
+    endif()
+endif()
+
 add_subdirectory(SGE)
 
 option(RTTR_EDITOR_ADMINMODE "In admin mode there are some key combos to open debugger, resource viewer and so on" OFF)
@@ -38,7 +58,7 @@ ELSE()
 ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
-target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata siedler2 endian::static Boost::nowide PUBLIC Boost::disable_autolinking Boost::program_options)
+target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata siedler2 endian::static glad Boost::nowide PUBLIC Boost::disable_autolinking Boost::program_options)
 target_include_directories(s25edit PRIVATE include)
 target_compile_features(s25edit PRIVATE cxx_std_17)
 

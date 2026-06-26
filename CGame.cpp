@@ -13,6 +13,7 @@
 #include "s25util/file_handle.h"
 #include <libsiedler2/ArchivItem_Ini.h>
 #include <libsiedler2/libsiedler2.h>
+#include <glad/glad.h>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/program_options.hpp>
@@ -43,6 +44,11 @@ CGame::CGame(Extent GameResolution_, bool fullscreen_)
 
 CGame::~CGame()
 {
+    if(glContext_)
+    {
+        SDL_GL_DeleteContext(glContext_);
+        glContext_ = nullptr;
+    }
     global::s2 = nullptr;
 }
 
@@ -69,12 +75,23 @@ int CGame::Execute()
     return 0;
 }
 
-void CGame::RenderPresent() const
+void CGame::RenderPresent()
 {
-    SDL_UpdateTexture(displayTexture_.get(), nullptr, Surf_Display->pixels, Surf_Display->w * sizeof(Uint32));
-    SDL_RenderClear(renderer_.get());
-    SDL_RenderCopy(renderer_.get(), displayTexture_.get(), nullptr, nullptr);
-    SDL_RenderPresent(renderer_.get());
+    glBindTexture(GL_TEXTURE_2D, displayTex_);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Surf_Display->w, Surf_Display->h, GL_BGRA, GL_UNSIGNED_BYTE,
+                    Surf_Display->pixels);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(0, 0);
+    glTexCoord2f(1, 0);
+    glVertex2i(GameResolution.x, 0);
+    glTexCoord2f(1, 1);
+    glVertex2i(GameResolution.x, GameResolution.y);
+    glTexCoord2f(0, 1);
+    glVertex2i(0, GameResolution.y);
+    glEnd();
+    SDL_GL_SwapWindow(window_.get());
 }
 
 CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)

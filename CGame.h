@@ -27,8 +27,8 @@ public:
     bool Running;
     bool showLoadScreen;
     SdlSurface Surf_Display;
-    SdlTexture displayTexture_;
-    SdlRenderer renderer_;
+    SDL_GLContext glContext_ = nullptr;
+    unsigned int displayTex_ = 0;
     SdlWindow window_;
 
 private:
@@ -88,7 +88,7 @@ public:
 
     void Render();
 
-    void RenderPresent() const;
+    void RenderPresent();
 
     CMenu* RegisterMenu(std::unique_ptr<CMenu> Menu);
     bool UnregisterMenu(CMenu* Menu);
