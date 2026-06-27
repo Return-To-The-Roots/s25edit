@@ -377,6 +377,19 @@ void CGame::EventHandling(SDL_Event* Event)
             break;
         }
 
+        case SDL_WINDOWEVENT:
+        {
+            // Follow user-driven window resizing/maximizing by growing the editor's working area, just like the
+            // game client does. The map view and menus re-derive their surfaces from GameResolution.
+            if(Event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED && !fullscreen)
+            {
+                const Extent newSize(Event->window.data1, Event->window.data2);
+                if(newSize != GameResolution)
+                    ResizeDisplay(newSize);
+            }
+            break;
+        }
+
         case SDL_QUIT: Running = false; break;
 
         default: break;

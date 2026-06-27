@@ -22,20 +22,31 @@ bool CGame::ReCreateWindow()
     window_.reset();
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
                                    SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
+                                   fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE));
     if(!window_)
         return false;
+    // Don't allow shrinking below the smallest resolution we have a dedicated map frame for
+    SDL_SetWindowMinimumSize(window_.get(), 640, 480);
     renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
     if(!renderer_)
         return false;
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
-                                     GameResolution.y);
-    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
-    if(!displayTexture_ || !Surf_Display)
+    if(!ResizeDisplay(GameResolution))
         return false;
 
     SetAppIcon();
     return true;
+}
+
+bool CGame::ResizeDisplay(Extent newSize)
+{
+    // Ignore degenerate sizes, e.g. while the window is minimized
+    if(newSize.x == 0 || newSize.y == 0)
+        return true;
+    GameResolution = newSize;
+    displayTexture_ =
+      makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, newSize.x, newSize.y);
+    Surf_Display = makeRGBSurface(newSize.x, newSize.y, true);
+    return displayTexture_ && Surf_Display;
 }
 
 bool CGame::Init()

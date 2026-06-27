@@ -74,6 +74,9 @@ public:
 
     bool Init();
     bool ReCreateWindow();
+    /// Resize the render target (display surface + texture) to the given size, e.g. after the user resized or maximized
+    /// the window. Keeps the existing window and renderer, so it is cheap enough to call while dragging the border.
+    bool ResizeDisplay(Extent newSize);
 
     void EventHandling(SDL_Event* Event);
 
