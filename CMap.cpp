@@ -1279,96 +1279,33 @@ void CMap::render()
     CFont::writeText(Surf_Map, "Save", Position(rightMenubarPos.x - 35, rightMenubarPos.y + 231));
 }
 
-static void getTriangleColor(TriangleTerrainType terrainType, MapType mapType, Sint16& r, Sint16& g, Sint16& b)
+static const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)
 {
-    switch(terrainType)
+    // Mask out harbour bit
+    const Uint8 s2Id = rawTextureId & ~0x40;
+    if(s2Id < map.s2IdToTerrain.size())
     {
-        case TRIANGLE_TEXTURE_STEPPE_MEADOW1:
-            r = (mapType == MAP_GREENLAND ? 100 : (mapType == MAP_WASTELAND ? 68 : 160));
-            g = (mapType == MAP_GREENLAND ? 144 : (mapType == MAP_WASTELAND ? 72 : 172));
-            b = (mapType == MAP_GREENLAND ? 20 : (mapType == MAP_WASTELAND ? 80 : 204));
-            break;
-        case TRIANGLE_TEXTURE_MINING1:
-            r = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 112 : 84));
-            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 108 : 88));
-            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 84 : 108));
-            break;
-        case TRIANGLE_TEXTURE_SNOW:
-            r = (mapType == MAP_GREENLAND ? 180 : (mapType == MAP_WASTELAND ? 132 : 0));
-            g = (mapType == MAP_GREENLAND ? 192 : (mapType == MAP_WASTELAND ? 0 : 48));
-            b = (mapType == MAP_GREENLAND ? 200 : (mapType == MAP_WASTELAND ? 0 : 104));
-            break;
-        case TRIANGLE_TEXTURE_SWAMP:
-            r = (mapType == MAP_GREENLAND ? 100 : 0);
-            g = (mapType == MAP_GREENLAND ? 144 : (mapType == MAP_WASTELAND ? 24 : 40));
-            b = (mapType == MAP_GREENLAND ? 20 : (mapType == MAP_WASTELAND ? 32 : 108));
-            break;
-        case TRIANGLE_TEXTURE_STEPPE:
-            r = (mapType == MAP_GREENLAND ? 192 : (mapType == MAP_WASTELAND ? 156 : 0));
-            g = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 124 : 112));
-            b = (mapType == MAP_GREENLAND ? 124 : (mapType == MAP_WASTELAND ? 100 : 176));
-            break;
-        case TRIANGLE_TEXTURE_WATER:
-            r = (mapType == MAP_GREENLAND ? 16 : (mapType == MAP_WASTELAND ? 68 : 0));
-            g = (mapType == MAP_GREENLAND ? 56 : (mapType == MAP_WASTELAND ? 68 : 48));
-            b = (mapType == MAP_GREENLAND ? 164 : (mapType == MAP_WASTELAND ? 44 : 104));
-            break;
-        case TRIANGLE_TEXTURE_MEADOW1:
-            r = (mapType == MAP_GREENLAND ? 72 : (mapType == MAP_WASTELAND ? 92 : 176));
-            g = (mapType == MAP_GREENLAND ? 120 : (mapType == MAP_WASTELAND ? 88 : 164));
-            b = (mapType == MAP_GREENLAND ? 12 : (mapType == MAP_WASTELAND ? 64 : 148));
-            break;
-        case TRIANGLE_TEXTURE_MEADOW2:
-            r = (mapType == MAP_GREENLAND ? 100 : (mapType == MAP_WASTELAND ? 100 : 180));
-            g = (mapType == MAP_GREENLAND ? 144 : (mapType == MAP_WASTELAND ? 96 : 184));
-            b = (mapType == MAP_GREENLAND ? 20 : (mapType == MAP_WASTELAND ? 72 : 180));
-            break;
-        case TRIANGLE_TEXTURE_MEADOW3:
-            r = (mapType == MAP_GREENLAND ? 64 : (mapType == MAP_WASTELAND ? 100 : 160));
-            g = (mapType == MAP_GREENLAND ? 112 : (mapType == MAP_WASTELAND ? 96 : 172));
-            b = (mapType == MAP_GREENLAND ? 8 : (mapType == MAP_WASTELAND ? 72 : 204));
-            break;
-        case TRIANGLE_TEXTURE_MINING2:
-            r = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 112 : 96));
-            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 100 : 96));
-            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 84 : 124));
-            break;
-        case TRIANGLE_TEXTURE_MINING3:
-            r = (mapType == MAP_GREENLAND ? 156 : 104);
-            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 76 : 108));
-            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 36 : 140));
-            break;
-        case TRIANGLE_TEXTURE_MINING4:
-            r = (mapType == MAP_GREENLAND ? 140 : 104);
-            g = (mapType == MAP_GREENLAND ? 112 : (mapType == MAP_WASTELAND ? 76 : 108));
-            b = (mapType == MAP_GREENLAND ? 72 : (mapType == MAP_WASTELAND ? 36 : 140));
-            break;
-        case TRIANGLE_TEXTURE_STEPPE_MEADOW2:
-            r = (mapType == MAP_GREENLAND ? 136 : (mapType == MAP_WASTELAND ? 112 : 100));
-            g = (mapType == MAP_GREENLAND ? 176 : (mapType == MAP_WASTELAND ? 108 : 144));
-            b = (mapType == MAP_GREENLAND ? 40 : (mapType == MAP_WASTELAND ? 84 : 20));
-            break;
-        case TRIANGLE_TEXTURE_FLOWER:
-            r = (mapType == MAP_GREENLAND ? 72 : (mapType == MAP_WASTELAND ? 68 : 124));
-            g = (mapType == MAP_GREENLAND ? 120 : (mapType == MAP_WASTELAND ? 72 : 132));
-            b = (mapType == MAP_GREENLAND ? 12 : (mapType == MAP_WASTELAND ? 80 : 172));
-            break;
-        case TRIANGLE_TEXTURE_LAVA:
-            r = (mapType == MAP_GREENLAND ? 192 : (mapType == MAP_WASTELAND ? 128 : 144));
-            g = (mapType == MAP_GREENLAND ? 32 : (mapType == MAP_WASTELAND ? 20 : 44));
-            b = (mapType == MAP_GREENLAND ? 32 : (mapType == MAP_WASTELAND ? 0 : 4));
-            break;
-        case TRIANGLE_TEXTURE_MINING_MEADOW:
-            r = (mapType == MAP_GREENLAND ? 156 : (mapType == MAP_WASTELAND ? 0 : 148));
-            g = (mapType == MAP_GREENLAND ? 128 : (mapType == MAP_WASTELAND ? 24 : 160));
-            b = (mapType == MAP_GREENLAND ? 88 : (mapType == MAP_WASTELAND ? 32 : 192));
-            break;
-        default: // color grey
-            r = 128;
-            g = 128;
-            b = 128;
-            break;
+        const auto idx = map.s2IdToTerrain[s2Id];
+        if(idx)
+            return &global::worldDesc.get(idx);
     }
+    return nullptr;
+}
+
+static void getTriangleColor(const bobMAP& map, Uint8 rawTextureId, Sint16& r, Sint16& g, Sint16& b)
+{
+    const auto* desc = getTerrainDesc(map, rawTextureId);
+    if(desc)
+    {
+        r = (desc->minimapColor >> 16) & 0xFF;
+        g = (desc->minimapColor >> 8) & 0xFF;
+        b = desc->minimapColor & 0xFF;
+        return;
+    }
+    // Fallback: grey for unknown terrain (e.g. MEADOW_MIXED sentinel)
+    r = 128;
+    g = 128;
+    b = 128;
 }
 
 void CMap::drawMinimap(SDL_Surface* Window)
@@ -1395,7 +1332,7 @@ void CMap::drawMinimap(SDL_Surface* Window)
                 continue;
 
             Sint16 r, g, b;
-            getTriangleColor(TriangleTerrainType(map->getVertex(x, y).rsuTexture), map->type, r, g, b);
+            getTriangleColor(*map, map->getVertex(x, y).rsuTexture, r, g, b);
 
             Uint32* row = (Uint32*)Window->pixels + (y / num_y + 20) * Window->pitch / 4; //-V206
             //+6 because of the left window frame
