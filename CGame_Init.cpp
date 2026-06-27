@@ -8,7 +8,6 @@
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
-#include "CSurface.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
@@ -132,10 +131,13 @@ bool CGame::Init()
         }
     }
 
+    // Create GL texture for splash background
+    splashBg_.load(global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface.get(), true);
+
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
     glClear(GL_COLOR_BUFFER_BIT);
-    CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
+    splashBg_.DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
     SDL_GL_SwapWindow(window_.get());
 
     GameDataLoader gdLoader(global::worldDesc);
@@ -290,6 +292,13 @@ bool CGame::Init()
 
     // create the mainmenu
     callback::mainmenu(INITIALIZING_CALL);
+
+    // Create GL textures for cursor and menu background images
+    cursor_.load(global::bmpArray[CURSOR].surface.get());
+    cursorClicked_.load(global::bmpArray[CURSOR_CLICKED].surface.get());
+    cross_.load(global::bmpArray[CROSS].surface.get());
+    menuBgMain_.load(global::bmpArray[SPLASHSCREEN_MAINMENU].surface.get(), true);
+    menuBgSub_.load(global::bmpArray[SPLASHSCREEN_SUBMENU3].surface.get(), true);
 
     return true;
 }

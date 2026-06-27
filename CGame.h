@@ -6,6 +6,7 @@
 #pragma once
 
 #include "CIO/CFont.h"
+#include "GlTexture.h"
 #include "SdlSurface.h"
 #include <boost/filesystem/path.hpp>
 #include <Point.h>
@@ -44,6 +45,14 @@ private:
 
     Uint32 lastFrameTime = 0;
     unsigned suppressResizeEvents_ = 0;
+
+    // GL textures for backgrounds and cursor
+    GlTexture splashBg_;
+    GlTexture menuBgMain_;
+    GlTexture menuBgSub_;
+    GlTexture cursor_;
+    GlTexture cursorClicked_;
+    GlTexture cross_;
 
     // structure for mouse cursor
     struct

@@ -7,7 +7,6 @@
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
-#include "CSurface.h"
 #include "RttrConfig.h"
 #include "files.h"
 #include "globals.h"
@@ -95,14 +94,10 @@ void CGame::RenderPresent()
     glVertex2i(0, GameResolution.y);
     glEnd();
 
-    // Draw cursor on top of everything (cached GL texture with colorkey)
+    // Draw cursor on top of everything
     {
-        SDL_Surface* cursorSurf = Cursor.clicked ?
-                                    (Cursor.button.right ? global::bmpArray[CROSS].surface.get() :
-                                                           global::bmpArray[CURSOR_CLICKED].surface.get()) :
-                                    global::bmpArray[CURSOR].surface.get();
-        if(cursorSurf)
-            CSurface::DrawGL(cursorSurf, Cursor.pos.x, Cursor.pos.y);
+        const auto& cursorImg = Cursor.clicked ? (Cursor.button.right ? cross_ : cursorClicked_) : cursor_;
+        cursorImg.Draw(Cursor.pos.x, Cursor.pos.y);
     }
 
     SDL_GL_SwapWindow(window_.get());

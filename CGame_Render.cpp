@@ -59,7 +59,7 @@ void CGame::Render()
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
     {
-        CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
+        splashBg_.DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
         SDL_GL_SwapWindow(window_.get());
         return;
     }
@@ -95,8 +95,9 @@ void CGame::Render()
         if(Menu->isActive())
         {
             // Draw menu background via OpenGL
-            auto& bgBmp = global::bmpArray[Menu->getBackground()];
-            CSurface::DrawStretched(Surf_Display, bgBmp.surface);
+            int bgIdx = Menu->getBackground();
+            (bgIdx == SPLASHSCREEN_MAINMENU ? menuBgMain_ : menuBgSub_)
+              .DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
             // Draw UI overlay on top
             CSurface::Draw(Surf_Display, Menu->getSurface(), 0, 0);
         }
@@ -120,15 +121,7 @@ void CGame::Render()
         }
     }
 
-    // render mouse cursor (drawn in RenderPresent via GL to stay on top of all overlays)
-    if(Cursor.clicked)
-    {
-        if(Cursor.button.right)
-            CSurface::Draw(Surf_Display, global::bmpArray[CROSS].surface, Cursor.pos);
-        else
-            CSurface::Draw(Surf_Display, global::bmpArray[CURSOR_CLICKED].surface, Cursor.pos);
-    } else
-        CSurface::Draw(Surf_Display, global::bmpArray[CURSOR].surface, Cursor.pos);
+    // Cursor is drawn in RenderPresent via GL (after the Surf_Display overlay)
 
 #ifdef _ADMINMODE
     FrameCounter++;
