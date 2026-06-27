@@ -42,12 +42,7 @@ void CGame::Render()
     suppressResizeEvents_ = 0;
 
     // Ensure viewport and ortho projection match current window size (handles resize)
-    glViewport(0, 0, GameResolution.x, GameResolution.y);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    setGLViewport();
 
     // Clear the framebuffer and the software overlay surface.
     // GL draws (backgrounds) and the final Surf_Display overlay are

@@ -68,6 +68,7 @@ private:
 
     void SetAppIcon();
     void RecreateDisplayResources();
+    void setGLViewport();
 
 public:
     void LoadSettings();

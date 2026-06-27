@@ -7,6 +7,7 @@
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
+#include "CSurface.h"
 #include "RttrConfig.h"
 #include "files.h"
 #include "globals.h"

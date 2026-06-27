@@ -45,12 +45,7 @@ bool CGame::ReCreateWindow()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 1);
-    glViewport(0, 0, GameResolution.x, GameResolution.y);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    setGLViewport();
 
     RecreateDisplayResources();
     if(!displayTex_ || !Surf_Display)
@@ -76,6 +71,16 @@ void CGame::RecreateDisplayResources()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GameResolution.x, GameResolution.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
+}
+
+void CGame::setGLViewport()
+{
+    glViewport(0, 0, GameResolution.x, GameResolution.y);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void CGame::UpdateDisplaySize(const Extent& newSize)
