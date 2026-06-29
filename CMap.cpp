@@ -1739,9 +1739,7 @@ void CMap::modifyHeightMakeBigHouse(Position pos)
     }
 
     // remove harbour if there is one
-    if((middleVertex.rsuTexture & 0x40) && getTerrainDesc(*map, middleVertex.rsuTexture)
-       && getTerrainDesc(*map, middleVertex.rsuTexture)->kind == TerrainKind::Land
-       && getTerrainDesc(*map, middleVertex.rsuTexture)->Is(ETerrain::Buildable))
+    if(middleVertex.rsuTexture & 0x40)
     {
         middleVertex.rsuTexture &= ~0x40;
     }
@@ -2040,8 +2038,8 @@ void CMap::modifyBuild(Position pos)
 
     // calculate the building using the height of the vertices
     // this building is a mine
-    if(getTerrainDesc(*map, curVertex.rsuTexture)
-       && getTerrainDesc(*map, curVertex.rsuTexture)->kind == TerrainKind::Mountain)
+    if(const auto* mineDesc = getTerrainDesc(*map, curVertex.rsuTexture);
+       mineDesc && mineDesc->kind == TerrainKind::Mountain)
     {
         building = 0x05;
         // test vertex lower right
@@ -2125,12 +2123,10 @@ void CMap::modifyBuild(Position pos)
     if(building > 0x00)
     {
         auto isSnowOrLava = [&](const MapNode& node) {
-            return (getTerrainDesc(*map, node.rsuTexture)
-                    && (getTerrainDesc(*map, node.rsuTexture)->kind == TerrainKind::Snow
-                        || getTerrainDesc(*map, node.rsuTexture)->kind == TerrainKind::Lava))
-                   || (getTerrainDesc(*map, node.usdTexture)
-                       && (getTerrainDesc(*map, node.usdTexture)->kind == TerrainKind::Snow
-                           || getTerrainDesc(*map, node.usdTexture)->kind == TerrainKind::Lava));
+            const auto* rsu = getTerrainDesc(*map, node.rsuTexture);
+            const auto* usd = getTerrainDesc(*map, node.usdTexture);
+            return (rsu && (rsu->kind == TerrainKind::Snow || rsu->kind == TerrainKind::Lava))
+                   || (usd && (usd->kind == TerrainKind::Snow || usd->kind == TerrainKind::Lava));
         };
         if(isSnowOrLava(*mapVertices[0]) || isSnowOrLava(*mapVertices[1]) || isSnowOrLava(*mapVertices[2])
            || isSnowOrLava(*mapVertices[3]))
@@ -2143,12 +2139,10 @@ void CMap::modifyBuild(Position pos)
     if(building > 0x01)
     {
         auto isSnowOrLava2 = [&](const MapNode& node) {
-            return (getTerrainDesc(*map, node.rsuTexture)
-                    && (getTerrainDesc(*map, node.rsuTexture)->kind == TerrainKind::Snow
-                        || getTerrainDesc(*map, node.rsuTexture)->kind == TerrainKind::Lava))
-                   || (getTerrainDesc(*map, node.usdTexture)
-                       && (getTerrainDesc(*map, node.usdTexture)->kind == TerrainKind::Snow
-                           || getTerrainDesc(*map, node.usdTexture)->kind == TerrainKind::Lava));
+            const auto* rsu = getTerrainDesc(*map, node.rsuTexture);
+            const auto* usd = getTerrainDesc(*map, node.usdTexture);
+            return (rsu && (rsu->kind == TerrainKind::Snow || rsu->kind == TerrainKind::Lava))
+                   || (usd && (usd->kind == TerrainKind::Snow || usd->kind == TerrainKind::Lava));
         };
         if(isSnowOrLava2(*mapVertices[4]) || isSnowOrLava2(*mapVertices[5]) || isSnowOrLava2(*mapVertices[6]))
         {

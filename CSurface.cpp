@@ -867,16 +867,14 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
         // draw the triangle
         // do not shade water and lava
-        if(getTerrainDesc(myMap, texture)
-           && (getTerrainDesc(myMap, texture)->kind == TerrainKind::Water
-               || getTerrainDesc(myMap, texture)->kind == TerrainKind::Lava))
+        if(const auto* terrainDesc = getTerrainDesc(myMap, texture);
+           terrainDesc && (terrainDesc->kind == TerrainKind::Water || terrainDesc->kind == TerrainKind::Lava))
             sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
                                left.y, right.x, right.y);
         else
         {
             // draw special winterland textures with moving water (ice floe textures)
-            if(type == MAP_WINTERLAND && getTerrainDesc(myMap, texture)
-               && (getTerrainDesc(myMap, texture)->s2Id == 2 || getTerrainDesc(myMap, texture)->s2Id == 3))
+            if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
             {
                 sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y,
                                    left2.x, left2.y, right2.x, right2.y);
@@ -1228,9 +1226,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                          (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
-                    if((P2.rsuTexture & 0x40) && getTerrainDesc(myMap, P2.rsuTexture)
-                       && getTerrainDesc(myMap, P2.rsuTexture)->kind == TerrainKind::Land
-                       && getTerrainDesc(myMap, P2.rsuTexture)->Is(ETerrain::Buildable))
+                    if(P2.rsuTexture & 0x40)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
                              (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
                              (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
