@@ -9,8 +9,6 @@
 #include "CIO/CWindow.h"
 #include "CMap.h"
 #include "CSurface.h"
-#include "SGE/sge_blib.h"
-#include "SGE/sge_surface.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
@@ -69,7 +67,6 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-    sge_Lock_OFF();
     CFile::init();
 
     /*NOTE: its important to load a palette at first,
@@ -99,11 +96,7 @@ bool CGame::Init()
 
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
-    // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-    auto& surfSplash = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-    sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1,
-                     Surf_Display->h - 1, surfSplash.get(), 0, 0, surfSplash->w - 1, 0, 0, surfSplash->h - 1,
-                     surfSplash->w - 1, surfSplash->h - 1);
+    CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
     RenderPresent();
 
     GameDataLoader gdLoader(global::worldDesc);

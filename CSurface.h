@@ -45,7 +45,9 @@ public:
     {
         return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, X2, Y2, W, H);
     }
-
+    // stretches Surf_Src to fill entire Surf_Dest
+    static void DrawStretched(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src);
+    static void DrawStretched(SdlSurface& Surf_Dest, SdlSurface& Surf_Src);
     static void DrawPixel_Color(SDL_Surface* screen, Position pos, Uint32 color);
     static void DrawPixel_RGB(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B);
     static void DrawPixel_RGB(SdlSurface& screen, Position pos, Uint8 R, Uint8 G, Uint8 B)

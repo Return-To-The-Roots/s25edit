@@ -9,7 +9,6 @@
 #include "CIO/CWindow.h"
 #include "CMap.h"
 #include "CSurface.h"
-#include "SGE/sge_blib.h"
 #include "globals.h"
 #ifdef _WIN32
 #    include "s25editResource.h"
@@ -49,11 +48,7 @@ void CGame::Render()
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
     {
-        // CSurface::Draw(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface, 0, 0);
-        auto& surfLoadScreen = global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface;
-        sge_TexturedRect(Surf_Display.get(), 0, 0, Surf_Display->w - 1, 0, 0, Surf_Display->h - 1, Surf_Display->w - 1,
-                         Surf_Display->h - 1, surfLoadScreen.get(), 0, 0, surfLoadScreen->w - 1, 0, 0,
-                         surfLoadScreen->h - 1, surfLoadScreen->w - 1, surfLoadScreen->h - 1);
+        CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
         RenderPresent();
         return;
     }
