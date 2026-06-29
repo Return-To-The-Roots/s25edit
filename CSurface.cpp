@@ -439,12 +439,14 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // Odd rows have no I/O shift, P2 = (w-1, y) reads file(w-1, y) correctly.
                     {
                         const int w = static_cast<int>(width);
+                        MapNode tP1 = myMap.getVertex(0, y + 1);
+                        tP1.x = myMap.getVertex(w - 1, y + 1).x + triangleWidth;
                         MapNode tP3 = myMap.getVertex(0, y);
                         tP3.x = myMap.getVertex(w - 1, y).x + triangleWidth;
                         DrawTriangle(display, displayRect, myMap, type,
-                                     myMap.getVertex(0, y + 1), // P1 = SE(w-1, y) wraps to (0, y+1)
-                                     myMap.getVertex(w - 1, y), // P2 = pt (reads usdTexture)
-                                     tP3);                      // P3 = E(w-1, y) wraps to (0, y)
+                                     tP1,                       // P1 = SE(w-1, y) with x-shifted
+                                     myMap.getVertex(w - 1, y), // P2 = pt
+                                     tP3);                      // P3 = E(w-1, y) with x-shifted
                     }
                 }
             }
