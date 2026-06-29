@@ -402,20 +402,18 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                                      myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
                         // USD at visual column x-1 — same vertices as master.
                         // Texture read unshift is applied inside DrawTriangle.
-                        DrawTriangle(display, displayRect, myMap, type,
-                                     myMap.getVertex(x - 1, y + 1), // P1
-                                     myMap.getVertex(x - 1, y),     // P2 (reads usdTexture, unshifted internally)
-                                     myMap.getVertex(x, y));        // P3
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), // P1
+                                     myMap.getVertex(x - 1, y), // P2 (reads usdTexture, unshifted internally)
+                                     myMap.getVertex(x, y));    // P3
                     }
                     // last UpSideDown at column width-1 (wrap) — same vertices as master.
                     {
                         const int w = static_cast<int>(width);
                         MapNode tP3 = myMap.getVertex(0, y);
                         tP3.x = myMap.getVertex(w - 1, y).x + triangleWidth;
-                        DrawTriangle(display, displayRect, myMap, type,
-                                     myMap.getVertex(w - 1, y + 1), // P1
-                                     myMap.getVertex(w - 1, y),     // P2 (reads usdTexture, unshifted internally)
-                                     tP3);                          // P3
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(w - 1, y + 1), // P1
+                                     myMap.getVertex(w - 1, y), // P2 (reads usdTexture, unshifted internally)
+                                     tP3);                      // P3
                     }
                 } else
                 {
@@ -864,15 +862,15 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     {
         // upper2, ..... are for special use in winterland.
         Point16 upper, left, right, upper2, left2, right2;
-        // I/O shift: USD data moved right by 1 in even rows.
-        // Read usdTexture from (P2.VertexX+1, P2.VertexY) to compensate.
+        // I/O shift: USD data at vertex(x,y) = file(x-1,y) for even rows.
+        // Read from (P2.VertexX+1, P2.VertexY) to get USD at visual (P2.VertexX, P2.VertexY).
         uint8_t rawTex;
         if(isRSU)
             rawTex = P1.rsuTexture;
         else
         {
             rawTex = P2.usdTexture;
-            if(P2.VertexY % 2 == 0) // even row: unshift
+            if(P2.VertexY % 2 == 0)
             {
                 int adjX = (P2.VertexX + 1 >= myMap.width) ? 0 : P2.VertexX + 1;
                 rawTex = myMap.getVertex(adjX, P2.VertexY).usdTexture;
@@ -985,9 +983,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             // USD left/right edge: compare RSU vs USD at same visual column.
             // I/O shift: USD moved right by 1 in even rows. P2.usdTexture at (x-1)
             // now holds file(x-2,y). Read USD from P3.usdTexture at (x) = file(x-1,y).
-            auto borderSide = CalcBorders(myMap,
-                P2.rsuTexture,
-                (P2.VertexY % 2 == 0) ? P3.usdTexture : P2.usdTexture, BorderRect);
+            auto borderSide =
+              CalcBorders(myMap, P2.rsuTexture, (P2.VertexY % 2 == 0) ? P3.usdTexture : P2.usdTexture, BorderRect);
 
             if(borderSide != BorderPreference::None)
             {
@@ -1033,8 +1030,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             MapNode tempP = myMap.getVertex(col, row);
 
             // I/O shift: P2.usdTexture at (x-1) = file(x-2,y). Read from P3.usdTexture at (x) = file(x-1,y).
-            borderSide = CalcBorders(myMap, tempP.rsuTexture,
-                (P2.VertexY % 2 == 0) ? P3.usdTexture : P2.usdTexture, BorderRect);
+            borderSide =
+              CalcBorders(myMap, tempP.rsuTexture, (P2.VertexY % 2 == 0) ? P3.usdTexture : P2.usdTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
                 Point32 thirdPt;
