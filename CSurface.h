@@ -62,6 +62,8 @@ public:
 
     static void get_nodeVectors(bobMAP& myMap);
     static void update_shading(bobMAP& myMap, Position pos);
+    /// Update palette cycling animations for the given map type's tileset
+    static void UpdatePaletteAnimations(MapType mapType);
 
 private:
     // to decide what to draw, triangle-textures or objects and texture-borders
@@ -76,7 +78,7 @@ private:
     static void update_flatVectors(bobMAP& myMap, Position pos);
     // update nodeVector based on new flatVectors around it
     static void update_nodeVector(bobMAP& myMap, Position pos);
-    static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
-                                        Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
+    static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, Point16& upper,
+                                        Point16& left, Point16& right, Point16& upper2, Point16& left2,
                                         Point16& right2);
 };

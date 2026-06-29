@@ -150,6 +150,13 @@ public:
         render();
         return Surf_Map.get();
     }
+    /// Get map surface palette without rendering (nullptr if not 8-bit or not created yet)
+    SDL_Palette* getSurfacePalette() const
+    {
+        if(!Surf_Map || Surf_Map->format->BytesPerPixel != 1)
+            return nullptr;
+        return Surf_Map->format->palette;
+    }
     DisplayRectangle getDisplayRect() { return displayRect; }
     void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
     auto& getPlayerHQx() { return PlayerHQx; }
