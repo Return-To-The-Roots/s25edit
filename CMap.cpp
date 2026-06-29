@@ -105,6 +105,29 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
     // load the right MAP0x.LST for all pictures
     loadMapPics();
 
+    // Populate s2IdToTerrain mapping before building calculation (needed by getTerrainDesc)
+    {
+        DescIdx<LandscapeDesc> lt(0);
+        for(DescIdx<LandscapeDesc> i(0); i.value < global::worldDesc.landscapes.size(); i.value++)
+        {
+            if(global::worldDesc.get(i).s2Id == map->type)
+            {
+                lt = i;
+                break;
+            }
+        }
+        for(DescIdx<TerrainDesc> i(0); i.value < global::worldDesc.terrain.size(); i.value++)
+        {
+            const TerrainDesc& t = global::worldDesc.get(i);
+            if(t.landscape == lt)
+            {
+                if(map->s2IdToTerrain.size() <= t.s2Id)
+                    map->s2IdToTerrain.resize(t.s2Id + 1);
+                map->s2IdToTerrain[t.s2Id] = i;
+            }
+        }
+    }
+
     CSurface::get_nodeVectors(*map);
 
     // for safety recalculate build and shadow data and test if fishes and water is correct
@@ -197,26 +220,6 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
 
     HorizontalMovementLocked = false;
     VerticalMovementLocked = false;
-
-    DescIdx<LandscapeDesc> lt(0);
-    for(DescIdx<LandscapeDesc> i(0); i.value < global::worldDesc.landscapes.size(); i.value++)
-    {
-        if(global::worldDesc.get(i).s2Id == map->type)
-        {
-            lt = i;
-            break;
-        }
-    }
-    for(DescIdx<TerrainDesc> i(0); i.value < global::worldDesc.terrain.size(); i.value++)
-    {
-        const TerrainDesc& t = global::worldDesc.get(i);
-        if(t.landscape == lt)
-        {
-            if(map->s2IdToTerrain.size() <= t.s2Id)
-                map->s2IdToTerrain.resize(t.s2Id + 1);
-            map->s2IdToTerrain[t.s2Id] = i;
-        }
-    }
 }
 void CMap::destructMap()
 {
@@ -2036,45 +2039,82 @@ void CMap::modifyBuild(Position pos)
     for(unsigned i = 0; i < mapVertices.size(); i++)
         mapVertices[i] = &map->getVertex(tempVertices[i]);
 
-    // calculate the building using the height of the vertices
-    // this building is a mine
-    if(const auto* mineDesc = getTerrainDesc(*map, curVertex.rsuTexture);
-       mineDesc && mineDesc->kind == TerrainKind::Mountain)
-    {
-        building = 0x05;
-        // test vertex lower right
-        const auto tmpHeight = mapVertices[6]->h;
-        if(tmpHeight - height >= 0x04)
-            building = 0x01;
-    }
-    // not a mine
-    else
-    {
-        building = 0x04;
-        // test the whole section
-        for(int i = 0; i < 6; i++)
+    // Determine building quality from terrain following s25client's BQCalculator:
+    // Check the 6 terrain triangles around the point (same layout as World::GetTerrainsAround):
+    //   {nwNode.t1, nwNode.t2, neNode.t1, curNode.t2, curNode.t1, wNode.t2}
+    // where t1 = rsuTexture, t2 = usdTexture
+    int buildingHits = 0, mineHits = 0, flagHits = 0;
+    bool danger = false;
+
+    auto checkTerrainBQ = [&](const TerrainDesc* desc) {
+        if(!desc)
+            return;
+        switch(desc->GetBQ())
         {
-            auto tmpHeight = mapVertices[i]->h;
-            if(height - tmpHeight >= 0x04 || tmpHeight - height >= 0x04)
-                building = 0x01;
+            case TerrainBQ::Castle: ++buildingHits; break;
+            case TerrainBQ::Mine: ++mineHits; break;
+            case TerrainBQ::Flag: ++flagHits; break;
+            case TerrainBQ::Danger: danger = true; break;
+            default: break; // Nothing
         }
+    };
 
-        // test vertex lower right
-        auto tmpHeight = mapVertices[6]->h;
-        if(height - tmpHeight >= 0x04 || tmpHeight - height >= 0x02)
+    checkTerrainBQ(getTerrainDesc(*map, mapVertices[1]->rsuTexture)); // nwNode.t1
+    checkTerrainBQ(getTerrainDesc(*map, mapVertices[1]->usdTexture)); // nwNode.t2
+    checkTerrainBQ(getTerrainDesc(*map, mapVertices[2]->rsuTexture)); // neNode.t1
+    checkTerrainBQ(getTerrainDesc(*map, mapVertices[0]->usdTexture)); // curNode.t2
+    checkTerrainBQ(getTerrainDesc(*map, mapVertices[0]->rsuTexture)); // curNode.t1
+    checkTerrainBQ(getTerrainDesc(*map, mapVertices[3]->usdTexture)); // wNode.t2
+
+    if(danger)
+        building = 0x00;
+    else if(mineHits == 6)
+        building = 0x05;
+    else if(buildingHits == 6)
+        building = 0x04;
+    else if(buildingHits || mineHits || flagHits)
+        building = 0x01;
+    else
+        building = 0x00;
+
+    // Now reduce BQ based on altitude (matching s25client altitude checks)
+    if(building == 0x04) // Castle
+    {
+        // flag point (SE neighbour) more than 1 higher? -> Flag
+        if(mapVertices[6]->h > height + 1)
             building = 0x01;
-
-        // now test the second section around the vertex
-        if(building > 0x02)
+        else
         {
-            // test the whole section
-            for(int i = 7; i < 19; i++)
+            // Direct neighbours: Flag for altitude difference > 3
+            for(int i = 1; i < 7; i++)
             {
-                tmpHeight = map->getVertex(tempVertices[i]).h;
-                if(height - tmpHeight >= 0x03 || tmpHeight - height >= 0x03)
-                    building = 0x02;
+                const auto tmpHeight = mapVertices[i]->h;
+                if(height > tmpHeight + 3 || tmpHeight > height + 3)
+                {
+                    building = 0x01;
+                    break;
+                }
+            }
+
+            if(building == 0x04)
+            {
+                // Radius-2 neighbours: Hut (small house) for altitude difference > 2
+                for(int i = 7; i < 19; i++)
+                {
+                    const auto tmpHeight = map->getVertex(tempVertices[i]).h;
+                    if(height > tmpHeight + 2 || tmpHeight > height + 2)
+                    {
+                        building = 0x02;
+                        break;
+                    }
+                }
             }
         }
+    } else if(building == 0x05) // Mine
+    {
+        // Mines only possible till altitude diff of 3 to SE neighbour
+        if(mapVertices[6]->h > height + 3)
+            building = 0x01;
     }
 
     // test if there is an object AROUND the vertex (trees or granite)
@@ -2116,84 +2156,6 @@ void CMap::modifyBuild(Position pos)
         )
         {
             building = 0x00;
-        }
-    }
-
-    // test if there is snow or lava at the vertex or around the vertex and touching the vertex (first section)
-    if(building > 0x00)
-    {
-        auto isSnowOrLava = [&](const MapNode& node) {
-            const auto* rsu = getTerrainDesc(*map, node.rsuTexture);
-            const auto* usd = getTerrainDesc(*map, node.usdTexture);
-            return (rsu && (rsu->kind == TerrainKind::Snow || rsu->kind == TerrainKind::Lava))
-                   || (usd && (usd->kind == TerrainKind::Snow || usd->kind == TerrainKind::Lava));
-        };
-        if(isSnowOrLava(*mapVertices[0]) || isSnowOrLava(*mapVertices[1]) || isSnowOrLava(*mapVertices[2])
-           || isSnowOrLava(*mapVertices[3]))
-        {
-            building = 0x00;
-        }
-    }
-
-    // test if there is snow or lava on the right side (RSU), in lower left (USD) or in lower right (first section)
-    if(building > 0x01)
-    {
-        auto isSnowOrLava2 = [&](const MapNode& node) {
-            const auto* rsu = getTerrainDesc(*map, node.rsuTexture);
-            const auto* usd = getTerrainDesc(*map, node.usdTexture);
-            return (rsu && (rsu->kind == TerrainKind::Snow || rsu->kind == TerrainKind::Lava))
-                   || (usd && (usd->kind == TerrainKind::Snow || usd->kind == TerrainKind::Lava));
-        };
-        if(isSnowOrLava2(*mapVertices[4]) || isSnowOrLava2(*mapVertices[5]) || isSnowOrLava2(*mapVertices[6]))
-        {
-            building = 0x01;
-        }
-    }
-
-    // test if vertex is surrounded by water or swamp
-    if(building > 0x00)
-    {
-        bool v0Shippable = nodeHasTerrainFlag(*map, *mapVertices[0], ETerrain::Shippable, true);
-        bool v1Shippable = nodeHasTerrainFlag(*map, *mapVertices[1], ETerrain::Shippable, true);
-        bool v2Shippable = nodeHasTerrainFlag(*map, *mapVertices[2], ETerrain::Shippable, true);
-        bool v3Shippable = nodeHasTerrainFlag(*map, *mapVertices[3], ETerrain::Shippable, true);
-        if(v0Shippable && v1Shippable && v2Shippable && v3Shippable)
-        {
-            building = 0x00;
-        } else if(v0Shippable || v1Shippable || v2Shippable || v3Shippable)
-        {
-            building = 0x01;
-        }
-    }
-
-    // test if there is non-buildable land at the vertex or touching the vertex
-    if(building > 0x01)
-    {
-        auto isNonBuildable = [&](const MapNode& node) {
-            const auto* rsu = getTerrainDesc(*map, node.rsuTexture);
-            const auto* usd = getTerrainDesc(*map, node.usdTexture);
-            return (rsu && !rsu->Is(ETerrain::Buildable)) || (usd && !usd->Is(ETerrain::Buildable));
-        };
-        if(isNonBuildable(*mapVertices[0]) || isNonBuildable(*mapVertices[1]) || isNonBuildable(*mapVertices[2])
-           || isNonBuildable(*mapVertices[3]))
-        {
-            building = 0x01;
-        }
-    }
-
-    // test if vertex is surrounded by mining-textures
-    if(building > 0x01)
-    {
-        bool v0Mtn = nodeIsMountain(*map, *mapVertices[0], true);
-        bool v1Mtn = nodeIsMountain(*map, *mapVertices[1], true);
-        bool v2Mtn = nodeIsMountain(*map, *mapVertices[2], true);
-        bool v3Mtn = nodeIsMountain(*map, *mapVertices[3], true);
-        if(v0Mtn && v1Mtn && v2Mtn && v3Mtn)
-        {
-            building = 0x05;
-        } else if(v0Mtn || v1Mtn || v2Mtn || v3Mtn)
-        {
-            building = 0x01;
         }
     }
 
