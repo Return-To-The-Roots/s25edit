@@ -570,10 +570,19 @@ bobMAP* CFile::read_wld(FILE* fp)
     // go to texture information for UpSideDown-Triangles
     fseek(fp, 16, SEEK_CUR);
 
+    // Read usdTexture: file → memory (align with s25client coordinate system).
+    // s25client MapLoader::InitNodes:
+    //   unsigned char t2 = map.getMapDataAt(MapLayer::Terrain2, pt.x, pt.y);
+    //   node.t2 = getTerrainFromS2(t2 & 0x3F);  // stored at same visual (pt.x, pt.y) as t1
+    // s25edit WLD file stores USD offsets that need shifting to match client:
+    //   even rows: memory(i, j) = file(i-1, j)
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            CHECK_READ(libendian::read(&myMap->getVertex(i, j).usdTexture, 1, fp));
+        {
+            const int dest_i = (i + !(j & 1)) % myMap->width;
+            CHECK_READ(libendian::read(&myMap->getVertex(dest_i, j).usdTexture, 1, fp));
+        }
     }
 
     // go to road data
@@ -833,10 +842,14 @@ bool CFile::save_wld(FILE* fp, void* data)
     // go to texture information for UpSideDown-Triangles
     libendian::write(map_data_header, fp);
 
+    // Write usdTexture: inverse of read shift.
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)
-            libendian::write(&myMap->getVertex(i, j).usdTexture, 1, fp);
+        {
+            const int src_i = (i + !(j & 1)) % myMap->width;
+            libendian::write(&myMap->getVertex(src_i, j).usdTexture, 1, fp);
+        }
     }
 
     // go to road data

@@ -390,47 +390,64 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             {
                 if(y % 2 == 0)
                 {
-                    // first RightSideUp
+                    // first RightSideUp at column 0 (seam wrap)
                     tempP2 = myMap.getVertex(width - 1, y + 1);
                     tempP2.x = 0;
                     DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(0, y), tempP2,
                                  myMap.getVertex(0, y + 1));
                     for(unsigned x = std::max(col_start, 1); x < width && x <= static_cast<unsigned>(col_end); x++)
                     {
-                        // RightSideUp
+                        // RSU at column x — s25client UpdateTrianglePos[0]: [pt, SW(pt), SE(pt)]
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
                                      myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
-                        // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1),
-                                     myMap.getVertex(x - 1, y), myMap.getVertex(x, y));
+                        // USD at visual column x-1 — same vertices as master.
+                        // Texture read unshift is applied inside DrawTriangle.
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), // P1
+                                     myMap.getVertex(x - 1, y), // P2 (reads usdTexture, unshifted internally)
+                                     myMap.getVertex(x, y));    // P3
                     }
-                    // last UpSideDown
-                    tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
-                                 myMap.getVertex(width - 1, y), tempP3);
+                    // last UpSideDown at column width-1 (wrap) — same vertices as master.
+                    {
+                        const int w = static_cast<int>(width);
+                        MapNode tP3 = myMap.getVertex(0, y);
+                        tP3.x = myMap.getVertex(w - 1, y).x + triangleWidth;
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(w - 1, y + 1), // P1
+                                     myMap.getVertex(w - 1, y), // P2 (reads usdTexture, unshifted internally)
+                                     tP3);                      // P3
+                    }
                 } else
                 {
                     for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
                     {
-                        // RightSideUp
+                        // RSU at column x — s25client UpdateTrianglePos[0]: [pt, SW(pt), SE(pt)]
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
                                      myMap.getVertex(x, y + 1), myMap.getVertex(x + 1, y + 1));
-                        // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1),
-                                     myMap.getVertex(x, y), myMap.getVertex(x + 1, y));
+                        // USD at column x — s25client UpdateTrianglePos[1]: [pt, SE(pt), E(pt)]
+                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1), // P1 = SE(x, y)
+                                     myMap.getVertex(x, y),      // P2 = pt (reads usdTexture)
+                                     myMap.getVertex(x + 1, y)); // P3 = E(x, y)
                     }
-                    // last RightSideUp
+                    // last RSU at column width-1 (wrap)
                     tempP3 = myMap.getVertex(0, y + 1);
                     tempP3.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
                     DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y),
                                  myMap.getVertex(width - 1, y + 1), tempP3);
-                    // last UpSideDown
-                    tempP1 = myMap.getVertex(0, y + 1);
-                    tempP1.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
-                    tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
+                    // last UpSideDown at column width-1 (wrap).
+                    // s25client UpdateTrianglePos[1] at (w-1, y):
+                    //   pt = (w-1, y), SE = (w-1 + (y&1), y+1) for odd y: (w, y+1) → wraps to (0, y+1)
+                    //   E = (w, y) → wraps to (0, y)
+                    // Odd rows have no I/O shift, P2 = (w-1, y) reads file(w-1, y) correctly.
+                    {
+                        const int w = static_cast<int>(width);
+                        MapNode tP1 = myMap.getVertex(0, y + 1);
+                        tP1.x = myMap.getVertex(w - 1, y + 1).x + triangleWidth;
+                        MapNode tP3 = myMap.getVertex(0, y);
+                        tP3.x = myMap.getVertex(w - 1, y).x + triangleWidth;
+                        DrawTriangle(display, displayRect, myMap, type,
+                                     tP1,                       // P1 = SE(w-1, y) with x-shifted
+                                     myMap.getVertex(w - 1, y), // P2 = pt
+                                     tP3);                      // P3 = E(w-1, y) with x-shifted
+                    }
                 }
             }
 
@@ -847,8 +864,21 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     {
         // upper2, ..... are for special use in winterland.
         Point16 upper, left, right, upper2, left2, right2;
-        auto const texture =
-          TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
+        // I/O shift: USD data at vertex(x,y) = file(x-1,y) for even rows.
+        // Read from (P2.VertexX+1, P2.VertexY) to get USD at visual (P2.VertexX, P2.VertexY).
+        uint8_t rawTex;
+        if(isRSU)
+            rawTex = P1.rsuTexture;
+        else
+        {
+            rawTex = P2.usdTexture;
+            if(P2.VertexY % 2 == 0)
+            {
+                int adjX = (P2.VertexX + 1 >= myMap.width) ? 0 : P2.VertexX + 1;
+                rawTex = myMap.getVertex(adjX, P2.VertexY).usdTexture;
+            }
+        }
+        auto const texture = TriangleTerrainType(rawTex & ~0x40); // Mask out harbor bit
         GetTerrainTextureCoords(type, texture, isRSU, texture_move, upper, left, right, upper2, left2, right2);
 
         // draw the triangle
@@ -887,6 +917,20 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     }
 
     // blit borders
+    //
+    // s25client TerrainRenderer::GenerateOpenGL checks six edge types per vertex
+    // using four terrain samples:
+    //   t1 = terrain[pos][0]  (RSU at pt)
+    //   t2 = terrain[pos][1]  (USD at pt)
+    //   t3 = terrain[E(pt)][0]   (RSU at x+1, y)
+    //   t4 = terrain[SW(pt)][1]  (USD at x-!(y&1), y+1)
+    //   left_right[0/1] = GetEdgeType(t2, t1) / GetEdgeType(t1, t2)
+    //   right_left[0/1] = GetEdgeType(t3, t2) / GetEdgeType(t2, t3)
+    //   top_down[0/1]   = GetEdgeType(t4, t1) / GetEdgeType(t1, t4)
+    //
+    // s25edit checks three edges per vertex (mirrors the original DrawTriangle
+    // second pass), with USD reads unshifted by +1 in even rows to compensate
+    // for the I/O shift (CFile.cpp).
     /// PRIORITY FROM HIGH TO LOW: SNOW, MINING_MEADOW, STEPPE, STEPPE_MEADOW2, MINING, MEADOW, FLOWER, STEPPE_MEADOW1,
     /// SWAMP, WATER, LAVA
     if(global::s2->getMapObj()->getRenderBorders())
@@ -894,8 +938,11 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         // RSU-Triangle
         if(isRSU)
         {
-            // left upper / right lower edge - therefore get the usd-texture from left to compare
+            // RSU left edge: compare USD from left vertex with RSU at this vertex.
+            // I/O shift: USD data moved right by 1 in even rows. Read from (x) instead of (x-1).
             Uint16 col = (P1.VertexX - 1 < 0 ? myMap.width - 1 : P1.VertexX - 1);
+            if(P1.VertexY % 2 == 0) // even row: unshift
+                col = (col + 1 >= myMap.width) ? 0 : col + 1;
             MapNode tempP = myMap.getVertex(col, P1.VertexY);
 
             SDL_Rect BorderRect;
@@ -935,8 +982,11 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         else
         {
             SDL_Rect BorderRect;
-            // left lower / right upper
-            auto borderSide = CalcBorders(myMap, P2.rsuTexture, P2.usdTexture, BorderRect);
+            // USD left/right edge: compare RSU vs USD at same visual column.
+            // I/O shift: USD moved right by 1 in even rows. P2.usdTexture at (x-1)
+            // now holds file(x-2,y). Read USD from P3.usdTexture at (x) = file(x-1,y).
+            auto borderSide =
+              CalcBorders(myMap, P2.rsuTexture, (P2.VertexY % 2 == 0) ? P3.usdTexture : P2.usdTexture, BorderRect);
 
             if(borderSide != BorderPreference::None)
             {
@@ -974,12 +1024,16 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                     DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
             }
 
-            // top / bottom - therefore get the rsu-texture one line above to compare
+            // USD top/bottom edge: compare RSU from vertex above with USD at this vertex.
+            // s25client analogue: GetEdgeType(t4, t1) / GetEdgeType(t1, t4)
+            //   where t4 = terrain[SW(pt)][1] = USD at SW(x, y).
             Uint16 row = (P2.VertexY - 1 < 0 ? myMap.height - 1 : P2.VertexY - 1);
             Uint16 col = (P2.VertexY % 2 == 0 ? P2.VertexX : (P2.VertexX + 1 > myMap.width - 1 ? 0 : P2.VertexX + 1));
             MapNode tempP = myMap.getVertex(col, row);
 
-            borderSide = CalcBorders(myMap, tempP.rsuTexture, P2.usdTexture, BorderRect);
+            // I/O shift: P2.usdTexture at (x-1) = file(x-2,y). Read from P3.usdTexture at (x) = file(x-1,y).
+            borderSide =
+              CalcBorders(myMap, tempP.rsuTexture, (P2.VertexY % 2 == 0) ? P3.usdTexture : P2.usdTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
                 Point32 thirdPt;

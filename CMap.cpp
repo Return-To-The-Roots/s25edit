@@ -8,8 +8,20 @@
 #include "CIO/CFile.h"
 #include "CIO/CFont.h"
 #include "CSurface.h"
+#include "Geometry.h"
 #include "callbacks.h"
 #include "globals.h"
+
+// I/O shift: for even rows, vertex(x,y).usdTexture = file(x-1,y).
+// Read .usdTexture from (x+1, y) to get the value for visual (x, y).
+static uint8_t usdAt(const bobMAP& map, int x, int y)
+{
+    if(y % 2 == 0)
+    {
+        x = (x + 1 >= map.width) ? 0 : x + 1;
+    }
+    return map.getVertex(x, y).usdTexture;
+}
 #include "gameData/LandscapeDesc.h"
 #include "gameData/TerrainDesc.h"
 #include <cassert>
@@ -1774,6 +1786,13 @@ void CMap::modifyShading(Position pos)
 
 void CMap::modifyTexture(Position pos, bool rsu, bool usd)
 {
+    // s25client TerrainRenderer::UpdateTriangleTerrain reads both textures from the same vertex:
+    //   terrain[nodeIdx][0] = RSU at (x, y)
+    //   terrain[nodeIdx][1] = USD at (x, y)  - same vertex as RSU
+    // After I/O shift: for even rows, USD at visual (pos) is at vertex(pos.x+1, pos.y).
+    MapNode& vertex = map->getVertex(clientUsdVertexPos(pos));
+    // Separate vertex for USD writes on even rows (I/O shift)
+    MapNode& usdVertex = (pos.y % 2 == 0) ? map->getVertex((pos.x + 1 >= map->width) ? 0 : pos.x + 1, pos.y) : vertex;
     if(modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED || modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
     {
         int newContent = rand() % 3;
@@ -1797,15 +1816,15 @@ void CMap::modifyTexture(Position pos, bool rsu, bool usd)
                 newContent = TRIANGLE_TEXTURE_MEADOW3_HARBOUR;
         }
         if(rsu)
-            map->getVertex(pos.x, pos.y).rsuTexture = newContent;
+            vertex.rsuTexture = newContent;
         if(usd)
-            map->getVertex(pos.x, pos.y).usdTexture = newContent;
+            usdVertex.usdTexture = newContent;
     } else
     {
         if(rsu)
-            map->getVertex(pos.x, pos.y).rsuTexture = modeContent;
+            vertex.rsuTexture = modeContent;
         if(usd)
-            map->getVertex(pos.x, pos.y).usdTexture = modeContent;
+            usdVertex.usdTexture = modeContent;
     }
 
     // at least setup the possible building and the resources at the vertex and 1 section/2 sections around
@@ -2025,7 +2044,7 @@ void CMap::modifyBuild(Position pos)
     const Uint8 height = curVertex.h;
     std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
-        mapVertices[i] = &map->getVertex(tempVertices[i]);
+        mapVertices[i] = &map->getVertex(clientUsdVertexPos(tempVertices[i].x, tempVertices[i].y));
 
     // calculate the building using the height of the vertices
     // this building is a mine
@@ -2113,13 +2132,17 @@ void CMap::modifyBuild(Position pos)
     // test if there is snow or lava at the vertex or around the vertex and touching the vertex (first section)
     if(building > 0x00)
     {
-        if(mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SNOW
-           || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_LAVA || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_LAVA
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SNOW
-           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_LAVA || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_LAVA
+        if(mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SNOW
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_SNOW
+           || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_LAVA
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_LAVA
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SNOW
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_SNOW
+           || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_LAVA
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_LAVA
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_LAVA
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SNOW
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_LAVA)
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_SNOW
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_LAVA)
         {
             building = 0x00;
         }
@@ -2129,10 +2152,12 @@ void CMap::modifyBuild(Position pos)
     if(building > 0x01)
     {
         if(mapVertices[4]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[4]->rsuTexture == TRIANGLE_TEXTURE_LAVA
-           || mapVertices[5]->usdTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[5]->usdTexture == TRIANGLE_TEXTURE_LAVA
-           || mapVertices[6]->rsuTexture == TRIANGLE_TEXTURE_SNOW || mapVertices[6]->usdTexture == TRIANGLE_TEXTURE_SNOW
+           || usdAt(*map, mapVertices[5]->VertexX, mapVertices[5]->VertexY) == TRIANGLE_TEXTURE_SNOW
+           || usdAt(*map, mapVertices[5]->VertexX, mapVertices[5]->VertexY) == TRIANGLE_TEXTURE_LAVA
+           || mapVertices[6]->rsuTexture == TRIANGLE_TEXTURE_SNOW
+           || usdAt(*map, mapVertices[6]->VertexX, mapVertices[6]->VertexY) == TRIANGLE_TEXTURE_SNOW
            || mapVertices[6]->rsuTexture == TRIANGLE_TEXTURE_LAVA
-           || mapVertices[6]->usdTexture == TRIANGLE_TEXTURE_LAVA)
+           || usdAt(*map, mapVertices[6]->VertexX, mapVertices[6]->VertexY) == TRIANGLE_TEXTURE_LAVA)
         {
             building = 0x01;
         }
@@ -2143,30 +2168,30 @@ void CMap::modifyBuild(Position pos)
     {
         if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER
             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER
-               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_WATER
+               || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_SWAMP)
            && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER
                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER
-               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+           && (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_WATER
+               || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_SWAMP)
            && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER
                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-           && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER
-               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SWAMP))
+           && (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_WATER
+               || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_SWAMP))
         {
             building = 0x00;
         } else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER
                    || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER
-                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_WATER
+                      || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_SWAMP)
                   || (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER
                       || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER
-                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_SWAMP)
+                  || (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_WATER
+                      || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_SWAMP)
                   || (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER
                       || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_SWAMP)
-                  || (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER
-                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_SWAMP))
+                  || (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_WATER
+                      || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_SWAMP))
         {
             building = 0x01;
         }
@@ -2176,11 +2201,11 @@ void CMap::modifyBuild(Position pos)
     if(building > 0x01)
     {
         if(mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_STEPPE
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_STEPPE
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_STEPPE
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE)
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_STEPPE)
         {
             building = 0x01;
         }
@@ -2193,52 +2218,52 @@ void CMap::modifyBuild(Position pos)
             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3
             || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1
-               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3
-               || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+           && (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING1
+               || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING2
+               || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING3
+               || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING4)
            && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1
-               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3
-               || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+           && (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING1
+               || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING2
+               || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING3
+               || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING4)
            && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-           && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1
-               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
-               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3
-               || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
+           && (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING1
+               || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING2
+               || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING3
+               || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING4))
         {
             building = 0x05;
         } else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                    || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                    || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                    || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1
-                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3
-                      || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING1
+                      || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING2
+                      || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING3
+                      || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING4)
                   || (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                       || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                       || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                       || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1
-                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3
-                      || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+                  || (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING1
+                      || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING2
+                      || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING3
+                      || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING4)
                   || (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                       || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                       || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                       || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-                  || (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1
-                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3
-                      || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
+                  || (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING1
+                      || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING2
+                      || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING3
+                      || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING4))
         {
             building = 0x01;
         }
@@ -2292,7 +2317,7 @@ void CMap::modifyResource(Position pos)
     MapNode& curVertex = map->getVertex(pos.x, pos.y);
     std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
-        mapVertices[i] = &map->getVertex(tempVertices[i]);
+        mapVertices[i] = &map->getVertex(clientUsdVertexPos(tempVertices[i].x, tempVertices[i].y));
 
     // SPECIAL CASE: test if we should set water only
     // test if vertex is surrounded by meadow and meadow-like textures
@@ -2310,20 +2335,20 @@ void CMap::modifyResource(Position pos)
         || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
         || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
         || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-       && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW1
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW2
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW3
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
-           || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+       && (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW1
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MEADOW1
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MEADOW2
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MEADOW3
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW2
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_FLOWER
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING_MEADOW
+           || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1
@@ -2338,20 +2363,20 @@ void CMap::modifyResource(Position pos)
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-       && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW1
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW2
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW3
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
-           || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+       && (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW1
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MEADOW1
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MEADOW2
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MEADOW3
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW2
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_FLOWER
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING_MEADOW
+           || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
        && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MEADOW1
@@ -2366,49 +2391,49 @@ void CMap::modifyResource(Position pos)
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW
            || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
-       && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW1
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW2
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW3
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_FLOWER
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW
-           || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR))
+       && (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW1
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MEADOW1
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MEADOW2
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MEADOW3
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW2
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_FLOWER
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_FLOWER_HARBOUR
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING_MEADOW
+           || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR))
     {
         curVertex.resource = 0x21;
     }
     // SPECIAL CASE: test if we should set fishes only
     // test if vertex is surrounded by water (first section) and at least one non-water texture in the second section
     else if((mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_WATER)
+            && (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_WATER)
             && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_WATER)
+            && (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_WATER)
             && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_WATER)
-            && (mapVertices[2]->usdTexture != TRIANGLE_TEXTURE_WATER
+            && (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_WATER)
+            && (usdAt(*map, mapVertices[2]->VertexX, mapVertices[2]->VertexY) != TRIANGLE_TEXTURE_WATER
                 || mapVertices[3]->rsuTexture != TRIANGLE_TEXTURE_WATER
                 || mapVertices[4]->rsuTexture != TRIANGLE_TEXTURE_WATER
-                || mapVertices[4]->usdTexture != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, mapVertices[4]->VertexX, mapVertices[4]->VertexY) != TRIANGLE_TEXTURE_WATER
                 || mapVertices[5]->rsuTexture != TRIANGLE_TEXTURE_WATER
-                || mapVertices[5]->usdTexture != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, mapVertices[5]->VertexX, mapVertices[5]->VertexY) != TRIANGLE_TEXTURE_WATER
                 || mapVertices[6]->rsuTexture != TRIANGLE_TEXTURE_WATER
-                || mapVertices[6]->usdTexture != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, mapVertices[6]->VertexX, mapVertices[6]->VertexY) != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[7]).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[7]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, tempVertices[7].x, tempVertices[7].y) != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[8]).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[8]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, tempVertices[8].x, tempVertices[8].y) != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[9]).rsuTexture != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[10]).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[10]).usdTexture != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, tempVertices[10].x, tempVertices[10].y) != TRIANGLE_TEXTURE_WATER
                 || map->getVertex(tempVertices[11]).rsuTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[12]).usdTexture != TRIANGLE_TEXTURE_WATER
-                || map->getVertex(tempVertices[14]).usdTexture != TRIANGLE_TEXTURE_WATER))
+                || usdAt(*map, tempVertices[12].x, tempVertices[12].y) != TRIANGLE_TEXTURE_WATER
+                || usdAt(*map, tempVertices[14].x, tempVertices[14].y) != TRIANGLE_TEXTURE_WATER))
     {
         curVertex.resource = 0x87;
     }
@@ -2417,26 +2442,26 @@ void CMap::modifyResource(Position pos)
              || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING2
              || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING3
              || mapVertices[0]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING1
-                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING3
-                || mapVertices[0]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+            && (usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING1
+                || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING2
+                || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING3
+                || usdAt(*map, mapVertices[0]->VertexX, mapVertices[0]->VertexY) == TRIANGLE_TEXTURE_MINING4)
             && (mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                 || mapVertices[1]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING1
-                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING3
-                || mapVertices[1]->usdTexture == TRIANGLE_TEXTURE_MINING4)
+            && (usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING1
+                || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING2
+                || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING3
+                || usdAt(*map, mapVertices[1]->VertexX, mapVertices[1]->VertexY) == TRIANGLE_TEXTURE_MINING4)
             && (mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING1
                 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING2
                 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING3
                 || mapVertices[2]->rsuTexture == TRIANGLE_TEXTURE_MINING4)
-            && (mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING1
-                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING2
-                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING3
-                || mapVertices[3]->usdTexture == TRIANGLE_TEXTURE_MINING4))
+            && (usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING1
+                || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING2
+                || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING3
+                || usdAt(*map, mapVertices[3]->VertexX, mapVertices[3]->VertexY) == TRIANGLE_TEXTURE_MINING4))
     {
         // check which resource to set
         if(mode == EDITOR_MODE_RESOURCE_RAISE)
