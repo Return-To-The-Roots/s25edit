@@ -76,7 +76,4 @@ private:
     static void update_flatVectors(bobMAP& myMap, Position pos);
     // update nodeVector based on new flatVectors around it
     static void update_nodeVector(bobMAP& myMap, Position pos);
-    static void GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
-                                        Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
-                                        Point16& right2);
 };

@@ -34,6 +34,18 @@ SDL_Rect rect2SDL_Rect(const Rect& rect)
     return result;
 }
 
+const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)
+{
+    const Uint8 s2Id = rawTextureId & ~0x40;
+    if(s2Id < map.s2IdToTerrain.size())
+    {
+        const auto idx = map.s2IdToTerrain[s2Id];
+        if(idx)
+            return &global::worldDesc.get(idx);
+    }
+    return nullptr;
+}
+
 void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3,
                                     SDL_Surface* source, const SDL_Rect& rect, Uint16 I1, Uint16 I2,
                                     Uint8 PreCalcPalettes[][256])
@@ -630,157 +642,12 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
 }
 } // namespace
 
-void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
-                                       Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
-                                       Point16& right2)
+static void getTerrainTextureCoords(const TerrainDesc& desc, bool isRSU, Point16& upper, Point16& left, Point16& right)
 {
-    const auto animOffset = Point16(-texture_move, texture_move);
-    switch(texture)
-    {
-            // in case of USD-Triangle "upper.x" and "upper.y" means "lowerX" and "lowerY"
-        case TRIANGLE_TEXTURE_STEPPE_MEADOW1:
-            upper = Point16(17, 96);
-            left = Point16(0, 126);
-            right = Point16(35, 126);
-            break;
-        case TRIANGLE_TEXTURE_MINING1:
-            upper = Point16(17, 48);
-            left = Point16(0, 78);
-            right = Point16(35, 78);
-            break;
-        case TRIANGLE_TEXTURE_SNOW:
-            if(isRSU)
-            {
-                upper = Point16(17, 0);
-                left = Point16(0, 30);
-                right = Point16(35, 30);
-            } else
-            {
-                upper = Point16(17, 28);
-                left = Point16(0, 0);
-                right = Point16(37, 0);
-            }
-            if(mapType == MAP_WINTERLAND)
-            {
-                if(isRSU)
-                {
-                    upper2 = Point16(231, 61) + animOffset;
-                    left2 = Point16(207, 62) + animOffset;
-                    right2 = Point16(223, 78) + animOffset;
-                } else
-                {
-                    upper2 = Point16(224, 79) + animOffset;
-                    left2 = Point16(232, 62) + animOffset;
-                    right2 = Point16(245, 76) + animOffset;
-                }
-            }
-            break;
-        case TRIANGLE_TEXTURE_SWAMP:
-            upper = Point16(113, 0);
-            left = Point16(96, 30);
-            right = Point16(131, 30);
-            if(mapType == MAP_WINTERLAND)
-            {
-                if(isRSU)
-                {
-                    upper2 = Point16(231, 61) + animOffset;
-                    left2 = Point16(207, 62) + animOffset;
-                    right2 = Point16(223, 78) + animOffset;
-                } else
-                {
-                    upper2 = Point16(224, 79) + animOffset;
-                    left2 = Point16(232, 62) + animOffset;
-                    right2 = Point16(245, 76) + animOffset;
-                }
-            }
-            break;
-        case TRIANGLE_TEXTURE_STEPPE:
-        case TRIANGLE_TEXTURE_STEPPE_:
-        case TRIANGLE_TEXTURE_STEPPE__:
-        case TRIANGLE_TEXTURE_STEPPE___:
-            upper = Point16(65, 0);
-            left = Point16(48, 30);
-            right = Point16(83, 30);
-            break;
-        case TRIANGLE_TEXTURE_WATER:
-        case TRIANGLE_TEXTURE_WATER_:
-        case TRIANGLE_TEXTURE_WATER__:
-            if(isRSU)
-            {
-                upper = Point16(231, 61) + animOffset;
-                left = Point16(207, 62) + animOffset;
-                right = Point16(223, 78) + animOffset;
-            } else
-            {
-                upper = Point16(224, 79) + animOffset;
-                left = Point16(232, 62) + animOffset;
-                right = Point16(245, 76) + animOffset;
-            }
-            break;
-        case TRIANGLE_TEXTURE_MEADOW1:
-            upper = Point16(65, 96);
-            left = Point16(48, 126);
-            right = Point16(83, 126);
-            break;
-        case TRIANGLE_TEXTURE_MEADOW2:
-            upper = Point16(113, 96);
-            left = Point16(96, 126);
-            right = Point16(131, 126);
-            break;
-        case TRIANGLE_TEXTURE_MEADOW3:
-            upper = Point16(161, 96);
-            left = Point16(144, 126);
-            right = Point16(179, 126);
-            break;
-        case TRIANGLE_TEXTURE_MINING2:
-            upper = Point16(65, 48);
-            left = Point16(48, 78);
-            right = Point16(83, 78);
-            break;
-        case TRIANGLE_TEXTURE_MINING3:
-            upper = Point16(113, 48);
-            left = Point16(96, 78);
-            right = Point16(131, 78);
-            break;
-        case TRIANGLE_TEXTURE_MINING4:
-            upper = Point16(161, 48);
-            left = Point16(144, 78);
-            right = Point16(179, 78);
-            break;
-        case TRIANGLE_TEXTURE_STEPPE_MEADOW2:
-            upper = Point16(17, 144);
-            left = Point16(0, 174);
-            right = Point16(35, 174);
-            break;
-        case TRIANGLE_TEXTURE_FLOWER:
-            upper = Point16(161, 0);
-            left = Point16(144, 30);
-            right = Point16(179, 30);
-            break;
-        case TRIANGLE_TEXTURE_LAVA:
-            if(isRSU)
-            {
-                upper = Point16(231, 117) + animOffset;
-                left = Point16(207, 118) + animOffset;
-                right = Point16(223, 134) + animOffset;
-            } else
-            {
-                upper = Point16(224, 135) + animOffset;
-                left = Point16(232, 118) + animOffset;
-                right = Point16(245, 132) + animOffset;
-            }
-            break;
-        case TRIANGLE_TEXTURE_MINING_MEADOW:
-            upper = Point16(65, 144);
-            left = Point16(48, 174);
-            right = Point16(83, 174);
-            break;
-        default: // TRIANGLE_TEXTURE_FLOWER
-            upper = Point16(161, 0);
-            left = Point16(144, 30);
-            right = Point16(179, 30);
-            break;
-    }
+    const auto tri = isRSU ? desc.GetRSUTriangle() : desc.GetUSDTriangle();
+    upper = Point16(static_cast<Sint16>(std::round(tri.tip.x)), static_cast<Sint16>(std::round(tri.tip.y)));
+    left = Point16(static_cast<Sint16>(std::round(tri.left.x)), static_cast<Sint16>(std::round(tri.left.y)));
+    right = Point16(static_cast<Sint16>(std::round(tri.right.x)), static_cast<Sint16>(std::round(tri.right.y)));
 }
 
 void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap,
@@ -793,17 +660,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     if(!GetAdjustedPoints(displayRect, myMap, p1, p2, p3))
         return;
 
-    // for moving water, lava, objects and so on
-    // This is very tricky: there are ice floes in the winterland and the water under this floes is moving.
-    // I don't know how this works in original settlers 2 but i solved it this way:
-    // i texture the triangle with normal water and then draw the floe over it. To Extract the floe
-    // from it's surrounded water, i use this color keys below. These are the color values for the water texture.
-    // I wrote a special SGE-Function that uses these color keys and ignores them in the Surf_Tileset.
-    static std::array<Uint32, 5> colorkeys = {14191, 14195, 13167, 13159, 11119};
-    static int texture_move = 0;
     static int roundCount = 0;
     static Uint32 roundTimeObjects = SDL_GetTicks();
-    static Uint32 roundTimeTextures = SDL_GetTicks();
     if(SDL_GetTicks() - roundTimeObjects > 30)
     {
         roundTimeObjects = SDL_GetTicks();
@@ -811,13 +669,6 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             roundCount = 0;
         else
             roundCount++;
-    }
-    if(SDL_GetTicks() - roundTimeTextures > 170)
-    {
-        roundTimeTextures = SDL_GetTicks();
-        texture_move++;
-        if(texture_move > 14)
-            texture_move = 0;
     }
 
     SDL_Surface* Surf_Tileset;
@@ -845,43 +696,27 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
     if(drawTextures)
     {
-        // upper2, ..... are for special use in winterland.
-        Point16 upper, left, right, upper2, left2, right2;
-        auto const texture =
-          TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
-        GetTerrainTextureCoords(type, texture, isRSU, texture_move, upper, left, right, upper2, left2, right2);
+        Point16 upper, left, right;
+        auto const rawTex = isRSU ? P1.rsuTexture : P2.usdTexture;
+        const auto* texDesc = getTerrainDesc(myMap, rawTex);
+        if(!texDesc)
+            return;
+        getTerrainTextureCoords(*texDesc, isRSU, upper, left, right);
 
         // draw the triangle
         // do not shade water and lava
-        if(texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
+        if(texDesc->kind == TerrainKind::Water || texDesc->kind == TerrainKind::Lava)
             sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
                                left.y, right.x, right.y);
         else
         {
-            // draw special winterland textures with moving water (ice floe textures)
-            if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
-            {
-                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y,
-                                   left2.x, left2.y, right2.x, right2.y);
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset,
-                                                            upper.x, upper.y, left.x, left.y, right.x, right.y,
-                                                            P1.shading << 8, P2.shading << 8, P3.shading << 8,
-                                                            gouData[type], colorkeys.data(), colorkeys.size());
-                else
-                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
-                                                     upper.y, left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i,
-                                                     colorkeys.data(), colorkeys.size());
-            } else
-            {
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
-                                                   upper.y, left.x, left.y, right.x, right.y, P1.shading << 8,
-                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
-                else
-                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
-                                            left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i);
-            }
+            if(global::s2->getMapObj()->getBitsPerPixel() == 8)
+                sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
+                                               upper.y, left.x, left.y, right.x, right.y, P1.shading << 8,
+                                               P2.shading << 8, P3.shading << 8, gouData[type]);
+            else
+                sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
+                                        left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i);
         }
         return;
     }
