@@ -259,6 +259,11 @@ std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, T
     {
         for(int i = 0; i < myMap->width; i++)
         {
+            // Aligned with s25client MapLoader::InitNodes:
+            //   node.t2 = MapLayer::Terrain2 at (pt.x, pt.y)
+            //   USD texture stored at the same visual position as RSU.
+            // clientUsdVertexPos(i,j) = (i,j) identity — marker that this is
+            // using client convention (vertex(x,y).usdTexture = USD at visual (x,y)).
             MapNode& curVertex = myMap->getVertex(clientUsdVertexPos(i, j));
             curVertex.h = 0x0A;
 
@@ -1775,6 +1780,10 @@ void CMap::modifyShading(Position pos)
 
 void CMap::modifyTexture(Position pos, bool rsu, bool usd)
 {
+    // Aligned with s25client TerrainRenderer::UpdateTriangleTerrain:
+    //   terrain[nodeIdx][1] = USD texture — read from same vertex as RSU.
+    // s25edit old: visual USD(x,y) read from vertex(x - !(y&1), y).usdTexture.
+    // s25edit now: vertex(pos).usdTexture = USD at visual (pos) — identity after I/O shift.
     MapNode& vertex = map->getVertex(clientUsdVertexPos(pos));
     if(modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED || modeContent == TRIANGLE_TEXTURE_MEADOW_MIXED_HARBOUR)
     {
@@ -2027,6 +2036,12 @@ void CMap::modifyBuild(Position pos)
     const Uint8 height = curVertex.h;
     std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
+        // s25client MapNode::t2 is stored at visual (x,y) — no offset.
+        // s25edit old: USD reads/writes used editor convention
+        //   (visual USD(x,y) → vertex(x - !(y&1), y).usdTexture).
+        // s25edit now: memory shifted during I/O, so vertex(pos).usdTexture
+        //   = USD at visual (pos).  tempVertices uses old editor positions;
+        //   clientUsdVertexPos converts them to client memory positions.
         mapVertices[i] = &map->getVertex(clientUsdVertexPos(tempVertices[i].x, tempVertices[i].y));
 
     // calculate the building using the height of the vertices
@@ -2294,6 +2309,7 @@ void CMap::modifyResource(Position pos)
     MapNode& curVertex = map->getVertex(pos.x, pos.y);
     std::array<const MapNode*, 7> mapVertices;
     for(unsigned i = 0; i < mapVertices.size(); i++)
+        // Same tempVertices → client convention conversion as modifyBuild.
         mapVertices[i] = &map->getVertex(clientUsdVertexPos(tempVertices[i].x, tempVertices[i].y));
 
     // SPECIAL CASE: test if we should set water only

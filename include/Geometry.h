@@ -7,84 +7,47 @@
 #include "defines.h"
 
 /// ---------------------------------------------------------------------------
-/// Two USD triangle coordinate conventions.
+/// USD triangle coordinate conventions — aligning with s25client.
 ///
-/// s25client (new, "client"):
-///   visual USD(x, y) ≡ vertex (x, y).usdTexture
+/// RSU triangles are identical in both.  USD differs in odd rows only:
 ///
-/// s25edit (old, "editor"):
-///   visual USD(x, y) ≡ vertex (x - !(y & 1), y).usdTexture
+/// s25client TerrainRenderer::UpdateTrianglePos[1]:
+///   gl_vertices[pos+1][0] = GetVertexPos(pt)          = (x, y)
+///   gl_vertices[pos+1][1] = GetNeighbour SE(pt)        = (x + (y&1), y+1)
+///   gl_vertices[pos+1][2] = GetNeighbour E(pt)         = (x+1, y)
+///   For odd rows: (x, y+1), (x, y), (x+1, y)
 ///
-/// RSU triangles are identical in both.
+/// s25edit old
+/// (CSurface.cpp master, even row USD loop, parity case):
+///   DrawTriangle(..., (x+1, y+1), (x, y), (x+1, y))
+///   Vertex 0 = (x+1, y+1) = SE(x+1, y) instead of SE(x, y).
 ///
-/// During the transition:
-///   - Updated call sites use the client* coordinate wrappers or access
-///     .usdTexture directly (identity convention).
-///   - Non-updated call sites use the editor* wrappers.
-///   - When all call sites are migrated, the editor* wrappers can be deleted.
+/// s25client MapLoader::InitNodes assigns USD texture:
+///   node.t2 = MapLayer::Terrain2 at (pt.x, pt.y) — same visual as node.t1.
+/// s25edit old: vertex(i,j).usdTexture read from file(i,j) without shift;
+///   render-time: visual USD(x,y) reads vertex(x - !(y&1), y).usdTexture.
+/// s25edit now: CFile.cpp shifts during I/O so vertex(i,j).usdTexture
+///   = USD at visual (i,j), matching node.t2.
+///
+/// The client* identity helpers mark "reviewed for client convention."
+/// editor* helpers document the old convention for reference.
 /// ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
-// Per-convention USD source-vertex mapping
-// ---------------------------------------------------------------------------
-
-/// s25client convention: USD(x,y) reads vertex (x, y).usdTexture
 inline Position clientUsdVertexPos(Position visualPos)
 {
     return visualPos;
 }
-
-/// s25client convention: USD(x,y) reads vertex (x, y).usdTexture
 inline Position clientUsdVertexPos(int x, int y)
 {
     return {x, y};
 }
 
-/// Editor convention: USD(x,y) reads vertex (x - !(y&1), y).usdTexture
+/// Old editor: USD(x,y) ← vertex(x - !(y&1), y).usdTexture.
 inline Position editorUsdVertexPos(Position visualPos)
 {
     return {visualPos.x - !(visualPos.y & 1), visualPos.y};
 }
-
-/// Editor convention: USD(x,y) reads vertex (x - !(y&1), y).usdTexture
 inline Position editorUsdVertexPos(int x, int y)
 {
     return {x - !(y & 1), y};
-}
-
-// ---------------------------------------------------------------------------
-// Per-convention USD triangle vertex sets
-// ---------------------------------------------------------------------------
-
-/// Three vertices of a USD triangle in DrawTriangle parameter order:
-/// P1 = bottom-left, P2 = top (reads usdTexture), P3 = bottom-right.
-struct UsdVertices
-{
-    int p1x, p1y;
-    int p2x, p2y;
-    int p3x, p3y;
-};
-
-/// USD triangle vertices for s25client convention (identity mapping).
-inline UsdVertices clientUsdTriangleVertices(int triX, int triY)
-{
-    const Position top = clientUsdVertexPos(triX, triY);
-    return {top.x + (triY & 1),
-            triY + 1, // P1 = bottom-left
-            top.x,
-            triY, // P2 = top
-            top.x + 1,
-            triY}; // P3 = bottom-right
-}
-
-/// USD triangle vertices for editor convention (backward compat).
-inline UsdVertices editorUsdTriangleVertices(int triX, int triY)
-{
-    const Position top = editorUsdVertexPos(triX, triY);
-    return {top.x + (triY & 1),
-            triY + 1, // P1 = bottom-left
-            top.x,
-            triY, // P2 = top
-            top.x + 1,
-            triY}; // P3 = bottom-right
 }

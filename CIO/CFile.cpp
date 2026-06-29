@@ -570,7 +570,21 @@ bobMAP* CFile::read_wld(FILE* fp)
     // go to texture information for UpSideDown-Triangles
     fseek(fp, 16, SEEK_CUR);
 
-    // Read usdTexture: file → memory (s25client convention).
+    // Read usdTexture: file → memory (align with s25client MapNode layout).
+    //
+    // s25client MapLoader::InitNodes:
+    //   node.t1 = MapLayer::Terrain1 at (pt.x, pt.y)
+    //   node.t2 = MapLayer::Terrain2 at (pt.x, pt.y)  — same visual position
+    //   Both textures are stored per-vertex with no offset.
+    //
+    // s25edit old (master):
+    //   file(i, j) → vertex(i, j).usdTexture  (no shift during load)
+    //   Render-time: visual USD(x,y) reads vertex(x - !(y&1), y).usdTexture
+    //   So file(i, j) contains USD for visual (i + !(j&1), j) in odd rows.
+    //
+    // s25edit now (align-coords):
+    //   Shift during load so vertex(i, j).usdTexture = USD at visual (i, j)
+    //   matching s25client's node.t2.
     //   memory(i, j) = file(i - !(j&1), j)
     for(int j = 0; j < myMap->height; j++)
     {
@@ -839,6 +853,8 @@ bool CFile::save_wld(FILE* fp, void* data)
     libendian::write(map_data_header, fp);
 
     // Write usdTexture: file(i, j) = memory(i + !(j&1), j)
+    //   Inverse of the read shift: restores the WLD file's original layout
+    //   (USD for visual (i + !(j&1), j) stored at file position (i, j)).
     for(int j = 0; j < myMap->height; j++)
     {
         for(int i = 0; i < myMap->width; i++)

@@ -6,7 +6,6 @@
 #include "CSurface.h"
 #include "CGame.h"
 #include "CMap.h"
-#include "Geometry.h"
 #include "Rect.h"
 #include "SGE/sge_blib.h"
 #include "SGE/sge_surface.h"
@@ -401,16 +400,36 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         // RightSideUp
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
                                      myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
-                        // UpSideDown
-                        const auto usd = clientUsdTriangleVertices(x - 1, y);
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(usd.p1x, usd.p1y),
-                                     myMap.getVertex(usd.p2x, usd.p2y), myMap.getVertex(usd.p3x, usd.p3y));
+                        // UpSideDown — aligned with s25client UpdateTrianglePos[1].
+                        //
+                        // s25client USD triangle at (x, y) vertices:
+                        //   gl_vertices[pos+1][0] = GetVertexPos(pt)          = (x, y)
+                        //   gl_vertices[pos+1][1] = SE(pt) = (x + (y&1), y+1)
+                        //   gl_vertices[pos+1][2] = E(pt)  = (x+1, y)
+                        //   For odd rows: (x, y+1), (x, y), (x+1, y)
+                        //
+                        // UpSideDown — s25client UpdateTrianglePos[1]:
+                        //   P1 = SE(pt) = (x + (y&1), y+1)
+                        //   P2 = pt     = (x, y)
+                        //   P3 = E(pt)  = (x+1, y)
+                        DrawTriangle(display, displayRect, myMap, type,
+                                     myMap.getVertex(x - 1 + (y & 1), y + 1), // P1 = SE(x-1, y)
+                                     myMap.getVertex(x - 1, y),               // P2 = pt
+                                     myMap.getVertex(x, y));                  // P3 = E(pt)
                     }
-                    // last UpSideDown
-                    tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
-                                 myMap.getVertex(width - 1, y), tempP3);
+                    // last UpSideDown (wrap edge, s25client convention)
+                    //   P1 = SE(width-1, y) = (width-1, y+1) for even y
+                    //   P2 = (width-1, y)
+                    //   P3 = E(width-1, y)  = (width, y) → wraps to (0, y)
+                    {
+                        const int w = static_cast<int>(width);
+                        MapNode tP3 = myMap.getVertex(0, y);
+                        tP3.x = myMap.getVertex(w - 1, y).x + triangleWidth;
+                        DrawTriangle(display, displayRect, myMap, type,
+                                     myMap.getVertex(w - 1, y + 1), // P1 = SE(width-1, y) for even y
+                                     myMap.getVertex(w - 1, y),     // P2 = pt
+                                     tP3);
+                    }
                 } else
                 {
                     for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
@@ -418,22 +437,39 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                         // RightSideUp
                         DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
                                      myMap.getVertex(x, y + 1), myMap.getVertex(x + 1, y + 1));
-                        // UpSideDown
-                        const auto usd = clientUsdTriangleVertices(x, y);
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(usd.p1x, usd.p1y),
-                                     myMap.getVertex(usd.p2x, usd.p2y), myMap.getVertex(usd.p3x, usd.p3y));
+                        // UpSideDown — s25client UpdateTrianglePos[1]:
+                        //   P1 = SE(pt) = (x + (y&1), y+1)
+                        //   P2 = pt     = (x, y)
+                        //   P3 = E(pt)  = (x+1, y)
+                        DrawTriangle(display, displayRect, myMap, type,
+                                     myMap.getVertex(x + (y & 1), y + 1), // P1 = SE(x, y)
+                                     myMap.getVertex(x, y),               // P2 = pt
+                                     myMap.getVertex(x + 1, y));          // P3 = E(pt)
                     }
                     // last RightSideUp
                     tempP3 = myMap.getVertex(0, y + 1);
                     tempP3.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
                     DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y),
                                  myMap.getVertex(width - 1, y + 1), tempP3);
-                    // last UpSideDown
-                    tempP1 = myMap.getVertex(0, y + 1);
-                    tempP1.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
-                    tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
+                    // last UpSideDown (wrap edge, s25client convention)
+                    // Visual column width-1, P3 wraps to (0, y)
+                    {
+                        // last UpSideDown (wrap edge, s25client convention)
+                        //   P1 = SE(width-1, y) = (width, y+1) for odd y → wraps to (0, y+1)
+                        //   P2 = (width-1, y)
+                        //   P3 = E(width-1, y)  = (width, y) → wraps to (0, y)
+                        {
+                            const int w = static_cast<int>(width);
+                            MapNode tP1 = myMap.getVertex(0, y + 1);
+                            tP1.x = myMap.getVertex(w - 1, y + 1).x + triangleWidth;
+                            MapNode tP3 = myMap.getVertex(0, y);
+                            tP3.x = myMap.getVertex(w - 1, y).x + triangleWidth;
+                            DrawTriangle(display, displayRect, myMap, type,
+                                         tP1,                       // P1 = SE wrapped
+                                         myMap.getVertex(w - 1, y), // P2 = pt
+                                         tP3);                      // P3 = E wrapped
+                        }
+                    }
                 }
             }
 
