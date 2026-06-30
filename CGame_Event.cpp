@@ -11,6 +11,41 @@
 #include "callbacks.h"
 #include "globals.h"
 
+namespace {
+bool tryZoom(Position deltaTriangle, int deltaInc, CMap* mapObj)
+{
+    if(!mapObj || !mapObj->getMap())
+        return false;
+    const int newInc = triangleIncrease + deltaInc;
+    if(newInc < 1 || newInc > 10)
+        return false;
+
+    callback::PleaseWait(INITIALIZING_CALL);
+    triangleWidth += deltaTriangle.x;
+    triangleHeight += deltaTriangle.y;
+    triangleIncrease += deltaInc;
+    bobMAP* myMap = mapObj->getMap();
+    myMap->updateVertexCoords();
+    CSurface::get_nodeVectors(*myMap);
+    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+    return true;
+}
+
+void resetZoom(CMap* mapObj)
+{
+    if(!mapObj || !mapObj->getMap())
+        return;
+    callback::PleaseWait(INITIALIZING_CALL);
+    triangleWidth = TRIANGLE_WIDTH_DEFAULT;
+    triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
+    triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
+    bobMAP* myMap = mapObj->getMap();
+    myMap->updateVertexCoords();
+    CSurface::get_nodeVectors(*myMap);
+    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+}
+} // namespace
+
 void CGame::EventHandling(SDL_Event* Event)
 {
     switch(Event->type)
@@ -84,45 +119,11 @@ void CGame::EventHandling(SDL_Event* Event)
 #endif
                 // F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
                 case SDLK_F5:
-                    if(triangleIncrease < ZOOM_INCREASE_MAX && MapObj->getMap())
-                    {
-                        callback::PleaseWait(INITIALIZING_CALL);
-                        triangleHeight += ZOOM_STEP_HEIGHT;
-                        triangleWidth += ZOOM_STEP_WIDTH;
-                        triangleIncrease += ZOOM_STEP_INCREASE;
-                        bobMAP* myMap = MapObj->getMap();
-                        myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(*myMap);
-                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-                    }
+                    tryZoom(Position(ZOOM_STEP_WIDTH, ZOOM_STEP_HEIGHT), ZOOM_STEP_INCREASE, MapObj.get());
                     break;
-                case SDLK_F6:
-                {
-                    if(MapObj->getMap())
-                    {
-                        callback::PleaseWait(INITIALIZING_CALL);
-                        triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
-                        triangleWidth = TRIANGLE_WIDTH_DEFAULT;
-                        triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
-                        bobMAP* myMap = MapObj->getMap();
-                        myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(*myMap);
-                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-                    }
-                }
-                break;
+                case SDLK_F6: resetZoom(MapObj.get()); break;
                 case SDLK_F7:
-                    if(triangleIncrease > ZOOM_INCREASE_MIN && MapObj->getMap())
-                    {
-                        callback::PleaseWait(INITIALIZING_CALL);
-                        triangleHeight -= ZOOM_STEP_HEIGHT;
-                        triangleWidth -= ZOOM_STEP_WIDTH;
-                        triangleIncrease -= ZOOM_STEP_INCREASE;
-                        bobMAP* myMap = MapObj->getMap();
-                        myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(*myMap);
-                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-                    }
+                    tryZoom(Position(-ZOOM_STEP_WIDTH, -ZOOM_STEP_HEIGHT), -ZOOM_STEP_INCREASE, MapObj.get());
                     break;
 
                 default: break;
@@ -142,17 +143,17 @@ void CGame::EventHandling(SDL_Event* Event)
 
         case SDL_MOUSEMOTION:
         {
-            // setup mouse cursor data
-            if(MapObj && MapObj->isActive())
+            // Avoid duplicate events especially when warping the mouse back during panning
             {
-                if((Event->motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) == 0)
-                {
-                    Cursor.pos = Position(Event->motion.x, Event->motion.y);
-                }
-            } else
-            {
-                Cursor.pos = Position(Event->motion.x, Event->motion.y);
+                static Position lastMousePos = Position::Invalid();
+                const Position newPos(Event->motion.x, Event->motion.y);
+                if(newPos == lastMousePos)
+                    break;
+                lastMousePos = newPos;
             }
+
+            // setup mouse cursor data
+            Cursor.pos = Position(Event->motion.x, Event->motion.y);
             /*
                         //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the
                switch and stop
@@ -381,6 +382,40 @@ void CGame::EventHandling(SDL_Event* Event)
                 if(Menu->isActive() && !Menu->isWaste())
                     Menu->setMouseData(Event->button);
             }
+            break;
+        }
+
+        case SDL_MOUSEWHEEL:
+        {
+            if(!MapObj)
+                break;
+
+            int y = Event->wheel.y;
+            if(Event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                y = -y;
+            if(y == 0)
+                break;
+
+            const Position deltaTri = (y > 0) ? Position(11, 5) : Position(-11, -5);
+            const int deltaInc = (y > 0) ? 1 : -1;
+
+            // Save values before zoom for cursor-centered adjustment
+            const PointF oldTriSize(triangleWidth, triangleHeight);
+            const PointF mousePos(Cursor.pos);
+
+            if(!tryZoom(deltaTri, deltaInc, MapObj.get()))
+                break;
+
+            // Keep the map point under the cursor stable after zoom
+            DisplayRectangle dr = MapObj->getDisplayRect();
+            const PointF ratio(triangleWidth / oldTriSize.x, triangleHeight / oldTriSize.y);
+            const auto size = dr.getSize();
+            const PointF newOrigin = (PointF(dr.getOrigin()) + mousePos) * ratio - mousePos;
+            dr.left = static_cast<Sint32>(newOrigin.x);
+            dr.top = static_cast<Sint32>(newOrigin.y);
+            dr.right = dr.left + size.x;
+            dr.bottom = dr.top + size.y;
+            MapObj->setDisplayRect(dr);
             break;
         }
 
