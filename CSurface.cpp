@@ -22,6 +22,20 @@
 static bool sgeLockOff = (sge_Lock_OFF(), true);
 
 namespace {
+const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)
+{
+    const Uint8 s2Id = rawTextureId & ~0x40;
+    if(s2Id < map.s2IdToTerrain.size())
+    {
+        const auto idx = map.s2IdToTerrain[s2Id];
+        if(idx)
+            return &global::worldDesc.get(idx);
+    }
+    return nullptr;
+}
+} // namespace
+
+namespace {
 SDL_Rect rect2SDL_Rect(const Rect& rect)
 {
     Point<Sint16> origin(rect.getOrigin());
@@ -853,7 +867,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
         // draw the triangle
         // do not shade water and lava
-        if(texture == TRIANGLE_TEXTURE_WATER || texture == TRIANGLE_TEXTURE_LAVA)
+        if(const auto* terrainDesc = getTerrainDesc(myMap, texture);
+           terrainDesc && (terrainDesc->kind == TerrainKind::Water || terrainDesc->kind == TerrainKind::Lava))
             sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
                                left.y, right.x, right.y);
         else
@@ -1211,13 +1226,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                          (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
                     break;
                 case 0x04:
-                    if(P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW1_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW1_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW2_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MEADOW3_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_STEPPE_MEADOW2_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_FLOWER_HARBOUR
-                       || P2.rsuTexture == TRIANGLE_TEXTURE_MINING_MEADOW_HARBOUR)
+                    if(P2.rsuTexture & 0x40)
                         Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
                              (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
                              (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
