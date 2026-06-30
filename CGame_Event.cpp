@@ -36,8 +36,8 @@ void resetZoom(CMap* mapObj)
     if(!mapObj || !mapObj->getMap())
         return;
     callback::PleaseWait(INITIALIZING_CALL);
-    triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
     triangleWidth = TRIANGLE_WIDTH_DEFAULT;
+    triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
     triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
     bobMAP* myMap = mapObj->getMap();
     myMap->updateVertexCoords();
