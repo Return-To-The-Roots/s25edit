@@ -12,6 +12,8 @@ std::vector<bobBMP> global::bmpArray(MAXBOBBMP);
 std::vector<bobSHADOW> global::shadowArray(MAXBOBSHADOW);
 // array for all palettes
 std::vector<bobPAL> global::palArray(MAXBOBPAL);
+// palette animation data per tileset (indexed by 8-bit tileset bmpArray index)
+std::vector<std::vector<PaletteAnimData>> global::tilesetAnimData;
 // the game object
 CGame* global::s2;
 

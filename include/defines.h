@@ -91,6 +91,19 @@ struct bobPAL
     std::array<SDL_Color, 256> colors;
 };
 
+// Palette animation data parsed from CRNG chunks in LBM files
+struct PaletteAnimData
+{
+    bool isActive = false;
+    bool moveUp = true;
+    uint16_t rate = 16384;
+    uint8_t firstClr = 0;
+    uint8_t lastClr = 0;
+    int currentOffset = 0;
+    int lastAppliedOffset = 0;
+    uint32_t lastUpdateTime = 0;
+};
+
 // Structure for Bobtype 7 (Shadow-Bitmaps)
 struct bobSHADOW
 {

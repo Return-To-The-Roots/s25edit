@@ -350,143 +350,208 @@ bool CFile::read_lbm(FILE* fp, const boost::filesystem::path& filepath)
     /* READ SECOND CHUNK "CMAP" */
 
     // chunk-identifier (4 Bytes)
-    // search for the "CMAP" and skip other chunk-types
-    while(!feof(fp))
+    // search for the "CMAP" and skip/parse other chunk-types
     {
-        CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
+        // Local collection of CRNG (palette animation) chunks
+        std::vector<PaletteAnimData> crngData;
 
-        if(strcmp(chunk_identifier.data(), "CMAP") == 0)
-            break;
-        else
-        {
+        // Helper to parse a CRNG chunk (caller already read chunk ID, we read length+data)
+        auto readCRNG = [&]() -> bool {
             Uint32 chunkLen;
-            CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
-            if(chunkLen & 1)
-                chunkLen++;
-            fseek(fp, chunkLen, SEEK_CUR);
-        }
-    }
-    if(feof(fp))
-        return false;
-    // length of data block
-    CHECK_READ(libendian::be_read_ui(&length, fp));
-    // must be 768 (RGB = 3 Byte x 256 Colors)
-    if(length != 3u * 256u)
-        return false;
-    // palette
-    for(auto& color : colors)
-    {
-        CHECK_READ(libendian::read(&color.r, 1, fp));
-        CHECK_READ(libendian::read(&color.g, 1, fp));
-        CHECK_READ(libendian::read(&color.b, 1, fp));
-    }
-
-    /* READ THIRD CHUNK "BODY" */
-
-    // chunk-identifier (4 Bytes)
-    // search for the "BODY" and skip other chunk-types
-    while(!feof(fp))
-    {
-        CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
-
-        if(strcmp(chunk_identifier.data(), "BODY") == 0)
-            break;
-        else
-        {
-            Uint32 chunkLen;
-            CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
-            if(chunkLen & 1)
-                chunkLen++;
-            fseek(fp, chunkLen, SEEK_CUR);
-        }
-    }
-    if(feof(fp))
-        return false;
-    // length of data block
-    CHECK_READ(libendian::be_read_ui(&length, fp));
-
-    // now we are ready to read the picture lines and fill the surface, so lets create one
-    if(!(bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, colors)))
-    {
-        std::cerr << "Failed to create surface: " << SDL_GetError() << std::endl;
-        return false;
-    }
-
-    if(compression_flag == 0)
-    {
-        // picture uncompressed
-        // main loop for reading picture lines
-        for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
-        {
-            // loop for reading pixels of the actual picture line
-            for(pos.x = 0; pos.x < bmpArray->w; pos.x++)
+            if(!libendian::be_read_ui(&chunkLen, fp))
+                return false;
+            if(chunkLen >= 8)
             {
-                // read color value (1 Byte)
-                CHECK_READ(libendian::read(&color_value, 1, fp));
-                // draw
-                CSurface::DrawPixel_Color(bmpArray->surface.get(), pos, (Uint32)color_value);
+                PaletteAnimData anim;
+                uint16_t padding, rate, flags;
+                if(!libendian::be_read_us(&padding, fp))
+                    return false;
+                if(!libendian::be_read_us(&rate, fp))
+                    return false;
+                if(!libendian::be_read_us(&flags, fp))
+                    return false;
+                uint8_t firstClr, lastClr;
+                if(!libendian::read(&firstClr, 1, fp))
+                    return false;
+                if(!libendian::read(&lastClr, 1, fp))
+                    return false;
+                anim.isActive = (flags & 1) != 0;
+                anim.moveUp = (flags & 2) != 0;
+                if(rate)
+                    anim.isActive = anim.moveUp = true;
+                anim.rate = rate;
+                anim.firstClr = firstClr;
+                anim.lastClr = lastClr;
+                anim.currentOffset = 0;
+                anim.lastUpdateTime = SDL_GetTicks();
+                crngData.push_back(anim);
+                if(chunkLen > 8)
+                {
+                    uint32_t remaining = chunkLen - 8;
+                    if(remaining & 1)
+                        remaining++;
+                    fseek(fp, remaining, SEEK_CUR);
+                } else if(chunkLen & 1)
+                    fseek(fp, 1, SEEK_CUR);
+            } else
+            {
+                if(chunkLen & 1)
+                    chunkLen++;
+                fseek(fp, chunkLen, SEEK_CUR);
+            }
+            return true;
+        };
+
+        while(!feof(fp))
+        {
+            CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
+
+            if(strcmp(chunk_identifier.data(), "CMAP") == 0)
+                break;
+            else if(strcmp(chunk_identifier.data(), "CRNG") == 0)
+            {
+                CHECK_READ(readCRNG());
+            } else
+            {
+                Uint32 chunkLen;
+                CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
+                if(chunkLen & 1)
+                    chunkLen++;
+                fseek(fp, chunkLen, SEEK_CUR);
             }
         }
-
-    } else if(compression_flag == 1)
-    {
-        // picture compressed
-
-        // main loop for reading picture lines
-        for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
+        if(feof(fp))
+            return false;
+        // length of data block
+        CHECK_READ(libendian::be_read_ui(&length, fp));
+        // must be 768 (RGB = 3 Byte x 256 Colors)
+        if(length != 3u * 256u)
+            return false;
+        // palette
+        for(auto& color : colors)
         {
-            // loop for reading pixels of the actual picture line
-            //(cause of a kind of RLE-Compression we cannot read the pixels sequentially)
-            //'x' will be incremented WITHIN the loop
-            for(pos.x = 0; pos.x < bmpArray->w;)
+            CHECK_READ(libendian::read(&color.r, 1, fp));
+            CHECK_READ(libendian::read(&color.g, 1, fp));
+            CHECK_READ(libendian::read(&color.b, 1, fp));
+        }
+
+        /* READ THIRD CHUNK "BODY" */
+
+        // chunk-identifier (4 Bytes)
+        // search for the "BODY" and skip/parse other chunk-types
+        while(!feof(fp))
+        {
+            CHECK_READ(libendian::read(chunk_identifier.data(), 4, fp));
+
+            if(strcmp(chunk_identifier.data(), "BODY") == 0)
+                break;
+            else if(strcmp(chunk_identifier.data(), "CRNG") == 0)
             {
-                // read compression type
-                CHECK_READ(libendian::read(&ctype, 1, fp));
+                CHECK_READ(readCRNG());
+            } else
+            {
+                Uint32 chunkLen;
+                CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
+                if(chunkLen & 1)
+                    chunkLen++;
+                fseek(fp, chunkLen, SEEK_CUR);
+            }
+        }
+        if(feof(fp))
+            return false;
+        // length of data block
+        CHECK_READ(libendian::be_read_ui(&length, fp));
 
-                if(ctype >= 0)
+        // now we are ready to read the picture lines and fill the surface, so lets create one
+        if(!(bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, colors)))
+        {
+            std::cerr << "Failed to create surface: " << SDL_GetError() << std::endl;
+            return false;
+        }
+
+        if(compression_flag == 0)
+        {
+            // picture uncompressed
+            // main loop for reading picture lines
+            for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
+            {
+                // loop for reading pixels of the actual picture line
+                for(pos.x = 0; pos.x < bmpArray->w; pos.x++)
                 {
-                    // following 'ctype + 1' pixels are uncompressed
-                    for(int k = 0; k < ctype + 1; k++, pos.x++)
-                    {
-                        // read color value (1 Byte)
-                        CHECK_READ(libendian::read(&color_value, 1, fp));
-                        // draw
-                        CSurface::DrawPixel_Color(bmpArray->surface.get(), pos, (Uint32)color_value);
-                    }
-                } else if(ctype >= -127)
-                {
-                    // draw the following byte '-ctype + 1' times to the surface
+                    // read color value (1 Byte)
                     CHECK_READ(libendian::read(&color_value, 1, fp));
-
-                    for(int k = 0; k < -ctype + 1; k++, pos.x++)
-                        CSurface::DrawPixel_Color(bmpArray->surface.get(), pos, (Uint32)color_value);
-                } else // if (ctype == -128)
-                {
-                    // ignore
+                    // draw
+                    CSurface::DrawPixel_Color(bmpArray->surface.get(), pos, (Uint32)color_value);
                 }
             }
-        }
-    } else
-        return false;
 
-    // if this is a texture file, we need a secondary 32-bit surface for SGE and we set a color key at both surfaces
-    if(filepath.filename() == "TEX5.LBM" || filepath.filename() == "TEX6.LBM" || filepath.filename() == "TEX7.LBM"
-       || filepath.filename() == "TEXTUR_0.LBM" || filepath.filename() == "TEXTUR_3.LBM")
-    {
-        SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
-
-        bmpArray++;
-        if((bmpArray->surface = makeRGBSurface((bmpArray - 1)->w, (bmpArray - 1)->h)))
+        } else if(compression_flag == 1)
         {
-            SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
-            CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface);
-        } else
-            bmpArray--;
-    }
+            // picture compressed
 
-    // we are finished, the surface is filled
-    // increment bmpArray for the next picture
-    bmpArray++;
+            // main loop for reading picture lines
+            for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
+            {
+                // loop for reading pixels of the actual picture line
+                //(cause of a kind of RLE-Compression we cannot read the pixels sequentially)
+                //'x' will be incremented WITHIN the loop
+                for(pos.x = 0; pos.x < bmpArray->w;)
+                {
+                    // read compression type
+                    CHECK_READ(libendian::read(&ctype, 1, fp));
+
+                    if(ctype >= 0)
+                    {
+                        // following 'ctype + 1' pixels are uncompressed
+                        for(int k = 0; k < ctype + 1; k++, pos.x++)
+                        {
+                            // read color value (1 Byte)
+                            CHECK_READ(libendian::read(&color_value, 1, fp));
+                            // draw
+                            CSurface::DrawPixel_Color(bmpArray->surface.get(), pos, (Uint32)color_value);
+                        }
+                    } else if(ctype >= -127)
+                    {
+                        // draw the following byte '-ctype + 1' times to the surface
+                        CHECK_READ(libendian::read(&color_value, 1, fp));
+
+                        for(int k = 0; k < -ctype + 1; k++, pos.x++)
+                            CSurface::DrawPixel_Color(bmpArray->surface.get(), pos, (Uint32)color_value);
+                    } else // if (ctype == -128)
+                    {
+                        // ignore
+                    }
+                }
+            }
+        } else
+            return false;
+
+        // if this is a texture file, we need a secondary 32-bit surface for SGE and we set a color key at both surfaces
+        if(filepath.filename() == "TEX5.LBM" || filepath.filename() == "TEX6.LBM" || filepath.filename() == "TEX7.LBM"
+           || filepath.filename() == "TEXTUR_0.LBM" || filepath.filename() == "TEXTUR_3.LBM")
+        {
+            // Store palette animation data for the 8-bit tileset
+            // bmpArray currently points to the 8-bit slot
+            const Uint16 bmpIdx8 = static_cast<Uint16>(bmpArray - global::bmpArray.data());
+            if(global::tilesetAnimData.size() <= bmpIdx8)
+                global::tilesetAnimData.resize(bmpIdx8 + 1);
+            global::tilesetAnimData[bmpIdx8] = std::move(crngData);
+
+            SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+
+            bmpArray++;
+            if((bmpArray->surface = makeRGBSurface((bmpArray - 1)->w, (bmpArray - 1)->h)))
+            {
+                SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
+                CSurface::Draw(bmpArray->surface, (bmpArray - 1)->surface);
+            } else
+                bmpArray--;
+        }
+
+        // we are finished, the surface is filled
+        // increment bmpArray for the next picture
+        bmpArray++;
+    } // end of scope for crngData
 
     return true;
 }

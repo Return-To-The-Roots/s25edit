@@ -53,9 +53,11 @@ void CGame::Render()
         return;
     }
 
-    // render the map if active
+    // update palette cycling animations before rendering the map
     if(MapObj && MapObj->isActive())
     {
+        if(MapObj->getMap())
+            CSurface::UpdatePaletteAnimations(MapObj->getMap()->type);
         CSurface::Draw(Surf_Display, MapObj->getSurface(), 0, 0);
         std::array<char, 100> textBuffer;
         // text for x and y of vertex (shown in upper left corner)

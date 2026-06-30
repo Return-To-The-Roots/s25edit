@@ -14,6 +14,7 @@ class CGame;
 struct bobBMP;
 struct bobSHADOW;
 struct bobPAL;
+struct PaletteAnimData;
 
 namespace global {
 // array for all pictures
@@ -22,6 +23,8 @@ extern std::vector<bobBMP> bmpArray;
 extern std::vector<bobSHADOW> shadowArray;
 // array for all palettes
 extern std::vector<bobPAL> palArray;
+// Palette animation data per tileset (indexed by the 8-bit tileset's bmpArray index)
+extern std::vector<std::vector<PaletteAnimData>> tilesetAnimData;
 // the game object
 extern CGame* s2;
 // Path to game data (must not be empty!)
