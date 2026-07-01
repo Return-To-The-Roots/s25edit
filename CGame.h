@@ -44,7 +44,7 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
-    unsigned suppressResizeEvents_ = 0;
+    Extent lastSetResolution_ = Extent{0, 0}; ///< Last resolution we tried to apply (to avoid infinite resize loops)
 
     // GL textures for splash screen and cursor
     Texture splashBg_;

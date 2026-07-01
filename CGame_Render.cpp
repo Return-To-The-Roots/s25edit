@@ -39,16 +39,12 @@ void CGame::SetAppIcon()
 
 void CGame::Render()
 {
-    suppressResizeEvents_ = 0;
-
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_FillRect(Surf_Display.get(), nullptr, SDL_MapRGBA(Surf_Display->format, 0, 0, 0, 0));
 
-    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution
-       || fullscreen != ((SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0))
-    {
+    const bool isFullscreen = (SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0;
+    if(lastSetResolution_ != GameResolution || fullscreen != isFullscreen)
         ReCreateWindow();
-    }
 
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)

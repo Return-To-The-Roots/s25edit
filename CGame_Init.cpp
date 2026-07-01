@@ -17,7 +17,6 @@
 
 bool CGame::ReCreateWindow()
 {
-    suppressResizeEvents_ = 3;
     displayTexture_ = Texture();
     cursor_ = Texture();
     cursorClicked_ = Texture();
@@ -33,9 +32,14 @@ bool CGame::ReCreateWindow()
         glContext_ = nullptr;
     }
     window_.reset();
+
+    Uint32 windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL;
+    if(fullscreen)
+        windowFlags |= SDL_WINDOW_FULLSCREEN;
+    else
+        windowFlags |= SDL_WINDOW_RESIZABLE;
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
-                                   SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   (fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE) | SDL_WINDOW_OPENGL));
+                                   SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y, windowFlags));
     if(!window_)
         return false;
 
@@ -48,12 +52,27 @@ bool CGame::ReCreateWindow()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 1);
-    setGLViewport();
 
     RecreateDisplayResources();
     if(!displayTexture_.isValid() || !Surf_Display)
         return false;
 
+    if(fullscreen)
+    {
+        SDL_DisplayMode dm;
+        SDL_zero(dm);
+        dm.w = static_cast<int>(GameResolution.x);
+        dm.h = static_cast<int>(GameResolution.y);
+        dm.format = 0; // let SDL pick a supported format
+        dm.refresh_rate = 0;
+        if(SDL_SetWindowDisplayMode(window_.get(), &dm) != 0)
+            std::cerr << "SDL_SetWindowDisplayMode failed: " << SDL_GetError() << std::endl;
+    }
+    SDL_ShowWindow(window_.get());
+
+    setGLViewport();
+
+    lastSetResolution_ = GameResolution;
     SetAppIcon();
 
     auto loadGlTex = [&](unsigned idx, Texture& tex, bool linear = false) {
@@ -76,7 +95,13 @@ void CGame::RecreateDisplayResources()
 
 void CGame::setGLViewport()
 {
-    glViewport(0, 0, GameResolution.x, GameResolution.y);
+    if(!window_)
+        return;
+    int w = 0, h = 0;
+    SDL_GL_GetDrawableSize(window_.get(), &w, &h);
+    if(w == 0 || h == 0)
+        return;
+    glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
@@ -87,6 +112,7 @@ void CGame::setGLViewport()
 void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
+    lastSetResolution_ = GameResolution;
     setGLViewport();
     RecreateDisplayResources();
     for(auto& menu : Menus)
