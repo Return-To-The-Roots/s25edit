@@ -9,8 +9,6 @@ project(s25edit)
 
 find_package(Boost 1.64 REQUIRED)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libutil/cmake")
-
 add_subdirectory(SGE)
 
 option(RTTR_EDITOR_ADMINMODE "In admin mode there are some key combos to open debugger, resource viewer and so on" OFF)

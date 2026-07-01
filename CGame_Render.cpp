@@ -41,7 +41,6 @@ void CGame::Render()
 {
     suppressResizeEvents_ = 0;
 
-    setGLViewport();
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_FillRect(Surf_Display.get(), nullptr, SDL_MapRGBA(Surf_Display->format, 0, 0, 0, 0));
 
@@ -88,9 +87,7 @@ void CGame::Render()
     for(auto& Menu : Menus)
     {
         if(Menu->isActive())
-        {
             CSurface::Draw(Surf_Display, Menu->getSurface(), 0, 0);
-        }
     }
 
     // render windows ordered by priority
@@ -110,8 +107,6 @@ void CGame::Render()
                 CSurface::Draw(Surf_Display, Window->getSurface(), Window->getX(), Window->getY());
         }
     }
-
-    // Cursor is drawn in RenderPresent via GL
 
 #ifdef _ADMINMODE
     FrameCounter++;

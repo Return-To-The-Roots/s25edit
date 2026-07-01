@@ -19,6 +19,14 @@ bool CGame::ReCreateWindow()
 {
     suppressResizeEvents_ = 3;
     displayTexture_ = Texture();
+    cursor_ = Texture();
+    cursorClicked_ = Texture();
+    cross_ = Texture();
+    splashBg_ = Texture();
+
+    for(auto& menu : Menus)
+        menu->resetBgTexture();
+
     if(glContext_)
     {
         SDL_GL_DeleteContext(glContext_);
@@ -47,13 +55,23 @@ bool CGame::ReCreateWindow()
         return false;
 
     SetAppIcon();
+
+    auto loadGlTex = [&](unsigned idx, Texture& tex, bool linear = false) {
+        if(idx < global::bmpArray.size() && global::bmpArray[idx].surface)
+            tex.load(global::bmpArray[idx].surface.get(), linear);
+    };
+    loadGlTex(CURSOR, cursor_);
+    loadGlTex(CURSOR_CLICKED, cursorClicked_);
+    loadGlTex(CROSS, cross_);
+    loadGlTex(SPLASHSCREEN_LOADING_S2SCREEN, splashBg_, true);
+
     return true;
 }
 
 void CGame::RecreateDisplayResources()
 {
     Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
-    displayTexture_.load(GameResolution);
+    displayTexture_.createEmpty(GameResolution);
 }
 
 void CGame::setGLViewport()
@@ -69,6 +87,7 @@ void CGame::setGLViewport()
 void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
+    setGLViewport();
     RecreateDisplayResources();
     for(auto& menu : Menus)
         menu->resetSurface();

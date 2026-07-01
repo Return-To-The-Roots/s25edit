@@ -15,7 +15,6 @@ bool CMenu::render()
     if(getBackground() < 0)
         return false;
 
-    // Lazy-load background texture from the palette-converted bitmap
     if(!bgTexture_)
     {
         const int picIdx = getBackground();

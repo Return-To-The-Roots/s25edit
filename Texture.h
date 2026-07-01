@@ -27,7 +27,7 @@ public:
     bool load(SDL_Surface* surface, bool filterLinear = false);
 
     /// Create an empty texture of the given size (for use as a render-target).
-    void load(Extent size, bool filterLinear = false);
+    void createEmpty(Extent size, bool filterLinear = false);
 
     /// Upload new pixel data to an existing texture (glTexSubImage2D).
     void upload(const void* bgraPixels);

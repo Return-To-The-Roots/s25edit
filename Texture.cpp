@@ -46,7 +46,7 @@ void Texture::load(const void* bgraPixels, Extent size, bool filterLinear)
     size_ = size;
 }
 
-void Texture::load(Extent size, bool filterLinear)
+void Texture::createEmpty(Extent size, bool filterLinear)
 {
     load(nullptr, size, filterLinear);
 }
