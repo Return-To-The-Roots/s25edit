@@ -20,7 +20,7 @@ class CMenu final : public CControlContainer
 
 public:
     void resetBgTexture() { bgTexture_.reset(); }
-
+    void renderGL(int baseX, int baseY) final;
     CMenu(int pic_background);
     void setActive() { active = true; };
     void setInactive() { active = false; };

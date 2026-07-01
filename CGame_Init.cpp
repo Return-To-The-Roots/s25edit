@@ -18,7 +18,6 @@
 bool CGame::ReCreateWindow()
 {
     suppressResizeEvents_ = 3;
-    displayTexture_ = Texture();
     cursor_ = Texture();
     cursorClicked_ = Texture();
     cross_ = Texture();
@@ -26,7 +25,6 @@ bool CGame::ReCreateWindow()
 
     for(auto& menu : Menus)
         menu->resetBgTexture();
-
     if(glContext_)
     {
         SDL_GL_DeleteContext(glContext_);
@@ -50,10 +48,6 @@ bool CGame::ReCreateWindow()
     glClearColor(0, 0, 0, 1);
     setGLViewport();
 
-    RecreateDisplayResources();
-    if(!displayTexture_.isValid() || !Surf_Display)
-        return false;
-
     SetAppIcon();
 
     auto loadGlTex = [&](unsigned idx, Texture& tex, bool linear = false) {
@@ -68,11 +62,6 @@ bool CGame::ReCreateWindow()
     return true;
 }
 
-void CGame::RecreateDisplayResources()
-{
-    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
-    displayTexture_.createEmpty(GameResolution);
-}
 
 void CGame::setGLViewport()
 {
@@ -88,7 +77,6 @@ void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
     setGLViewport();
-    RecreateDisplayResources();
     for(auto& menu : Menus)
         menu->resetSurface();
     for(auto& wnd : Windows)

@@ -5,7 +5,9 @@
 
 #pragma once
 
+#include "../Texture.h"
 #include "defines.h"
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -45,16 +47,32 @@ private:
 protected:
     SdlSurface surface;
     bool needRender = true;
+    Texture surfaceTex_; ///< GL texture for this container's surface (used by CWindow)
 
     void renderElements();
     auto& getTextFields() { return textfields; }
     const auto& getTextFields() const { return textfields; }
     int getBackground() const { return pic_background; }
 
+    /// Draw all child controls via OpenGL textured quads instead of software blits.
+    /// @param baseX, baseY Screen position offset (container's position on screen).
+    virtual void renderGL(int baseX, int baseY);
+
+private:
+    // Per-control texture cache: keys are the SDL_Surface* of each child control.
+    // Avoids re-uploading unchanged surfaces every frame.
+    struct ControlTex
+    {
+        Texture tex;
+        int lastW = 0, lastH = 0;
+    };
+    std::map<SDL_Surface*, ControlTex> childTexCache_;
+    std::map<int, Texture> staticTexCache_; // bmpArray index -> GL texture
+
 public:
     CControlContainer(int pic_background);
     CControlContainer(int pic_background, Extent borderBeginSize, Extent borderEndSize);
-    ~CControlContainer() noexcept;
+    virtual ~CControlContainer() noexcept;
     // Access
     Extent getBorderSize() const { return borderBeginSize + borderEndSize; }
     void setBackgroundPicture(int pic_background);

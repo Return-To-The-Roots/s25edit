@@ -38,6 +38,18 @@ public:
     /// Draw the texture at native size at the given position.
     void Draw(Position pos) const;
 
+    /// Convenience overload for callers using separate x/y.
+    void Draw(int x, int y) const { Draw(Position(x, y)); }
+
+    /// Returns the raw GL texture name (for use with glBindTexture).
+    unsigned getHandle() const { return texture_; }
+
+    /// Width in pixels.
+    int getWidth() const { return size_.x; }
+
+    /// Height in pixels.
+    int getHeight() const { return size_.y; }
+
     /// Returns true if the texture has been created.
     bool isValid() const { return texture_ != 0; }
 

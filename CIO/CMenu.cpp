@@ -15,6 +15,17 @@ bool CMenu::render()
     if(getBackground() < 0)
         return false;
 
+    if(!needRender)
+        return true;
+    needRender = false;
+    return true;
+}
+
+void CMenu::renderGL(int baseX, int baseY)
+{
+    render();
+
+    // Lazy-load and draw fullscreen background
     if(!bgTexture_)
     {
         const int picIdx = getBackground();
@@ -24,21 +35,8 @@ bool CMenu::render()
             bgTexture_->load(global::bmpArray[picIdx].surface.get(), true);
         }
     }
-
     if(bgTexture_)
         bgTexture_->Draw(Rect(0, 0, global::s2->getRes().x, global::s2->getRes().y));
 
-    if(!needRender)
-        return true;
-    needRender = false;
-    // if we need a new surface
-    if(!surface)
-    {
-        surface = makeRGBSurface(global::s2->getRes().x, global::s2->getRes().y, true);
-        if(!surface)
-            return false;
-    }
-
-    renderElements();
-    return true;
+    CControlContainer::renderGL(baseX, baseY);
 }

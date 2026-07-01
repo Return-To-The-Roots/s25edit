@@ -19,6 +19,7 @@
 #include "globals.h"
 #include "helpers/format.hpp"
 #include "s25util/strAlgos.h"
+#include <glad/glad.h>
 #include <boost/filesystem.hpp>
 #include <algorithm>
 #include <cctype>
@@ -51,9 +52,12 @@ void callback::PleaseWait(int Param)
             WNDWait->addText("Please wait ...", Position(10, 10), FontSize::Large);
             // we need to render this window NOW, cause the render loop will do it too late (when the operation
             // is done and we don't need the "Please wait"-window anymore)
-            CSurface::Draw(global::s2->getDisplaySurface(), WNDWait->getSurface(),
-                           global::s2->getDisplaySurface()->w / 2 - 106, global::s2->getDisplaySurface()->h / 2 - 35);
-            global::s2->RenderPresent();
+            {
+                const auto res = global::s2->getRes();
+                glClear(GL_COLOR_BUFFER_BIT);
+                WNDWait->renderGL(res.x / 2 - 106, res.y / 2 - 35);
+                global::s2->RenderPresent();
+            }
             break;
 
         case CALL_FROM_GAMELOOP: // This window gives a "Please Wait"-string, so it is shown while there is an intensive
@@ -2848,8 +2852,8 @@ void callback::MinimapMenu(int Param)
                 height = map->height / scaleNum;
                 //--> 12px is width of left and right window frame and 30px is height of the upper and lower window
                 // frame
-                if((global::s2->getDisplaySurface()->w - 12 < width)
-                   || (global::s2->getDisplaySurface()->h - 30 < height))
+                if((static_cast<int>(global::s2->getRes().x) - 12 < width)
+                   || (static_cast<int>(global::s2->getRes().y) - 30 < height))
                     break;
                 WNDMinimap = global::s2->RegisterWindow(
                   std::make_unique<CWindow>(MinimapMenu, WINDOWQUIT, WindowPos::Center, Extent(width + 12, height + 30),

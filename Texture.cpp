@@ -98,20 +98,12 @@ bool Texture::load(SDL_Surface* surface, bool filterLinear)
         return true;
     }
 
-    // 32-bit surface: convert to destination format (BGRA), force full opacity
+    // 32-bit surface: convert to destination format (BGRA).
+    // SDL_ConvertSurfaceFormat preserves color keys and alpha, so
+    // transparent pixels keep alpha=0 and text anti-aliasing is retained.
     SDL_Surface* converted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
     if(!converted)
         return false;
-
-    // Force alpha to opaque (LBM palette entries often have alpha=0)
-    SDL_LockSurface(converted);
-    for(int y = 0; y < converted->h; y++)
-    {
-        auto* row = (Uint32*)((Uint8*)converted->pixels + y * converted->pitch);
-        for(int x = 0; x < converted->w; x++)
-            row[x] |= 0xFF000000u; // set alpha bits
-    }
-    SDL_UnlockSurface(converted);
 
     load(converted->pixels, Extent(converted->w, converted->h), filterLinear);
     SDL_FreeSurface(converted);

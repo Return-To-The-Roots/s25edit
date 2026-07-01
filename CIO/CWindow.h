@@ -46,6 +46,7 @@ private:
     bool render() final;
 
 public:
+    void renderGL(int baseX, int baseY) final;
     CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title = nullptr,
             int color = WINDOW_GREEN1, Uint8 flags = 0);
     CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size, const char* title = nullptr,
