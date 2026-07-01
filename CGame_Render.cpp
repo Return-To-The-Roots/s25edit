@@ -41,12 +41,7 @@ void CGame::Render()
 {
     suppressResizeEvents_ = 0;
 
-    // Ensure viewport and ortho projection match current window size (handles resize)
     setGLViewport();
-
-    // Clear the framebuffer and the software overlay surface.
-    // GL draws (backgrounds) and the final Surf_Display overlay are
-    // composited via blending.
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_FillRect(Surf_Display.get(), nullptr, SDL_MapRGBA(Surf_Display->format, 0, 0, 0, 0));
 
@@ -59,7 +54,7 @@ void CGame::Render()
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
     {
-        splashBg_.DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
+        splashBg_.Draw(Rect(0, 0, GameResolution.x, GameResolution.y));
         SDL_GL_SwapWindow(window_.get());
         return;
     }
@@ -94,11 +89,6 @@ void CGame::Render()
     {
         if(Menu->isActive())
         {
-            // Draw menu background via OpenGL
-            int bgIdx = Menu->getBackground();
-            (bgIdx == SPLASHSCREEN_MAINMENU ? menuBgMain_ : menuBgSub_)
-              .DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
-            // Draw UI overlay on top
             CSurface::Draw(Surf_Display, Menu->getSurface(), 0, 0);
         }
     }
@@ -121,7 +111,7 @@ void CGame::Render()
         }
     }
 
-    // Cursor is drawn in RenderPresent via GL (after the Surf_Display overlay)
+    // Cursor is drawn in RenderPresent via GL
 
 #ifdef _ADMINMODE
     FrameCounter++;

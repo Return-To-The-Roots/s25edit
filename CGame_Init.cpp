@@ -18,11 +18,7 @@
 bool CGame::ReCreateWindow()
 {
     suppressResizeEvents_ = 3;
-    if(displayTex_)
-    {
-        glDeleteTextures(1, &displayTex_);
-        displayTex_ = 0;
-    }
+    displayTexture_ = Texture();
     if(glContext_)
     {
         SDL_GL_DeleteContext(glContext_);
@@ -47,7 +43,7 @@ bool CGame::ReCreateWindow()
     setGLViewport();
 
     RecreateDisplayResources();
-    if(!displayTex_ || !Surf_Display)
+    if(!displayTexture_.isValid() || !Surf_Display)
         return false;
 
     SetAppIcon();
@@ -56,20 +52,8 @@ bool CGame::ReCreateWindow()
 
 void CGame::RecreateDisplayResources()
 {
-    if(displayTex_)
-    {
-        glDeleteTextures(1, &displayTex_);
-        displayTex_ = 0;
-    }
     Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
-
-    glGenTextures(1, &displayTex_);
-    glBindTexture(GL_TEXTURE_2D, displayTex_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GameResolution.x, GameResolution.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
+    displayTexture_.load(GameResolution);
 }
 
 void CGame::setGLViewport()
@@ -137,7 +121,7 @@ bool CGame::Init()
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
     glClear(GL_COLOR_BUFFER_BIT);
-    splashBg_.DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
+    splashBg_.Draw(Rect(0, 0, GameResolution.x, GameResolution.y));
     SDL_GL_SwapWindow(window_.get());
 
     GameDataLoader gdLoader(global::worldDesc);
@@ -293,12 +277,10 @@ bool CGame::Init()
     // create the mainmenu
     callback::mainmenu(INITIALIZING_CALL);
 
-    // Create GL textures for cursor and menu background images
+    // Create GL textures for cursor
     cursor_.load(global::bmpArray[CURSOR].surface.get());
     cursorClicked_.load(global::bmpArray[CURSOR_CLICKED].surface.get());
     cross_.load(global::bmpArray[CROSS].surface.get());
-    menuBgMain_.load(global::bmpArray[SPLASHSCREEN_MAINMENU].surface.get(), true);
-    menuBgSub_.load(global::bmpArray[SPLASHSCREEN_SUBMENU3].surface.get(), true);
 
     return true;
 }

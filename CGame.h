@@ -6,8 +6,8 @@
 #pragma once
 
 #include "CIO/CFont.h"
-#include "GlTexture.h"
 #include "SdlSurface.h"
+#include "Texture.h"
 #include <boost/filesystem/path.hpp>
 #include <Point.h>
 #include <memory>
@@ -28,8 +28,8 @@ public:
     bool Running;
     bool showLoadScreen;
     SdlSurface Surf_Display;
+    Texture displayTexture_;
     SDL_GLContext glContext_ = nullptr;
-    unsigned int displayTex_ = 0;
     SdlWindow window_;
 
 private:
@@ -46,13 +46,11 @@ private:
     Uint32 lastFrameTime = 0;
     unsigned suppressResizeEvents_ = 0;
 
-    // GL textures for backgrounds and cursor
-    GlTexture splashBg_;
-    GlTexture menuBgMain_;
-    GlTexture menuBgSub_;
-    GlTexture cursor_;
-    GlTexture cursorClicked_;
-    GlTexture cross_;
+    // GL textures for splash screen and cursor
+    Texture splashBg_;
+    Texture cursor_;
+    Texture cursorClicked_;
+    Texture cross_;
 
     // structure for mouse cursor
     struct

@@ -5,6 +5,7 @@
 
 #include "CMenu.h"
 #include "../CGame.h"
+#include "../Texture.h"
 #include "../globals.h"
 
 CMenu::CMenu(int pic_background) : CControlContainer(pic_background) {}
@@ -14,7 +15,20 @@ bool CMenu::render()
     if(getBackground() < 0)
         return false;
 
-    // if we don't need to render, all is up to date, return true
+    // Lazy-load background texture from the palette-converted bitmap
+    if(!bgTexture_)
+    {
+        const int picIdx = getBackground();
+        if(picIdx >= 0 && picIdx < static_cast<int>(global::bmpArray.size()) && global::bmpArray[picIdx].surface)
+        {
+            bgTexture_ = std::make_unique<Texture>();
+            bgTexture_->load(global::bmpArray[picIdx].surface.get(), true);
+        }
+    }
+
+    if(bgTexture_)
+        bgTexture_->Draw(Rect(0, 0, global::s2->getRes().x, global::s2->getRes().y));
+
     if(!needRender)
         return true;
     needRender = false;
@@ -26,7 +40,6 @@ bool CMenu::render()
             return false;
     }
 
-    // Background is drawn via OpenGL in CGame::Render(); only draw UI elements here.
     renderElements();
     return true;
 }

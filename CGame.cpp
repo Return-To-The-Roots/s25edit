@@ -77,27 +77,12 @@ int CGame::Execute()
 
 void CGame::RenderPresent()
 {
-    glBindTexture(GL_TEXTURE_2D, displayTex_);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Surf_Display->w, Surf_Display->h, GL_BGRA, GL_UNSIGNED_BYTE,
-                    Surf_Display->pixels);
-    // Screen was cleared at the start of Render(); GL-drawn backgrounds
-    // are already in the framebuffer. The Surf_Display texture (with
-    // alpha=0 for transparent areas) is blended on top via GL_BLEND.
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0);
-    glVertex2i(0, 0);
-    glTexCoord2f(1, 0);
-    glVertex2i(GameResolution.x, 0);
-    glTexCoord2f(1, 1);
-    glVertex2i(GameResolution.x, GameResolution.y);
-    glTexCoord2f(0, 1);
-    glVertex2i(0, GameResolution.y);
-    glEnd();
+    displayTexture_.upload(Surf_Display->pixels);
+    displayTexture_.Draw(Rect(0, 0, GameResolution.x, GameResolution.y));
 
-    // Draw cursor on top of everything
     {
         const auto& cursorImg = Cursor.clicked ? (Cursor.button.right ? cross_ : cursorClicked_) : cursor_;
-        cursorImg.Draw(Cursor.pos.x, Cursor.pos.y);
+        cursorImg.Draw(Cursor.pos);
     }
 
     SDL_GL_SwapWindow(window_.get());

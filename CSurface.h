@@ -45,7 +45,6 @@ public:
     {
         return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, X2, Y2, W, H);
     }
-
     static void DrawPixel_Color(SDL_Surface* screen, Position pos, Uint32 color);
     static void DrawPixel_RGB(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B);
     static void DrawPixel_RGB(SdlSurface& screen, Position pos, Uint8 R, Uint8 G, Uint8 B)

@@ -1,61 +1,65 @@
-// Copyright (C) 2009 - 2021 Marc Vester (XaserLE)
-// Copyright (C) 2009 - 2021 Settlers Freaks <sf-team at siedler25.org>
+// Copyright (C) 2026 - 2026 Settlers Freaks <sf-team at siedler25.org>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "GlTexture.h"
+#include "Texture.h"
 #include <glad/glad.h>
+#include <utility>
 #include <vector>
 
-GlTexture::~GlTexture()
+Texture::~Texture()
 {
     if(texture_)
         glDeleteTextures(1, &texture_);
 }
 
-GlTexture::GlTexture(GlTexture&& other) noexcept
-    : texture_(other.texture_), width_(other.width_), height_(other.height_)
-{
-    other.texture_ = 0;
-    other.width_ = 0;
-    other.height_ = 0;
-}
+Texture::Texture(Texture&& other) noexcept
+    : texture_(std::exchange(other.texture_, 0)), size_(std::exchange(other.size_, {0, 0}))
+{}
 
-GlTexture& GlTexture::operator=(GlTexture&& other) noexcept
+Texture& Texture::operator=(Texture&& other) noexcept
 {
     if(this != &other)
     {
         if(texture_)
             glDeleteTextures(1, &texture_);
-        texture_ = other.texture_;
-        width_ = other.width_;
-        height_ = other.height_;
-        other.texture_ = 0;
-        other.width_ = 0;
-        other.height_ = 0;
+        texture_ = std::exchange(other.texture_, 0);
+        size_ = std::exchange(other.size_, {0, 0});
     }
     return *this;
 }
 
-void GlTexture::createTexture(const void* bgraPixels, int w, int h, bool linear)
+void Texture::load(const void* bgraPixels, Extent size, bool filterLinear)
 {
     if(texture_)
         glDeleteTextures(1, &texture_);
     texture_ = 0;
-    width_ = height_ = 0;
+    size_ = {0, 0};
 
     glGenTextures(1, &texture_);
     glBindTexture(GL_TEXTURE_2D, texture_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, linear ? GL_LINEAR : GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, linear ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterLinear ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterLinear ? GL_LINEAR : GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, bgraPixels);
-    width_ = w;
-    height_ = h;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, bgraPixels);
+    size_ = size;
 }
 
-bool GlTexture::load(SDL_Surface* surface, bool linear)
+void Texture::load(Extent size, bool filterLinear)
+{
+    load(nullptr, size, filterLinear);
+}
+
+void Texture::upload(const void* bgraPixels)
+{
+    if(!texture_)
+        return;
+    glBindTexture(GL_TEXTURE_2D, texture_);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_BGRA, GL_UNSIGNED_BYTE, bgraPixels);
+}
+
+bool Texture::load(SDL_Surface* surface, bool filterLinear)
 {
     if(!surface)
         return false;
@@ -68,7 +72,7 @@ bool GlTexture::load(SDL_Surface* surface, bool linear)
 
         SDL_Palette* pal = surface->format->palette;
         Uint32 ck;
-        const bool hasCK = (SDL_GetColorKey(surface, &ck) == 0);
+        const bool hasCK = SDL_GetColorKey(surface, &ck) == 0;
         const Uint8 ckIdx = hasCK ? static_cast<Uint8>(ck & 0xFF) : 0;
 
         SDL_LockSurface(surface);
@@ -90,7 +94,7 @@ bool GlTexture::load(SDL_Surface* surface, bool linear)
         }
         SDL_UnlockSurface(surface);
 
-        createTexture(pixels.data(), w, h, linear);
+        load(pixels.data(), Extent(w, h), filterLinear);
         return true;
     }
 
@@ -109,12 +113,12 @@ bool GlTexture::load(SDL_Surface* surface, bool linear)
     }
     SDL_UnlockSurface(converted);
 
-    createTexture(converted->pixels, converted->w, converted->h, linear);
+    load(converted->pixels, Extent(converted->w, converted->h), filterLinear);
     SDL_FreeSurface(converted);
     return true;
 }
 
-void GlTexture::DrawFull(const Rect& destRect) const
+void Texture::Draw(const Rect& destRect) const
 {
     if(!texture_)
         return;
@@ -132,7 +136,7 @@ void GlTexture::DrawFull(const Rect& destRect) const
     glEnd();
 }
 
-void GlTexture::Draw(int x, int y) const
+void Texture::Draw(Position pos) const
 {
     if(!texture_)
         return;
@@ -140,12 +144,12 @@ void GlTexture::Draw(int x, int y) const
     glBindTexture(GL_TEXTURE_2D, texture_);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
-    glVertex2i(x, y);
+    glVertex2i(pos.x, pos.y);
     glTexCoord2f(1, 0);
-    glVertex2i(x + width_, y);
+    glVertex2i(pos.x + size_.x, pos.y);
     glTexCoord2f(1, 1);
-    glVertex2i(x + width_, y + height_);
+    glVertex2i(pos.x + size_.x, pos.y + size_.y);
     glTexCoord2f(0, 1);
-    glVertex2i(x, y + height_);
+    glVertex2i(pos.x, pos.y + size_.y);
     glEnd();
 }
