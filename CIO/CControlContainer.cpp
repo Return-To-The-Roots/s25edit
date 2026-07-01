@@ -12,6 +12,7 @@
 #include "CSelectBox.h"
 #include "CTextfield.h"
 #include "helpers/containerUtils.h"
+#include <glad/glad.h>
 
 CControlContainer::CControlContainer(int pic_background)
     : CControlContainer(pic_background, Extent::all(0), Extent::all(0))
@@ -202,4 +203,85 @@ void CControlContainer::renderElements()
         CSurface::Draw(surface, button->getSurface(), button->getX(), button->getY());
     for(const auto& static_picture : static_pictures)
         CSurface::Draw(surface, global::bmpArray[static_picture.pic].surface, static_picture.pos);
+}
+
+static void drawTexturedQuad(int x, int y, int w, int h)
+{
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(x, y);
+    glTexCoord2f(1, 0);
+    glVertex2i(x + w, y);
+    glTexCoord2f(1, 1);
+    glVertex2i(x + w, y + h);
+    glTexCoord2f(0, 1);
+    glVertex2i(x, y + h);
+    glEnd();
+}
+
+void CControlContainer::renderGL(int baseX, int baseY)
+{
+    for(const auto& picture : pictures)
+    {
+        auto* surf = picture->getSurface();
+        if(!surf)
+            continue;
+        auto& entry = childTexCache_[surf];
+        entry.tex.load(surf);
+        glBindTexture(GL_TEXTURE_2D, entry.tex.getHandle());
+        drawTexturedQuad(baseX + picture->getX(), baseY + picture->getY(), entry.tex.getWidth(), entry.tex.getHeight());
+    }
+    for(const auto& text : texts)
+    {
+        auto* surf = text->getSurface();
+        if(!surf)
+            continue;
+        auto& entry = childTexCache_[surf];
+        entry.tex.load(surf);
+        glBindTexture(GL_TEXTURE_2D, entry.tex.getHandle());
+        drawTexturedQuad(baseX + text->getX(), baseY + text->getY(), entry.tex.getWidth(), entry.tex.getHeight());
+    }
+    for(const auto& textfield : textfields)
+    {
+        auto* surf = textfield->getSurface();
+        if(!surf)
+            continue;
+        auto& entry = childTexCache_[surf];
+        entry.tex.load(surf);
+        glBindTexture(GL_TEXTURE_2D, entry.tex.getHandle());
+        drawTexturedQuad(baseX + textfield->getX(), baseY + textfield->getY(), entry.tex.getWidth(),
+                         entry.tex.getHeight());
+    }
+    for(const auto& selectbox : selectboxes)
+    {
+        SDL_Surface* surf = selectbox->getSurface().get();
+        if(!surf)
+            continue;
+        auto& entry = childTexCache_[surf];
+        entry.tex.load(surf);
+        glBindTexture(GL_TEXTURE_2D, entry.tex.getHandle());
+        const auto& pos = selectbox->getPos();
+        drawTexturedQuad(baseX + pos.x, baseY + pos.y, entry.tex.getWidth(), entry.tex.getHeight());
+    }
+    for(const auto& button : buttons)
+    {
+        auto* surf = button->getSurface();
+        if(!surf)
+            continue;
+        auto& entry = childTexCache_[surf];
+        entry.tex.load(surf);
+        glBindTexture(GL_TEXTURE_2D, entry.tex.getHandle());
+        drawTexturedQuad(baseX + button->getX(), baseY + button->getY(), entry.tex.getWidth(), entry.tex.getHeight());
+    }
+    for(const auto& static_picture : static_pictures)
+    {
+        auto* srcSurf = global::bmpArray[static_picture.pic].surface.get();
+        if(!srcSurf)
+            continue;
+        auto& entry = staticTexCache_[static_picture.pic];
+        entry.load(srcSurf);
+        glBindTexture(GL_TEXTURE_2D, entry.getHandle());
+        drawTexturedQuad(baseX + static_picture.pos.x, baseY + static_picture.pos.y, entry.getWidth(),
+                         entry.getHeight());
+    }
 }

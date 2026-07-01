@@ -13,6 +13,7 @@
 #include "s25util/file_handle.h"
 #include <libsiedler2/ArchivItem_Ini.h>
 #include <libsiedler2/libsiedler2.h>
+#include <glad/glad.h>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
 #include <boost/program_options.hpp>
@@ -43,6 +44,11 @@ CGame::CGame(Extent GameResolution_, bool fullscreen_)
 
 CGame::~CGame()
 {
+    if(glContext_)
+    {
+        SDL_GL_DeleteContext(glContext_);
+        glContext_ = nullptr;
+    }
     global::s2 = nullptr;
 }
 
@@ -69,12 +75,12 @@ int CGame::Execute()
     return 0;
 }
 
-void CGame::RenderPresent() const
+void CGame::RenderPresent()
 {
-    SDL_UpdateTexture(displayTexture_.get(), nullptr, Surf_Display->pixels, Surf_Display->w * sizeof(Uint32));
-    SDL_RenderClear(renderer_.get());
-    SDL_RenderCopy(renderer_.get(), displayTexture_.get(), nullptr, nullptr);
-    SDL_RenderPresent(renderer_.get());
+    const auto& cursorImg = Cursor.clicked ? (Cursor.button.right ? cross_ : cursorClicked_) : cursor_;
+    cursorImg.Draw(Cursor.pos);
+
+    SDL_GL_SwapWindow(window_.get());
 }
 
 CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)

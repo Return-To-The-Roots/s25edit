@@ -8,47 +8,75 @@
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
-#include "CSurface.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
+#include <glad/glad.h>
 #include <iostream>
 #include <vector>
 
 bool CGame::ReCreateWindow()
 {
     suppressResizeEvents_ = 3;
-    displayTexture_.reset();
-    renderer_.reset();
+    cursor_ = Texture();
+    cursorClicked_ = Texture();
+    cross_ = Texture();
+    splashBg_ = Texture();
+
+    for(auto& menu : Menus)
+        menu->resetBgTexture();
+    if(glContext_)
+    {
+        SDL_GL_DeleteContext(glContext_);
+        glContext_ = nullptr;
+    }
     window_.reset();
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
                                    SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE));
+                                   (fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE) | SDL_WINDOW_OPENGL));
     if(!window_)
         return false;
-    renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
-    if(!renderer_)
-        return false;
-    RecreateDisplayResources();
-    if(!displayTexture_ || !Surf_Display)
+
+    glContext_ = SDL_GL_CreateContext(window_.get());
+    if(!glContext_ || !gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
         return false;
 
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    glClearColor(0, 0, 0, 1);
+    setGLViewport();
+
     SetAppIcon();
+
+    auto loadGlTex = [&](unsigned idx, Texture& tex, bool linear = false) {
+        if(idx < global::bmpArray.size() && global::bmpArray[idx].surface)
+            tex.load(global::bmpArray[idx].surface.get(), linear);
+    };
+    loadGlTex(CURSOR, cursor_);
+    loadGlTex(CURSOR_CLICKED, cursorClicked_);
+    loadGlTex(CROSS, cross_);
+    loadGlTex(SPLASHSCREEN_LOADING_S2SCREEN, splashBg_, true);
+
     return true;
 }
 
-void CGame::RecreateDisplayResources()
+
+void CGame::setGLViewport()
 {
-    displayTexture_.reset();
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
-                                     GameResolution.y);
-    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+    glViewport(0, 0, GameResolution.x, GameResolution.y);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
-    RecreateDisplayResources();
+    setGLViewport();
     for(auto& menu : Menus)
         menu->resetSurface();
     for(auto& wnd : Windows)
@@ -94,10 +122,14 @@ bool CGame::Init()
         }
     }
 
+    // Create GL texture for splash background
+    splashBg_.load(global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface.get(), true);
+
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
-    CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
-    RenderPresent();
+    glClear(GL_COLOR_BUFFER_BIT);
+    splashBg_.Draw(Rect(0, 0, GameResolution.x, GameResolution.y));
+    SDL_GL_SwapWindow(window_.get());
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())
@@ -251,6 +283,11 @@ bool CGame::Init()
 
     // create the mainmenu
     callback::mainmenu(INITIALIZING_CALL);
+
+    // Create GL textures for cursor
+    cursor_.load(global::bmpArray[CURSOR].surface.get());
+    cursorClicked_.load(global::bmpArray[CURSOR_CLICKED].surface.get());
+    cross_.load(global::bmpArray[CROSS].surface.get());
 
     return true;
 }

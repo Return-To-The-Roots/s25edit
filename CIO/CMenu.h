@@ -6,15 +6,21 @@
 #pragma once
 
 #include "CControlContainer.h"
+#include <memory>
+
+class Texture;
 
 class CMenu final : public CControlContainer
 {
     // if active is false, the menu will not be render within the game loop
     bool active = true;
+    mutable std::unique_ptr<Texture> bgTexture_;
 
     bool render() final;
 
 public:
+    void resetBgTexture() { bgTexture_.reset(); }
+    void renderGL(int baseX, int baseY) final;
     CMenu(int pic_background);
     void setActive() { active = true; };
     void setInactive() { active = false; };

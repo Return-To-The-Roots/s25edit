@@ -14,6 +14,7 @@
 #include "CTextfield.h"
 #include "CollisionDetection.h"
 #include "helpers/containerUtils.h"
+#include <glad/glad.h>
 #include <cassert>
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title, int color,
@@ -42,8 +43,10 @@ CWindow::CWindow(void callback(int), int callbackQuitMessage, Position pos, Exte
 static Position makePos(WindowPos pos, Extent size)
 {
     if(pos == WindowPos::Center)
-        return Position(global::s2->getDisplaySurface()->w, global::s2->getDisplaySurface()->h) / 2 - size / 2;
-    else
+    {
+        const auto res = global::s2->getRes();
+        return Position(res.x / 2, res.y / 2) - size / 2;
+    } else
         return {};
 }
 
@@ -91,12 +94,14 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
         // make sure to not move the window outside the display surface
         if(x_ < 0)
             x_ = 0;
-        if(x_ + w_ >= global::s2->getDisplaySurface()->w) //-V807
-            x_ = global::s2->getDisplaySurface()->w - w_ - 1;
-        if(y_ < 0)
-            y_ = 0;
-        if(y_ + h_ >= global::s2->getDisplaySurface()->h)
-            y_ = global::s2->getDisplaySurface()->h - h_ - 1;
+        {
+            const auto res = global::s2->getRes();
+            const int resW = res.x, resH = res.y;
+            if(x_ + w_ >= resW) //-V807
+                x_ = resW - w_ - 1;
+            if(y_ + h_ >= resH)
+                y_ = resH - h_ - 1;
+        }
     }
 
     // check whats happen to the close button
@@ -462,4 +467,23 @@ void CWindow::setInactive()
     {
         textfield->setInactive();
     }
+}
+
+void CWindow::renderGL(int baseX, int baseY)
+{
+    render();
+    if(!surface)
+        return;
+    surfaceTex_.load(surface.get());
+    glBindTexture(GL_TEXTURE_2D, surfaceTex_.getHandle());
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(baseX, baseY);
+    glTexCoord2f(1, 0);
+    glVertex2i(baseX + surface->w, baseY);
+    glTexCoord2f(1, 1);
+    glVertex2i(baseX + surface->w, baseY + surface->h);
+    glTexCoord2f(0, 1);
+    glVertex2i(baseX, baseY + surface->h);
+    glEnd();
 }
