@@ -8,7 +8,7 @@
 #include <Point.h>
 #include <SDL.h>
 
-/// Wraps a GL texture with RAII and provides draw methods.
+/// Wraps a texture with RAII and provides draw methods.
 class Texture
 {
 public:

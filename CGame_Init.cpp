@@ -14,7 +14,7 @@
 #include <glad/glad.h>
 #include <iostream>
 
-bool CGame::CreateGLWindow()
+bool CGame::CreateWindow()
 {
     if(window_)
         return false;
@@ -132,7 +132,7 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "Create Window...";
-    if(!CreateGLWindow())
+    if(!CreateWindow())
     {
         std::cout << "failure";
         return false;
@@ -164,7 +164,7 @@ bool CGame::Init()
         }
     }
 
-    // Create GL texture for splash background
+    // Create texture for splash background
     splashBg_.load(global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface.get(), true);
 
     // std::cout << "\nShow loading screen...";
@@ -326,7 +326,7 @@ bool CGame::Init()
     // create the mainmenu
     callback::mainmenu(INITIALIZING_CALL);
 
-    // Create GL textures for cursor
+    // Create textures for cursor
     cursor_.load(global::bmpArray[CURSOR].surface.get());
     cursorClicked_.load(global::bmpArray[CURSOR_CLICKED].surface.get());
     cross_.load(global::bmpArray[CROSS].surface.get());
