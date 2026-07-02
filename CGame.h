@@ -44,7 +44,8 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
-    Extent lastSetResolution_ = Extent{0, 0}; ///< Last resolution we tried to apply (to avoid infinite resize loops)
+    Extent appliedResolution_ = Extent{0, 0}; ///< Last resolution we applied to the window/display
+    bool appliedFullscreen_ = false;          ///< Last fullscreen state we applied
 
     // GL textures for splash screen and cursor
     Texture splashBg_;
@@ -74,8 +75,9 @@ private:
     std::unique_ptr<CMap> MapObj;
 
     void SetAppIcon();
-    void RecreateDisplayResources();
     void setGLViewport();
+    bool CreateGLWindow();
+    void ApplyWindowChanges();
 
 public:
     void LoadSettings();
@@ -87,7 +89,6 @@ public:
     int Execute();
 
     bool Init();
-    bool ReCreateWindow();
     void UpdateDisplaySize(const Extent& newSize);
 
     void EventHandling(SDL_Event* Event);

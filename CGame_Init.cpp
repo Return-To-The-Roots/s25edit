@@ -13,33 +13,15 @@
 #include "lua/GameDataLoader.h"
 #include <glad/glad.h>
 #include <iostream>
-#include <vector>
 
-bool CGame::ReCreateWindow()
+bool CGame::CreateGLWindow()
 {
-    displayTexture_ = Texture();
-    cursor_ = Texture();
-    cursorClicked_ = Texture();
-    cross_ = Texture();
-    splashBg_ = Texture();
+    if(window_)
+        return false;
 
-    for(auto& menu : Menus)
-        menu->resetBgTexture();
-
-    if(glContext_)
-    {
-        SDL_GL_DeleteContext(glContext_);
-        glContext_ = nullptr;
-    }
-    window_.reset();
-
-    Uint32 windowFlags = SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL;
-    if(fullscreen)
-        windowFlags |= SDL_WINDOW_FULLSCREEN;
-    else
-        windowFlags |= SDL_WINDOW_RESIZABLE;
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
-                                   SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y, windowFlags));
+                                   SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
+                                   SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
     if(!window_)
         return false;
 
@@ -53,9 +35,23 @@ bool CGame::ReCreateWindow()
     glDisable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 1);
 
-    RecreateDisplayResources();
+    SDL_ShowWindow(window_.get());
+
+    ApplyWindowChanges();
     if(!displayTexture_.isValid() || !Surf_Display)
         return false;
+
+    SetAppIcon();
+
+    return true;
+}
+
+void CGame::ApplyWindowChanges()
+{
+    if(!window_)
+        return;
+    if(GameResolution == appliedResolution_ && fullscreen == appliedFullscreen_)
+        return;
 
     if(fullscreen)
     {
@@ -67,30 +63,31 @@ bool CGame::ReCreateWindow()
         dm.refresh_rate = 0;
         if(SDL_SetWindowDisplayMode(window_.get(), &dm) != 0)
             std::cerr << "SDL_SetWindowDisplayMode failed: " << SDL_GetError() << std::endl;
+
+        const Uint32 flags = SDL_GetWindowFlags(window_.get());
+        if(!(flags & SDL_WINDOW_FULLSCREEN))
+        {
+            if(SDL_SetWindowFullscreen(window_.get(), SDL_WINDOW_FULLSCREEN) != 0)
+                std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+        } else if(GameResolution != appliedResolution_)
+        {
+            // Already fullscreen and the resolution changed. Toggle fullscreen off and
+            // back on so SDL/Wayland actually applies the new display mode.
+            if(SDL_SetWindowFullscreen(window_.get(), 0) != 0)
+                std::cerr << "SDL_SetWindowFullscreen(0) failed: " << SDL_GetError() << std::endl;
+            SDL_SetWindowSize(window_.get(), GameResolution.x, GameResolution.y);
+            if(SDL_SetWindowFullscreen(window_.get(), SDL_WINDOW_FULLSCREEN) != 0)
+                std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+        }
+    } else
+    {
+        if(SDL_SetWindowFullscreen(window_.get(), 0) != 0)
+            std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+        SDL_SetWindowSize(window_.get(), GameResolution.x, GameResolution.y);
+        SDL_SetWindowPosition(window_.get(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
-    SDL_ShowWindow(window_.get());
 
-    setGLViewport();
-
-    lastSetResolution_ = GameResolution;
-    SetAppIcon();
-
-    auto loadGlTex = [&](unsigned idx, Texture& tex, bool linear = false) {
-        if(idx < global::bmpArray.size() && global::bmpArray[idx].surface)
-            tex.load(global::bmpArray[idx].surface.get(), linear);
-    };
-    loadGlTex(CURSOR, cursor_);
-    loadGlTex(CURSOR_CLICKED, cursorClicked_);
-    loadGlTex(CROSS, cross_);
-    loadGlTex(SPLASHSCREEN_LOADING_S2SCREEN, splashBg_, true);
-
-    return true;
-}
-
-void CGame::RecreateDisplayResources()
-{
-    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
-    displayTexture_.createEmpty(GameResolution);
+    UpdateDisplaySize(GameResolution);
 }
 
 void CGame::setGLViewport()
@@ -112,11 +109,18 @@ void CGame::setGLViewport()
 void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
-    lastSetResolution_ = GameResolution;
+    appliedResolution_ = GameResolution;
+    appliedFullscreen_ = fullscreen;
+
+    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+    displayTexture_.createEmpty(GameResolution);
+
     setGLViewport();
-    RecreateDisplayResources();
     for(auto& menu : Menus)
+    {
+        menu->resetBgTexture();
         menu->resetSurface();
+    }
     for(auto& wnd : Windows)
         wnd->resetSurface();
 }
@@ -128,7 +132,7 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "Create Window...";
-    if(!ReCreateWindow())
+    if(!CreateGLWindow())
     {
         std::cout << "failure";
         return false;
