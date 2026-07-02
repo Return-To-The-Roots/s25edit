@@ -60,27 +60,42 @@ void CGame::ApplyWindowChanges()
         dm.format = 0; // let SDL pick a supported format
         dm.refresh_rate = 0;
         if(SDL_SetWindowDisplayMode(window_.get(), &dm) != 0)
+        {
             std::cerr << "SDL_SetWindowDisplayMode failed: " << SDL_GetError() << std::endl;
+            return;
+        }
 
         const Uint32 flags = SDL_GetWindowFlags(window_.get());
         if(!(flags & SDL_WINDOW_FULLSCREEN))
         {
             if(SDL_SetWindowFullscreen(window_.get(), SDL_WINDOW_FULLSCREEN) != 0)
+            {
                 std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+                return;
+            }
         } else if(GameResolution != appliedResolution_)
         {
             // Already fullscreen and the resolution changed. Toggle fullscreen off and
             // back on so SDL/Wayland actually applies the new display mode.
             if(SDL_SetWindowFullscreen(window_.get(), 0) != 0)
+            {
                 std::cerr << "SDL_SetWindowFullscreen(0) failed: " << SDL_GetError() << std::endl;
+                return;
+            }
             SDL_SetWindowSize(window_.get(), GameResolution.x, GameResolution.y);
             if(SDL_SetWindowFullscreen(window_.get(), SDL_WINDOW_FULLSCREEN) != 0)
+            {
                 std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+                return;
+            }
         }
     } else
     {
         if(SDL_SetWindowFullscreen(window_.get(), 0) != 0)
+        {
             std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+            return;
+        }
         SDL_SetWindowSize(window_.get(), GameResolution.x, GameResolution.y);
         SDL_SetWindowPosition(window_.get(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
