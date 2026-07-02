@@ -22,6 +22,8 @@
 #include <boost/filesystem.hpp>
 #include <algorithm>
 #include <cctype>
+#include <numeric>
+#include <set>
 
 namespace bfs = boost::filesystem;
 
@@ -187,50 +189,7 @@ void callback::submenuOptions(int Param)
     {
         MAINMENU = 1,
         FULLSCREEN,
-        GRAPHICS_CHANGE,
-        SELECTBOX_800_600,
-        SELECTBOX_832_624,
-        SELECTBOX_960_540,
-        SELECTBOX_964_544,
-        SELECTBOX_960_640,
-        SELECTBOX_960_720,
-        SELECTBOX_1024_576,
-        SELECTBOX_1024_600,
-        SELECTBOX_1072_600,
-        SELECTBOX_1152_768,
-        SELECTBOX_1024_768,
-        SELECTBOX_1152_864,
-        SELECTBOX_1152_870,
-        SELECTBOX_1152_900,
-        SELECTBOX_1200_800,
-        SELECTBOX_1200_900,
-        SELECTBOX_1280_720,
-        SELECTBOX_1280_768,
-        SELECTBOX_1280_800,
-        SELECTBOX_1280_854,
-        SELECTBOX_1360_768,
-        SELECTBOX_1366_768,
-        SELECTBOX_1376_768,
-        SELECTBOX_1400_900,
-        SELECTBOX_1440_900,
-        SELECTBOX_1440_960,
-        SELECTBOX_1280_960,
-        SELECTBOX_1280_1024,
-        SELECTBOX_1360_1024,
-        SELECTBOX_1366_1024,
-        SELECTBOX_1600_768,
-        SELECTBOX_1600_900,
-        SELECTBOX_1600_1024,
-        SELECTBOX_1400_1050,
-        SELECTBOX_1680_1050,
-        SELECTBOX_1600_1200,
-        SELECTBOX_1920_1080,
-        SELECTBOX_1920_1200,
-        SELECTBOX_1920_1400,
-        SELECTBOX_1920_1440,
-        SELECTBOX_2048_1152,
-        SELECTBOX_2048_1536,
-        SELECTBOX_3840_2160
+        GRAPHICS_CHANGE
     };
 
     switch(Param)
@@ -256,49 +215,54 @@ void callback::submenuOptions(int Param)
                                  Extent(200, 20), BUTTON_RED1, (global::s2->fullscreen ? "WINDOW" : "FULLSCREEN"));
             SelectBoxRes = SubMenu->addSelectBox(ButtonFullscreen->getPos() - Position(0, 340), Extent(200, 330),
                                                  FontSize::Medium, FontColor::Yellow, BUTTON_GREY);
-            SelectBoxRes->addOption("800 x 600 (SVGA)", submenuOptions, SELECTBOX_800_600);
-            SelectBoxRes->addOption("832 x 624 (Half Megapixel)", submenuOptions, SELECTBOX_832_624);
-            SelectBoxRes->addOption("960 x 540 (QHD)", submenuOptions, SELECTBOX_960_540);
-            SelectBoxRes->addOption("964 x 544", submenuOptions, SELECTBOX_964_544);
-            SelectBoxRes->addOption("960 x 640 (DVGA)", submenuOptions, SELECTBOX_960_640);
-            SelectBoxRes->addOption("960 x 720", submenuOptions, SELECTBOX_960_720);
-            SelectBoxRes->addOption("1024 x 576 (WXGA)", submenuOptions, SELECTBOX_1024_576);
-            SelectBoxRes->addOption("1024 x 600 (WSVGA)", submenuOptions, SELECTBOX_1024_600);
-            SelectBoxRes->addOption("1072 x 600 (WSVGA)", submenuOptions, SELECTBOX_1072_600);
-            SelectBoxRes->addOption("1152 x 768", submenuOptions, SELECTBOX_1152_768);
-            SelectBoxRes->addOption("1024 x 768 (EVGA)", submenuOptions, SELECTBOX_1024_768);
-            SelectBoxRes->addOption("1152 x 864 (XGA)", submenuOptions, SELECTBOX_1152_864);
-            SelectBoxRes->addOption("1152 x 870 (XGA)", submenuOptions, SELECTBOX_1152_870);
-            SelectBoxRes->addOption("1152 x 900 (XGA)", submenuOptions, SELECTBOX_1152_900);
-            SelectBoxRes->addOption("1200 x 800 (DSVGA)", submenuOptions, SELECTBOX_1200_800);
-            SelectBoxRes->addOption("1200 x 900 (OLPC)", submenuOptions, SELECTBOX_1200_900);
-            SelectBoxRes->addOption("1280 x 720 (720p)", submenuOptions, SELECTBOX_1280_720);
-            SelectBoxRes->addOption("1280 x 768 (WXGA)", submenuOptions, SELECTBOX_1280_768);
-            SelectBoxRes->addOption("1280 x 800 (WXGA)", submenuOptions, SELECTBOX_1280_800);
-            SelectBoxRes->addOption("1280 x 854 (WXGA)", submenuOptions, SELECTBOX_1280_854);
-            SelectBoxRes->addOption("1360 x 768 (WXGA)", submenuOptions, SELECTBOX_1360_768);
-            SelectBoxRes->addOption("1366 x 768 (WXGA)", submenuOptions, SELECTBOX_1366_768);
-            SelectBoxRes->addOption("1376 x 768 (WXGA)", submenuOptions, SELECTBOX_1376_768);
-            SelectBoxRes->addOption("1400 x 900 (WXGA+)", submenuOptions, SELECTBOX_1400_900);
-            SelectBoxRes->addOption("1440 x 900 (WXGA+)", submenuOptions, SELECTBOX_1440_900);
-            SelectBoxRes->addOption("1440 x 960", submenuOptions, SELECTBOX_1440_960);
-            SelectBoxRes->addOption("1280 x 960 (SXGA)", submenuOptions, SELECTBOX_1280_960);
-            SelectBoxRes->addOption("1280 x 1024 (SXGA)", submenuOptions, SELECTBOX_1280_1024);
-            SelectBoxRes->addOption("1360 x 1024 (XGA-2)", submenuOptions, SELECTBOX_1360_1024);
-            SelectBoxRes->addOption("1366 x 1024 (XGA-2)", submenuOptions, SELECTBOX_1366_1024);
-            SelectBoxRes->addOption("1600 x 768 (UWXGA)", submenuOptions, SELECTBOX_1600_768);
-            SelectBoxRes->addOption("1600 x 900 (WSXGA)", submenuOptions, SELECTBOX_1600_900);
-            SelectBoxRes->addOption("1600 x 1024 (WSXGA)", submenuOptions, SELECTBOX_1600_1024);
-            SelectBoxRes->addOption("1400 x 1050 (SXGA+)", submenuOptions, SELECTBOX_1400_1050);
-            SelectBoxRes->addOption("1680 x 1050 (WSXGA+)", submenuOptions, SELECTBOX_1680_1050);
-            SelectBoxRes->addOption("1600 x 1200 (UXGA)", submenuOptions, SELECTBOX_1600_1200);
-            SelectBoxRes->addOption("1920 x 1080 (1080p)", submenuOptions, SELECTBOX_1920_1080);
-            SelectBoxRes->addOption("1920 x 1200 (WUXGA)", submenuOptions, SELECTBOX_1920_1200);
-            SelectBoxRes->addOption("1920 x 1400 (TXGA)", submenuOptions, SELECTBOX_1920_1400);
-            SelectBoxRes->addOption("1920 x 1440", submenuOptions, SELECTBOX_1920_1440);
-            SelectBoxRes->addOption("2048 x 1152 (QWXGA)", submenuOptions, SELECTBOX_2048_1152);
-            SelectBoxRes->addOption("2048 x 1536 (SUXGA)", submenuOptions, SELECTBOX_2048_1536);
-            SelectBoxRes->addOption("3840 x 2160 (4K UHD)", submenuOptions, SELECTBOX_3840_2160);
+            // Query supported display resolutions from SDL and format like s25client
+            {
+                auto getAspectRatio = [](int w, int h) -> std::pair<int, int> {
+                    // Some resolutions have conventional aspect ratios
+                    if(w == 1360 && h == 1024)
+                        return {4, 3};
+                    if((w == 1360 && h == 768) || (w == 1366 && h == 768))
+                        return {16, 9};
+                    int divisor = std::gcd(w, h);
+                    std::pair<int, int> ratio = {w / divisor, h / divisor};
+                    if(ratio == std::pair<int, int>(8, 5))
+                        return {16, 10};
+                    if(ratio == std::pair<int, int>(5, 3))
+                        return {15, 9};
+                    return ratio;
+                };
+
+                std::set<std::pair<int, int>> resolutions;
+                int numDisplays = SDL_GetNumVideoDisplays();
+                for(int d = 0; d < numDisplays; ++d)
+                {
+                    int numModes = SDL_GetNumDisplayModes(d);
+                    for(int m = 0; m < numModes; ++m)
+                    {
+                        SDL_DisplayMode mode;
+                        if(SDL_GetDisplayMode(d, m, &mode) == 0)
+                            resolutions.insert({mode.w, mode.h});
+                    }
+                }
+                for(const auto& res : resolutions)
+                {
+                    // Skip resolutions smaller than 800x600 (like s25client's MinWindowSize)
+                    if(res.first < 800 && res.second < 600)
+                        continue;
+                    auto ratio = getAspectRatio(res.first, res.second);
+                    std::string label = helpers::format("%dx%d", res.first, res.second);
+                    // Pad to 9 chars (4+1+4 = "1234x5678") for alignment
+                    int padding = 9 - static_cast<int>(label.size());
+                    if(padding > 0)
+                        label.append(padding, ' ');
+                    label += helpers::format(" (%d:%d)", ratio.first, ratio.second);
+                    SelectBoxRes->addOption(label, [res](int) {
+                        global::s2->GameResolution.x = res.first;
+                        global::s2->GameResolution.y = res.second;
+                        submenuOptions(GRAPHICS_CHANGE);
+                    });
+                }
+            }
             break;
 
         case MAINMENU:
@@ -326,264 +290,6 @@ void callback::submenuOptions(int Param)
             SelectBoxRes = nullptr;
             SubMenu = nullptr;
             submenuOptions(INITIALIZING_CALL);
-            break;
-
-        case SELECTBOX_800_600:
-            global::s2->GameResolution.x = 800;
-            global::s2->GameResolution.y = 600;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_832_624:
-            global::s2->GameResolution.x = 832;
-            global::s2->GameResolution.y = 624;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_960_540:
-            global::s2->GameResolution.x = 960;
-            global::s2->GameResolution.y = 540;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_964_544:
-            global::s2->GameResolution.x = 964;
-            global::s2->GameResolution.y = 544;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_960_640:
-            global::s2->GameResolution.x = 960;
-            global::s2->GameResolution.y = 640;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_960_720:
-            global::s2->GameResolution.x = 960;
-            global::s2->GameResolution.y = 720;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1024_576:
-            global::s2->GameResolution.x = 1024;
-            global::s2->GameResolution.y = 576;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1024_600:
-            global::s2->GameResolution.x = 1024;
-            global::s2->GameResolution.y = 600;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1072_600:
-            global::s2->GameResolution.x = 1072;
-            global::s2->GameResolution.y = 600;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1152_768:
-            global::s2->GameResolution.x = 1152;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1024_768:
-            global::s2->GameResolution.x = 1024;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1152_864:
-            global::s2->GameResolution.x = 1152;
-            global::s2->GameResolution.y = 864;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1152_870:
-            global::s2->GameResolution.x = 1152;
-            global::s2->GameResolution.y = 870;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1152_900:
-            global::s2->GameResolution.x = 1152;
-            global::s2->GameResolution.y = 900;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1200_800:
-            global::s2->GameResolution.x = 1200;
-            global::s2->GameResolution.y = 800;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1200_900:
-            global::s2->GameResolution.x = 1200;
-            global::s2->GameResolution.y = 900;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1280_720:
-            global::s2->GameResolution.x = 1280;
-            global::s2->GameResolution.y = 720;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1280_768:
-            global::s2->GameResolution.x = 1280;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1280_800:
-            global::s2->GameResolution.x = 1280;
-            global::s2->GameResolution.y = 800;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1280_854:
-            global::s2->GameResolution.x = 1280;
-            global::s2->GameResolution.y = 854;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1360_768:
-            global::s2->GameResolution.x = 1360;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1366_768:
-            global::s2->GameResolution.x = 1366;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1376_768:
-            global::s2->GameResolution.x = 1376;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1400_900:
-            global::s2->GameResolution.x = 1400;
-            global::s2->GameResolution.y = 900;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1440_900:
-            global::s2->GameResolution.x = 1440;
-            global::s2->GameResolution.y = 900;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1440_960:
-            global::s2->GameResolution.x = 1440;
-            global::s2->GameResolution.y = 960;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1280_960:
-            global::s2->GameResolution.x = 1280;
-            global::s2->GameResolution.y = 960;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1280_1024:
-            global::s2->GameResolution.x = 1280;
-            global::s2->GameResolution.y = 1024;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1360_1024:
-            global::s2->GameResolution.x = 1360;
-            global::s2->GameResolution.y = 1024;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1366_1024:
-            global::s2->GameResolution.x = 1366;
-            global::s2->GameResolution.y = 1024;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1600_768:
-            global::s2->GameResolution.x = 1600;
-            global::s2->GameResolution.y = 768;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1600_900:
-            global::s2->GameResolution.x = 1600;
-            global::s2->GameResolution.y = 900;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1600_1024:
-            global::s2->GameResolution.x = 1600;
-            global::s2->GameResolution.y = 1024;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1400_1050:
-            global::s2->GameResolution.x = 1400;
-            global::s2->GameResolution.y = 1050;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1680_1050:
-            global::s2->GameResolution.x = 1680;
-            global::s2->GameResolution.y = 1050;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1600_1200:
-            global::s2->GameResolution.x = 1600;
-            global::s2->GameResolution.y = 1200;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1920_1080:
-            global::s2->GameResolution.x = 1920;
-            global::s2->GameResolution.y = 1080;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1920_1200:
-            global::s2->GameResolution.x = 1920;
-            global::s2->GameResolution.y = 1200;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1920_1400:
-            global::s2->GameResolution.x = 1920;
-            global::s2->GameResolution.y = 1400;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_1920_1440:
-            global::s2->GameResolution.x = 1920;
-            global::s2->GameResolution.y = 1440;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_2048_1152:
-            global::s2->GameResolution.x = 2048;
-            global::s2->GameResolution.y = 1152;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_2048_1536:
-            global::s2->GameResolution.x = 2048;
-            global::s2->GameResolution.y = 1536;
-            submenuOptions(GRAPHICS_CHANGE);
-            break;
-
-        case SELECTBOX_3840_2160:
-            global::s2->GameResolution.x = 3840;
-            global::s2->GameResolution.y = 2160;
-            submenuOptions(GRAPHICS_CHANGE);
             break;
 
         default: break;
