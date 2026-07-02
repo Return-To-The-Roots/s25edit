@@ -7,6 +7,7 @@
 
 #include "CIO/CFont.h"
 #include "SdlSurface.h"
+#include "Texture.h"
 #include <boost/filesystem/path.hpp>
 #include <Point.h>
 #include <memory>
@@ -27,8 +28,8 @@ public:
     bool Running;
     bool showLoadScreen;
     SdlSurface Surf_Display;
-    SdlTexture displayTexture_;
-    SdlRenderer renderer_;
+    Texture displayTexture_;
+    SDL_GLContext glContext_ = nullptr;
     SdlWindow window_;
 
 private:
@@ -43,7 +44,14 @@ private:
     CFont lastFps;
 
     Uint32 lastFrameTime = 0;
-    unsigned suppressResizeEvents_ = 0;
+    Extent appliedResolution_ = Extent{0, 0}; ///< Last resolution we applied to the window/display
+    bool appliedFullscreen_ = false;          ///< Last fullscreen state we applied
+
+    // Textures for splash screen and cursor
+    Texture splashBg_;
+    Texture cursor_;
+    Texture cursorClicked_;
+    Texture cross_;
 
     // structure for mouse cursor
     struct
@@ -67,9 +75,13 @@ private:
     std::unique_ptr<CMap> MapObj;
 
     void SetAppIcon();
-    void RecreateDisplayResources();
+    void setGLViewport();
+    bool CreateWindow();
 
 public:
+    // Apply current GameResolution and fullscreen settings to the window/display.
+    void ApplyWindowChanges();
+
     void LoadSettings();
     void SaveSettings() const;
 
@@ -79,7 +91,6 @@ public:
     int Execute();
 
     bool Init();
-    bool ReCreateWindow();
     void UpdateDisplaySize(const Extent& newSize);
 
     void EventHandling(SDL_Event* Event);
@@ -88,7 +99,7 @@ public:
 
     void Render();
 
-    void RenderPresent() const;
+    void RenderPresent();
 
     CMenu* RegisterMenu(std::unique_ptr<CMenu> Menu);
     bool UnregisterMenu(CMenu* Menu);

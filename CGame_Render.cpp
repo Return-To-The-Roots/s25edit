@@ -10,6 +10,7 @@
 #include "CMap.h"
 #include "CSurface.h"
 #include "globals.h"
+#include <glad/glad.h>
 #ifdef _WIN32
 #    include "s25editResource.h"
 #    ifndef WIN32_LEAN_AND_MEAN
@@ -38,18 +39,14 @@ void CGame::SetAppIcon()
 
 void CGame::Render()
 {
-    suppressResizeEvents_ = 0;
-    if(Extent(Surf_Display->w, Surf_Display->h) != GameResolution
-       || fullscreen != ((SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0))
-    {
-        ReCreateWindow();
-    }
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_FillRect(Surf_Display.get(), nullptr, SDL_MapRGBA(Surf_Display->format, 0, 0, 0, 0));
 
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
     {
-        CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
-        RenderPresent();
+        splashBg_.Draw(Rect(0, 0, GameResolution.x, GameResolution.y));
+        SDL_GL_SwapWindow(window_.get());
         return;
     }
 
@@ -102,16 +99,6 @@ void CGame::Render()
                 CSurface::Draw(Surf_Display, Window->getSurface(), Window->getX(), Window->getY());
         }
     }
-
-    // render mouse cursor
-    if(Cursor.clicked)
-    {
-        if(Cursor.button.right)
-            CSurface::Draw(Surf_Display, global::bmpArray[CROSS].surface, Cursor.pos);
-        else
-            CSurface::Draw(Surf_Display, global::bmpArray[CURSOR_CLICKED].surface, Cursor.pos);
-    } else
-        CSurface::Draw(Surf_Display, global::bmpArray[CURSOR].surface, Cursor.pos);
 
 #ifdef _ADMINMODE
     FrameCounter++;

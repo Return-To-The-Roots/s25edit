@@ -68,6 +68,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     if(Event->key.keysym.mod & KMOD_ALT)
                     {
                         fullscreen = !fullscreen;
+                        ApplyWindowChanges();
                         SaveSettings();
                     }
                     break;
@@ -388,12 +389,16 @@ void CGame::EventHandling(SDL_Event* Event)
         {
             if(Event->window.event == SDL_WINDOWEVENT_RESIZED)
             {
-                if(suppressResizeEvents_ > 0)
-                {
-                    suppressResizeEvents_--;
-                    break; // Skip stale event from our own window recreation
-                }
-                UpdateDisplaySize(Extent(Event->window.data1, Event->window.data2));
+                // In fullscreen the compositor (e.g. Wayland) may report a size
+                // different from the one we requested. We already applied the
+                // resolution ourselves, so don't let the event override it.
+                if(fullscreen)
+                    break;
+                const Extent newSize(Event->window.data1, Event->window.data2);
+                // Ignore events matching the resolution we already applied.
+                if(newSize == appliedResolution_)
+                    break;
+                UpdateDisplaySize(newSize);
             }
             break;
         }

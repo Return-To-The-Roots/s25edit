@@ -8,49 +8,132 @@
 #include "CIO/CMenu.h"
 #include "CIO/CWindow.h"
 #include "CMap.h"
-#include "CSurface.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "lua/GameDataLoader.h"
+#include <glad/glad.h>
 #include <iostream>
-#include <vector>
 
-bool CGame::ReCreateWindow()
+bool CGame::CreateWindow()
 {
-    suppressResizeEvents_ = 3;
-    displayTexture_.reset();
-    renderer_.reset();
-    window_.reset();
+    if(window_)
+        return false;
+
     window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
                                    SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE));
+                                   SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
     if(!window_)
         return false;
-    renderer_.reset(SDL_CreateRenderer(window_.get(), -1, 0));
-    if(!renderer_)
+
+    glContext_ = SDL_GL_CreateContext(window_.get());
+    if(!glContext_ || !gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
         return false;
-    RecreateDisplayResources();
-    if(!displayTexture_ || !Surf_Display)
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    glClearColor(0, 0, 0, 1);
+
+    SDL_ShowWindow(window_.get());
+
+    ApplyWindowChanges();
+    if(!displayTexture_.isValid() || !Surf_Display)
         return false;
 
     SetAppIcon();
+
     return true;
 }
 
-void CGame::RecreateDisplayResources()
+void CGame::ApplyWindowChanges()
 {
-    displayTexture_.reset();
-    displayTexture_ = makeSdlTexture(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GameResolution.x,
-                                     GameResolution.y);
-    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+    if(!window_)
+        return;
+
+    if(fullscreen)
+    {
+        SDL_DisplayMode dm;
+        SDL_zero(dm);
+        dm.w = static_cast<int>(GameResolution.x);
+        dm.h = static_cast<int>(GameResolution.y);
+        dm.format = 0; // let SDL pick a supported format
+        dm.refresh_rate = 0;
+        if(SDL_SetWindowDisplayMode(window_.get(), &dm) != 0)
+        {
+            std::cerr << "SDL_SetWindowDisplayMode failed: " << SDL_GetError() << std::endl;
+            return;
+        }
+
+        const Uint32 flags = SDL_GetWindowFlags(window_.get());
+        if(!(flags & SDL_WINDOW_FULLSCREEN))
+        {
+            if(SDL_SetWindowFullscreen(window_.get(), SDL_WINDOW_FULLSCREEN) != 0)
+            {
+                std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+                return;
+            }
+        } else if(GameResolution != appliedResolution_)
+        {
+            // Already fullscreen and the resolution changed. Toggle fullscreen off and
+            // back on so SDL/Wayland actually applies the new display mode.
+            if(SDL_SetWindowFullscreen(window_.get(), 0) != 0)
+            {
+                std::cerr << "SDL_SetWindowFullscreen(0) failed: " << SDL_GetError() << std::endl;
+                return;
+            }
+            SDL_SetWindowSize(window_.get(), GameResolution.x, GameResolution.y);
+            if(SDL_SetWindowFullscreen(window_.get(), SDL_WINDOW_FULLSCREEN) != 0)
+            {
+                std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+                return;
+            }
+        }
+    } else
+    {
+        if(SDL_SetWindowFullscreen(window_.get(), 0) != 0)
+        {
+            std::cerr << "SDL_SetWindowFullscreen failed: " << SDL_GetError() << std::endl;
+            return;
+        }
+        SDL_SetWindowSize(window_.get(), GameResolution.x, GameResolution.y);
+        SDL_SetWindowPosition(window_.get(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    }
+
+    UpdateDisplaySize(GameResolution);
+}
+
+void CGame::setGLViewport()
+{
+    if(!window_)
+        return;
+    int w = 0, h = 0;
+    SDL_GL_GetDrawableSize(window_.get(), &w, &h);
+    if(w == 0 || h == 0)
+        return;
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, GameResolution.x, GameResolution.y, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void CGame::UpdateDisplaySize(const Extent& newSize)
 {
     GameResolution = newSize;
-    RecreateDisplayResources();
+    appliedResolution_ = GameResolution;
+    appliedFullscreen_ = fullscreen;
+
+    Surf_Display = makeRGBSurface(GameResolution.x, GameResolution.y, true);
+    displayTexture_.createEmpty(GameResolution);
+
+    setGLViewport();
     for(auto& menu : Menus)
+    {
+        menu->resetBgTexture();
         menu->resetSurface();
+    }
     for(auto& wnd : Windows)
         wnd->resetSurface();
 }
@@ -62,7 +145,7 @@ bool CGame::Init()
     SDL_ShowCursor(SDL_DISABLE);
 
     std::cout << "Create Window...";
-    if(!ReCreateWindow())
+    if(!CreateWindow())
     {
         std::cout << "failure";
         return false;
@@ -94,10 +177,14 @@ bool CGame::Init()
         }
     }
 
+    // Create texture for splash background
+    splashBg_.load(global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface.get(), true);
+
     // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
-    CSurface::DrawStretched(Surf_Display, global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface);
-    RenderPresent();
+    glClear(GL_COLOR_BUFFER_BIT);
+    splashBg_.Draw(Rect(0, 0, GameResolution.x, GameResolution.y));
+    SDL_GL_SwapWindow(window_.get());
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())
@@ -251,6 +338,11 @@ bool CGame::Init()
 
     // create the mainmenu
     callback::mainmenu(INITIALIZING_CALL);
+
+    // Create textures for cursor
+    cursor_.load(global::bmpArray[CURSOR].surface.get());
+    cursorClicked_.load(global::bmpArray[CURSOR_CLICKED].surface.get());
+    cross_.load(global::bmpArray[CROSS].surface.get());
 
     return true;
 }

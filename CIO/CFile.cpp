@@ -291,6 +291,7 @@ bool CFile::read_bbm(FILE* fp)
         CHECK_READ(libendian::read(&(color.r), 1, fp));
         CHECK_READ(libendian::read(&(color.g), 1, fp));
         CHECK_READ(libendian::read(&(color.b), 1, fp));
+        color.a = 255;
     }
 
     palArray++;
@@ -1250,6 +1251,7 @@ bool CFile::read_bob05(FILE* fp)
         CHECK_READ(libendian::read(&(color.r), 1, fp));
         CHECK_READ(libendian::read(&(color.g), 1, fp));
         CHECK_READ(libendian::read(&(color.b), 1, fp));
+        color.a = 255;
     }
 
     palArray++;
