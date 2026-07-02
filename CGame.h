@@ -77,9 +77,11 @@ private:
     void SetAppIcon();
     void setGLViewport();
     bool CreateWindow();
-    void ApplyWindowChanges();
 
 public:
+    // Apply current GameResolution and fullscreen settings to the window/display.
+    void ApplyWindowChanges();
+
     void LoadSettings();
     void SaveSettings() const;
 

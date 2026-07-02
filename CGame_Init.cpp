@@ -50,8 +50,6 @@ void CGame::ApplyWindowChanges()
 {
     if(!window_)
         return;
-    if(GameResolution == appliedResolution_ && fullscreen == appliedFullscreen_)
-        return;
 
     if(fullscreen)
     {

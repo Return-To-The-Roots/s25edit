@@ -68,6 +68,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     if(Event->key.keysym.mod & KMOD_ALT)
                     {
                         fullscreen = !fullscreen;
+                        ApplyWindowChanges();
                         SaveSettings();
                     }
                     break;

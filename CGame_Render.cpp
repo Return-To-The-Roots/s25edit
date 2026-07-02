@@ -42,8 +42,6 @@ void CGame::Render()
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_FillRect(Surf_Display.get(), nullptr, SDL_MapRGBA(Surf_Display->format, 0, 0, 0, 0));
 
-    ApplyWindowChanges();
-
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
     {
