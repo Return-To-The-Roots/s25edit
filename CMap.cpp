@@ -983,6 +983,14 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
     }
 }
 
+namespace {
+constexpr int positiveModulo(int value, int divisor)
+{
+    // C++ % can be negative for negative inputs; this always returns [0, divisor-1]
+    return ((value % divisor) + divisor) % divisor;
+}
+} // namespace
+
 void CMap::storeVerticesFromMouse(Position mousePos, Uint8 /*MouseState*/)
 {
     // if user raises or reduces the height of a vertex, don't let the cursor jump to another vertex
@@ -995,16 +1003,11 @@ void CMap::storeVerticesFromMouse(Position mousePos, Uint8 /*MouseState*/)
     // get X
     // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor)
     // we subtract "triangleWidth/2"  Xeven = (mousePos.x + displayRect.left) / triangleWidth;
-    Xeven = (mousePos.x + displayRect.left - triangleWidth / 2) / triangleWidth;
-    Xeven = ((Xeven % map->width) + map->width) % map->width;
+    Xeven = positiveModulo((mousePos.x + displayRect.left - triangleWidth / 2) / triangleWidth, map->width);
     // Add rows are already shifted by triangleWidth / 2
-    Xodd = (mousePos.x + displayRect.left) / triangleWidth;
-    // Xodd = (mousePos.x + displayRect.left) / triangleWidth;
-    Xodd = ((Xodd % (map->width - 1)) + (map->width - 1)) % (map->width - 1);
+    Xodd = positiveModulo((mousePos.x + displayRect.left) / triangleWidth, map->width - 1);
 
-    MousePosY = mousePos.y + displayRect.top;
-    // correct mouse position Y if displayRect is outside map edges
-    MousePosY = ((MousePosY % map->height_pixel) + map->height_pixel) % map->height_pixel;
+    MousePosY = positiveModulo(mousePos.y + displayRect.top, map->height_pixel);
 
     // get Y
     for(int j = 0; j < map->height; j++)
