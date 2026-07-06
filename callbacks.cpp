@@ -2820,7 +2820,6 @@ void callback::MinimapMenu(int Param)
 {
     static CWindow* WNDMinimap = nullptr;
     static CMap* MapObj = nullptr;
-    static SDL_Surface* WndSurface = nullptr;
     static int scaleNum = 1;
     // only in case INITIALIZING_CALL needed to create the window
     int width;
@@ -2856,13 +2855,15 @@ void callback::MinimapMenu(int Param)
                   std::make_unique<CWindow>(MinimapMenu, WINDOWQUIT, WindowPos::Center, Extent(width + 12, height + 30),
                                             "Overview", WINDOW_NOTHING, WINDOW_CLOSE | WINDOW_MOVE));
                 global::s2->RegisterCallback(MinimapMenu);
-                WndSurface = WNDMinimap->getSurface();
             }
             break;
 
         case CALL_FROM_GAMELOOP:
-            if(MapObj && WndSurface)
-                MapObj->drawMinimap(WndSurface);
+            if(MapObj && WNDMinimap)
+            {
+                if(SDL_Surface* surf = WNDMinimap->getSurface())
+                    MapObj->drawMinimap(surf);
+            }
             break;
 
         case WINDOW_CLICKED_CALL:
@@ -2894,7 +2895,6 @@ void callback::MinimapMenu(int Param)
                 WNDMinimap = nullptr;
             }
             MapObj = nullptr;
-            WndSurface = nullptr;
             global::s2->UnregisterCallback(MinimapMenu);
             break;
 
