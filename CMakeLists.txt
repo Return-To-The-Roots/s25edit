@@ -8,8 +8,9 @@ cmake_minimum_required(VERSION 3.16..3.20)
 project(s25edit)
 
 find_package(Boost 1.64 REQUIRED)
+find_package(SDL2 REQUIRED)
 
-add_subdirectory(SGE)
+
 
 option(RTTR_EDITOR_ADMINMODE "In admin mode there are some key combos to open debugger, resource viewer and so on" OFF)
 if(RTTR_EDITOR_ADMINMODE)
@@ -18,8 +19,6 @@ endif()
 
 file(GLOB MAIN_SOURCES *.cpp *.h include/*.h)
 file(GLOB CIO_SOURCES CIO/*.cpp CIO/*.h)
-SOURCE_GROUP(Main FILES ${MAIN_SOURCES})
-SOURCE_GROUP(CIO FILES ${CIO_SOURCES})
 
 if(WIN32)
     if(CMAKE_HOST_WIN32)
@@ -38,7 +37,8 @@ ELSE()
 ENDIF()
 
 add_executable(s25edit ${MAIN_SOURCES} ${CIO_SOURCES} ${icon_RC})
-target_link_libraries(s25edit PRIVATE SGE rttrConfig s25Common gamedata siedler2 endian::static glad Boost::nowide PUBLIC Boost::disable_autolinking Boost::program_options)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${MAIN_SOURCES} ${CIO_SOURCES})
+target_link_libraries(s25edit PRIVATE rttrConfig s25Common gamedata siedler2 s25Main endian::static glad Boost::nowide SDL2::SDL2 PUBLIC Boost::disable_autolinking Boost::program_options)
 target_include_directories(s25edit PRIVATE include)
 target_compile_features(s25edit PRIVATE cxx_std_17)
 

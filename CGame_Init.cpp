@@ -4,38 +4,64 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "CGame.h"
-#include "CIO/CFile.h"
-#include "CIO/CMenu.h"
-#include "CIO/CWindow.h"
-#include "CMap.h"
-#include "callbacks.h"
+#include "WindowManager.h"
+#include "dskMainMenu.h"
+#include "defines.h"
 #include "globals.h"
+#include "Loader.h"
 #include "lua/GameDataLoader.h"
+#include "ogl/glAllocator.h"
+#include "ogl/glArchivItem_Bitmap.h"
+#include <libsiedler2/Archiv.h>
+#include <libsiedler2/ArchivItem_Bitmap.h>
+#include <libsiedler2/ArchivItem_Palette.h>
+#include <libsiedler2/ErrorCodes.h>
+#include <libsiedler2/libsiedler2.h>
+#include "drivers/VideoDriverWrapper.h"
 #include <glad/glad.h>
+#include <boost/filesystem.hpp>
 #include <iostream>
+#include <exception>
 
 bool CGame::CreateWindow()
 {
     if(window_)
         return false;
 
-    window_.reset(SDL_CreateWindow("Return to the Roots Map editor [BETA]", SDL_WINDOWPOS_CENTERED,
-                                   SDL_WINDOWPOS_CENTERED, GameResolution.x, GameResolution.y,
-                                   SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
-    if(!window_)
+    // Load the SDL2 video driver plugin
+    std::string driverName = "SDL2";
+    try
+    {
+        if(!VIDEODRIVER.LoadDriver(driverName))
+        {
+            std::cerr << "LoadDriver failed" << std::endl;
+            return false;
+        }
+    } catch(std::exception& e)
+    {
+        std::cerr << "LoadDriver exception: " << e.what() << std::endl;
+        return false;
+    } catch(...)
+    {
+        std::cerr << "LoadDriver unknown exception" << std::endl;
+        return false;
+    }
+
+    if(!VIDEODRIVER.CreateScreen({static_cast<unsigned short>(GameResolution.x),
+                                  static_cast<unsigned short>(GameResolution.y)},
+                                 DisplayMode::Windowed))
         return false;
 
-    glContext_ = SDL_GL_CreateContext(window_.get());
-    if(!glContext_ || !gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-        return false;
+    // Keep our own SDL window handle for event polling and resize handling
+    window_.reset(SDL_GL_GetCurrentWindow());
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_SCISSOR_TEST);
     glClearColor(0, 0, 0, 1);
-
-    SDL_ShowWindow(window_.get());
 
     ApplyWindowChanges();
 
@@ -138,41 +164,34 @@ bool CGame::Init()
         std::cout << "failure";
         return false;
     }
-    CFile::init();
-
     /*NOTE: its important to load a palette at first,
      *      otherwise all images will be black (in exception of the LBM-Files, they have their own palette).
-     *      if its necessary to load pictures from a
-     *      specified file with a special palette, so
-     *      load this palette from a file and set
-     *      CFile::palActual = CFile::palArray - 1 (--> last loaden palette)
-     *      and after loading the images set
-     *      CFile::palActual = CFile::palArray (--> first palette)
      */
 
-    // load some pictures (after all the splash-screens)
-    // at first GFX/PICS/SETUP997.LBM, cause this is the S2-loading picture
-    std::cout << "\nLoading file: GFX/PICS/SETUP997.LBM...";
-    if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP997.LBM", LBM))
+    // Initialize basic LOADER infrastructure early (before LoadFilesAtStart)
+    libsiedler2::setAllocator(new GlAllocator());
+    LOADER.initResourceFolders();
+
+    // Load the loading screen splash before the heavier LoadFilesAtStart
     {
-        std::cout << "failure";
-        // if SETUP997.LBM doesn't exist, it's probably settlers2+mission cd and there we have SETUP998.LBM instead
-        std::cout << "\nTry to load file: GFX/PICS/SETUP998.LBM instead...";
-        if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP998.LBM", LBM))
+        auto setup997Path = global::gameDataFilePath / "GFX/PICS/SETUP997.LBM";
+        if(!boost::filesystem::exists(setup997Path))
+            setup997Path = global::gameDataFilePath / "GFX/PICS/SETUP998.LBM";
+        if(boost::filesystem::exists(setup997Path))
         {
-            std::cout << "failure";
-            return false;
+            LOADER.Load(setup997Path, nullptr);
+            splashBg_ = LOADER.GetImageN(ResourceId::make(setup997Path), 0);
         }
     }
 
-    // Create texture for splash background
-    splashBg_.load(global::bmpArray[SPLASHSCREEN_LOADING_S2SCREEN].surface.get(), true);
-
-    // std::cout << "\nShow loading screen...";
     showLoadScreen = true;
     glClear(GL_COLOR_BUFFER_BIT);
-    splashBg_.draw(Rect(0, 0, GameResolution.x, GameResolution.y));
+    if(splashBg_)
+        splashBg_->DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
     SDL_GL_SwapWindow(window_.get());
+
+    // Now load the full set of LOADER files
+    LOADER.LoadFilesAtStart();
 
     GameDataLoader gdLoader(global::worldDesc);
     if(!gdLoader.Load())
@@ -181,156 +200,36 @@ bool CGame::Init()
         return false;
     }
 
-    // continue loading pictures
-    for(const std::string file :
-        {"GFX/PICS/SETUP000.LBM", "GFX/PICS/SETUP010.LBM", "GFX/PICS/SETUP011.LBM", "GFX/PICS/SETUP012.LBM",
-         "GFX/PICS/SETUP013.LBM", "GFX/PICS/SETUP014.LBM", "GFX/PICS/SETUP015.LBM"})
+    // Load EDITRES for fonts, and palette
+    std::cout << "\nLoading default palette from file: GFX/PALETTE/PAL5.BBM...";
+    // Load editor resources into the LOADER (already initialized at top)
     {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
-        {
-            std::cout << "failure";
-            // if it doesn't exist, it's probably settlers2+missioncd and we simply load SETUP010.LBM instead
-            std::cout << "\nLoading file: GFX/PICS/SETUP010.LBM instead...";
-            if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP010.LBM", LBM))
-            {
-                std::cout << "failure";
-                return false;
-            }
-        }
+        const auto* pal5 = LOADER.GetPaletteN("pal5", 0);
+
+        // Main menu background (not in LoadFilesAtStart)
+        const auto setup010Path = global::gameDataFilePath / "GFX/PICS/SETUP010.LBM";
+        if(boost::filesystem::exists(setup010Path))
+            LOADER.Load(setup010Path, nullptr);
+
+        // Editor archives keyed separately from game's IO.IDX etc.
+        const auto editioPath = global::gameDataFilePath / "DATA/IO/EDITIO.IDX";
+        LOADER.Load(editioPath, pal5);
+        const auto editresPath = global::gameDataFilePath / "DATA/EDITRES.IDX";
+        LOADER.Load(editresPath, pal5);
+        const auto editbobPath = global::gameDataFilePath / "DATA/EDITBOB.LST";
+        LOADER.Load(editbobPath, pal5);
+
+        auto* cursorNorm = LOADER.GetImageN("editres", CURSOR);
+        auto* cursorPressed = LOADER.GetImageN("editres", CURSOR_CLICKED);
+        if(cursorNorm)
+            WINDOWMANAGER.SetCursorImage(Cursor::Hand, cursorNorm, cursorPressed);
     }
 
-    for(const std::string file :
-        {"GFX/PICS/SETUP666.LBM", "GFX/PICS/SETUP667.LBM", "GFX/PICS/SETUP801.LBM", "GFX/PICS/SETUP802.LBM",
-         "GFX/PICS/SETUP803.LBM", "GFX/PICS/SETUP804.LBM", "GFX/PICS/SETUP805.LBM", "GFX/PICS/SETUP806.LBM",
-         "GFX/PICS/SETUP810.LBM", "GFX/PICS/SETUP811.LBM", "GFX/PICS/SETUP895.LBM", "GFX/PICS/SETUP896.LBM"})
-    {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
-        {
-            std::cout << "failure";
-            return false;
-        }
-    }
+    // Show the new Desktop-based main menu via WindowManager
+    WINDOWMANAGER.Switch(std::make_unique<dskMainMenu>());
 
-    for(const std::string file : {"GFX/PICS/SETUP897.LBM", "GFX/PICS/SETUP898.LBM"})
-    {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
-        {
-            std::cout << "failure";
-            // if it doesn't exist, it's probably settlers2+missioncd and we simply load SETUP896.LBM instead
-            std::cout << "\nLoading file: GFX/PICS/SETUP896.LBM instead...";
-            if(!CFile::open_file(global::gameDataFilePath / "GFX/PICS/SETUP896.LBM", LBM))
-            {
-                std::cout << "failure";
-                return false;
-            }
-        }
-    }
-
-    for(const std::string file :
-        {"GFX/PICS/SETUP899.LBM", "GFX/PICS/SETUP990.LBM", "GFX/PICS/WORLD.LBM", "GFX/PICS/WORLDMSK.LBM"})
-    {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
-        {
-            std::cout << "failure";
-            return false;
-        }
-    }
-
-    // load gouraud data
-    for(const std::string file : {"DATA/TEXTURES/GOU5.DAT", "DATA/TEXTURES/GOU6.DAT", "DATA/TEXTURES/GOU7.DAT"})
-    {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, GOU))
-        {
-            std::cout << "failure";
-            return false;
-        }
-    }
-
-    // load only the palette at this time from editres.idx
-    std::cout << "\nLoading palette from file: DATA/EDITRES.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath / "DATA/EDITRES.IDX", IDX, true))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set the right palette
-    CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: DATA/EDITRES.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath / "DATA/EDITRES.IDX", IDX))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set back palette
-    CFile::set_palActual(CFile::get_palArray());
-    // load only the palette at this time from editio.idx
-    std::cout << "\nLoading palette from file: DATA/IO/EDITIO.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath / "DATA/IO/EDITIO.IDX", IDX, true))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set the right palette
-    CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: DATA/IO/EDITIO.IDX...";
-    if(!CFile::open_file(global::gameDataFilePath / "DATA/IO/EDITIO.IDX", IDX))
-    {
-        std::cout << "failure";
-        return false;
-    }
-    // set back palette
-    CFile::set_palActual(CFile::get_palArray());
-    std::cout << "\nLoading file: DATA/EDITBOB.LST...";
-    if(!CFile::open_file(global::gameDataFilePath / "DATA/EDITBOB.LST", LST))
-    {
-        std::cout << "failure";
-        return false;
-    }
-
-    // texture tilesets
-    for(const std::string file : {"GFX/TEXTURES/TEX5.LBM", "GFX/TEXTURES/TEX6.LBM", "GFX/TEXTURES/TEX7.LBM"})
-    {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, LBM))
-        {
-            std::cout << "failure";
-            return false;
-        }
-    }
-
-    /*
-    std::cout << "\nLoading palette from file: GFX/PALETTE/PAL5.BBM...";
-    if ( !CFile::open_file(global::gameDataFilePath / "GFX/PALETTE/PAL5.BBM", BBM, true) )
-    {
-        std::cout << "failure";
-        return false;
-    }
-    */
-
-    // EVERY MISSION-FILE SHOULD BE LOADED SEPARATLY IF THE SPECIFIED MISSION GOES ON -- SO THIS IS TEMPORARY
-    for(const std::string file : {"DATA/MIS0BOBS.LST", "DATA/MIS1BOBS.LST", "DATA/MIS2BOBS.LST", "DATA/MIS3BOBS.LST",
-                                  "DATA/MIS4BOBS.LST", "DATA/MIS5BOBS.LST"})
-    {
-        std::cout << "\nLoading file: " << file << "...";
-        if(!CFile::open_file(global::gameDataFilePath / file, LST))
-        {
-            std::cout << "failure";
-            return false;
-        }
-    }
-
-    // create the mainmenu
-    callback::mainmenu(INITIALIZING_CALL);
-
-    // Create textures for cursor
-    cursor_.load(global::bmpArray[CURSOR].surface.get());
-    cursorClicked_.load(global::bmpArray[CURSOR_CLICKED].surface.get());
-    cross_.load(global::bmpArray[CROSS].surface.get());
+    // All resources loaded, dismiss the loading splash so the Desktop renders
+    showLoadScreen = false;
 
     return true;
 }

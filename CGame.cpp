@@ -4,15 +4,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "CGame.h"
-#include "CIO/CMenu.h"
-#include "CIO/CWindow.h"
-#include "CMap.h"
 #include "RttrConfig.h"
+#include "defines.h"
 #include "files.h"
 #include "globals.h"
 #include "s25util/file_handle.h"
 #include <libsiedler2/ArchivItem_Ini.h>
 #include <libsiedler2/libsiedler2.h>
+#include "drivers/VideoDriverWrapper.h"
 #include <glad/glad.h>
 #include <boost/filesystem.hpp>
 #include <boost/nowide/cstdio.hpp>
@@ -34,11 +33,8 @@ namespace bfs = boost::filesystem;
 boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[]);
 
 CGame::CGame(Extent GameResolution_, bool fullscreen_)
-    : GameResolution(GameResolution_), fullscreen(fullscreen_), Running(true), showLoadScreen(true),
-      lastFps("", Position{0, 0}, FontSize::Medium)
+    : GameResolution(GameResolution_), fullscreen(fullscreen_), Running(true), showLoadScreen(true)
 {
-    global::bmpArray.resize(MAXBOBBMP);
-    global::shadowArray.resize(MAXBOBSHADOW);
     global::s2 = this;
 }
 
@@ -57,16 +53,13 @@ int CGame::Execute()
     if(!Init())
         return -1;
 
-    SDL_Event Event;
-    lastFps.setText("");
-    lastFpsTick = SDL_GetTicks();
     lastFrameTime = SDL_GetTicks();
-    framesPassedSinceLastFps = 0;
 
     while(Running)
     {
-        while(SDL_PollEvent(&Event))
-            EventHandling(&Event);
+        // Let the video driver poll and dispatch events to the WindowManager
+        if(!VIDEODRIVER.Run())
+            Running = false;
 
         GameLoop();
         Render();
@@ -77,61 +70,7 @@ int CGame::Execute()
 
 void CGame::RenderPresent()
 {
-    const auto& cursorImg = Cursor.clicked ? (Cursor.button.right ? cross_ : cursorClicked_) : cursor_;
-    cursorImg.draw(Cursor.pos);
-
-    SDL_GL_SwapWindow(window_.get());
-}
-
-CMenu* CGame::RegisterMenu(std::unique_ptr<CMenu> Menu)
-{
-    for(auto& i : Menus)
-        i->setInactive();
-
-    Menu->setActive();
-    Menus.emplace_back(std::move(Menu));
-
-    return Menus.back().get();
-}
-
-bool CGame::UnregisterMenu(CMenu* Menu)
-{
-    auto it = std::find_if(Menus.begin(), Menus.end(), [Menu](const auto& cur) { return cur.get() == Menu; });
-    if(it == Menus.end())
-        return false;
-    if(it != Menus.begin())
-        it[-1]->setActive();
-    Menus.erase(it);
-    return true;
-}
-
-CWindow* CGame::RegisterWindow(std::unique_ptr<CWindow> Window)
-{
-    // first find the highest priority
-    const auto itHighestPriority =
-      std::max_element(Windows.cbegin(), Windows.cend(),
-                       [](const auto& lhs, const auto& rhs) { return lhs->getPriority() < rhs->getPriority(); });
-    const int highestPriority = itHighestPriority == Windows.cend() ? 0 : (*itHighestPriority)->getPriority();
-
-    for(auto& i : Windows)
-        i->setInactive();
-
-    Window->setActive();
-    Window->setPriority(highestPriority + 1);
-    Windows.emplace_back(std::move(Window));
-
-    return Windows.back().get();
-}
-
-bool CGame::UnregisterWindow(CWindow* Window)
-{
-    auto it = std::find_if(Windows.begin(), Windows.end(), [Window](const auto& cur) { return cur.get() == Window; });
-    if(it == Windows.end())
-        return false;
-    if(it != Windows.begin())
-        it[-1]->setActive();
-    Windows.erase(it);
-    return true;
+    VIDEODRIVER.SwapBuffers();
 }
 
 void CGame::RegisterCallback(void (*callback)(int))
@@ -147,28 +86,6 @@ bool CGame::UnregisterCallback(void (*callback)(int))
         return false;
     Callbacks.erase(it);
     return true;
-}
-
-void CGame::setMapObj(std::unique_ptr<CMap> MapObj)
-{
-    this->MapObj = std::move(MapObj);
-}
-
-CMap* CGame::getMapObj()
-{
-    return MapObj.get();
-}
-
-void CGame::delMapObj()
-{
-    MapObj.reset();
-}
-
-void CGame::enterEditor(const boost::filesystem::path& filepath)
-{
-    for(auto& menu : Menus)
-        menu->setWaste();
-    setMapObj(std::make_unique<CMap>(filepath));
 }
 
 void CGame::LoadSettings()
@@ -201,19 +118,6 @@ void CGame::GameLoop()
 {
     for(auto&& callback : Callbacks)
         callback(CALL_FROM_GAMELOOP);
-    const auto isWaste = [](const auto& p) { return p->isWaste(); };
-    auto itMenu = std::find_if(Menus.begin(), Menus.end(), isWaste);
-    while(itMenu != Menus.end())
-    {
-        UnregisterMenu(itMenu->get());
-        itMenu = std::find_if(Menus.begin(), Menus.end(), isWaste);
-    }
-    auto itWnd = std::find_if(Windows.begin(), Windows.end(), isWaste);
-    while(itWnd != Windows.end())
-    {
-        UnregisterWindow(itWnd->get());
-        itWnd = std::find_if(Windows.begin(), Windows.end(), isWaste);
-    }
 }
 
 namespace {
@@ -407,3 +311,19 @@ boost::program_options::variables_map parse_cmdline_args(int argc, char* argv[])
 
     return result;
 }
+
+// VideoDriverLoaderInterface callbacks
+// These are called by the video driver's MessageLoop.
+// We currently use our own SDL_PollEvent loop, so these are no-ops for now.
+void CGame::Msg_LeftDown(MouseCoords /*mc*/) {}
+void CGame::Msg_LeftUp(MouseCoords /*mc*/) {}
+void CGame::Msg_RightDown(const MouseCoords& /*mc*/) {}
+void CGame::Msg_RightUp(const MouseCoords& /*mc*/) {}
+void CGame::Msg_MiddleDown(const MouseCoords& /*mc*/) {}
+void CGame::Msg_MiddleUp(const MouseCoords& /*mc*/) {}
+void CGame::Msg_WheelUp(const MouseCoords& /*mc*/) {}
+void CGame::Msg_WheelDown(const MouseCoords& /*mc*/) {}
+void CGame::Msg_MouseMove(const MouseCoords& /*mc*/) {}
+void CGame::Msg_KeyDown(const KeyEvent& /*ke*/) {}
+void CGame::WindowResized() {}
+

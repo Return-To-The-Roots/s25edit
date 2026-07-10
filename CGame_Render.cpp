@@ -4,13 +4,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "CGame.h"
-#include "CIO/CFont.h"
-#include "CIO/CMenu.h"
-#include "CIO/CWindow.h"
-#include "CMap.h"
-#include "CSurface.h"
-#include "Texture.h"
+#include "WindowManager.h"
 #include "globals.h"
+#include "drivers/VideoDriverWrapper.h"
+#include "ogl/glArchivItem_Bitmap.h"
 #include <glad/glad.h>
 #ifdef _WIN32
 #    include "s25editResource.h"
@@ -43,94 +40,34 @@ void CGame::Render()
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_SCISSOR_TEST);
 
     // if the S2 loading screen is shown, render only this until user clicks a mouse button
     if(showLoadScreen)
     {
-        splashBg_.draw(Rect(0, 0, GameResolution.x, GameResolution.y));
-        SDL_GL_SwapWindow(window_.get());
+        if(splashBg_)
+            splashBg_->DrawFull(Rect(0, 0, GameResolution.x, GameResolution.y));
+        VIDEODRIVER.SwapBuffers();
         return;
     }
 
-    // render the map if active
-    if(MapObj && MapObj->isActive())
-    {
-        if(auto* mapSurf = MapObj->getSurface())
-        {
-            std::array<char, 100> textBuffer;
-            std::snprintf(textBuffer.data(), textBuffer.size(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
-            CFont::writeText(mapSurf, textBuffer.data(), 20, 20);
-            std::snprintf(textBuffer.data(), textBuffer.size(),
-                          "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
-                          MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
-            CFont::writeText(mapSurf, textBuffer.data(), 100, 20);
-            if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
-                CFont::writeText(mapSurf, "Movement locked (F9 or F10 to unlock)", 20, 40, FontSize::Large,
-                                 FontColor::Orange);
-            else if(MapObj->isHorizontalMovementLocked())
-                CFont::writeText(mapSurf, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large,
-                                 FontColor::Orange);
-            else if(MapObj->isVerticalMovementLocked())
-                CFont::writeText(mapSurf, "Vertical movement locked (F10 to unlock)", 20, 40, FontSize::Large,
-                                 FontColor::Orange);
+    // Reset projection to screen-space before WindowManager draws
+    const auto rs = VIDEODRIVER.GetRenderSize();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, rs.x, rs.y, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-            mapTex_.load(mapSurf);
-            mapTex_.draw(Rect(0, 0, GameResolution.x, GameResolution.y));
-        }
-    }
+    WINDOWMANAGER.Draw();
 
-    // render active menus
-    for(auto& Menu : Menus)
-    {
-        if(Menu->isActive())
-            Menu->draw(Position(0, 0));
-    }
-
-    // render windows ordered by priority
-    int highestPriority = 0;
-    // first find the highest priority
-    for(auto& Window : Windows)
-    {
-        if(Window->getPriority() > highestPriority)
-            highestPriority = Window->getPriority();
-    }
-    // render from lowest priority to highest
-    for(int actualPriority = 0; actualPriority <= highestPriority; actualPriority++)
-    {
-        for(auto& Window : Windows)
-        {
-            if(Window->getPriority() == actualPriority)
-                Window->draw(Position(0, 0));
-        }
-    }
-
-#ifdef _ADMINMODE
-    FrameCounter++;
-#endif
-
-    ++framesPassedSinceLastFps;
-    const auto curTicks = SDL_GetTicks();
-    const auto diffTicks = curTicks - lastFpsTick;
-    if(diffTicks > 1000)
-    {
-        lastFps.setText(std::to_string((framesPassedSinceLastFps * 1000) / diffTicks) + " FPS");
-        framesPassedSinceLastFps = 0;
-        lastFpsTick = curTicks;
-    }
-    lastFps.draw(Position(0, 0));
-
-    const auto& cursorImg = Cursor.clicked ? (Cursor.button.right ? cross_ : cursorClicked_) : cursor_;
-    cursorImg.draw(Cursor.pos);
-
-    SDL_GL_SwapWindow(window_.get());
-
-#ifdef _ADMINMODE
-    FrameCounter++;
-#endif
+    VIDEODRIVER.SwapBuffers();
 
     if(msWait)
         SDL_Delay(msWait);
 
+    const auto curTicks = SDL_GetTicks();
     const auto timeSinceLastFrame = curTicks - lastFrameTime;
     const auto targetFPS = 60;
     const auto targetMsPerFrame = 1000 / targetFPS;
