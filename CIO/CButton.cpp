@@ -134,7 +134,7 @@ void CButton::draw(Position parentOrigin) const
     // 4. Draw picture or text centered inside the button
     if(button_picture >= 0)
     {
-        auto& picTex = getBmpTexture(button_picture);
+        auto& picTex = getTexture(ArchiveID::EDITIO, button_picture);
         const Position picPos = absPos + size_ / 2 - Position(picTex.getSize()) / 2;
         picTex.draw(picPos);
     } else if(button_text)

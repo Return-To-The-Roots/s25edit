@@ -14,13 +14,16 @@
 #include "CTextfield.h"
 #include "CollisionDetection.h"
 #include "helpers/containerUtils.h"
+#include <libsiedler2/ArchivItem_Bitmap.h>
 #include <glad/glad.h>
 #include <cassert>
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title, int color,
-                 Uint8 flags)
-    : CControlContainer(color, {global::bmpArray[WINDOW_LEFT_FRAME].w, global::bmpArray[WINDOW_UPPER_FRAME].h,
-                                global::bmpArray[WINDOW_RIGHT_FRAME].w, global::bmpArray[WINDOW_LOWER_FRAME].h}),
+                 Uint8 flags, ArchiveID bgArchive)
+    : CControlContainer(
+      color,
+      BorderSizes(ArchiveID::EDITRES, WINDOW_LEFT_FRAME, WINDOW_UPPER_FRAME, WINDOW_RIGHT_FRAME, WINDOW_LOWER_FRAME),
+      bgArchive),
       pos_(pos), size_(size), title(title), callback_(callback), callbackQuitMessage(callbackQuitMessage)
 {
     assert(callback);
@@ -39,18 +42,14 @@ static Position makePos(WindowPos pos, Extent size)
 }
 
 CWindow::CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size,
-                 const char* title /*= nullptr*/, int color /*= WINDOW_GREEN1*/, Uint8 flags /*= 0*/)
-    : CWindow(callback, callbackQuitMessage, makePos(pos, size), size, title, color, flags)
+                 const char* title /*= nullptr*/, int color /*= WINDOW_GREEN1*/, Uint8 flags /*= 0*/,
+                 ArchiveID bgArchive /*= ArchiveID::EDITRES*/)
+    : CWindow(callback, callbackQuitMessage, makePos(pos, size), size, title, color, flags, bgArchive)
 {}
 
 void CWindow::setTitle(const char* title)
 {
     this->title = title;
-}
-
-void CWindow::setColor(int color)
-{
-    setBackgroundPicture(color);
 }
 
 bool CWindow::hasActiveInputElement()
@@ -61,10 +60,14 @@ bool CWindow::hasActiveInputElement()
 void CWindow::setMouseData(SDL_MouseMotionEvent motion)
 {
     // cursor is on the title frame (+/-2 and +/-4 are only for a good optic)
-    const Position titleFrameLT = pos_ + Position(global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2, 4);
+    const Position titleFrameLT =
+      pos_ + Position(static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_LEFT_UPPER_CORNER).x), 0)
+      + Position(2, 4);
     const Position titleFrameRB =
-      Position(pos_.x + static_cast<int>(size_.x) - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2,
-               pos_.y + global::bmpArray[WINDOW_UPPER_FRAME].h - 4);
+      pos_
+      + Position(static_cast<int>(size_.x),
+                 static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_UPPER_FRAME).y))
+      - Position(static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_RIGHT_UPPER_CORNER).x) + 2, 4);
     if(IsPointInRect(motion.x, motion.y, Rect(titleFrameLT, Extent(titleFrameRB - titleFrameLT))))
     {
         // left button was pressed while moving
@@ -88,27 +91,30 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     if(canClose)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        canClose_marked = (motion.x >= pos_.x + 2) && (motion.x < pos_.x + global::bmpArray[WINDOW_BUTTON_CLOSE].w - 2)
-                          && (motion.y >= pos_.y + 2)
-                          && (motion.y < pos_.y + global::bmpArray[WINDOW_BUTTON_CLOSE].h - 2);
+        const auto closeSize = global::getBitmapSize(ArchiveID::EDITRES, WINDOW_BUTTON_CLOSE);
+        canClose_marked =
+          IsPointInRect(Position(motion.x, motion.y), Rect(pos_ + Position(2, 2), closeSize - Extent(4, 4)));
     }
     // check whats happen to the minimize button
     if(canMinimize)
     {
         // cursor is on the button (+/-2 is only for the optic)
+        const auto minSize = global::getBitmapSize(ArchiveID::EDITRES, WINDOW_BUTTON_MINIMIZE);
         canMinimize_marked =
-          (motion.x >= pos_.x + static_cast<int>(size_.x) - global::bmpArray[WINDOW_BUTTON_MINIMIZE].w + 2)
-          && (motion.x < pos_.x + static_cast<int>(size_.x) - 2) && (motion.y >= pos_.y + 2)
-          && (motion.y < pos_.y + global::bmpArray[WINDOW_BUTTON_MINIMIZE].h - 2);
+          IsPointInRect(Position(motion.x, motion.y),
+                        Rect(pos_ + Position(static_cast<int>(size_.x) - static_cast<int>(minSize.x) + 2, 2),
+                             minSize - Extent(4, 4)));
     }
     // check whats happen to the resize button
     if(canResize)
     {
         // cursor is on the button (+/-2 is only for the optic)
-        if((motion.x >= pos_.x + static_cast<int>(size_.x) - global::bmpArray[WINDOW_BUTTON_RESIZE].w + 2)
-           && (motion.x < pos_.x + static_cast<int>(size_.x) - 2)
-           && (motion.y >= pos_.y + static_cast<int>(size_.y) - global::bmpArray[WINDOW_BUTTON_RESIZE].h + 2)
-           && (motion.y < pos_.y + static_cast<int>(size_.y) - 2))
+        const auto resizeSize = global::getBitmapSize(ArchiveID::EDITRES, WINDOW_BUTTON_RESIZE);
+        if(IsPointInRect(Position(motion.x, motion.y),
+                         Rect(pos_
+                                + Position(static_cast<int>(size_.x) - static_cast<int>(resizeSize.x) + 2,
+                                           static_cast<int>(size_.y) - static_cast<int>(resizeSize.y) + 2),
+                              resizeSize - Extent(4, 4))))
         {
             // left button was pressed while moving
             if(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT))
@@ -157,7 +163,8 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     // save width and height in case we minimize the window (the initializing values are for preventing any mistakes and
     // compilerwarning --- in fact: uninitialized values are only a problem if the window is created minimized, but this
     // will not happen)
-    static int maximized_h = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
+    static int maximized_h = global::getBitmapSize(ArchiveID::EDITRES, WINDOW_UPPER_FRAME).y
+                             + global::getBitmapSize(ArchiveID::EDITRES, WINDOW_CORNER_RECTANGLE).y;
     if(!minimized)
         maximized_h = static_cast<int>(size_.y);
 
@@ -165,10 +172,14 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // cursor is on the title frame (+/-2 and +/-4 are only for a good optic)
-        if((button.x >= pos_.x + global::bmpArray[WINDOW_LEFT_UPPER_CORNER].w + 2)
-           && (button.x < pos_.x + static_cast<int>(size_.x) - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2)
+        if((button.x
+            >= pos_.x + static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_LEFT_UPPER_CORNER).x) + 2)
+           && (button.x < pos_.x + static_cast<int>(size_.x)
+                            - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_RIGHT_UPPER_CORNER).x)
+                            - 2)
            && (button.y >= pos_.y + 4)
-           && (button.y < pos_.y + static_cast<int>(global::bmpArray[WINDOW_UPPER_FRAME].h) - 4))
+           && (button.y
+               < pos_.y + static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_UPPER_FRAME).y) - 4))
         {
             marked = true;
             clicked = true;
@@ -211,7 +222,8 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
                     minimized = false;
                 } else // minimize now
                 {
-                    size_.y = global::bmpArray[WINDOW_UPPER_FRAME].h + global::bmpArray[WINDOW_CORNER_RECTANGLE].h;
+                    size_.y = global::getBitmapSize(ArchiveID::EDITRES, WINDOW_UPPER_FRAME).y
+                              + global::getBitmapSize(ArchiveID::EDITRES, WINDOW_CORNER_RECTANGLE).y;
                     minimized = true;
                 }
             }
@@ -243,7 +255,7 @@ void CWindow::draw(Position /*parentOrigin*/)
 {
     // 1. Background fill (tiled)
     if(getBackground() != WINDOW_NOTHING)
-        getBmpTexture(getBackground()).drawTiled(getRect());
+        getTexture(backgroundArchive_, getBackground()).drawTiled(getRect());
 
     // 2. Content (if not minimized) — clipped to the area inside frames
     if(!minimized)
@@ -273,51 +285,52 @@ void CWindow::draw(Position /*parentOrigin*/)
 
     // Draw upper frame tile across the top of the window
     {
-        const Rect upperFrameRect(pos_, Extent(size_.x, getBmpTexture(upperframe).getSize().y));
-        getBmpTexture(upperframe).drawTiled(upperFrameRect);
+        const Rect upperFrameRect(pos_, Extent(size_.x, getTexture(ArchiveID::EDITRES, upperframe).getSize().y));
+        getTexture(ArchiveID::EDITRES, upperframe).drawTiled(upperFrameRect);
     }
 
     // 4. Title text
     if(title)
     {
-        const int titleY = pos_.y + (getBmpTexture(WINDOW_UPPER_FRAME).getSize().y - 9) / 2;
+        const int titleY = pos_.y + (getTexture(ArchiveID::EDITRES, WINDOW_UPPER_FRAME).getSize().y - 9) / 2;
         CFont::draw(title, Position(pos_.x + static_cast<int>(size_.x) / 2, titleY), FontSize::Small, FontColor::Yellow,
                     FontAlign::Middle);
     }
 
     // 5. Lower frame (tiled across bottom)
     {
-        const int lowerH = getBmpTexture(WINDOW_LOWER_FRAME).getSize().y;
+        const int lowerH = getTexture(ArchiveID::EDITRES, WINDOW_LOWER_FRAME).getSize().y;
         const Rect lowerFrameRect(Position(pos_.x, pos_.y + static_cast<int>(size_.y) - lowerH),
                                   Extent(size_.x, lowerH));
-        getBmpTexture(WINDOW_LOWER_FRAME).drawTiled(lowerFrameRect);
+        getTexture(ArchiveID::EDITRES, WINDOW_LOWER_FRAME).drawTiled(lowerFrameRect);
     }
 
     // 6. Left frame (tiled down left side)
     {
-        const Rect leftFrameRect(pos_, Extent(getBmpTexture(WINDOW_LEFT_FRAME).getSize().x, size_.y));
-        getBmpTexture(WINDOW_LEFT_FRAME).drawTiled(leftFrameRect);
+        const Rect leftFrameRect(pos_, Extent(getTexture(ArchiveID::EDITRES, WINDOW_LEFT_FRAME).getSize().x, size_.y));
+        getTexture(ArchiveID::EDITRES, WINDOW_LEFT_FRAME).drawTiled(leftFrameRect);
     }
 
     // 7. Right frame (tiled down right side)
     {
-        const int rightW = getBmpTexture(WINDOW_RIGHT_FRAME).getSize().x;
+        const int rightW = getTexture(ArchiveID::EDITRES, WINDOW_RIGHT_FRAME).getSize().x;
         const Rect rightFrameRect(Position(pos_.x + static_cast<int>(size_.x) - rightW, pos_.y),
                                   Extent(rightW, size_.y));
-        getBmpTexture(WINDOW_RIGHT_FRAME).drawTiled(rightFrameRect);
+        getTexture(ArchiveID::EDITRES, WINDOW_RIGHT_FRAME).drawTiled(rightFrameRect);
     }
 
     // 8. Corners
     {
-        getBmpTexture(WINDOW_LEFT_UPPER_CORNER).draw(pos_);
+        getTexture(ArchiveID::EDITRES, WINDOW_LEFT_UPPER_CORNER).draw(pos_);
 
-        const int ruW = getBmpTexture(WINDOW_RIGHT_UPPER_CORNER).getSize().x;
-        getBmpTexture(WINDOW_RIGHT_UPPER_CORNER).draw(pos_ + Position(static_cast<int>(size_.x) - ruW, 0));
+        const Extent ru = getTexture(ArchiveID::EDITRES, WINDOW_RIGHT_UPPER_CORNER).getSize();
+        getTexture(ArchiveID::EDITRES, WINDOW_RIGHT_UPPER_CORNER)
+          .draw(pos_ + Position(static_cast<int>(size_.x) - ru.x, 0));
 
-        const int crW = getBmpTexture(WINDOW_CORNER_RECTANGLE).getSize().x;
-        const int crH = getBmpTexture(WINDOW_CORNER_RECTANGLE).getSize().y;
-        getBmpTexture(WINDOW_CORNER_RECTANGLE).draw(pos_ + Position(0, static_cast<int>(size_.y) - crH));
-        getBmpTexture(WINDOW_CORNER_RECTANGLE).draw(pos_ + size_ - Position(crW, crH));
+        const Extent cr = getTexture(ArchiveID::EDITRES, WINDOW_CORNER_RECTANGLE).getSize();
+        getTexture(ArchiveID::EDITRES, WINDOW_CORNER_RECTANGLE)
+          .draw(pos_ + Position(0, static_cast<int>(size_.y) - cr.y));
+        getTexture(ArchiveID::EDITRES, WINDOW_CORNER_RECTANGLE).draw(pos_ + size_ - cr);
     }
 
     // 9. Close button
@@ -330,7 +343,7 @@ void CWindow::draw(Position /*parentOrigin*/)
             closebutton = WINDOW_BUTTON_CLOSE_MARKED;
         else
             closebutton = WINDOW_BUTTON_CLOSE;
-        getBmpTexture(closebutton).draw(pos_);
+        getTexture(ArchiveID::EDITRES, closebutton).draw(pos_);
     }
 
     // 10. Minimize button
@@ -343,8 +356,9 @@ void CWindow::draw(Position /*parentOrigin*/)
             minimizebutton = WINDOW_BUTTON_MINIMIZE_MARKED;
         else
             minimizebutton = WINDOW_BUTTON_MINIMIZE;
-        getBmpTexture(minimizebutton)
-          .draw(pos_ + Position(static_cast<int>(size_.x) - getBmpTexture(minimizebutton).getSize().x, 0));
+        const Extent minBtnSize = getTexture(ArchiveID::EDITRES, minimizebutton).getSize();
+        getTexture(ArchiveID::EDITRES, minimizebutton)
+          .draw(pos_ + Position(static_cast<int>(size_.x) - minBtnSize.x, 0));
     }
 
     // 11. Resize button
@@ -357,7 +371,8 @@ void CWindow::draw(Position /*parentOrigin*/)
             resizebutton = WINDOW_BUTTON_RESIZE_MARKED;
         else
             resizebutton = WINDOW_BUTTON_RESIZE;
-        getBmpTexture(resizebutton).draw(pos_ + size_ - getBmpTexture(resizebutton).getSize());
+        const Extent resBtnSize = getTexture(ArchiveID::EDITRES, resizebutton).getSize();
+        getTexture(ArchiveID::EDITRES, resizebutton).draw(pos_ + size_ - resBtnSize);
     }
 }
 

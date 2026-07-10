@@ -55,28 +55,44 @@ void CGame::Render()
     // render the map if active
     if(MapObj && MapObj->isActive())
     {
-        if(auto* mapSurf = MapObj->getSurface())
-        {
-            std::array<char, 100> textBuffer;
-            std::snprintf(textBuffer.data(), textBuffer.size(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
-            CFont::writeText(mapSurf, textBuffer.data(), 20, 20);
-            std::snprintf(textBuffer.data(), textBuffer.size(),
-                          "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
-                          MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
-            CFont::writeText(mapSurf, textBuffer.data(), 100, 20);
-            if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
-                CFont::writeText(mapSurf, "Movement locked (F9 or F10 to unlock)", 20, 40, FontSize::Large,
-                                 FontColor::Orange);
-            else if(MapObj->isHorizontalMovementLocked())
-                CFont::writeText(mapSurf, "Horizontal movement locked (F9 to unlock)", 20, 40, FontSize::Large,
-                                 FontColor::Orange);
-            else if(MapObj->isVerticalMovementLocked())
-                CFont::writeText(mapSurf, "Vertical movement locked (F10 to unlock)", 20, 40, FontSize::Large,
-                                 FontColor::Orange);
+        // Set up map-space projection: (displayRect.left, top) maps to (0,0) screen
+        auto viewRect = MapObj->getDisplayRect();
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glOrtho(static_cast<GLdouble>(viewRect.left), static_cast<GLdouble>(viewRect.left + GameResolution.x),
+                static_cast<GLdouble>(viewRect.top + GameResolution.y), static_cast<GLdouble>(viewRect.top), -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
 
-            mapTex_.load(mapSurf);
-            mapTex_.draw(Rect(0, 0, GameResolution.x, GameResolution.y));
-        }
+        MapObj->render();
+
+        // Restore screen-space projection
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+
+        // HUD text overlays drawn directly via OpenGL
+        std::array<char, 100> textBuffer;
+        // text for x and y of vertex (shown in upper left corner)
+        std::snprintf(textBuffer.data(), textBuffer.size(), "%d    %d", MapObj->getVertexX(), MapObj->getVertexY());
+        CFont::draw(textBuffer.data(), Position(20, 20));
+        // text for MinReduceHeight and MaxRaiseHeight
+        std::snprintf(textBuffer.data(), textBuffer.size(),
+                      "min. height: %#04x/0x3C  max. height: %#04x/0x3C  NormalNull: 0x0A",
+                      MapObj->getMinReduceHeight(), MapObj->getMaxRaiseHeight());
+        CFont::draw(textBuffer.data(), Position(100, 20));
+        // text for MovementLocked
+        if(MapObj->isHorizontalMovementLocked() && MapObj->isVerticalMovementLocked())
+            CFont::draw("Movement locked (F9 or F10 to unlock)", Position(20, 40), FontSize::Large, FontColor::Orange);
+        else if(MapObj->isHorizontalMovementLocked())
+            CFont::draw("Horizontal movement locked (F9 to unlock)", Position(20, 40), FontSize::Large,
+                        FontColor::Orange);
+        else if(MapObj->isVerticalMovementLocked())
+            CFont::draw("Vertical movement locked (F10 to unlock)", Position(20, 40), FontSize::Large,
+                        FontColor::Orange);
     }
 
     // render active menus

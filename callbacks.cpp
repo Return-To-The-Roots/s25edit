@@ -21,6 +21,7 @@
 #include "globals.h"
 #include "helpers/format.hpp"
 #include "s25util/strAlgos.h"
+#include <libsiedler2/ArchivItem_Bitmap.h>
 #include <glad/glad.h>
 #include <boost/filesystem.hpp>
 #include <algorithm>
@@ -145,7 +146,7 @@ void callback::mainmenu(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU));
+            MainMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_MAINMENU, ArchiveID::SETUP010));
             MainMenu->addButton(mainmenu, ENDGAME, Position(50, 400), Extent(200, 20), BUTTON_RED1, "Quit program");
             MainMenu->addButton(mainmenu, STARTEDITOR, Position(50, 160), Extent(200, 20), BUTTON_RED1, "Start editor");
             MainMenu->addButton(mainmenu, LOADMAP, Position(50, 200), Extent(200, 20), BUTTON_GREEN2, "Load map");
@@ -239,7 +240,7 @@ void callback::submenuOptions(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            SubMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_SUBMENU3));
+            SubMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_SUBMENU3, ArchiveID::SETUP013));
             // add button for "back to main menu"
             SubMenu->addButton(submenuOptions, MAINMENU, Position(global::s2->GameResolution.x / 2 - 100, 440),
                                Extent(200, 20), BUTTON_RED1, "back");
@@ -611,9 +612,9 @@ void callback::EditorHelpMenu(int Param)
         case INITIALIZING_CALL:
             if(WNDHelp)
                 break;
-            WNDHelp = global::s2->RegisterWindow(
-              std::make_unique<CWindow>(EditorHelpMenu, WINDOWQUIT, WindowPos::Center, Extent(640, 380), "Hilfe",
-                                        WINDOW_GREEN2, WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
+            WNDHelp = global::s2->RegisterWindow(std::make_unique<CWindow>(
+              EditorHelpMenu, WINDOWQUIT, WindowPos::Center, Extent(640, 380), "Hilfe", WINDOW_GREEN2,
+              WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE, ArchiveID::EDITIO));
 
             SelectBoxHelp = WNDHelp->addSelectBox(Position(0, 0), Extent(WNDHelp->getSize() - WNDHelp->getBorderSize()),
                                                   FontSize::Medium, FontColor::Yellow, BUTTON_GREEN1);
@@ -811,10 +812,10 @@ void callback::EditorLoadMenu(int Param)
             if(!WNDLoad || !CB_Filename || !BtnLoad || !BtnAbort)
                 break;
 
-            int borderL = global::bmpArray[WINDOW_LEFT_FRAME].w;
-            int borderR = global::bmpArray[WINDOW_RIGHT_FRAME].w;
-            int borderT = global::bmpArray[WINDOW_UPPER_FRAME].h;
-            int borderB = global::bmpArray[WINDOW_LOWER_FRAME].h;
+            int borderL = static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_LEFT_FRAME).x);
+            int borderR = static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_RIGHT_FRAME).x);
+            int borderT = static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_UPPER_FRAME).y);
+            int borderB = static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, WINDOW_LOWER_FRAME).y);
 
             int window_w = static_cast<int>(WNDLoad->getSize().x);
             int window_h = static_cast<int>(WNDLoad->getSize().y);
@@ -1094,24 +1095,28 @@ void callback::EditorTextureMenu(int Param)
             MapObj->setMode(EDITOR_MODE_TEXTURE);
             MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW);
 
-            WNDTexture->addPicture(EditorTextureMenu, PICSNOW, Position(2, 2), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE, Position(36, 2), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICSWAMP, Position(70, 2), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICFLOWER, Position(104, 2), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMINING1, Position(138, 2), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMINING2, Position(172, 2), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMINING3, Position(2, 36), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMINING4, Position(36, 36), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE_MEADOW1, Position(70, 36), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW1, Position(104, 36), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW2, Position(138, 36), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW3, Position(172, 36), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE_MEADOW2, Position(2, 70), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICMINING_MEADOW, Position(36, 70), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICWATER, Position(70, 70), textureIndex++);
-            WNDTexture->addPicture(EditorTextureMenu, PICLAVA, Position(104, 70), textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICSNOW, Position(2, 2), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE, Position(36, 2), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICSWAMP, Position(70, 2), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICFLOWER, Position(104, 2), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMINING1, Position(138, 2), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMINING2, Position(172, 2), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMINING3, Position(2, 36), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMINING4, Position(36, 36), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE_MEADOW1, Position(70, 36), ArchiveID::EDITIO,
+                                   textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW1, Position(104, 36), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW2, Position(138, 36), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMEADOW3, Position(172, 36), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICSTEPPE_MEADOW2, Position(2, 70), ArchiveID::EDITIO,
+                                   textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICMINING_MEADOW, Position(36, 70), ArchiveID::EDITIO,
+                                   textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICWATER, Position(70, 70), ArchiveID::EDITIO, textureIndex++);
+            WNDTexture->addPicture(EditorTextureMenu, PICLAVA, Position(104, 70), ArchiveID::EDITIO, textureIndex++);
             if(map->type != MAP_WASTELAND)
-                WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, Position(138, 70), textureIndex);
+                WNDTexture->addPicture(EditorTextureMenu, PICMEADOW_MIXED, Position(138, 70), ArchiveID::EDITIO,
+                                       textureIndex);
             break;
 
         case PICSNOW: MapObj->setModeContent(TRIANGLE_TEXTURE_SNOW); break;
@@ -1218,30 +1223,45 @@ void callback::EditorTreeMenu(int Param)
             switch(map->type)
             {
                 case MAP_GREENLAND:
-                    WNDTree->addPicture(EditorTreeMenu, PICPINE, Position(2, 2), PICTURE_TREE_PINE);
-                    WNDTree->addPicture(EditorTreeMenu, PICBIRCH, Position(36, 2), PICTURE_TREE_BIRCH);
-                    WNDTree->addPicture(EditorTreeMenu, PICOAK, Position(70, 2), PICTURE_TREE_OAK);
-                    WNDTree->addPicture(EditorTreeMenu, PICPALM1, Position(104, 2), PICTURE_TREE_PALM1);
-                    WNDTree->addPicture(EditorTreeMenu, PICPALM2, Position(2, 36), PICTURE_TREE_PALM2);
-                    WNDTree->addPicture(EditorTreeMenu, PICPINEAPPLE, Position(36, 36), PICTURE_TREE_PINEAPPLE);
-                    WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, Position(70, 36), PICTURE_TREE_CYPRESS);
-                    WNDTree->addPicture(EditorTreeMenu, PICCHERRY, Position(104, 36), PICTURE_TREE_CHERRY);
-                    WNDTree->addPicture(EditorTreeMenu, PICFIR, Position(2, 72), PICTURE_TREE_FIR);
-                    WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, Position(36, 70), PICTURE_TREE_WOOD_MIXED);
-                    WNDTree->addPicture(EditorTreeMenu, PICPALM_MIXED, Position(70, 70), PICTURE_TREE_PALM_MIXED);
+                    WNDTree->addPicture(EditorTreeMenu, PICPINE, Position(2, 2), ArchiveID::EDITIO, PICTURE_TREE_PINE);
+                    WNDTree->addPicture(EditorTreeMenu, PICBIRCH, Position(36, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_BIRCH);
+                    WNDTree->addPicture(EditorTreeMenu, PICOAK, Position(70, 2), ArchiveID::EDITIO, PICTURE_TREE_OAK);
+                    WNDTree->addPicture(EditorTreeMenu, PICPALM1, Position(104, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_PALM1);
+                    WNDTree->addPicture(EditorTreeMenu, PICPALM2, Position(2, 36), ArchiveID::EDITIO,
+                                        PICTURE_TREE_PALM2);
+                    WNDTree->addPicture(EditorTreeMenu, PICPINEAPPLE, Position(36, 36), ArchiveID::EDITIO,
+                                        PICTURE_TREE_PINEAPPLE);
+                    WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, Position(70, 36), ArchiveID::EDITIO,
+                                        PICTURE_TREE_CYPRESS);
+                    WNDTree->addPicture(EditorTreeMenu, PICCHERRY, Position(104, 36), ArchiveID::EDITIO,
+                                        PICTURE_TREE_CHERRY);
+                    WNDTree->addPicture(EditorTreeMenu, PICFIR, Position(2, 72), ArchiveID::EDITIO, PICTURE_TREE_FIR);
+                    WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, Position(36, 70), ArchiveID::EDITIO,
+                                        PICTURE_TREE_WOOD_MIXED);
+                    WNDTree->addPicture(EditorTreeMenu, PICPALM_MIXED, Position(70, 70), ArchiveID::EDITIO,
+                                        PICTURE_TREE_PALM_MIXED);
                     break;
                 case MAP_WASTELAND:
-                    WNDTree->addPicture(EditorTreeMenu, PICFLAPHAT, Position(2, 2), PICTURE_TREE_FLAPHAT);
-                    WNDTree->addPicture(EditorTreeMenu, PICSPIDER, Position(36, 2), PICTURE_TREE_SPIDER);
-                    WNDTree->addPicture(EditorTreeMenu, PICPINEAPPLE, Position(70, 2), PICTURE_TREE_PINEAPPLE);
-                    WNDTree->addPicture(EditorTreeMenu, PICCHERRY, Position(104, 2), PICTURE_TREE_CHERRY);
+                    WNDTree->addPicture(EditorTreeMenu, PICFLAPHAT, Position(2, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_FLAPHAT);
+                    WNDTree->addPicture(EditorTreeMenu, PICSPIDER, Position(36, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_SPIDER);
+                    WNDTree->addPicture(EditorTreeMenu, PICPINEAPPLE, Position(70, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_PINEAPPLE);
+                    WNDTree->addPicture(EditorTreeMenu, PICCHERRY, Position(104, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_CHERRY);
                     break;
                 case MAP_WINTERLAND:
-                    WNDTree->addPicture(EditorTreeMenu, PICPINE, Position(2, 2), PICTURE_TREE_PINE);
-                    WNDTree->addPicture(EditorTreeMenu, PICBIRCH, Position(36, 2), PICTURE_TREE_BIRCH);
-                    WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, Position(70, 2), PICTURE_TREE_CYPRESS);
-                    WNDTree->addPicture(EditorTreeMenu, PICFIR, Position(104, 2), PICTURE_TREE_FIR);
-                    WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, Position(2, 36), PICTURE_TREE_WOOD_MIXED);
+                    WNDTree->addPicture(EditorTreeMenu, PICPINE, Position(2, 2), ArchiveID::EDITIO, PICTURE_TREE_PINE);
+                    WNDTree->addPicture(EditorTreeMenu, PICBIRCH, Position(36, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_BIRCH);
+                    WNDTree->addPicture(EditorTreeMenu, PICCYPRESS, Position(70, 2), ArchiveID::EDITIO,
+                                        PICTURE_TREE_CYPRESS);
+                    WNDTree->addPicture(EditorTreeMenu, PICFIR, Position(104, 2), ArchiveID::EDITIO, PICTURE_TREE_FIR);
+                    WNDTree->addPicture(EditorTreeMenu, PICWOOD_MIXED, Position(2, 36), ArchiveID::EDITIO,
+                                        PICTURE_TREE_WOOD_MIXED);
                     break;
                 default: // should not happen
                     break;
@@ -1404,10 +1424,14 @@ void callback::EditorResourceMenu(int Param)
                                         WINDOW_GREEN1, WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
             MapObj = global::s2->getMapObj();
 
-            WNDResource->addPicture(EditorResourceMenu, PICGOLD, Position(2, 2), PICTURE_RESOURCE_GOLD);
-            WNDResource->addPicture(EditorResourceMenu, PICORE, Position(36, 2), PICTURE_RESOURCE_ORE);
-            WNDResource->addPicture(EditorResourceMenu, PICCOAL, Position(70, 2), PICTURE_RESOURCE_COAL);
-            WNDResource->addPicture(EditorResourceMenu, PICGRANITE, Position(104, 2), PICTURE_RESOURCE_GRANITE);
+            WNDResource->addPicture(EditorResourceMenu, PICGOLD, Position(2, 2), ArchiveID::EDITIO,
+                                    PICTURE_RESOURCE_GOLD);
+            WNDResource->addPicture(EditorResourceMenu, PICORE, Position(36, 2), ArchiveID::EDITIO,
+                                    PICTURE_RESOURCE_ORE);
+            WNDResource->addPicture(EditorResourceMenu, PICCOAL, Position(70, 2), ArchiveID::EDITIO,
+                                    PICTURE_RESOURCE_COAL);
+            WNDResource->addPicture(EditorResourceMenu, PICGRANITE, Position(104, 2), ArchiveID::EDITIO,
+                                    PICTURE_RESOURCE_GRANITE);
 
             MapObj->setMode(EDITOR_MODE_RESOURCE_RAISE);
             MapObj->setModeContent(0x51);
@@ -1509,52 +1533,64 @@ void callback::EditorLandscapeMenu(int Param)
             switch(map->type)
             {
                 case MAP_GREENLAND:
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Position(2, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Position(2, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_GRANITE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Position(36, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Position(36, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_TREE_DEAD);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Position(70, 2), PICTURE_LANDSCAPE_STONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICCACTUS, Position(2, 36), PICTURE_LANDSCAPE_CACTUS);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Position(36, 36),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Position(70, 2), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_STONE);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICCACTUS, Position(2, 36), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_CACTUS);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Position(36, 36), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_PEBBLE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, Position(70, 36), PICTURE_LANDSCAPE_BUSH);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, Position(2, 70), PICTURE_LANDSCAPE_SHRUB);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Position(36, 70), PICTURE_LANDSCAPE_BONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Position(70, 70),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, Position(70, 36), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_BUSH);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, Position(2, 70), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_SHRUB);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Position(36, 70), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_BONE);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Position(70, 70), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_MUSHROOM);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Position(5, 107), MAPPIC_FLOWERS);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Position(5, 107), ArchiveID::MAP00,
+                                             MAPPIC_FLOWERS);
                     break;
                 case MAP_WASTELAND:
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Position(2, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Position(2, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_GRANITE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Position(36, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Position(36, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_TREE_DEAD);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Position(70, 2), PICTURE_LANDSCAPE_STONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTALAGMITE, Position(2, 36),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Position(70, 2), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_STONE);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTALAGMITE, Position(2, 36), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_STALAGMITE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Position(36, 36),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Position(36, 36), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_PEBBLE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, Position(70, 36), PICTURE_LANDSCAPE_BUSH);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, Position(2, 70), PICTURE_LANDSCAPE_SHRUB);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Position(36, 70), PICTURE_LANDSCAPE_BONE);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Position(70, 70),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBUSH, Position(70, 36), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_BUSH);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSHRUB, Position(2, 70), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_SHRUB);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Position(36, 70), ArchiveID::EDITIO,
+                                             PICTURE_LANDSCAPE_BONE);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Position(70, 70), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_MUSHROOM);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Position(5, 107), MAPPIC_FLOWERS);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Position(5, 107), ArchiveID::MAP00,
+                                             MAPPIC_FLOWERS);
                     break;
                 case MAP_WINTERLAND:
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Position(2, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICGRANITE, Position(2, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_GRANITE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Position(36, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICTREEDEAD, Position(36, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_TREE_DEAD_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Position(70, 2),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICSTONE, Position(70, 2), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_STONE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Position(2, 36),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICPEBBLE, Position(2, 36), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_PEBBLE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Position(36, 36),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICBONE, Position(36, 36), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_BONE_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Position(70, 36),
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICMUSHROOM, Position(70, 36), ArchiveID::EDITIO,
                                              PICTURE_LANDSCAPE_MUSHROOM_WINTER);
-                    WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Position(73, 73), MAPPIC_FLOWERS);
+                    WNDLandscape->addPicture(EditorLandscapeMenu, PICFLOWERS, Position(73, 73), ArchiveID::MAP00,
+                                             MAPPIC_FLOWERS);
                     break;
                 default: // should not happen
                     break;
@@ -1705,12 +1741,14 @@ void callback::EditorAnimalMenu(int Param)
             WNDAnimal = global::s2->RegisterWindow(
               std::make_unique<CWindow>(EditorAnimalMenu, WINDOWQUIT, Pos, Extent(116, 106), "Animals", WINDOW_GREEN1,
                                         WINDOW_CLOSE | WINDOW_MINIMIZE | WINDOW_MOVE));
-            WNDAnimal->addPicture(EditorAnimalMenu, PICRABBIT, Position(2, 2), PICTURE_ANIMAL_RABBIT);
-            WNDAnimal->addPicture(EditorAnimalMenu, PICFOX, Position(36, 2), PICTURE_ANIMAL_FOX);
-            WNDAnimal->addPicture(EditorAnimalMenu, PICSTAG, Position(70, 2), PICTURE_ANIMAL_STAG);
-            WNDAnimal->addPicture(EditorAnimalMenu, PICROE, Position(2, 36), PICTURE_ANIMAL_ROE);
-            WNDAnimal->addPicture(EditorAnimalMenu, PICDUCK, Position(36, 36), PICTURE_ANIMAL_DUCK);
-            WNDAnimal->addPicture(EditorAnimalMenu, PICSHEEP, Position(70, 36), PICTURE_ANIMAL_SHEEP);
+            WNDAnimal->addPicture(EditorAnimalMenu, PICRABBIT, Position(2, 2), ArchiveID::EDITIO,
+                                  PICTURE_ANIMAL_RABBIT);
+            WNDAnimal->addPicture(EditorAnimalMenu, PICFOX, Position(36, 2), ArchiveID::EDITIO, PICTURE_ANIMAL_FOX);
+            WNDAnimal->addPicture(EditorAnimalMenu, PICSTAG, Position(70, 2), ArchiveID::EDITIO, PICTURE_ANIMAL_STAG);
+            WNDAnimal->addPicture(EditorAnimalMenu, PICROE, Position(2, 36), ArchiveID::EDITIO, PICTURE_ANIMAL_ROE);
+            WNDAnimal->addPicture(EditorAnimalMenu, PICDUCK, Position(36, 36), ArchiveID::EDITIO, PICTURE_ANIMAL_DUCK);
+            WNDAnimal->addPicture(EditorAnimalMenu, PICSHEEP, Position(70, 36), ArchiveID::EDITIO,
+                                  PICTURE_ANIMAL_SHEEP);
 
             MapObj = global::s2->getMapObj();
             MapObj->setMode(EDITOR_MODE_ANIMAL);
@@ -1939,8 +1977,10 @@ void callback::EditorCursorMenu(int Param)
             CursorRandomButton = WNDCursor->addButton(EditorCursorMenu, CURSORRANDOM, Position(2, 34), Extent(196, 32),
                                                       BUTTON_GREY, "Cursor-Activity: static");
             WNDCursor->addButton(EditorCursorMenu, TRIANGLE, Position(2, 66), Extent(32, 32), BUTTON_GREY, nullptr);
-            trianglePictureArrowUp = WNDCursor->addStaticPicture(Position(8, 74), CURSOR_SYMBOL_ARROW_UP);
-            trianglePictureArrowDown = WNDCursor->addStaticPicture(Position(17, 77), CURSOR_SYMBOL_ARROW_DOWN);
+            trianglePictureArrowUp =
+              WNDCursor->addStaticPicture(Position(8, 74), ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_UP);
+            trianglePictureArrowDown =
+              WNDCursor->addStaticPicture(Position(17, 77), ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_DOWN);
             if(MapObj)
             {
                 MapObj->setVertexFillRSU(true);
@@ -1963,8 +2003,8 @@ void callback::EditorCursorMenu(int Param)
                 trianglePictureArrowDown = -1;
                 // add random if necessary
                 if(trianglePictureRandom == -1)
-                    trianglePictureRandom =
-                      WNDCursor->addStaticPicture(Position(14, 76), FONT14_SPACE + 31 * 7 + 5); // Interrogation point
+                    trianglePictureRandom = WNDCursor->addStaticPicture(
+                      Position(14, 76), ArchiveID::EDITIO, FONT14_SPACE + 31 * 7 + 5); // Interrogation point
                 MapObj->setVertexFillRSU(false);
                 MapObj->setVertexFillUSD(false);
                 MapObj->setVertexFillRandom(true);
@@ -1972,10 +2012,12 @@ void callback::EditorCursorMenu(int Param)
             {
                 // only arrow down is shown, so upgrade to both arrows
                 // add arrow up
-                trianglePictureArrowUp = WNDCursor->addStaticPicture(Position(8, 74), CURSOR_SYMBOL_ARROW_UP);
+                trianglePictureArrowUp =
+                  WNDCursor->addStaticPicture(Position(8, 74), ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_UP);
                 // add arrow down if necessary
                 if(trianglePictureArrowDown == -1)
-                    trianglePictureArrowDown = WNDCursor->addStaticPicture(Position(17, 77), CURSOR_SYMBOL_ARROW_DOWN);
+                    trianglePictureArrowDown =
+                      WNDCursor->addStaticPicture(Position(17, 77), ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_DOWN);
                 MapObj->setVertexFillRSU(true);
                 MapObj->setVertexFillUSD(true);
                 MapObj->setVertexFillRandom(false);
@@ -1988,7 +2030,8 @@ void callback::EditorCursorMenu(int Param)
                     WNDCursor->delStaticPicture(trianglePictureArrowUp);
                     trianglePictureArrowUp = -1;
                 }
-                trianglePictureArrowDown = WNDCursor->addStaticPicture(Position(17, 77), CURSOR_SYMBOL_ARROW_DOWN);
+                trianglePictureArrowDown =
+                  WNDCursor->addStaticPicture(Position(17, 77), ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_DOWN);
                 MapObj->setVertexFillRSU(false);
                 MapObj->setVertexFillUSD(true);
                 MapObj->setVertexFillRandom(false);
@@ -1999,7 +2042,8 @@ void callback::EditorCursorMenu(int Param)
                 trianglePictureRandom = -1;
                 // add arrow up if necessary
                 if(trianglePictureArrowUp == -1)
-                    trianglePictureArrowUp = WNDCursor->addStaticPicture(Position(8, 74), CURSOR_SYMBOL_ARROW_UP);
+                    trianglePictureArrowUp =
+                      WNDCursor->addStaticPicture(Position(8, 74), ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_UP);
                 // delete arrow down if necessary
                 if(trianglePictureArrowDown != -1)
                 {
@@ -2174,7 +2218,7 @@ void callback::EditorCreateMenu(int Param)
             WNDCreate->addText("Main area", Position(82, 120), FontSize::Small, FontColor::Yellow);
             WNDCreate->addButton(EditorCreateMenu, TEXTURE_PREVIOUS, Position(45, 139), Extent(35, 20), BUTTON_GREY,
                                  "-");
-            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), PicTextureIndexGlobal);
+            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), ArchiveID::EDITIO, PicTextureIndexGlobal);
             WNDCreate->addButton(EditorCreateMenu, TEXTURE_NEXT, Position(158, 139), Extent(35, 20), BUTTON_GREY, "+");
 
             WNDCreate->addText("Border size", Position(103, 175), FontSize::Small, FontColor::Yellow);
@@ -2186,7 +2230,8 @@ void callback::EditorCreateMenu(int Param)
             WNDCreate->addText("Border area", Position(65, 215), FontSize::Small, FontColor::Yellow);
             WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_PREVIOUS, Position(45, 234), Extent(35, 20),
                                  BUTTON_GREY, "-");
-            PicBorderTextureIndex = WNDCreate->addStaticPicture(Position(102, 228), PicBorderTextureIndexGlobal);
+            PicBorderTextureIndex =
+              WNDCreate->addStaticPicture(Position(102, 228), ArchiveID::EDITIO, PicBorderTextureIndexGlobal);
             WNDCreate->addButton(EditorCreateMenu, BORDER_TEXTURE_NEXT, Position(158, 234), Extent(35, 20), BUTTON_GREY,
                                  "+");
 
@@ -2331,8 +2376,9 @@ void callback::EditorCreateMenu(int Param)
             }
             WNDCreate->delStaticPicture(PicTextureIndex);
             WNDCreate->delStaticPicture(PicBorderTextureIndex);
-            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), PicTextureIndexGlobal);
-            PicBorderTextureIndex = WNDCreate->addStaticPicture(Position(102, 228), PicBorderTextureIndexGlobal);
+            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), ArchiveID::EDITIO, PicTextureIndexGlobal);
+            PicBorderTextureIndex =
+              WNDCreate->addStaticPicture(Position(102, 228), ArchiveID::EDITIO, PicBorderTextureIndexGlobal);
             break;
 
         case TEXTURE_PREVIOUS:
@@ -2435,7 +2481,7 @@ void callback::EditorCreateMenu(int Param)
                 texture = TRIANGLE_TEXTURE_LAVA;
             }
             WNDCreate->delStaticPicture(PicTextureIndex);
-            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), PicTextureIndexGlobal);
+            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), ArchiveID::EDITIO, PicTextureIndexGlobal);
             break;
         case TEXTURE_NEXT:
             PicTextureIndexGlobal++;
@@ -2537,7 +2583,7 @@ void callback::EditorCreateMenu(int Param)
                 texture = TRIANGLE_TEXTURE_LAVA;
             }
             WNDCreate->delStaticPicture(PicTextureIndex);
-            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), PicTextureIndexGlobal);
+            PicTextureIndex = WNDCreate->addStaticPicture(Position(102, 133), ArchiveID::EDITIO, PicTextureIndexGlobal);
             break;
 
         case REDUCE_BORDER:
@@ -2653,7 +2699,8 @@ void callback::EditorCreateMenu(int Param)
                 border_texture = TRIANGLE_TEXTURE_LAVA;
             }
             WNDCreate->delStaticPicture(PicBorderTextureIndex);
-            PicBorderTextureIndex = WNDCreate->addStaticPicture(Position(102, 228), PicBorderTextureIndexGlobal);
+            PicBorderTextureIndex =
+              WNDCreate->addStaticPicture(Position(102, 228), ArchiveID::EDITIO, PicBorderTextureIndexGlobal);
             break;
         case BORDER_TEXTURE_NEXT:
             PicBorderTextureIndexGlobal++;
@@ -2755,7 +2802,8 @@ void callback::EditorCreateMenu(int Param)
                 border_texture = TRIANGLE_TEXTURE_LAVA;
             }
             WNDCreate->delStaticPicture(PicBorderTextureIndex);
-            PicBorderTextureIndex = WNDCreate->addStaticPicture(Position(102, 228), PicBorderTextureIndexGlobal);
+            PicBorderTextureIndex =
+              WNDCreate->addStaticPicture(Position(102, 228), ArchiveID::EDITIO, PicBorderTextureIndexGlobal);
             break;
 
         case CREATE_WORLD:
@@ -2871,10 +2919,10 @@ void callback::MinimapMenu(int Param)
                          mouse, Rect(WNDMinimap->getPos() + Position(6, 20), WNDMinimap->getSize() - Extent(12, 30))))
                     {
                         DisplayRectangle displayRect = MapObj->getDisplayRect();
-                        displayRect.setOrigin((mouse - WNDMinimap->getRect().getOrigin() - Position(6, 20)
-                                               - Position(global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].nx,
-                                                          global::bmpArray[MAPPIC_ARROWCROSS_ORANGE].ny))
-                                              * Position(triangleWidth, triangleHeight) * scaleNum);
+                        displayRect.setOrigin(
+                          (mouse - WNDMinimap->getRect().getOrigin() - Position(6, 20)
+                           - Texture::getTexture(ArchiveID::MAP00, MAPPIC_ARROWCROSS_ORANGE).anchor())
+                          * Position(triangleWidth, triangleHeight) * scaleNum);
                         MapObj->setDisplayRect(displayRect);
                     }
                 }
@@ -2921,112 +2969,6 @@ void callback::debugger(int Param)
             if(Debugger)
                 Debugger->sendParam(Param);
             break;
-    }
-}
-
-// this is the picture-viewer
-void callback::viewer(int Param)
-{
-    static CWindow* WNDViewer = nullptr;
-    static int index = 0;
-    static int PicInWndIndex = -1;
-    static CFont* PicInfosText = nullptr;
-
-    enum
-    {
-        BACKWARD_1,
-        BACKWARD_10,
-        BACKWARD_100,
-        FORWARD_1,
-        FORWARD_10,
-        FORWARD_100,
-        WINDOWQUIT
-    };
-    if(Param != INITIALIZING_CALL && Param != MAP_QUIT)
-    {
-        assert(WNDViewer);
-    }
-
-    switch(Param)
-    {
-        case INITIALIZING_CALL:
-            if(WNDViewer)
-                break;
-            WNDViewer = global::s2->RegisterWindow(
-              std::make_unique<CWindow>(viewer, WINDOWQUIT, Position(0, 0), Extent(250, 140), "Viewer", WINDOW_GREEN1,
-                                        WINDOW_CLOSE | WINDOW_MOVE | WINDOW_RESIZE | WINDOW_MINIMIZE));
-            global::s2->RegisterCallback(viewer);
-            WNDViewer->addButton(viewer, BACKWARD_100, Position(0, 0), Extent(35, 20), BUTTON_GREY, "100<-");
-            WNDViewer->addButton(viewer, BACKWARD_10, Position(35, 0), Extent(35, 20), BUTTON_GREY, "10<-");
-            WNDViewer->addButton(viewer, BACKWARD_1, Position(70, 0), Extent(35, 20), BUTTON_GREY, "1<-");
-            WNDViewer->addButton(viewer, FORWARD_1, Position(105, 0), Extent(35, 20), BUTTON_GREY, "->1");
-            WNDViewer->addButton(viewer, FORWARD_10, Position(140, 0), Extent(35, 20), BUTTON_GREY, "->10");
-            WNDViewer->addButton(viewer, FORWARD_100, Position(175, 0), Extent(35, 20), BUTTON_GREY, "->100");
-            break;
-
-        case CALL_FROM_GAMELOOP:
-            if(PicInWndIndex >= 0)
-                WNDViewer->delStaticPicture(PicInWndIndex);
-            PicInWndIndex = WNDViewer->addStaticPicture(Position(5, 30), index);
-
-            if(PicInfosText)
-            {
-                if(WNDViewer->delText(PicInfosText))
-                    PicInfosText = nullptr;
-            }
-            if(!PicInfosText)
-            {
-                const auto infos =
-                  helpers::format("index=%d, w=%d, h=%d, nx=%d, ny=%d", index, global::bmpArray[index].w,
-                                  global::bmpArray[index].h, global::bmpArray[index].nx, global::bmpArray[index].ny);
-                PicInfosText = WNDViewer->addText(infos, Position(220, 3), FontSize::Large, FontColor::Red);
-            }
-
-            break;
-
-        case BACKWARD_100:
-            if(index - 100 >= 0)
-                index -= 100;
-            else
-                index = 0;
-            break;
-        case BACKWARD_10:
-            if(index - 10 >= 0)
-                index -= 10;
-            else
-                index = 0;
-            break;
-        case BACKWARD_1:
-            if(index - 1 >= 0)
-                index -= 1;
-            else
-                index = 0;
-            break;
-        case FORWARD_1:
-            if(index < MAXBOBBMP - 1)
-                index++;
-            break;
-        case FORWARD_10:
-            if(index + 10 < MAXBOBBMP - 1)
-                index += 10;
-            break;
-        case FORWARD_100:
-            if(index + 100 < MAXBOBBMP - 1)
-                index += 100;
-            break;
-
-        case WINDOWQUIT:
-            if(WNDViewer)
-            {
-                WNDViewer->setWaste();
-                WNDViewer = nullptr;
-                global::s2->UnregisterCallback(viewer);
-                index = 0;
-                PicInWndIndex = -1;
-            }
-            break;
-
-        default: break;
     }
 }
 
@@ -3085,19 +3027,22 @@ void callback::submenu1(int Param)
     switch(Param)
     {
         case INITIALIZING_CALL:
-            SubMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_SUBMENU1));
+            SubMenu = global::s2->RegisterMenu(std::make_unique<CMenu>(SPLASHSCREEN_SUBMENU1, ArchiveID::SETUP011));
             SubMenu->addButton(submenu1, MAINMENU, Position(400, 440), Extent(200, 20), BUTTON_RED1, "back");
             greatMoon = SubMenu->addButton(submenu1, GREATMOON, Position(100, 100), Extent(200, 200), BUTTON_STONE,
                                            nullptr, MOON);
             greatMoon->setMotionParams(GREATMOONENTRY, GREATMOONLEAVE);
             SubMenu->addButton(submenu1, SMALLMOON, Position(100, 350),
-                               Extent(global::bmpArray[MOON].w, global::bmpArray[MOON].h), BUTTON_STONE, nullptr, MOON);
+                               Extent(static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, MOON).x),
+                                      static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, MOON).y)),
+                               BUTTON_STONE, nullptr, MOON);
             SubMenu->addButton(submenu1, TOOSMALL, Position(100, 400),
-                               Extent(global::bmpArray[MOON].w - 1, global::bmpArray[MOON].h - 1), BUTTON_STONE,
-                               nullptr, MOON);
+                               Extent(static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, MOON).x) - 1,
+                                      static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, MOON).y) - 1),
+                               BUTTON_STONE, nullptr, MOON);
             SubMenu->addButton(submenu1, CREATEWINDOW, Position(500, 10), Extent(130, 30), BUTTON_GREEN1,
                                "Create window");
-            picObject = SubMenu->addPicture(submenu1, PICOBJECT, Position(200, 30), MIS0BOBS_SHIP);
+            picObject = SubMenu->addPicture(submenu1, PICOBJECT, Position(200, 30), ArchiveID::MIS0BOBS, MIS0BOBS_SHIP);
             picObject->setMotionParams(PICOBJECTENTRY, PICOBJECTLEAVE);
             SubMenu->addText("Textblock", Position(400, 200), FontSize::Large);
             testTextfield = SubMenu->addTextfield(Position(400, 300), 10, 3);
@@ -3149,7 +3094,7 @@ void callback::submenu1(int Param)
 
         case TOOSMALL:
             if(picIndex == -1)
-                picIndex = SubMenu->addStaticPicture(Position(0, 0), MAINFRAME_640_480);
+                picIndex = SubMenu->addStaticPicture(Position(0, 0), ArchiveID::EDITRES, MAINFRAME_640_480);
             break;
 
         case CREATEWINDOW:
@@ -3161,8 +3106,8 @@ void callback::submenu1(int Param)
                 testWindow->addText("Text inside the window", Position(10, 10), FontSize::Large);
                 testWindow->addButton(submenu1, -10, Position(150, 100), Extent(210, 30), BUTTON_GREEN2,
                                       "Button inside the window");
-                testWindowPicture =
-                  testWindow->addPicture(submenu1, TESTWINDOWPICTURE, Position(10, 60), MIS2BOBS_FORTRESS);
+                testWindowPicture = testWindow->addPicture(submenu1, TESTWINDOWPICTURE, Position(10, 60),
+                                                           ArchiveID::MIS2BOBS, MIS2BOBS_FORTRESS);
                 testWindowPicture->setMotionParams(TESTWINDOWPICTUREENTRY, TESTWINDOWPICTURELEAVE);
                 testTextfield_testWindow = testWindow->addTextfield(Position(130, 30), 10, 3, FontSize::Large,
                                                                     FontColor::Red, BUTTON_GREY, true);

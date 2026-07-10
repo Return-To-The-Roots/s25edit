@@ -7,19 +7,43 @@
 #include "CGame.h"
 #include "CMap.h"
 #include "Rect.h"
-#include "SGE/sge_blib.h"
-#include "SGE/sge_surface.h"
+#include "Texture.h"
 #include "globals.h"
 #include "gameData/EdgeDesc.h"
 #include "gameData/TerrainDesc.h"
+#include <libsiedler2/ArchivItem_Bitmap.h>
+#include <libsiedler2/ArchivItem_Bitmap_Raw.h>
+#include <libsiedler2/ArchivItem_PaletteAnimation.h>
+#include <libsiedler2/PixelBufferBGRA.h>
+#include <libsiedler2/PixelBufferPaletted.h>
+#include <glad/glad.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <map>
 
-// Disable SGE's internal surface locking once at startup; terrain drawing is
-// the only remaining consumer of SGE functions and the caller already handles
-// locking. Was originally called in CGame::Init().
-static bool sgeLockOff = (sge_Lock_OFF(), true);
+static uint8_t intensityToColor(Sint32 val)
+{
+    if(val <= 0)
+        return 0;
+    constexpr Sint32 maxVal = 2 * 65536;
+    if(val >= maxVal)
+        return 255;
+    return static_cast<uint8_t>((val * 255 + maxVal / 2) / maxVal);
+}
+
+// For border rendering we use GL_MODULATE (no RGB_SCALE), so
+// [0, 65536] maps linearly to [0, 255].
+static uint8_t intensityToModulate(Sint32 val)
+{
+    if(val <= 0)
+        return 0;
+    constexpr Sint32 maxVal = 65536;
+    if(val >= maxVal)
+        return 255;
+    return static_cast<uint8_t>((val * 255 + maxVal / 2) / maxVal);
+}
 
 namespace {
 const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)
@@ -33,243 +57,32 @@ const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)
     }
     return nullptr;
 }
-} // namespace
 
-namespace {
-SDL_Rect rect2SDL_Rect(const Rect& rect)
+static void DrawFadedTexturedTrigon(const Point16& p1, const Point16& p2, const Point16& p3, const Rect& rect,
+                                    Sint32 I1, Sint32 I2, float texW, float texH)
 {
-    Point<Sint16> origin(rect.getOrigin());
-    Point<Uint16> size(rect.getSize());
-    SDL_Rect result;
-    result.x = origin.x;
-    result.y = origin.y;
-    result.w = size.x;
-    result.h = size.y;
-    return result;
+    uint8_t c1 = intensityToModulate(I1);
+    uint8_t c2 = intensityToModulate(I2);
+    uint8_t ct = c2;
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glBegin(GL_TRIANGLES);
+    glTexCoord2f(float(rect.left) / texW, float(rect.top) / texH);
+    glColor4ub(c1, c1, c1, 255);
+    glVertex2f(float(p1.x), float(p1.y));
+    glTexCoord2f(float(rect.right) / texW, float(rect.top) / texH);
+    glColor4ub(c2, c2, c2, 255);
+    glVertex2f(float(p2.x), float(p2.y));
+    glTexCoord2f(float((rect.left + rect.right) / 2) / texW, float(rect.bottom) / texH);
+    glColor4ub(ct, ct, ct, 255);
+    glVertex2f(float(p3.x), float(p3.y));
+    glEnd();
 }
 
-void DrawPreCalcFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3,
-                                    SDL_Surface* source, const SDL_Rect& rect, Uint16 I1, Uint16 I2,
-                                    Uint8 PreCalcPalettes[][256])
-{
-    Sint16 right = rect.x + rect.w - 1;
-    Sint16 middle = rect.x + rect.w / Sint16(2);
-    Sint16 bottom = rect.y + rect.h - 1;
-    Uint32 colorKey;
-    const int keycount = (SDL_GetColorKey(source, &colorKey) < 0) ? 0 : 1;
-    sge_PreCalcFadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right,
-                                            rect.y, middle, bottom, I1, I2, I2, PreCalcPalettes, &colorKey, keycount);
-}
-
-void DrawFadedTexturedTrigon(SDL_Surface* dest, const Point16& p1, const Point16& p2, const Point16& p3,
-                             SDL_Surface* source, const SDL_Rect& rect, Sint32 I1, Sint32 I2)
-{
-    Sint16 right = rect.x + rect.w - 1;
-    Sint16 middle = rect.x + rect.w / Sint16(2);
-    Sint16 bottom = rect.y + rect.h - 1;
-    Uint32 colorKey;
-    const int keycount = (SDL_GetColorKey(source, &colorKey) < 0) ? 0 : 1;
-    sge_FadedTexturedTrigonColorKeys(dest, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, source, rect.x, rect.y, right, rect.y,
-                                     middle, bottom, I1, I2, I2, &colorKey, keycount);
-}
 } // namespace
 
 bool CSurface::drawTextures = false;
 
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
-{
-    if(!Surf_Dest || !Surf_Src)
-        return false;
-
-    SDL_Rect DestR;
-
-    DestR.x = X;
-    DestR.y = Y;
-
-    SDL_BlitSurface(Surf_Src, nullptr, Surf_Dest, &DestR);
-
-    return true;
-}
-
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, int X, int Y)
-{
-    return Draw(Surf_Dest, Surf_Src.get(), X, Y);
-}
-
-bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, Position pos)
-{
-    return Draw(Surf_Dest.get(), Surf_Src.get(), pos.x, pos.y);
-}
-
-bool CSurface::Draw(SdlSurface& Surf_Dest, SDL_Surface* Surf_Src, int X, int Y)
-{
-    return Draw(Surf_Dest.get(), Surf_Src, X, Y);
-}
-
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, int X, int Y, int angle)
-{
-    if(!Surf_Dest || !Surf_Src)
-        return false;
-
-    if(angle != 90 && angle != 180 && angle != 270)
-        return false;
-
-    // Simple software rotation for 90/180/270 degrees
-    // 90/270 swap width and height; 180 keeps original dimensions
-    int rotW = (angle == 180) ? Surf_Src->w : Surf_Src->h;
-    int rotH = (angle == 180) ? Surf_Src->h : Surf_Src->w;
-    SDL_Surface* rotated =
-      SDL_CreateRGBSurface(0, rotW, rotH, Surf_Src->format->BitsPerPixel, Surf_Src->format->Rmask,
-                           Surf_Src->format->Gmask, Surf_Src->format->Bmask, Surf_Src->format->Amask);
-    if(!rotated)
-        return false;
-    // Copy palette for 8-bit surfaces
-    if(Surf_Src->format->palette && rotated->format->palette)
-        SDL_SetPaletteColors(rotated->format->palette, Surf_Src->format->palette->colors, 0, 256);
-    SDL_LockSurface(Surf_Src);
-    SDL_LockSurface(rotated);
-    int srcW = Surf_Src->w, srcH = Surf_Src->h, bpp = Surf_Src->format->BytesPerPixel;
-    for(int sy = 0; sy < srcH; sy++)
-    {
-        for(int sx = 0; sx < srcW; sx++)
-        {
-            int dx, dy;
-            switch(angle)
-            {
-                case 90:
-                    dx = srcH - 1 - sy;
-                    dy = sx;
-                    break;
-                case 180:
-                    dx = srcW - 1 - sx;
-                    dy = srcH - 1 - sy;
-                    break;
-                case 270:
-                    dx = sy;
-                    dy = srcW - 1 - sx;
-                    break;
-                default:
-                    dx = sx;
-                    dy = sy;
-                    break;
-            }
-            memcpy((Uint8*)rotated->pixels + dy * rotated->pitch + dx * bpp,
-                   (Uint8*)Surf_Src->pixels + sy * Surf_Src->pitch + sx * bpp, bpp);
-        }
-    }
-    SDL_UnlockSurface(rotated);
-    SDL_UnlockSurface(Surf_Src);
-    SDL_Rect dst = {(Sint16)X, (Sint16)Y, 0, 0};
-    SDL_BlitSurface(rotated, nullptr, Surf_Dest, &dst);
-    SDL_FreeSurface(rotated);
-
-    return true;
-}
-
-bool CSurface::Draw(SdlSurface& Surf_Dest, SdlSurface& Surf_Src, int X, int Y, int angle)
-{
-    return Draw(Surf_Dest.get(), Surf_Src.get(), X, Y, angle);
-}
-
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SDL_Surface* Surf_Src, Position dest, Position srcOffset, Extent srcSize)
-{
-    if(!Surf_Dest || !Surf_Src)
-        return false;
-
-    SDL_Rect DestR;
-
-    DestR.x = dest.x;
-    DestR.y = dest.y;
-
-    SDL_Rect SrcR;
-
-    SrcR.x = srcOffset.x;
-    SrcR.y = srcOffset.y;
-    SrcR.w = static_cast<int>(srcSize.x);
-    SrcR.h = static_cast<int>(srcSize.y);
-
-    SDL_BlitSurface(Surf_Src, &SrcR, Surf_Dest, &DestR);
-
-    return true;
-}
-
-bool CSurface::Draw(SDL_Surface* Surf_Dest, SdlSurface& Surf_Src, Position dest, Position srcOffset, Extent srcSize)
-{
-    return Draw(Surf_Dest, Surf_Src.get(), dest, srcOffset, srcSize);
-}
-
-// this is the example function from the SDL-documentation to draw pixels
-void CSurface::DrawPixel_Color(SDL_Surface* screen, Position pos, Uint32 color)
-{
-    int bpp = screen->format->BytesPerPixel;
-    /* Here p is the address to the pixel we want to retrieve */
-    Uint8* p = (Uint8*)screen->pixels + static_cast<int>(pos.y) * screen->pitch + static_cast<int>(pos.x) * bpp;
-
-    if(SDL_MUSTLOCK(screen))
-        SDL_LockSurface(screen);
-
-    switch(bpp)
-    {
-        case 1: *p = color; break;
-
-        case 2: *(Uint16*)p = color; break;
-
-        case 3:
-            if((SDL_BYTEORDER) == SDL_LIL_ENDIAN)
-            {
-                p[0] = color;
-                p[1] = color >> 8;
-                p[2] = color >> 16;
-            } else
-            {
-                p[2] = color;
-                p[1] = color >> 8;
-                p[0] = color >> 16;
-            }
-            break;
-
-        case 4: *(Uint32*)p = color; break;
-    }
-
-    if(SDL_MUSTLOCK(screen))
-        SDL_UnlockSurface(screen);
-}
-
-// this is the example function from the sdl-documentation to draw pixels
-void CSurface::DrawPixel_RGB(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B)
-{
-    DrawPixel_Color(screen, pos, SDL_MapRGB(screen->format, R, G, B));
-}
-
-void CSurface::DrawPixel_RGBA(SDL_Surface* screen, Position pos, Uint8 R, Uint8 G, Uint8 B, Uint8 A)
-{
-    DrawPixel_Color(screen, pos, SDL_MapRGBA(screen->format, R, G, B, A));
-}
-
-Uint32 CSurface::GetPixel(SDL_Surface* surface, Position pos)
-{
-    int bpp = surface->format->BytesPerPixel;
-    /* Here p is the address to the pixel we want to retrieve */
-    Uint8* p = (Uint8*)surface->pixels + static_cast<int>(pos.y) * surface->pitch + static_cast<int>(pos.x) * bpp;
-    switch(bpp)
-    {
-        case 1: return *p;
-
-        case 2: return *(Uint16*)p;
-
-        case 3:
-            if((SDL_BYTEORDER) == SDL_BIG_ENDIAN)
-                return p[0] << 16 | p[1] << 8 | p[2];
-            else
-                return p[0] | p[1] << 8 | p[2] << 16;
-
-        case 4: return *(Uint32*)p; //-V206
-
-        default: return 0; /* shouldn't happen, but avoids warnings */
-    }
-}
-
-void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap)
+void CSurface::DrawTriangleField(const DisplayRectangle& displayRect, const bobMAP& myMap)
 {
     Uint16 width = myMap.width;
     Uint16 height = myMap.height;
@@ -280,20 +93,8 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     if(width < 8 || height < 8)
         return;
 
-    assert(displayRect.left < myMap.width_pixel);
-    assert(displayRect.right > 0);
-    assert(displayRect.top < myMap.height_pixel);
-    assert(displayRect.bottom > 0);
-
-    Uint8 maxH = 0;
-    for(int y = 0; y < height; ++y)
-    {
-        for(int x = 0; x < width; ++x)
-        {
-            maxH = std::max(myMap.getVertex(x, y).h, maxH);
-        }
-    }
-    const int additionalRows = triangleIncrease * std::max(0, maxH - 0x0A) / triangleHeight;
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
@@ -303,15 +104,12 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
 
         for(int k = 0; k < 4; k++)
         {
-            // beware calling DrawTriangle for each triangle
-
             // IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
 
-            // at first call DrawTriangle for all triangles inside the map edges
-            int row_start = std::max(displayRect.top, 2 * triangleHeight) / triangleHeight - 2;
-            int row_end = (displayRect.bottom) / triangleHeight + additionalRows;
-            int col_start = std::max<int>(displayRect.left, triangleWidth) / triangleWidth - 1;
-            int col_end = (displayRect.right) / triangleWidth + 1;
+            int row_start = std::max(0, displayRect.top / triangleHeight - 1);
+            int row_end = std::min<int>(height, displayRect.bottom / triangleHeight + 2);
+            int col_start = std::max(0, displayRect.left / triangleWidth - 1);
+            int col_end = std::min<int>(width, displayRect.right / triangleWidth + 2);
             bool view_outside_edges;
 
             if(k > 0)
@@ -386,44 +184,43 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                     // first RightSideUp
                     tempP2 = myMap.getVertex(width - 1, y + 1);
                     tempP2.x = 0;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(0, y), tempP2,
-                                 myMap.getVertex(0, y + 1));
+                    DrawTriangle(displayRect, myMap, type, myMap.getVertex(0, y), tempP2, myMap.getVertex(0, y + 1));
                     for(unsigned x = std::max(col_start, 1); x < width && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
-                                     myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
+                        DrawTriangle(displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x - 1, y + 1),
+                                     myMap.getVertex(x, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1),
-                                     myMap.getVertex(x - 1, y), myMap.getVertex(x, y));
+                        DrawTriangle(displayRect, myMap, type, myMap.getVertex(x - 1, y + 1), myMap.getVertex(x - 1, y),
+                                     myMap.getVertex(x, y));
                     }
                     // last UpSideDown
                     tempP3 = myMap.getVertex(0, y);
                     tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
+                    DrawTriangle(displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
                                  myMap.getVertex(width - 1, y), tempP3);
                 } else
                 {
                     for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
                     {
                         // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
-                                     myMap.getVertex(x, y + 1), myMap.getVertex(x + 1, y + 1));
+                        DrawTriangle(displayRect, myMap, type, myMap.getVertex(x, y), myMap.getVertex(x, y + 1),
+                                     myMap.getVertex(x + 1, y + 1));
                         // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1),
-                                     myMap.getVertex(x, y), myMap.getVertex(x + 1, y));
+                        DrawTriangle(displayRect, myMap, type, myMap.getVertex(x + 1, y + 1), myMap.getVertex(x, y),
+                                     myMap.getVertex(x + 1, y));
                     }
                     // last RightSideUp
                     tempP3 = myMap.getVertex(0, y + 1);
                     tempP3.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y),
+                    DrawTriangle(displayRect, myMap, type, myMap.getVertex(width - 1, y),
                                  myMap.getVertex(width - 1, y + 1), tempP3);
                     // last UpSideDown
                     tempP1 = myMap.getVertex(0, y + 1);
                     tempP1.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
                     tempP3 = myMap.getVertex(0, y);
                     tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
+                    DrawTriangle(displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
                 }
             }
 
@@ -435,11 +232,11 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
                 tempP2.y = height * triangleHeight + myMap.getVertex(x, 0).y;
                 tempP3 = myMap.getVertex(x + 1, 0);
                 tempP3.y = height * triangleHeight + myMap.getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, height - 1), tempP2, tempP3);
+                DrawTriangle(displayRect, myMap, type, myMap.getVertex(x, height - 1), tempP2, tempP3);
                 // UpSideDown
                 tempP1 = myMap.getVertex(x + 1, 0);
                 tempP1.y = height * triangleHeight + myMap.getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1),
+                DrawTriangle(displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1),
                              myMap.getVertex(x + 1, height - 1));
             }
         }
@@ -450,14 +247,14 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
         tempP3 = myMap.getVertex(0, 0);
         tempP3.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
         tempP3.y += height * triangleHeight;
-        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
+        DrawTriangle(displayRect, myMap, type, myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
         // last UpSideDown
         tempP1 = myMap.getVertex(0, 0);
         tempP1.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
         tempP1.y += height * triangleHeight;
         tempP3 = myMap.getVertex(0, height - 1);
         tempP3.x = myMap.getVertex(width - 1, height - 1).x + triangleWidth;
-        DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, height - 1), tempP3);
+        DrawTriangle(displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, height - 1), tempP3);
     }
 }
 
@@ -468,7 +265,7 @@ enum class BorderPreference
     LeftTop,
     RightBottom
 };
-BorderPreference CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Rect& borderRect)
+BorderPreference CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, Rect& borderRect)
 {
     // we have to decide which border to blit, "left or right" or "top or bottom"
     s2Id1 &= ~(0x40 | 0x80);
@@ -487,13 +284,13 @@ BorderPreference CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Re
     {
         if(!t1.edgeType)
             return BorderPreference::None;
-        borderRect = rect2SDL_Rect(global::worldDesc.get(t1.edgeType).posInTexture);
+        borderRect = global::worldDesc.get(t1.edgeType).posInTexture;
         return BorderPreference::LeftTop;
     } else if(t1.edgePriority < t2.edgePriority)
     {
         if(!t2.edgeType)
             return BorderPreference::None;
-        borderRect = rect2SDL_Rect(global::worldDesc.get(t2.edgeType).posInTexture);
+        borderRect = global::worldDesc.get(t2.edgeType).posInTexture;
         return BorderPreference::RightBottom;
     }
     return BorderPreference::None;
@@ -616,18 +413,129 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
         if(!triangle_shown)
             return false;
     }
-    p1 -= displayRect.getOrigin();
-    p2 -= displayRect.getOrigin();
-    p3 -= displayRect.getOrigin();
     return true;
 }
 } // namespace
 
-void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
-                                       Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
-                                       Point16& right2)
+// palette animation helpers
+
+/// Holds pre-rendered frames for one palette-animated terrain.
+struct AnimFrames
 {
-    const auto animOffset = Point16(-texture_move, texture_move);
+    std::vector<Texture> frames;
+};
+
+static std::map<std::pair<const TerrainDesc*, int>, AnimFrames> s_animFrameCache;
+
+static const AnimFrames* getAnimFrames(const TerrainDesc& td, MapType mapType)
+{
+    // Determine tileset index from map type
+    auto& ta = global::tilesetAnims[static_cast<int>(mapType)];
+    if(ta.anims.empty())
+        return nullptr;
+    // palAnimIdx is the index in the tileset Archiv (0 = bitmap, 1+ = animations)
+    // ta.anims[0] = Archiv[1], ta.anims[1] = Archiv[2], etc.
+    if(td.palAnimIdx < 1)
+        return nullptr;
+    size_t animIdx = static_cast<size_t>(td.palAnimIdx) - 1;
+    if(animIdx >= ta.anims.size())
+        return nullptr;
+    const auto* anim = ta.anims[animIdx];
+    if(!anim || !anim->isActive)
+        return nullptr;
+
+    unsigned numFrames = anim->lastClr - anim->firstClr + 1;
+    if(numFrames < 2)
+        return nullptr;
+    if(numFrames > 32)
+        numFrames = 32;
+
+    auto key = std::make_pair(&td, static_cast<int>(mapType));
+    auto it = s_animFrameCache.find(key);
+    if(it != s_animFrameCache.end())
+        return &it->second;
+
+    // Get the tileset bitmap from the typed archive
+    const libsiedler2::baseArchivItem_Bitmap* tsBmp =
+      dynamic_cast<const libsiedler2::baseArchivItem_Bitmap*>(global::typedArchives[ta.archive].get(ta.bmpIdx));
+    if(!tsBmp)
+        return nullptr;
+    const auto* srcPal = tsBmp->getPalette();
+    if(!srcPal)
+        return nullptr;
+
+    // Extract the terrain sub-rect from the tileset
+    auto r = td.posInTexture;
+    Extent texSize = r.getSize();
+    if(texSize.x == 0 || texSize.y == 0)
+        return nullptr;
+
+    // Create paletted pixel buffer with the sub-rect
+    libsiedler2::PixelBufferPaletted buffer(texSize.x, texSize.y);
+    if(tsBmp->print(buffer, nullptr, 0, 0, r.left, r.top, texSize.x, texSize.y))
+        return nullptr;
+
+    // Build the per-frame animation object (direction hardcoded to false,
+    // matching s25client's ExtractAnimatedTexture which ignores the CRNG flags)
+    libsiedler2::ArchivItem_PaletteAnimation frameStep;
+    frameStep.isActive = true;
+    frameStep.moveUp = false;
+    frameStep.firstClr = anim->firstClr;
+    frameStep.lastClr = anim->lastClr;
+
+    auto& result = s_animFrameCache[key];
+    result.frames.reserve(numFrames);
+
+    std::unique_ptr<libsiedler2::ArchivItem_Palette> curPal;
+    for(unsigned fi = 0; fi < numFrames; fi++)
+    {
+        auto pal = (fi == 0) ? std::make_unique<libsiedler2::ArchivItem_Palette>(*srcPal) : frameStep.apply(*curPal);
+        if(!pal)
+            continue;
+
+        // Render frame to BGRA
+        libsiedler2::PixelBufferBGRA bgraBuf(texSize.x, texSize.y);
+        for(unsigned y = 0; y < texSize.y; y++)
+        {
+            for(unsigned x = 0; x < texSize.x; x++)
+            {
+                auto idx = buffer.get(x, y);
+                auto c = pal->get(idx);
+                uint32_t* dst = reinterpret_cast<uint32_t*>(bgraBuf.getPixelPtr()) + y * texSize.x + x;
+                *dst = (0xFFu << 24) | (uint32_t(c.r) << 16) | (uint32_t(c.g) << 8) | uint32_t(c.b);
+            }
+        }
+
+        Texture tex;
+        libsiedler2::ArchivItem_Bitmap_Raw tmpBmp;
+        tmpBmp.create(texSize.x, texSize.y, bgraBuf.getPixelPtr(), texSize.x, texSize.y,
+                      libsiedler2::TextureFormat::BGRA, nullptr);
+        tex.load(tmpBmp);
+        result.frames.push_back(std::move(tex));
+
+        curPal = std::move(pal);
+    }
+
+    return result.frames.empty() ? nullptr : &result;
+}
+
+/// Choose the current animation frame based on elapsed wall-clock time.
+/// Matches s25client: each frame is shown for 630*5/16 = ~197 ms.
+static unsigned getAnimFrameIdx(const AnimFrames& af)
+{
+    unsigned numFrames = af.frames.size();
+    if(numFrames <= 1)
+        return 0;
+    // Match s25client's GetGlobalAnimation(numFrames, 5*numFrames, 16, 0):
+    // unit = 630ms * 5 * numFrames / 16  →  197ms per frame
+    constexpr unsigned unitPerFrame = 630 * 5 / 16; // ≈ 197 ms
+    uint32_t now = SDL_GetTicks();
+    return (now / unitPerFrame) % numFrames;
+}
+
+void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, Point16& upper,
+                                       Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2)
+{
     switch(texture)
     {
             // in case of USD-Triangle "upper.x" and "upper.y" means "lowerX" and "lowerY"
@@ -657,14 +565,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
             {
                 if(isRSU)
                 {
-                    upper2 = Point16(231, 61) + animOffset;
-                    left2 = Point16(207, 62) + animOffset;
-                    right2 = Point16(223, 78) + animOffset;
+                    upper2 = Point16(231, 61);
+                    left2 = Point16(207, 62);
+                    right2 = Point16(223, 78);
                 } else
                 {
-                    upper2 = Point16(224, 79) + animOffset;
-                    left2 = Point16(232, 62) + animOffset;
-                    right2 = Point16(245, 76) + animOffset;
+                    upper2 = Point16(224, 79);
+                    left2 = Point16(232, 62);
+                    right2 = Point16(245, 76);
                 }
             }
             break;
@@ -676,14 +584,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
             {
                 if(isRSU)
                 {
-                    upper2 = Point16(231, 61) + animOffset;
-                    left2 = Point16(207, 62) + animOffset;
-                    right2 = Point16(223, 78) + animOffset;
+                    upper2 = Point16(231, 61);
+                    left2 = Point16(207, 62);
+                    right2 = Point16(223, 78);
                 } else
                 {
-                    upper2 = Point16(224, 79) + animOffset;
-                    left2 = Point16(232, 62) + animOffset;
-                    right2 = Point16(245, 76) + animOffset;
+                    upper2 = Point16(224, 79);
+                    left2 = Point16(232, 62);
+                    right2 = Point16(245, 76);
                 }
             }
             break;
@@ -700,14 +608,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
         case TRIANGLE_TEXTURE_WATER__:
             if(isRSU)
             {
-                upper = Point16(231, 61) + animOffset;
-                left = Point16(207, 62) + animOffset;
-                right = Point16(223, 78) + animOffset;
+                upper = Point16(231, 61);
+                left = Point16(207, 62);
+                right = Point16(223, 78);
             } else
             {
-                upper = Point16(224, 79) + animOffset;
-                left = Point16(232, 62) + animOffset;
-                right = Point16(245, 76) + animOffset;
+                upper = Point16(224, 79);
+                left = Point16(232, 62);
+                right = Point16(245, 76);
             }
             break;
         case TRIANGLE_TEXTURE_MEADOW1:
@@ -753,14 +661,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
         case TRIANGLE_TEXTURE_LAVA:
             if(isRSU)
             {
-                upper = Point16(231, 117) + animOffset;
-                left = Point16(207, 118) + animOffset;
-                right = Point16(223, 134) + animOffset;
+                upper = Point16(231, 117);
+                left = Point16(207, 118);
+                right = Point16(223, 134);
             } else
             {
-                upper = Point16(224, 135) + animOffset;
-                left = Point16(232, 118) + animOffset;
-                right = Point16(245, 132) + animOffset;
+                upper = Point16(224, 135);
+                left = Point16(232, 118);
+                right = Point16(245, 132);
             }
             break;
         case TRIANGLE_TEXTURE_MINING_MEADOW:
@@ -776,27 +684,19 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
     }
 }
 
-void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap,
-                            MapType type, const MapNode& P1, const MapNode& P2, const MapNode& P3)
+void CSurface::DrawTriangle(const DisplayRectangle& displayRect, const bobMAP& myMap, MapType type, const MapNode& P1,
+                            const MapNode& P2, const MapNode& P3)
 {
     Point32 p1(P1.x, P1.y);
     Point32 p2(P2.x, P2.y);
     Point32 p3(P3.x, P3.y);
+
     // prevent drawing triangles that are not shown
     if(!GetAdjustedPoints(displayRect, myMap, p1, p2, p3))
         return;
 
-    // for moving water, lava, objects and so on
-    // This is very tricky: there are ice floes in the winterland and the water under this floes is moving.
-    // I don't know how this works in original settlers 2 but i solved it this way:
-    // i texture the triangle with normal water and then draw the floe over it. To Extract the floe
-    // from it's surrounded water, i use this color keys below. These are the color values for the water texture.
-    // I wrote a special SGE-Function that uses these color keys and ignores them in the Surf_Tileset.
-    static std::array<Uint32, 5> colorkeys = {14191, 14195, 13167, 13159, 11119};
-    static int texture_move = 0;
     static int roundCount = 0;
     static Uint32 roundTimeObjects = SDL_GetTicks();
-    static Uint32 roundTimeTextures = SDL_GetTicks();
     if(SDL_GetTicks() - roundTimeObjects > 30)
     {
         roundTimeObjects = SDL_GetTicks();
@@ -805,78 +705,88 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         else
             roundCount++;
     }
-    if(SDL_GetTicks() - roundTimeTextures > 170)
-    {
-        roundTimeTextures = SDL_GetTicks();
-        texture_move++;
-        if(texture_move > 14)
-            texture_move = 0;
-    }
 
-    SDL_Surface* Surf_Tileset;
+    // Determine tileset texture
+    ArchiveID tsArchive;
     switch(type)
     {
         case MAP_GREENLAND:
-        default:
-            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP :
-                                                                                              TILESET_GREENLAND_32BPP]
-                             .surface.get();
-            break;
-        case MAP_WASTELAND:
-            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP :
-                                                                                              TILESET_WASTELAND_32BPP]
-                             .surface.get();
-            break;
-        case MAP_WINTERLAND:
-            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WINTERLAND_8BPP :
-                                                                                              TILESET_WINTERLAND_32BPP]
-                             .surface.get();
-            break;
+        default: tsArchive = ArchiveID::TEX5; break;
+        case MAP_WASTELAND: tsArchive = ArchiveID::TEX6; break;
+        case MAP_WINTERLAND: tsArchive = ArchiveID::TEX7; break;
     }
-
     bool const isRSU = p1.y < p2.y;
+    auto& tilesetTex = Texture::getTexture(tsArchive, 0);
+    if(!tilesetTex.isValid())
+        return;
+    glBindTexture(GL_TEXTURE_2D, tilesetTex.getHandle());
 
+    const auto* tsBmp =
+      dynamic_cast<const libsiedler2::baseArchivItem_Bitmap*>(global::typedArchives[tsArchive].get(0));
+    const float texW = tsBmp ? static_cast<float>(tsBmp->getWidth()) : 0.0f;
+    const float texH = tsBmp ? static_cast<float>(tsBmp->getHeight()) : 0.0f;
     if(drawTextures)
     {
-        // upper2, ..... are for special use in winterland.
         Point16 upper, left, right, upper2, left2, right2;
         auto const texture =
           TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
-        GetTerrainTextureCoords(type, texture, isRSU, texture_move, upper, left, right, upper2, left2, right2);
+        GetTerrainTextureCoords(type, texture, isRSU, upper, left, right, upper2, left2, right2);
 
-        // draw the triangle
-        // do not shade water and lava
-        if(const auto* terrainDesc = getTerrainDesc(myMap, texture);
-           terrainDesc && (terrainDesc->kind == TerrainKind::Water || terrainDesc->kind == TerrainKind::Lava))
-            sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y, left.x,
-                               left.y, right.x, right.y);
-        else
+        const float uvs[3][2] = {{static_cast<float>(upper.x) / texW, static_cast<float>(upper.y) / texH},
+                                 {static_cast<float>(left.x) / texW, static_cast<float>(left.y) / texH},
+                                 {static_cast<float>(right.x) / texW, static_cast<float>(right.y) / texH}};
+
+        const float vertCoord[3][2] = {
+          {float(p1.x), float(p1.y)}, {float(p2.x), float(p2.y)}, {float(p3.x), float(p3.y)}};
+        const MapNode* verts[3] = {&P1, &P2, &P3};
+
+        // --- palette animation: any terrain with palAnimIdx >= 0 ---
+        if(const auto* terrainDesc = getTerrainDesc(myMap, texture); terrainDesc && terrainDesc->palAnimIdx >= 0)
         {
-            // draw special winterland textures with moving water (ice floe textures)
-            if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
+            const auto* af = getAnimFrames(*terrainDesc, type);
+            if(af && !af->frames.empty())
             {
-                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y,
-                                   left2.x, left2.y, right2.x, right2.y);
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset,
-                                                            upper.x, upper.y, left.x, left.y, right.x, right.y,
-                                                            P1.shading << 8, P2.shading << 8, P3.shading << 8,
-                                                            gouData[type], colorkeys.data(), colorkeys.size());
-                else
-                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
-                                                     upper.y, left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i,
-                                                     colorkeys.data(), colorkeys.size());
-            } else
-            {
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
-                                                   upper.y, left.x, left.y, right.x, right.y, P1.shading << 8,
-                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
-                else
-                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
-                                            left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i);
+                unsigned frameIdx = getAnimFrameIdx(*af);
+                glBindTexture(GL_TEXTURE_2D, af->frames[frameIdx].getHandle());
+
+                // Use the GDL triangle UVs (the animated texture covers only the terrain sub-rect)
+                auto tri = isRSU ? terrainDesc->GetRSUTriangle() : terrainDesc->GetUSDTriangle();
+                auto r = terrainDesc->posInTexture;
+                float ox = static_cast<float>(r.left);
+                float oy = static_cast<float>(r.top);
+                float sx = static_cast<float>(r.getSize().x);
+                float sy = static_cast<float>(r.getSize().y);
+                float nu[3][2] = {{(tri.tip.x - ox) / sx, (tri.tip.y - oy) / sy},
+                                  {(tri.left.x - ox) / sx, (tri.left.y - oy) / sy},
+                                  {(tri.right.x - ox) / sx, (tri.right.y - oy) / sy}};
+
+                glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+                glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 2.0f);
+                glBegin(GL_TRIANGLES);
+                for(int k = 0; k < 3; k++)
+                {
+                    glTexCoord2f(nu[k][0], nu[k][1]);
+                    glColor4ub(intensityToColor(verts[k]->i), intensityToColor(verts[k]->i),
+                               intensityToColor(verts[k]->i), 255);
+                    glVertex2f(vertCoord[k][0], vertCoord[k][1]);
+                }
+                glEnd();
+                return;
             }
         }
+
+        // Most terrains: draw from the tileset with standard shading
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+        glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 2.0f);
+        glBegin(GL_TRIANGLES);
+        for(int k = 0; k < 3; k++)
+        {
+            glTexCoord2f(uvs[k][0], uvs[k][1]);
+            glColor4ub(intensityToColor(verts[k]->i), intensityToColor(verts[k]->i), intensityToColor(verts[k]->i),
+                       255);
+            glVertex2f(vertCoord[k][0], vertCoord[k][1]);
+        }
+        glEnd();
         return;
     }
 
@@ -892,7 +802,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             Uint16 col = (P1.VertexX - 1 < 0 ? myMap.width - 1 : P1.VertexX - 1);
             MapNode tempP = myMap.getVertex(col, P1.VertexY);
 
-            SDL_Rect BorderRect;
+            Rect BorderRect;
             auto borderSide = CalcBorders(myMap, tempP.usdTexture, P1.rsuTexture, BorderRect);
             if(borderSide != BorderPreference::None)
             {
@@ -904,7 +814,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 {
                     tmpP1 += Point16(1, 0);
                     tmpP2 += Point16(1, 0);
-                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                    thirdPt = Point32(tempP.x, tempP.y);
                     // Shift it close to p1
                     auto diff = thirdPt - p1;
                     if(diff.x < -myMap.width_pixel / 2)
@@ -918,17 +828,13 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 }
                 Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect,
-                                                   P1.shading << 8, P2.shading << 8, gouData[type]);
-                else
-                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
+                DrawFadedTexturedTrigon(tmpP1, tmpP2, tipPt, BorderRect, P1.i, P2.i, texW, texH);
             }
         }
         // USD-Triangle
         else
         {
-            SDL_Rect BorderRect;
+            Rect BorderRect;
             // left lower / right upper
             auto borderSide = CalcBorders(myMap, P2.rsuTexture, P2.usdTexture, BorderRect);
 
@@ -946,7 +852,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                     tmpP2 -= Point16(1, 0);
                 } else
                 {
-                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                    thirdPt = Point32(tempP.x, tempP.y);
                     // Shift it close to p1
                     auto diff = thirdPt - p1;
                     if(diff.x < -myMap.width_pixel / 2)
@@ -961,11 +867,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
                 Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect,
-                                                   P1.shading << 8, P2.shading << 8, gouData[type]);
-                else
-                    DrawFadedTexturedTrigon(display, tmpP1, tmpP2, tipPt, Surf_Tileset, BorderRect, P1.i, P2.i);
+                DrawFadedTexturedTrigon(tmpP1, tmpP2, tipPt, BorderRect, P1.i, P2.i, texW, texH);
             }
 
             // top / bottom - therefore get the rsu-texture one line above to compare
@@ -981,7 +883,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                     thirdPt = p1;
                 else
                 {
-                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
+                    thirdPt = Point32(tempP.x, tempP.y);
                     // Shift it close to p2
                     auto diff = thirdPt - p2;
                     if(diff.x < -myMap.width_pixel / 2)
@@ -995,15 +897,12 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 }
                 Point16 tipPt{(p2 + p3 + thirdPt) / 3};
 
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    DrawPreCalcFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect,
-                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
-                else
-                    DrawFadedTexturedTrigon(display, Point16(p2), Point16(p3), tipPt, Surf_Tileset, BorderRect, P2.i,
-                                            P3.i);
+                DrawFadedTexturedTrigon(Point16(p2), Point16(p3), tipPt, BorderRect, P2.i, P3.i, texW, texH);
             }
         }
     }
+
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     // blit picture to vertex (trees, animals, buildings and so on) --> BUT ONLY AT node1 ON RIGHTSIDEUP-TRIANGLES
 
@@ -1111,13 +1010,34 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
 
                     case 0x16: objIdx = MAPPIC_DOOR; break;
 
-                    case 0x18: objIdx = MIS1BOBS_STONE1; break;
-                    case 0x19: objIdx = MIS1BOBS_STONE2; break;
-                    case 0x1A: objIdx = MIS1BOBS_STONE3; break;
-                    case 0x1B: objIdx = MIS1BOBS_STONE4; break;
-                    case 0x1C: objIdx = MIS1BOBS_STONE5; break;
-                    case 0x1D: objIdx = MIS1BOBS_STONE6; break;
-                    case 0x1E: objIdx = MIS1BOBS_STONE7; break;
+                    case 0x18:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE1).drawSprite(p2);
+                        objIdx = 0;
+                        break;
+                    case 0x19:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE2).drawSprite(p2);
+                        objIdx = 0;
+                        break;
+                    case 0x1A:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE3).drawSprite(p2);
+                        objIdx = 0;
+                        break;
+                    case 0x1B:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE4).drawSprite(p2);
+                        objIdx = 0;
+                        break;
+                    case 0x1C:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE5).drawSprite(p2);
+                        objIdx = 0;
+                        break;
+                    case 0x1D:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE6).drawSprite(p2);
+                        objIdx = 0;
+                        break;
+                    case 0x1E:
+                        Texture::getTexture(ArchiveID::MIS1BOBS, MIS1BOBS_STONE7).drawSprite(p2);
+                        objIdx = 0;
+                        break;
 
                     case 0x22: objIdx = MAPPIC_MUSHROOM3; break;
 
@@ -1134,14 +1054,12 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
             // headquarter
             case 0x80: // node2.objectType is the number of the player beginning with 0x00
                        //%7 cause in the original game there are only 7 players and 7 different flags
-                objIdx = FLAG_BLUE_DARK + P2.objectType % 7;
-                break;
-
+                Texture::getTexture(ArchiveID::EDITBOB, FLAG_BLUE_DARK + P2.objectType % 7).drawSprite(p2);
+                break; // don't set objIdx — drawn directly from typed archive
             default: break;
         }
         if(objIdx != 0)
-            Draw(display, global::bmpArray[objIdx].surface, (int)(p2.x - global::bmpArray[objIdx].nx),
-                 (int)(p2.y - global::bmpArray[objIdx].ny));
+            Texture::getTexture(ArchiveID::MAP00, objIdx).drawSprite(p2);
     }
 
     // blit resources
@@ -1150,37 +1068,29 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         if(P2.resource >= 0x41 && P2.resource <= 0x47)
         {
             for(char i = 0x41; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_COAL].surface,
-                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_COAL].nx),
-                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_COAL].ny - (4 * (i - 0x40))));
+                Texture::getTexture(ArchiveID::EDITIO, PICTURE_RESOURCE_COAL)
+                  .drawSprite(Position(p2.x, p2.y - 4 * (i - 0x40)));
         } else if(P2.resource >= 0x49 && P2.resource <= 0x4F)
         {
             for(char i = 0x49; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_ORE].surface,
-                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_ORE].nx),
-                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_ORE].ny - (4 * (i - 0x48))));
+                Texture::getTexture(ArchiveID::EDITIO, PICTURE_RESOURCE_ORE)
+                  .drawSprite(Position(p2.x, p2.y - 4 * (i - 0x48)));
         }
         if(P2.resource >= 0x51 && P2.resource <= 0x57)
         {
             for(char i = 0x51; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_GOLD].surface,
-                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_GOLD].nx),
-                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_GOLD].ny - (4 * (i - 0x50))));
+                Texture::getTexture(ArchiveID::EDITIO, PICTURE_RESOURCE_GOLD)
+                  .drawSprite(Position(p2.x, p2.y - 4 * (i - 0x50)));
         }
         if(P2.resource >= 0x59 && P2.resource <= 0x5F)
         {
             for(char i = 0x59; i <= P2.resource; i++)
-                Draw(display, global::bmpArray[PICTURE_RESOURCE_GRANITE].surface,
-                     (int)(p2.x - global::bmpArray[PICTURE_RESOURCE_GRANITE].nx),
-                     (int)(p2.y - global::bmpArray[PICTURE_RESOURCE_GRANITE].ny - (4 * (i - 0x58))));
+                Texture::getTexture(ArchiveID::EDITIO, PICTURE_RESOURCE_GRANITE)
+                  .drawSprite(Position(p2.x, p2.y - 4 * (i - 0x58)));
         }
         // blit animals
         if(P2.animal > 0x00 && P2.animal <= 0x06)
-        {
-            Draw(display, global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].surface,
-                 (int)(p2.x - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].nx),
-                 (int)(p2.y - global::bmpArray[PICTURE_SMALL_BEAR + P2.animal].ny));
-        }
+            Texture::getTexture(ArchiveID::EDITBOB, PICTURE_SMALL_BEAR + P2.animal).drawSprite(p2);
     }
 
     // blit buildings
@@ -1190,34 +1100,16 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         {
             switch(P2.build % 8)
             {
-                case 0x01:
-                    Draw(display, global::bmpArray[MAPPIC_FLAG].surface, (int)(p2.x - global::bmpArray[MAPPIC_FLAG].nx),
-                         (int)(p2.y - global::bmpArray[MAPPIC_FLAG].ny));
-                    break;
-                case 0x02:
-                    Draw(display, global::bmpArray[MAPPIC_HOUSE_SMALL].surface,
-                         (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_SMALL].nx),
-                         (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_SMALL].ny));
-                    break;
-                case 0x03:
-                    Draw(display, global::bmpArray[MAPPIC_HOUSE_MIDDLE].surface,
-                         (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_MIDDLE].nx),
-                         (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_MIDDLE].ny));
-                    break;
+                case 0x01: Texture::getTexture(ArchiveID::MAP00, MAPPIC_FLAG).drawSprite(p2); break;
+                case 0x02: Texture::getTexture(ArchiveID::MAP00, MAPPIC_HOUSE_SMALL).drawSprite(p2); break;
+                case 0x03: Texture::getTexture(ArchiveID::MAP00, MAPPIC_HOUSE_MIDDLE).drawSprite(p2); break;
                 case 0x04:
                     if(P2.rsuTexture & 0x40)
-                        Draw(display, global::bmpArray[MAPPIC_HOUSE_HARBOUR].surface,
-                             (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_HARBOUR].nx),
-                             (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_HARBOUR].ny));
+                        Texture::getTexture(ArchiveID::MAP00, MAPPIC_HOUSE_HARBOUR).drawSprite(p2);
                     else
-                        Draw(display, global::bmpArray[MAPPIC_HOUSE_BIG].surface,
-                             (int)(p2.x - global::bmpArray[MAPPIC_HOUSE_BIG].nx),
-                             (int)(p2.y - global::bmpArray[MAPPIC_HOUSE_BIG].ny));
+                        Texture::getTexture(ArchiveID::MAP00, MAPPIC_HOUSE_BIG).drawSprite(p2);
                     break;
-                case 0x05:
-                    Draw(display, global::bmpArray[MAPPIC_MINE].surface, (int)(p2.x - global::bmpArray[MAPPIC_MINE].nx),
-                         (int)(p2.y - global::bmpArray[MAPPIC_MINE].ny));
-                    break;
+                case 0x05: Texture::getTexture(ArchiveID::MAP00, MAPPIC_MINE).drawSprite(p2); break;
                 default: break;
             }
         }

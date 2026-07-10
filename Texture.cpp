@@ -7,8 +7,14 @@
 #include "globals.h"
 #include <glad/glad.h>
 #include <algorithm>
+#include <array>
+#include <map>
+#include <set>
 #include <utility>
 #include <vector>
+
+#include <libsiedler2/ArchivItem_Bitmap.h>
+#include <libsiedler2/ArchivItem_Palette.h>
 
 Texture::~Texture()
 {
@@ -32,7 +38,7 @@ Texture& Texture::operator=(Texture&& other) noexcept
     return *this;
 }
 
-void Texture::load(const void* bgraPixels, Extent size, bool filterLinear)
+void Texture::load(const uint8_t* bgraPixels, Extent size)
 {
     if(texture_)
         glDeleteTextures(1, &texture_);
@@ -41,17 +47,17 @@ void Texture::load(const void* bgraPixels, Extent size, bool filterLinear)
 
     glGenTextures(1, &texture_);
     glBindTexture(GL_TEXTURE_2D, texture_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterLinear ? GL_LINEAR : GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterLinear ? GL_LINEAR : GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, bgraPixels);
     size_ = size;
 }
 
-void Texture::createEmpty(Extent size, bool filterLinear)
+void Texture::createEmpty(Extent size)
 {
-    load(nullptr, size, filterLinear);
+    load(nullptr, size);
 }
 
 void Texture::upload(const void* bgraPixels)
@@ -62,62 +68,42 @@ void Texture::upload(const void* bgraPixels)
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size_.x, size_.y, GL_BGRA, GL_UNSIGNED_BYTE, bgraPixels);
 }
 
-bool Texture::load(SDL_Surface* surface, bool filterLinear)
+bool Texture::load(const libsiedler2::baseArchivItem_Bitmap& bitmap)
 {
-    if(!surface)
+    const auto w = bitmap.getWidth();
+    const auto h = bitmap.getHeight();
+    if(w == 0 || h == 0)
         return false;
 
-    // For 8-bit paletted surfaces, honour colorkey if set.
-    if(surface->format->palette)
+    // Render the bitmap to a BGRA buffer via libsiedler2's print method.
+    // This handles both paletted and BGRA source formats.
+    std::vector<uint8_t> bgra(static_cast<size_t>(w) * h * 4);
+    if(bitmap.print(bgra.data(), w, h, libsiedler2::TextureFormat::BGRA) != 0)
     {
-        const int w = surface->w, h = surface->h;
-        std::vector<Uint32> pixels(static_cast<size_t>(w) * h);
-
-        SDL_Palette* pal = surface->format->palette;
-        Uint32 ck;
-        const bool hasCK = SDL_GetColorKey(surface, &ck) == 0;
-        const Uint8 ckIdx = hasCK ? static_cast<Uint8>(ck & 0xFF) : 0;
-
-        SDL_LockSurface(surface);
-        for(int row = 0; row < h; row++)
+        // If print fails (e.g. paletted bitmap without a palette), try manual conversion
+        if(bitmap.getFormat() == libsiedler2::TextureFormat::Paletted)
         {
-            const auto* src = (const Uint8*)surface->pixels + row * surface->pitch;
-            for(int col = 0; col < w; col++)
+            const auto* pal = bitmap.getPalette();
+            if(!pal)
+                return false;
+            const auto& src = bitmap.getPixelData();
+            if(src.size() < static_cast<size_t>(w) * h)
+                return false;
+            for(unsigned y = 0; y < h; y++)
             {
-                const Uint8 idx = src[col];
-                if(hasCK && idx == ckIdx)
-                    pixels[row * w + col] = 0; // transparent
-                else
+                for(unsigned x = 0; x < w; x++)
                 {
-                    const SDL_Color& c = pal->colors[idx];
-                    // BGRA layout: A<<24 | R<<16 | G<<8 | B (little-endian GL_BGRA)
-                    pixels[row * w + col] = (0xFFu << 24) | (Uint32(c.r) << 16) | (Uint32(c.g) << 8) | Uint32(c.b);
+                    uint8_t idx = src[y * w + x];
+                    auto c = pal->get(idx);
+                    uint32_t& dst = reinterpret_cast<uint32_t*>(bgra.data())[y * w + x];
+                    dst = (0xFFu << 24) | (uint32_t(c.r) << 16) | (uint32_t(c.g) << 8) | uint32_t(c.b);
                 }
             }
-        }
-        SDL_UnlockSurface(surface);
-
-        load(pixels.data(), Extent(w, h), filterLinear);
-        return true;
+        } else
+            return false;
     }
 
-    // 32-bit surface: convert to destination format (BGRA), force full opacity
-    SDL_Surface* converted = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
-    if(!converted)
-        return false;
-
-    // Force alpha to opaque (LBM palette entries often have alpha=0)
-    SDL_LockSurface(converted);
-    for(int y = 0; y < converted->h; y++)
-    {
-        auto* row = (Uint32*)((Uint8*)converted->pixels + y * converted->pitch);
-        for(int x = 0; x < converted->w; x++)
-            row[x] |= 0xFF000000u;
-    }
-    SDL_UnlockSurface(converted);
-
-    load(converted->pixels, Extent(converted->w, converted->h), filterLinear);
-    SDL_FreeSurface(converted);
+    load(bgra.data(), Extent(w, h));
     return true;
 }
 
@@ -126,6 +112,7 @@ void Texture::draw(const Rect& destRect) const
     if(!texture_)
         return;
 
+    glColor4f(1, 1, 1, 1);
     glBindTexture(GL_TEXTURE_2D, texture_);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
@@ -144,6 +131,7 @@ void Texture::draw(Position pos) const
     if(!texture_)
         return;
 
+    glColor4f(1, 1, 1, 1);
     glBindTexture(GL_TEXTURE_2D, texture_);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
@@ -190,6 +178,38 @@ void Texture::drawTiled(const Rect& destRect) const
     glEnd();
 }
 
+void Texture::draw(const Rect& destRect, const Rect& srcRect) const
+{
+    if(!texture_)
+        return;
+
+    // Clamp source rect to texture bounds
+    int srcL = std::max(0, srcRect.left);
+    int srcT = std::max(0, srcRect.top);
+    int srcR = std::min(static_cast<int>(size_.x), srcRect.right);
+    int srcB = std::min(static_cast<int>(size_.y), srcRect.bottom);
+    if(srcL >= srcR || srcT >= srcB)
+        return;
+
+    const float u0 = float(srcL) / float(size_.x);
+    const float v0 = float(srcT) / float(size_.y);
+    const float u1 = float(srcR) / float(size_.x);
+    const float v1 = float(srcB) / float(size_.y);
+
+    glColor4f(1, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture_);
+    glBegin(GL_QUADS);
+    glTexCoord2f(u0, v0);
+    glVertex2i(destRect.left, destRect.top);
+    glTexCoord2f(u1, v0);
+    glVertex2i(destRect.right, destRect.top);
+    glTexCoord2f(u1, v1);
+    glVertex2i(destRect.right, destRect.bottom);
+    glTexCoord2f(u0, v1);
+    glVertex2i(destRect.left, destRect.bottom);
+    glEnd();
+}
+
 void drawRect(const Rect& rect, unsigned color)
 {
     glDisable(GL_TEXTURE_2D);
@@ -204,33 +224,14 @@ void drawRect(const Rect& rect, unsigned color)
     glColor4f(1, 1, 1, 1);
 }
 
-Texture& getBmpTexture(unsigned idx, bool filterLinear)
+Texture& getTexture(ArchiveID archive, int index)
 {
-    static std::vector<Texture> cache;
-    static std::vector<bool> linearFlags;
-    if(idx >= global::bmpArray.size())
-    {
-        static Texture dummy;
-        return dummy;
-    }
-    if(idx >= cache.size())
-    {
-        cache.resize(static_cast<size_t>(idx) + 1);
-        linearFlags.resize(static_cast<size_t>(idx) + 1, false);
-    }
-    if(!cache[idx].isValid() || linearFlags[idx] != filterLinear)
-    {
-        linearFlags[idx] = filterLinear;
-        auto& bmp = global::bmpArray[idx];
-        if(bmp.surface)
-            cache[idx].load(bmp.surface.get(), filterLinear);
-    }
-    return cache[idx];
+    return Texture::getTexture(archive, index);
 }
 
 void drawButtonBox(const Rect& area, bool pressed, unsigned baseTex, unsigned faceTex)
 {
-    getBmpTexture(baseTex).drawTiled(area);
+    getTexture(ArchiveID::EDITIO, baseTex).drawTiled(area);
 
     const auto sz = area.getSize();
 
@@ -246,6 +247,42 @@ void drawButtonBox(const Rect& area, bool pressed, unsigned baseTex, unsigned fa
     }
 
     // Foreground inset by 2px
-    const Rect fgRect(area.getOrigin() + Position(2, 2), sz - Extent(4, 4));
-    getBmpTexture(faceTex).drawTiled(fgRect);
+    const Extent fgSz(sz.x - 4u, sz.y - 4u);
+    const Rect fgRect(area.getOrigin() + Position(2, 2), fgSz);
+    getTexture(ArchiveID::EDITIO, faceTex).drawTiled(fgRect);
+}
+
+// Bitmap-texture cache (static members)
+// Cache for typed-archive textures: (archive, index) → Texture
+static std::map<std::pair<ArchiveID, int>, std::unique_ptr<Texture>> s_typedTexCache;
+
+Texture& Texture::getTexture(ArchiveID archive, int index)
+{
+    auto& archiv = global::typedArchives[archive];
+    if(index < 0 || static_cast<unsigned>(index) >= archiv.size())
+    {
+        static Texture dummy;
+        return dummy;
+    }
+    const auto key = std::make_pair(archive, index);
+    auto it = s_typedTexCache.find(key);
+    if(it == s_typedTexCache.end() || !it->second->isValid())
+    {
+        auto tex = std::make_unique<Texture>();
+        const auto* bmp = dynamic_cast<const libsiedler2::baseArchivItem_Bitmap*>(archiv.get(index));
+        if(bmp)
+        {
+            tex->load(*bmp);
+            tex->anchor_ = {bmp->getNx(), bmp->getNy()};
+        }
+        it = s_typedTexCache.emplace(key, std::move(tex)).first;
+    }
+    return *it->second;
+}
+
+void Texture::drawSprite(Position pos) const
+{
+    if(!isValid())
+        return;
+    draw(pos - anchor_);
 }

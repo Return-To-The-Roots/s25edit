@@ -36,7 +36,6 @@ void EditorCursorMenu(int Param);
 
 #ifdef _ADMINMODE
 void debugger(int Param);
-void viewer(int Param);
 void submenu1(int Param);
 #endif
 } // namespace callback

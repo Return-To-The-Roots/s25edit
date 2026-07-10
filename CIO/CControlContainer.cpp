@@ -13,16 +13,26 @@
 #include "CTextfield.h"
 #include "helpers/containerUtils.h"
 
-CControlContainer::CControlContainer(int pic_background) : CControlContainer(pic_background, BorderSizes{}) {}
-CControlContainer::CControlContainer(int pic_background, BorderSizes border)
-    : border(border), pic_background(pic_background)
+BorderSizes::BorderSizes(ArchiveID archive, int leftIdx, int topIdx, int rightIdx, int bottomIdx)
+    : left(static_cast<int>(global::getBitmapSize(archive, leftIdx).x)),
+      top(static_cast<int>(global::getBitmapSize(archive, topIdx).y)),
+      right(static_cast<int>(global::getBitmapSize(archive, rightIdx).x)),
+      bottom(static_cast<int>(global::getBitmapSize(archive, bottomIdx).y))
+{}
+
+CControlContainer::CControlContainer(int pic_background, ArchiveID archive)
+    : CControlContainer(pic_background, BorderSizes{}, archive)
+{}
+CControlContainer::CControlContainer(int pic_background, BorderSizes border, ArchiveID archive)
+    : backgroundArchive_(archive), border(border), pic_background(pic_background)
 {}
 
 CControlContainer::~CControlContainer() noexcept = default;
 
-void CControlContainer::setBackgroundPicture(int pic_background)
+void CControlContainer::setBackgroundPicture(int pic_background, ArchiveID archive)
 {
     this->pic_background = pic_background;
+    backgroundArchive_ = archive;
 }
 
 void CControlContainer::setMouseData(const SDL_MouseMotionEvent motion)
@@ -108,11 +118,12 @@ bool CControlContainer::delText(CFont* TextToDelete)
     return eraseElement(texts, TextToDelete);
 }
 
-CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Position pos, int picture)
+CPicture* CControlContainer::addPicture(void callback(int), int clickedParam, Position pos, ArchiveID archive,
+                                        int localIndex)
 {
     pos = pos + Position(border.left, border.top);
 
-    pictures.emplace_back(std::make_unique<CPicture>(callback, clickedParam, pos, picture));
+    pictures.emplace_back(std::make_unique<CPicture>(callback, clickedParam, pos, archive, localIndex));
     return pictures.back().get();
 }
 
@@ -121,14 +132,14 @@ bool CControlContainer::delPicture(CPicture* PictureToDelete)
     return eraseElement(pictures, PictureToDelete);
 }
 
-int CControlContainer::addStaticPicture(Position pos, int picture)
+int CControlContainer::addStaticPicture(Position pos, ArchiveID archive, int localIndex)
 {
-    if(picture < 0)
+    if(localIndex < 0)
         return -1;
     pos = pos + Position(border.left, border.top);
 
     unsigned id = static_pictures.empty() ? 0u : static_pictures.back().id + 1u;
-    static_pictures.emplace_back(Picture{pos, picture, id});
+    static_pictures.emplace_back(Picture{pos, archive, localIndex, id});
     return id;
 }
 
@@ -189,6 +200,6 @@ void CControlContainer::drawChildren(Position origin)
         button->draw(origin);
     for(const auto& static_picture : static_pictures)
     {
-        getBmpTexture(static_picture.pic).draw(origin + static_picture.pos);
+        getTexture(static_picture.archive, static_picture.pic).draw(origin + static_picture.pos);
     }
 }

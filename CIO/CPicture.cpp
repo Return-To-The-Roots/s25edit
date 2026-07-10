@@ -7,17 +7,20 @@
 #include "../Texture.h"
 #include "../globals.h"
 #include "CollisionDetection.h"
+#include <libsiedler2/Archiv.h>
+#include <libsiedler2/ArchivItem_Bitmap.h>
 
-CPicture::CPicture(void callback(int), int clickedParam, Position pos, int picture) : pos_(pos)
+CPicture::CPicture(void callback(int), int clickedParam, Position pos, ArchiveID archive, int picture)
+    : pos_(pos), archive_(archive), picture_(picture >= 0 ? picture : 0)
 {
     marked = false;
     clicked = false;
-    if(picture >= 0)
-        this->picture_ = picture;
-    else
-        this->picture_ = 0;
-    this->size_.x = global::bmpArray[picture].w;
-    this->size_.y = global::bmpArray[picture].h;
+    auto& archiv = global::typedArchives[archive];
+    if(picture >= 0 && static_cast<unsigned>(picture) < archiv.size())
+    {
+        if(auto* bmp = dynamic_cast<const libsiedler2::baseArchivItem_Bitmap*>(archiv.get(picture)))
+            size_ = Extent(bmp->getWidth(), bmp->getHeight());
+    }
     this->callback = callback;
     this->clickedParam = clickedParam;
     motionEntryParam = -1;
@@ -66,5 +69,5 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
 
 void CPicture::draw(Position parentOrigin) const
 {
-    getBmpTexture(picture_).draw(parentOrigin + pos_);
+    getTexture(archive_, picture_).draw(parentOrigin + pos_);
 }

@@ -79,10 +79,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     // if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
                     callback::debugger(INITIALIZING_CALL);
                     break;
-                case SDLK_F4: // if CTRL and ALT are pressed
-                    // if (SDL_GetModState() == (KMOD_LCTRL | KMOD_LALT))
-                    callback::viewer(INITIALIZING_CALL);
-                    break;
+
 #endif
                 // F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
                 case SDLK_F5:

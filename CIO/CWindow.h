@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ArchiveID.h"
 #include "CControlContainer.h"
 
 enum class WindowPos
@@ -49,9 +50,9 @@ public:
     void draw(Position parentOrigin) override;
 
     CWindow(void callback(int), int callbackQuitMessage, Position pos, Extent size, const char* title = nullptr,
-            int color = WINDOW_GREEN1, Uint8 flags = 0);
+            int color = WINDOW_GREEN1, Uint8 flags = 0, ArchiveID bgArchive = ArchiveID::EDITRES);
     CWindow(void callback(int), int callbackQuitMessage, WindowPos pos, Extent size, const char* title = nullptr,
-            int color = WINDOW_GREEN1, Uint8 flags = 0);
+            int color = WINDOW_GREEN1, Uint8 flags = 0, ArchiveID bgArchive = ArchiveID::EDITRES);
     // Access
     Position getPos() const { return pos_; }
     Extent getSize() const { return size_; }
@@ -76,5 +77,4 @@ public:
     // minimized surface bool isMinimized() { return minimized; }; we need an information if a input-element (textfield
     // etc.) is active to not deliver the input to other gui-element in the event system
     bool hasActiveInputElement();
-    void setColor(int color);
 };

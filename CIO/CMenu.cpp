@@ -8,13 +8,13 @@
 #include "../Texture.h"
 #include "../globals.h"
 
-CMenu::CMenu(int pic_background) : CControlContainer(pic_background) {}
+CMenu::CMenu(int pic_background, ArchiveID archive) : CControlContainer(pic_background, BorderSizes{}, archive) {}
 
 void CMenu::draw(Position /*parentOrigin*/)
 {
     // Draw full-screen background texture
     const auto res = global::s2->getRes();
-    getBmpTexture(getBackground(), true).draw(Rect(0, 0, res.x, res.y));
+    getTexture(backgroundArchive_, getBackground()).draw(Rect(0, 0, res.x, res.y));
 
     drawChildren(Position(0, 0));
 }

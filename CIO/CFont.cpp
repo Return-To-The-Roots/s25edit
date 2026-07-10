@@ -4,11 +4,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "CFont.h"
+#include "../CIO/CFile.h"
 #include "../CSurface.h"
 #include "../Texture.h"
 #include "../globals.h"
 #include "CollisionDetection.h"
+#include <libsiedler2/ArchivItem_Bitmap.h>
+#include <libsiedler2/ArchivItem_Bitmap_Player.h>
+#include <libsiedler2/ArchivItem_Font.h>
+#include <libsiedler2/PixelBufferBGRA.h>
+#include <glad/glad.h>
 #include <cassert>
+#include <cmath>
+#include <iostream>
 
 CFont::CFont(std::string text, Position pos, FontSize fontsize, FontColor color)
     : pos_(pos), string_(std::move(text)), fontsize_(fontsize), color_(color), initialColor_(color), clickedParam(0)
@@ -64,244 +72,208 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
     }
 }
 
-namespace {
-unsigned getIndexForChar(uint8_t c)
+// atlas-based rendering
+struct GlyphPos
 {
-    // subtract 32 shows that we start by spacebar as 'zero-position'
-    if(c >= 32 && c <= 90)
-        return c - 32;
-    /* \ */
-    else if(c == 92)
-        return 59;
-    // _
-    else if(c == 95)
-        return 60;
-    // between 'a' and 'z'
-    else if(c >= 97 && c <= 122)
-        return c - 32 - 4;
-    // ©
-    else if(c == 169)
-        return 114;
-    // Ä
-    else if(c == 196)
-        return 100;
-    // Ç
-    else if(c == 199)
-        return 87;
-    // Ö
-    else if(c == 214)
-        return 106;
-    // Ü
-    else if(c == 220)
-        return 107;
-    // ß
-    else if(c == 223)
-        return 113;
-    // à
-    else if(c == 224)
-        return 92;
-    // á
-    else if(c == 225)
-        return 108;
-    // â
-    else if(c == 226)
-        return 90;
-    // ä
-    else if(c == 228)
-        return 91;
-    // ç
-    else if(c == 231)
-        return 93;
-    // è
-    else if(c == 232)
-        return 96;
-    // é
-    else if(c == 233)
-        return 89;
-    // ê
-    else if(c == 234)
-        return 94;
-    // ë
-    else if(c == 235)
-        return 95;
-    // ì
-    else if(c == 236)
-        return 99;
-    // í
-    else if(c == 237)
-        return 109;
-    // î
-    else if(c == 238)
-        return 98;
-    // ï
-    else if(c == 239)
-        return 97;
-    // ñ
-    else if(c == 241)
-        return 112;
-    // ò
-    else if(c == 242)
-        return 103;
-    // ó
-    else if(c == 243)
-        return 110;
-    // ô
-    else if(c == 244)
-        return 101;
-    // ö
-    else if(c == 246)
-        return 102;
-    // ù
-    else if(c == 249)
-        return 105;
-    // ú
-    else if(c == 250)
-        return 111;
-    // û
-    else if(c == 251)
-        return 104;
-    // ü
-    else if(c == 252)
-        return 88;
-    // chiffre not available, use '_' instead
-    return 60;
-}
+    unsigned x, y, w;
+};
+struct FontAtlas
+{
+    Texture tex;
+    unsigned lineHeight = 0;
+    unsigned maxWidth = 0;
+    std::array<GlyphPos, 256> glyphs{};
+};
 
-unsigned getIndexForChar(uint8_t c, FontSize fontsize, FontColor color)
+static libsiedler2::ColorRGB getPlayerColor(FontColor color)
 {
-    unsigned offset;
-    switch(fontsize)
+    switch(color)
     {
-        case FontSize::Small: offset = FONT9_SPACE; break;
-        default:
-        case FontSize::Medium: offset = FONT11_SPACE; break;
-        case FontSize::Large: offset = FONT14_SPACE; break;
+        case FontColor::Blue: return {64, 128, 255};
+        case FontColor::Red: return {255, 64, 64};
+        case FontColor::Orange: return {255, 165, 0};
+        case FontColor::Green: return {64, 192, 64};
+        case FontColor::MintGreen: return {64, 255, 160};
+        case FontColor::Yellow: return {255, 255, 0};
+        case FontColor::BrightRed: return {255, 32, 32};
     }
-    return offset + getIndexForChar(c) * NUM_FONT_COLORS + static_cast<unsigned>(color);
+    return {255, 255, 0};
 }
 
-unsigned getCharWidth(uint8_t c, FontSize fontsize, FontColor color)
+static FontAtlas& getAtlas(FontSize size, FontColor color)
 {
-    // NOTE: there is a bug in the ansi 236 'ì' at fontsize 9, the width is 39, this is not useable, we will use the
-    // width of ansi 237 'í' instead
+    static FontAtlas atlases[3][7];
+    int ci = static_cast<int>(color);
+    if(ci < 0 || ci > 6)
+        ci = 0;
+    int si;
+    switch(size)
+    {
+        case FontSize::Small: si = 0; break;
+        case FontSize::Medium: si = 1; break;
+        case FontSize::Large: si = 2; break;
+        default: si = 0; break;
+    }
+    if(!atlases[si][ci].tex.isValid())
+    {
+        auto& a = atlases[si][ci];
+        // Resolve the font from the EDITRES archive by height
+        unsigned targetDy = static_cast<unsigned>(size);
+        auto& archiv = global::typedArchives[ArchiveID::EDITRES];
+        const libsiedler2::ArchivItem_Font* font = nullptr;
+        for(unsigned i = 0; i < archiv.size(); i++)
+        {
+            auto* f = dynamic_cast<const libsiedler2::ArchivItem_Font*>(archiv.get(i));
+            if(!f)
+                continue;
+            unsigned dy = f->getDy();
+            if(dy + 1 >= targetDy && dy <= targetDy + 1)
+            {
+                font = f;
+                break;
+            }
+        }
+        if(!font)
+            return a;
+
+        a.lineHeight = font->getDy() + 1;
+        unsigned advW = font->getDx();
+        a.maxWidth = advW;
+
+        unsigned numGlyphs = 0;
+        for(unsigned i = 32; i < font->size(); ++i)
+        {
+            if(font->get(i))
+                numGlyphs++;
+        }
+        if(numGlyphs == 0)
+            return a;
+
+        auto numCols = static_cast<unsigned>(std::sqrt(static_cast<double>(numGlyphs)));
+        if(numCols < 1)
+            numCols = 1;
+        unsigned numRows = (numGlyphs + numCols - 1) / numCols;
+        constexpr Extent spacing(1, 1);
+        Extent cellSize(advW + spacing.x * 2, font->getDy() + spacing.y * 2);
+        Extent texSize = cellSize * Extent(numCols, numRows) + spacing * 2u;
+
+        libsiedler2::PixelBufferBGRA buffer(texSize.x, texSize.y);
+
+        // Build a palette where player-color indices 128-135 map to the
+        // requested FontColor, and everything else is dark outline.
+        auto playerClr = getPlayerColor(color);
+        auto atlasPal = std::make_unique<libsiedler2::ArchivItem_Palette>();
+        {
+            const auto* srcPal = global::currentPalette;
+            if(!srcPal)
+                return a;
+            for(int i = 0; i < 256; i++)
+            {
+                if(i >= 128 && i < 136)
+                    atlasPal->set(i, playerClr);
+                else if(i == 0)
+                    atlasPal->set(i, libsiedler2::ColorRGB(0, 0, 0)); // transparent background
+                else
+                    atlasPal->set(i, libsiedler2::ColorRGB(32, 32, 32)); // dark outline
+            }
+        }
+
+        unsigned gi = 0;
+        for(unsigned ci = 32; ci < font->size(); ++ci)
+        {
+            auto* sub = font->get(ci);
+            const auto* pg = dynamic_cast<const libsiedler2::ArchivItem_Bitmap_Player*>(sub);
+            if(!pg)
+                continue;
+
+            unsigned col = gi % numCols, row = gi / numCols;
+            unsigned px = spacing.x + col * cellSize.x;
+            unsigned py = spacing.y + row * cellSize.y;
+
+            const_cast<libsiedler2::ArchivItem_Bitmap_Player*>(pg)->print(buffer, atlasPal.get(), 128, px, py, 0, 0, 0,
+                                                                          0);
+            a.glyphs[ci] = GlyphPos{px, py, pg->getWidth()};
+            if(pg->getWidth() > a.maxWidth)
+                a.maxWidth = pg->getWidth();
+            gi++;
+        }
+
+        a.tex.load(buffer.getPixelPtr(), texSize);
+    }
+    return atlases[si][ci];
+}
+
+static unsigned getCharWidth(uint8_t c, FontSize fontsize)
+{
     if(fontsize == FontSize::Small && c == 236)
         c = 109;
-    return global::bmpArray[getIndexForChar(c, fontsize, color)].w;
-}
-} // namespace
-
-void CFont::draw(Position parentOrigin) const
-{
-    if(string_.empty())
-        return;
-    draw(string_, parentOrigin + pos_, fontsize_, color_, FontAlign::Left);
+    auto& atlas = getAtlas(fontsize, FontColor::Yellow);
+    if(!atlas.tex.isValid())
+        return 8;
+    auto& g = atlas.glyphs[c];
+    if(g.w > 0)
+        return g.w;
+    return atlas.maxWidth; // fallback
 }
 
 void CFont::draw(const std::string& string, Position pos, FontSize fontsize, FontColor color, FontAlign align)
 {
     if(string.empty())
         return;
+    auto& atlas = getAtlas(fontsize, color);
+    if(!atlas.tex.isValid())
+        return;
 
-    // Measure text width for alignment
-    unsigned totalWidth = 0;
-    for(unsigned char c : string)
-        totalWidth += getCharWidth(c, fontsize, color);
+    unsigned totalW = CFont::getTextWidth(string, fontsize);
+    if(align == FontAlign::Middle)
+        pos.x -= static_cast<int>(totalW / 2);
+    else if(align == FontAlign::Right)
+        pos.x -= static_cast<int>(totalW);
 
-    // Apply alignment
-    switch(align)
+    float texW = static_cast<float>(atlas.tex.getSize().x);
+    float texH = static_cast<float>(atlas.tex.getSize().y);
+
+    glBindTexture(GL_TEXTURE_2D, atlas.tex.getHandle());
+    glColor4f(1, 1, 1, 1);
+    glBegin(GL_QUADS);
+
+    int curX = pos.x;
+    for(char c : string)
     {
-        case FontAlign::Middle: pos.x -= static_cast<int>(totalWidth / 2); break;
-        case FontAlign::Right: pos.x -= static_cast<int>(totalWidth); break;
-        case FontAlign::Left: break; // no adjustment
-    }
-
-    // Draw each character as a textured quad
-    Position curPos = pos;
-    for(unsigned char c : string)
-    {
-        auto& tex = getBmpTexture(getIndexForChar(c, fontsize, color));
-        tex.draw(Rect(curPos, tex.getSize()));
-        curPos.x += tex.getSize().x;
-    }
-}
-
-bool CFont::writeText(SDL_Surface* Surf_Dest, const std::string& string, unsigned x, unsigned y, FontSize fontsize,
-                      FontColor color, FontAlign align)
-{
-    // data for necessary counting pixels depending on alignment
-    unsigned pixel_ctr_w = 0;
-    // counter for the drawed pixels (cause we dont want to draw outside of the surface)
-    unsigned pos_x = x;
-    unsigned pos_y = y;
-
-    if(!Surf_Dest || string.empty())
-        return false;
-
-    // are there enough vertical pixels to draw the chiffres?
-    if(Surf_Dest->h < static_cast<int>(y + static_cast<unsigned>(fontsize)))
-        return false;
-
-    // in case of right or middle alignment we must count the pixels first
-    auto pixel_count_loop = (align == FontAlign::Middle) || (align == FontAlign::Right);
-
-    // now lets draw the chiffres
-    auto chiffre = string.begin();
-    while(chiffre != string.end())
-    {
-        const auto charW = getCharWidth(*chiffre, fontsize, color);
-        // if we only count pixels in this round
-        if(pixel_count_loop)
+        unsigned char uc = static_cast<unsigned char>(c);
+        auto& g = atlas.glyphs[uc];
+        if(g.w == 0)
         {
-            pixel_ctr_w += charW;
-
-            // if text is to long to go further left, stop loop and begin writing at x=0
-            if((align == FontAlign::Middle && pixel_ctr_w / 2 > x) || static_cast<int>(pixel_ctr_w) >= Surf_Dest->w)
-            {
-                pos_x = 0;
-                chiffre = string.begin();
-                pixel_count_loop = false;
-                continue;
-            }
-
-            ++chiffre;
-
-            // if this was the last chiffre go in normal mode and write the text to the specified position
-            if(chiffre == string.end())
-            {
-                chiffre = string.begin();
-
-                if(align == FontAlign::Middle)
-                    pos_x = x - pixel_ctr_w / 2;
-                else if(align == FontAlign::Right)
-                    pos_x = Surf_Dest->w - pixel_ctr_w;
-
-                pixel_count_loop = false;
-            }
+            curX += atlas.maxWidth / 2;
             continue;
         }
+        int gh = static_cast<int>(atlas.lineHeight);
+        float u0 = static_cast<float>(g.x) / texW;
+        float v0 = static_cast<float>(g.y) / texH;
+        float u1 = static_cast<float>(g.x + g.w) / texW;
+        float v1 = static_cast<float>(g.y + gh) / texH;
 
-        // if right end of surface is reached, stop drawing chiffres
-        if(Surf_Dest->w < static_cast<int>(pos_x + charW))
-            break;
-
-        // draw the chiffre to the destination
-        CSurface::Draw(Surf_Dest, global::bmpArray[getIndexForChar(*chiffre, fontsize, color)].surface, pos_x, pos_y);
-
-        // set position for next chiffre
-        pos_x += charW;
-
-        // go to next chiffre
-        ++chiffre;
+        glTexCoord2f(u0, v0);
+        glVertex2i(curX, pos.y);
+        glTexCoord2f(u1, v0);
+        glVertex2i(curX + g.w, pos.y);
+        glTexCoord2f(u1, v1);
+        glVertex2i(curX + g.w, pos.y + gh);
+        glTexCoord2f(u0, v1);
+        glVertex2i(curX, pos.y + gh);
+        curX += g.w; // advance by glyph width
     }
-
-    return true;
+    glEnd();
 }
 
 unsigned CFont::getTextWidth(const std::string& string, FontSize fontsize)
 {
     unsigned w = 0;
     for(unsigned char c : string)
-        w += getCharWidth(c, fontsize, FontColor::Yellow); // width is same for all colors
-
+    {
+        if(c == '\n')
+            break;
+        w += getCharWidth(c, fontsize);
+    }
     return w;
 }

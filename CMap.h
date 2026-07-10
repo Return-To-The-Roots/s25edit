@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "CSurface.h"
 #include "defines.h"
 #include <boost/filesystem/path.hpp>
 #include <Point.h>
@@ -45,15 +46,12 @@ class CMap
 
 private:
     boost::filesystem::path filepath_;
-    SdlSurface Surf_Map;
-    SdlSurface Surf_RightMenubar;
     std::unique_ptr<bobMAP> map;
     DisplayRectangle displayRect;
     bool active;
     Position Vertex_;
     bool RenderBuildHelp;
     bool RenderBorders;
-    int BitsPerPixel;
     // editor mode variables
     int mode;
     // necessary for release the EDITOR_MODE_CUT (set back to last used mode)
@@ -132,12 +130,6 @@ public:
     bool isVerticalMovementLocked() const { return VerticalMovementLocked; }
     bool getRenderBuildHelp() const { return RenderBuildHelp; }
     bool getRenderBorders() const { return RenderBorders; }
-    int getBitsPerPixel() const { return BitsPerPixel; }
-    void setBitsPerPixel(int bbp)
-    {
-        BitsPerPixel = bbp;
-        Surf_Map.reset();
-    }
     void setMode(int mode) { this->mode = mode; }
     int getMode() const { return mode; }
     void setModeContent(int modeContent) { this->modeContent = modeContent; }
@@ -145,11 +137,9 @@ public:
     int getModeContent() const { return modeContent; }
     int getModeContent2() const { return modeContent2; }
     bobMAP* getMap() { return map.get(); }
-    SDL_Surface* getSurface()
-    {
-        render();
-        return Surf_Map.get();
-    }
+    /// Render terrain directly with OpenGL, then draw editor UI chrome.
+    /// Should be called from the main render loop with the correct GL projection set.
+    void render();
     DisplayRectangle getDisplayRect() { return displayRect; }
     void setDisplayRect(const DisplayRectangle& displayRect) { this->displayRect = displayRect; }
     auto& getPlayerHQx() { return PlayerHQx; }
@@ -162,7 +152,6 @@ public:
     void setAuthor(const std::string& author) { map->setAuthor(author); }
 
     void drawMinimap(std::vector<uint32_t>& pixels, int w, int h, int& scale);
-    void render();
     // get and set some variables necessary for cursor behavior
     void setHexagonMode(bool HexagonMode)
     {

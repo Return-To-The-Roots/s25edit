@@ -8,10 +8,13 @@
 #include "CIO/CFile.h"
 #include "CIO/CFont.h"
 #include "CSurface.h"
+#include "Texture.h"
 #include "callbacks.h"
 #include "globals.h"
 #include "gameData/LandscapeDesc.h"
 #include "gameData/TerrainDesc.h"
+#include <libsiedler2/ArchivItem_Bitmap.h>
+#include <glad/glad.h>
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -83,8 +86,6 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
                         TriangleTerrainType texture, int border, int border_texture)
 {
     map = nullptr;
-    Surf_Map.reset();
-    Surf_RightMenubar.reset();
     displayRect.left = 0;
     displayRect.top = 0;
     displayRect.setSize(global::s2->GameResolution);
@@ -141,12 +142,10 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
         }
     }
 
-    Surf_Map.reset();
     active = true;
     Vertex_ = {10, 10};
     RenderBuildHelp = false;
     RenderBorders = true;
-    BitsPerPixel = 32;
     MouseBlit = correctMouseBlit(Vertex_);
     ChangeSection_ = 1;
     lastChangeSection = ChangeSection_;
@@ -223,12 +222,8 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
 }
 void CMap::destructMap()
 {
-    // free all surfaces that MAP0x.LST needed
-    unloadMapPics();
     undoBuffer.clear();
     redoBuffer.clear();
-    Surf_Map.reset();
-    Surf_RightMenubar.reset();
     // free vertex array
     Vertices.clear();
     // free map structure memory
@@ -430,33 +425,12 @@ void CMap::loadMapPics()
             palFile = "GFX/PALETTE/PAL5.BBM";
             break;
     }
-    CFile::set_palArray(&global::palArray[PAL_MAPxx]);
-    // load only the palette at this time from MAP0x.LST
-    std::cout << "\nLoading palette from file: " << picFile << "...";
-    if(!CFile::open_file(global::gameDataFilePath / picFile, LST, true))
-    {
-        std::cout << "failure";
-    }
-    // set the right palette
-    CFile::set_palActual(CFile::get_palArray() - 1);
-    std::cout << "\nLoading file: " << picFile << "...";
-    if(!CFile::open_file(global::gameDataFilePath / picFile, LST))
-    {
-        std::cout << "failure";
-    }
-    // set back palette
-    // CFile::set_palActual(CFile::get_palArray());
-    // std::cout << "\nLoading file: DATA/MBOB/ROM_BOBS.LST...";
-    // if ( !CFile::open_file(global::gameDataFilePath + "DATA/MBOB/ROM_BOBS.LST", LST) )
-    //{
-    //    std::cout << "failure";
-    //}
-    // set back palette
-    CFile::set_palActual(CFile::get_palArray());
-    CFile::set_palArray(&global::palArray[PAL_xBBM]);
-    // load palette file for the map (for precalculated shading)
+    // Load the palette file first so the LST load has it available
     std::cout << "\nLoading palette from file: " << palFile << "...";
-    if(!CFile::open_file(global::gameDataFilePath / palFile, BBM, true))
+    global::loadPalette(global::gameDataFilePath / palFile);
+    // Load map graphics into typed archive (bitmap items only)
+    std::cout << "\nLoading file: " << picFile << "...";
+    if(!global::loadBitmapArchive(ArchiveID::MAP00, global::gameDataFilePath / picFile, global::currentPalette))
     {
         std::cout << "failure";
     }
@@ -464,15 +438,9 @@ void CMap::loadMapPics()
 
 void CMap::unloadMapPics()
 {
-    for(int i = MAPPIC_ARROWCROSS_YELLOW; i <= MAPPIC_LAST_ENTRY; i++)
-    {
-        global::bmpArray[i].surface.reset();
-    }
-    // set back bmpArray-pointer, cause MAP0x.LST is no longer needed
-    CFile::set_bmpArray(&global::bmpArray[MAPPIC_ARROWCROSS_YELLOW]);
-    // set back palArray-pointer, cause PALx.BBM is no longer needed
-    CFile::set_palActual(&global::palArray[PAL_IO]);
-    CFile::set_palArray(&global::palArray[PAL_IO + 1]);
+    auto it = global::typedArchives.find(ArchiveID::MAP00);
+    if(it != global::typedArchives.end())
+        global::typedArchives.erase(it);
 }
 
 void CMap::moveMap(Position offset)
@@ -920,6 +888,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
                 unloadMapPics();
                 loadMapPics();
 
+                callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                 break;
             case SDLK_w: // convert map to winterland
                 callback::PleaseWait(INITIALIZING_CALL);
@@ -940,12 +909,7 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
 
                 callback::PleaseWait(WINDOW_QUIT_MESSAGE);
                 break;
-            case SDLK_p:
-                if(BitsPerPixel == 8)
-                    setBitsPerPixel(32);
-                else
-                    setBitsPerPixel(8);
-                break;
+
             case SDLK_F9: // lock horizontal movement
                 HorizontalMovementLocked = !HorizontalMovementLocked;
 
@@ -1076,28 +1040,32 @@ void CMap::render()
     if(displayRect.getSize() != global::s2->GameResolution)
     {
         displayRect.setSize(global::s2->GameResolution);
-        Surf_Map.reset();
     }
-
-    // if we need a new surface
-    if(!Surf_Map)
-    {
-        if(BitsPerPixel == 8)
-            Surf_Map =
-              makePalSurface(displayRect.getSize().x, displayRect.getSize().y, global::palArray[PAL_xBBM].colors);
-        else
-            Surf_Map = makeRGBSurface(displayRect.getSize().x, displayRect.getSize().y);
-    }
-    // else
-    // clear the surface before drawing new (in normal case not needed)
-    // SDL_FillRect( Surf_Map, nullptr, SDL_MapRGB(Surf_Map->format,0,0,0) );
 
     // touch vertex data if user modifies it
     if(modify)
+    {
         modifyVertex();
+    }
 
+    // 1. Draw terrain with OpenGL
     if(!map->vertex.empty())
-        CSurface::DrawTriangleField(Surf_Map.get(), displayRect, *map);
+        CSurface::DrawTriangleField(displayRect, *map);
+
+    // 2. Draw editor UI chrome on top (screen-space)
+    // Switch to screen-space projection for UI chrome
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, static_cast<GLdouble>(displayRect.getSize().x), static_cast<GLdouble>(displayRect.getSize().y), 0, -1,
+            1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     // draw pictures to cursor position
     int symbol_index, symbol_index2 = -1;
@@ -1124,162 +1092,202 @@ void CMap::render()
     }
     for(int i = 0; i < VertexCounter; i++)
     {
-        if(Vertices[i].active)
+        if(!Vertices[i].active)
+            continue;
+        const bool isMapPicSymbol =
+          (mode == EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE || mode == EDITOR_MODE_TEXTURE_MAKE_HARBOUR);
+        if(isMapPicSymbol)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, Vertices[i].blit - Position::all(10));
+            // MAPPIC textures
+            Texture::getTexture(ArchiveID::MAP00, symbol_index)
+              .draw(Position(Vertices[i].blit.x - 10, Vertices[i].blit.y - 10));
+        } else
+        {
+            // Cursor symbols from EDITBOB.LST
+            Texture::getTexture(ArchiveID::EDITBOB, symbol_index)
+              .draw(Position(Vertices[i].blit.x - 10, Vertices[i].blit.y - 10));
             if(symbol_index2 >= 0)
-                CSurface::Draw(Surf_Map, global::bmpArray[symbol_index2].surface, Vertices[i].blit - Position(0, 7));
+                Texture::getTexture(ArchiveID::EDITBOB, symbol_index2)
+                  .draw(Position(Vertices[i].blit.x, Vertices[i].blit.y - 7));
         }
     }
 
     // draw the frame
     if(displayRect.getSize() == Extent(640, 480))
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface);
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480).draw(Position(0, 0));
     else if(displayRect.getSize() == Extent(800, 600))
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_800_600].surface);
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_800_600).draw(Position(0, 0));
     else if(displayRect.getSize() == Extent(1024, 768))
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_1024_768].surface);
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_1024_768).draw(Position(0, 0));
     else if(displayRect.getSize() == Extent(1280, 1024))
     {
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_LEFT_1280_1024].surface);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_RIGHT_1280_1024].surface, Position(640, 0));
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_LEFT_1280_1024).draw(Position(0, 0));
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_RIGHT_1280_1024).draw(Position(640, 0));
     } else
     {
         // draw the corners
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, 0, 0, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, displayRect.getSize().y - 150, 0,
-                       480 - 150, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150, 0,
-                       640 - 150, 0, 150, 150);
-        CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 150,
-                       displayRect.getSize().y - 150, 640 - 150, 480 - 150, 150, 150);
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480).draw(Rect(0, 0, 150, 150), Rect(0, 0, 150, 150));
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+          .draw(Rect(0, static_cast<int>(displayRect.getSize().y) - 150, 150, 150), Rect(0, 480 - 150, 150, 150));
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+          .draw(Rect(static_cast<int>(displayRect.getSize().x) - 150, 0, 150, 150), Rect(640 - 150, 0, 150, 150));
+        Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+          .draw(Rect(static_cast<int>(displayRect.getSize().x) - 150, static_cast<int>(displayRect.getSize().y) - 150,
+                     150, 150),
+                Rect(640 - 150, 480 - 150, 150, 150));
         // draw the edges
         unsigned x = 150, y = 150;
         while(x + 150 < displayRect.getSize().x)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, 0, 150, 0, 150, 12);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, x, displayRect.getSize().y - 12, 150,
-                           0, 150, 12);
+            Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+              .draw(Rect(static_cast<int>(x), 0, 150, 12), Rect(150, 0, 150, 12));
+            Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+              .draw(Rect(static_cast<int>(x), static_cast<int>(displayRect.getSize().y) - 12, 150, 12),
+                    Rect(150, 0, 150, 12));
             x += 150;
         }
         while(y + 150 < displayRect.getSize().y)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, 0, y, 0, 150, 12, 150);
-            CSurface::Draw(Surf_Map, global::bmpArray[MAINFRAME_640_480].surface, displayRect.getSize().x - 12, y, 0,
-                           150, 12, 150);
+            Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+              .draw(Rect(0, static_cast<int>(y), 12, 150), Rect(0, 150, 12, 150));
+            Texture::getTexture(ArchiveID::EDITRES, MAINFRAME_640_480)
+              .draw(Rect(static_cast<int>(displayRect.getSize().x) - 12, static_cast<int>(y), 12, 150),
+                    Rect(0, 150, 12, 150));
             y += 150;
         }
     }
 
     // draw the statues at the frame
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_LEFT].surface, Position(12, 12));
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_UP_RIGHT].surface,
-                   Position(displayRect.getSize().x - global::bmpArray[STATUE_UP_RIGHT].w - 12, 12));
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_LEFT].surface,
-                   Position(12, displayRect.getSize().y - global::bmpArray[STATUE_DOWN_LEFT].h - 12));
-    CSurface::Draw(Surf_Map, global::bmpArray[STATUE_DOWN_RIGHT].surface,
-                   displayRect.getSize()
-                     - Position(global::bmpArray[STATUE_DOWN_RIGHT].w, global::bmpArray[STATUE_DOWN_RIGHT].h)
-                     - Position::all(12));
+    Texture::getTexture(ArchiveID::EDITRES, STATUE_UP_LEFT).draw(Position(12, 12));
+    Texture::getTexture(ArchiveID::EDITRES, STATUE_UP_RIGHT)
+      .draw(Position(static_cast<int>(displayRect.getSize().x)
+                       - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, STATUE_UP_RIGHT).x) - 12,
+                     12));
+    Texture::getTexture(ArchiveID::EDITRES, STATUE_DOWN_LEFT)
+      .draw(Position(12, static_cast<int>(displayRect.getSize().y)
+                           - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, STATUE_DOWN_LEFT).y) - 12));
+    Texture::getTexture(ArchiveID::EDITRES, STATUE_DOWN_RIGHT)
+      .draw(Position(static_cast<int>(displayRect.getSize().x)
+                       - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, STATUE_DOWN_RIGHT).x) - 12,
+                     static_cast<int>(displayRect.getSize().y)
+                       - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, STATUE_DOWN_RIGHT).y) - 12));
 
     // lower menubar
-    const Position menubarPos = Position(displayRect.getSize().x / 2, displayRect.getSize().y);
+    const Position menubarPos =
+      Position(static_cast<int>(displayRect.getSize().x) / 2, static_cast<int>(displayRect.getSize().y));
     // draw lower menubar
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR].surface,
-                   menubarPos - Extent(global::bmpArray[MENUBAR].w / 2, global::bmpArray[MENUBAR].h));
+    Texture::getTexture(ArchiveID::EDITRES, MENUBAR)
+      .draw(Position(menubarPos.x - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, MENUBAR).x) / 2,
+                     menubarPos.y - static_cast<int>(global::getBitmapSize(ArchiveID::EDITRES, MENUBAR).y)));
 
     // draw pictures to lower menubar
-    // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 236, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 199, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 162, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 125, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 88, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 51, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x - 14, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 92, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 129, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 166, menubarPos.y - 36, 0, 0,
-                   37, 32);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, menubarPos.x + 203, menubarPos.y - 36, 0, 0,
-                   37, 32);
+    // backgrounds (use button background texture for each slot)
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 236, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 199, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 162, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 125, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 88, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 51, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x - 14, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x + 92, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x + 129, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x + 166, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(menubarPos.x + 203, menubarPos.y - 36, 37, 32), Rect(0, 0, 37, 32));
+
     // pictures
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_HEIGHT].surface, menubarPos - Extent(232, 35));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TEXTURE].surface, menubarPos - Extent(195, 35));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_TREE].surface, menubarPos - Extent(158, 37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_RESOURCE].surface, menubarPos - Extent(121, 32));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_LANDSCAPE].surface, menubarPos - Extent(84, 37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_ANIMAL].surface, menubarPos - Extent(48, 36));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_PLAYER].surface, menubarPos - Extent(10, 34));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_HEIGHT).draw(Position(menubarPos.x - 232, menubarPos.y - 35));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_TEXTURE).draw(Position(menubarPos.x - 195, menubarPos.y - 35));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_TREE).draw(Position(menubarPos.x - 158, menubarPos.y - 37));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_RESOURCE).draw(Position(menubarPos.x - 121, menubarPos.y - 32));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_LANDSCAPE).draw(Position(menubarPos.x - 84, menubarPos.y - 37));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_ANIMAL).draw(Position(menubarPos.x - 48, menubarPos.y - 36));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_PLAYER).draw(Position(menubarPos.x - 10, menubarPos.y - 34));
 
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUILDHELP].surface, menubarPos + Position(96, -35));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_MINIMAP].surface, menubarPos + Position(131, -37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_NEWWORLD].surface, menubarPos + Position(166, -37));
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_COMPUTER].surface, menubarPos + Position(207, -35));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_BUILDHELP).draw(Position(menubarPos.x + 96, menubarPos.y - 35));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_MINIMAP).draw(Position(menubarPos.x + 131, menubarPos.y - 37));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_NEWWORLD).draw(Position(menubarPos.x + 166, menubarPos.y - 37));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_COMPUTER).draw(Position(menubarPos.x + 207, menubarPos.y - 35));
 
-    // right menubar
-    // do we need a surface?
-    if(!Surf_RightMenubar)
+    // right menubar: draw the MENUBAR sprite rotated 270 degrees via OpenGL
     {
-        // we permute width and height, cause we want to rotate the menubar 90 degrees
-        if((Surf_RightMenubar = makePalSurface(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w,
-                                               global::palArray[PAL_RESOURCE].colors))
-           != nullptr)
+        auto& tex = Texture::getTexture(ArchiveID::EDITRES, MENUBAR);
+        const auto sz = tex.getSize();
+        const Position rmPos =
+          Position(static_cast<int>(displayRect.getSize().x), static_cast<int>(displayRect.getSize().y) / 2);
+
+        if(tex.isValid())
         {
-            SDL_SetColorKey(Surf_RightMenubar.get(), SDL_TRUE, SDL_MapRGB(Surf_RightMenubar->format, 0, 0, 0));
-            CSurface::Draw(Surf_RightMenubar, global::bmpArray[MENUBAR].surface, 0, 0, 270);
+            glMatrixMode(GL_MODELVIEW);
+            glPushMatrix();
+            // Shift right menubar 1px right, 2px down to align button backgrounds
+            glTranslatef(static_cast<float>(rmPos.x - static_cast<int>(sz.y) / 2 + 1), static_cast<float>(rmPos.y + 2),
+                         0.f);
+            glRotatef(270.f, 0.f, 0.f, 1.f);
+            tex.draw(Rect(-static_cast<int>(sz.x) / 2, -static_cast<int>(sz.y) / 2, sz.x, sz.y));
+            glPopMatrix();
         }
     }
-    // draw right menubar (remember permutation of width and height)
-    const Position rightMenubarPos = Position(displayRect.getSize().x, displayRect.getSize().y / 2);
-    CSurface::Draw(Surf_Map, Surf_RightMenubar,
-                   rightMenubarPos - Extent(global::bmpArray[MENUBAR].h, global::bmpArray[MENUBAR].w / 2));
 
     // draw pictures to right menubar
-    // backgrounds
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 239, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 202, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 165, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 128, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y - 22, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 15, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 52, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 89, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 126, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 163, 0, 0, 32, 37);
-    CSurface::Draw(Surf_Map, global::bmpArray[BUTTON_GREEN1_DARK].surface, rightMenubarPos.x - 36,
-                   rightMenubarPos.y + 200, 0, 0, 32, 37);
+    const Position rightMenubarPos =
+      Position(static_cast<int>(displayRect.getSize().x), static_cast<int>(displayRect.getSize().y) / 2);
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y - 239, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y - 202, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y - 165, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y - 128, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y - 22, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y + 15, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y + 52, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y + 89, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y + 126, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y + 163, 32, 37), Rect(0, 0, 32, 37));
+    Texture::getTexture(ArchiveID::EDITIO, BUTTON_GREEN1_DARK)
+      .draw(Rect(rightMenubarPos.x - 36, rightMenubarPos.y + 200, 32, 37), Rect(0, 0, 32, 37));
+
     // pictures
-    // four cursor menu pictures
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(33, 237));
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, rightMenubarPos - Extent(20, 235));
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_DOWN].surface, rightMenubarPos - Extent(33, 220));
-    CSurface::Draw(Surf_Map, global::bmpArray[CURSOR_SYMBOL_ARROW_UP].surface, rightMenubarPos - Extent(20, 220));
+    Texture::getTexture(ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_UP)
+      .draw(Position(rightMenubarPos.x - 33, rightMenubarPos.y - 237));
+    Texture::getTexture(ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_DOWN)
+      .draw(Position(rightMenubarPos.x - 20, rightMenubarPos.y - 235));
+    Texture::getTexture(ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_DOWN)
+      .draw(Position(rightMenubarPos.x - 33, rightMenubarPos.y - 220));
+    Texture::getTexture(ArchiveID::EDITBOB, CURSOR_SYMBOL_ARROW_UP)
+      .draw(Position(rightMenubarPos.x - 20, rightMenubarPos.y - 220));
     // bugkill picture for quickload with text
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 162));
-    CFont::writeText(Surf_Map, "Load", Position(rightMenubarPos.x - 35, rightMenubarPos.y + 193));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_BUGKILL)
+      .draw(Position(rightMenubarPos.x - 37, rightMenubarPos.y + 162));
+    CFont::draw("Load", Position(rightMenubarPos.x - 35, rightMenubarPos.y + 193));
     // bugkill picture for quicksave with text
-    CSurface::Draw(Surf_Map, global::bmpArray[MENUBAR_BUGKILL].surface, rightMenubarPos + Position(-37, 200));
-    CFont::writeText(Surf_Map, "Save", Position(rightMenubarPos.x - 35, rightMenubarPos.y + 231));
+    Texture::getTexture(ArchiveID::EDITIO, MENUBAR_BUGKILL)
+      .draw(Position(rightMenubarPos.x - 37, rightMenubarPos.y + 200));
+    CFont::draw("Save", Position(rightMenubarPos.x - 35, rightMenubarPos.y + 231));
+
+    // Restore matrices
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 }
 
 static const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)

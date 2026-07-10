@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ArchiveID.h"
 #include "Point.h"
 #include "defines.h"
 
@@ -15,6 +16,7 @@ class CPicture
 private:
     Position pos_;
     Extent size_;
+    ArchiveID archive_;
     int picture_;
     bool marked;
     bool clicked;
@@ -24,7 +26,7 @@ private:
     int motionLeaveParam;
 
 public:
-    CPicture(void callback(int), int clickedParam, Position pos = {0, 0}, int picture = -1);
+    CPicture(void callback(int), int clickedParam, Position pos, ArchiveID archive, int picture);
     // Access
     int getX() const { return pos_.x; };
     int getY() const { return pos_.y; };

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ArchiveID.h"
 #include "defines.h"
 #include <memory>
 #include <vector>
@@ -22,6 +23,13 @@ struct BorderSizes
     int top = 0;
     int right = 0;
     int bottom = 0;
+
+    BorderSizes() = default;
+
+    /// Construct border sizes from four bitmap indices in an archive.
+    /// Each field is set to the relevant dimension of the corresponding bitmap:
+    /// left/right = bitmap width, top/bottom = bitmap height.
+    BorderSizes(ArchiveID archive, int leftIdx, int topIdx, int rightIdx, int bottomIdx);
 };
 
 class CControlContainer
@@ -32,9 +40,13 @@ private:
     struct Picture
     {
         Position pos;
+        ArchiveID archive;
         int pic;
         unsigned id;
     };
+
+protected:
+    ArchiveID backgroundArchive_;
 
     // if waste is true, the menu will be delete within the game loop
     BorderSizes border;
@@ -62,8 +74,8 @@ protected:
     int getBackground() const { return pic_background; }
 
 public:
-    CControlContainer(int pic_background);
-    CControlContainer(int pic_background, BorderSizes border);
+    CControlContainer(int pic_background, ArchiveID archive);
+    CControlContainer(int pic_background, BorderSizes border, ArchiveID archive);
     virtual ~CControlContainer() noexcept;
     // Access
     BorderSizes getBorderSizes() const { return border; }
@@ -71,7 +83,7 @@ public:
     {
         return {static_cast<unsigned>(border.left + border.right), static_cast<unsigned>(border.top + border.bottom)};
     }
-    void setBackgroundPicture(int pic_background);
+    void setBackgroundPicture(int pic_background, ArchiveID archive);
     virtual void setMouseData(SDL_MouseMotionEvent motion);
     virtual void setMouseData(SDL_MouseButtonEvent button);
     void setKeyboardData(const SDL_KeyboardEvent& key);
@@ -83,9 +95,9 @@ public:
     bool delButton(CButton* ButtonToDelete);
     CFont* addText(std::string string, Position pos, FontSize fontsize, FontColor color = FontColor::Yellow);
     bool delText(CFont* TextToDelete);
-    CPicture* addPicture(void callback(int), int clickedParam, Position pos, int picture);
+    CPicture* addPicture(void callback(int), int clickedParam, Position pos, ArchiveID archive, int localIndex);
     bool delPicture(CPicture* PictureToDelete);
-    int addStaticPicture(Position pos, int picture);
+    int addStaticPicture(Position pos, ArchiveID archive, int localIndex);
     bool delStaticPicture(int picId);
     CTextfield* addTextfield(Position pos = {0, 0}, Uint16 cols = 10, Uint16 rows = 1,
                              FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,

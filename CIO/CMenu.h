@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ArchiveID.h"
 #include "CControlContainer.h"
 
 class CMenu final : public CControlContainer
@@ -13,7 +14,7 @@ class CMenu final : public CControlContainer
     bool active = true;
 
 public:
-    CMenu(int pic_background);
+    CMenu(int pic_background, ArchiveID archive);
     void setActive() { active = true; }
     void setInactive() { active = false; }
     bool isActive() const { return active; }

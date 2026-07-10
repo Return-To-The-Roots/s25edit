@@ -5,23 +5,66 @@
 
 #pragma once
 
+#include "ArchiveID.h"
+#include "Texture.h"
 #include "gameData/WorldDescription.h"
+#include <libsiedler2/Archiv.h>
 #include <boost/filesystem/path.hpp>
 #include <SDL.h>
+#include <array>
+#include <map>
 #include <vector>
 
 class CGame;
-struct bobBMP;
-struct bobSHADOW;
-struct bobPAL;
+
+namespace libsiedler2 {
+class ArchivItem_Palette;
+class ArchivItem_PaletteAnimation;
+class baseArchivItem_Bitmap;
+struct ColorBGRA;
+} // namespace libsiedler2
 
 namespace global {
-// array for all pictures
-extern std::vector<bobBMP> bmpArray;
-// array for all shadows
-extern std::vector<bobSHADOW> shadowArray;
-// array for all palettes
-extern std::vector<bobPAL> palArray;
+
+// ── Typed archive storage ─────────────────────────────────────────────
+/// Per-ArchiveID archives, loaded and kept intact.
+extern std::map<ArchiveID, libsiedler2::Archiv> typedArchives;
+
+/// Load a file into typedArchives[archive] using libsiedler2::Load directly.
+/// Returns true on success.
+bool loadArchive(ArchiveID archive, const boost::filesystem::path& filepath,
+                 const libsiedler2::ArchivItem_Palette* palette = nullptr);
+
+/// Get the size of a bitmap from a typed archive.
+Extent getBitmapSize(ArchiveID archive, unsigned index);
+
+/// Load a palette BBM file into currentPalette. Returns true on success.
+bool loadPalette(const boost::filesystem::path& filepath);
+
+/// Load a file into typedArchives[archive], keeping only bitmap-type items
+/// (Bitmap, BitmapRLE, Raw, BitmapPlayer), skipping nulls and other types.
+/// Used for archives like MAP00.LST that contain non-bitmap items.
+bool loadBitmapArchive(ArchiveID archive, const boost::filesystem::path& filepath,
+                       const libsiedler2::ArchivItem_Palette* palette = nullptr);
+
+/// Load a terrain tileset (TEX5/6/7.LBM) into typedArchives and extract
+/// palette animations into tilesetAnims[tsIdx].  The old flat-archive
+/// path is NOT used — call this instead of CFile::open_file.
+bool loadTileset(ArchiveID archive, int tsIdx, const boost::filesystem::path& filepath);
+
+// Palette animations per tileset (greenland=0, wasteland=1, winterland=2).
+struct TilesetAnim
+{
+    ArchiveID archive = ArchiveID::EDITRES; // which archive contains the bitmap
+    unsigned bmpIdx = 0;                    // index of the tileset bitmap within the archive
+    std::vector<const libsiedler2::ArchivItem_PaletteAnimation*> anims;
+    std::vector<std::unique_ptr<libsiedler2::ArchivItem>> storage; // keeps animations alive
+};
+extern std::array<TilesetAnim, 3> tilesetAnims;
+
+/// Currently active palette (loaded from PAL*.BBM).
+extern const libsiedler2::ArchivItem_Palette* currentPalette;
+
 // the game object
 extern CGame* s2;
 // Path to game data (must not be empty!)
@@ -48,5 +91,3 @@ constexpr unsigned char ZOOM_STEP_INCREASE = 1;
 // Zoom boundaries (based on triangleIncrease)
 constexpr unsigned char ZOOM_INCREASE_MAX = 9;
 constexpr unsigned char ZOOM_INCREASE_MIN = 1;
-
-extern Uint8 gouData[3][256][256];

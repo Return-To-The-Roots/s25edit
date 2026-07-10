@@ -8,6 +8,7 @@
 #include "../Texture.h"
 #include "../globals.h"
 #include "CFont.h"
+#include <libsiedler2/ArchivItem_Bitmap.h>
 
 void CMinimapWindow::draw(Position /*parentOrigin*/)
 {
@@ -45,8 +46,7 @@ void CMinimapWindow::draw(Position /*parentOrigin*/)
 
         const int flagIdx = FLAG_BLUE_DARK + i % 7;
         const Position hqPos = Position(hqX, hqY) / scale;
-        const Position flagOffset(global::bmpArray[flagIdx].nx, global::bmpArray[flagIdx].ny);
-        getBmpTexture(flagIdx).draw(contentPos + hqPos - flagOffset);
+        Texture::getTexture(ArchiveID::EDITBOB, flagIdx).drawSprite(contentPos + hqPos);
 
         // Player number
         CFont::draw(std::to_string(i + 1), contentPos + hqPos, FontSize::Small, FontColor::MintGreen);
@@ -57,8 +57,9 @@ void CMinimapWindow::draw(Position /*parentOrigin*/)
         const int arrowIdx = MAPPIC_ARROWCROSS_ORANGE;
         const auto& dispRect = map->getDisplayRect();
         const Position arrowCenter = dispRect.getOrigin() + dispRect.getSize() / 2u;
-        const Position arrowPos = contentPos + arrowCenter / Position(triangleWidth, triangleHeight) / scale
-                                  - Position(global::bmpArray[arrowIdx].nx, global::bmpArray[arrowIdx].ny);
-        getBmpTexture(arrowIdx).draw(arrowPos);
+        auto& tex = Texture::getTexture(ArchiveID::MAP00, arrowIdx);
+        const Position arrowPos =
+          contentPos + arrowCenter / Position(triangleWidth, triangleHeight) / scale - tex.anchor();
+        tex.draw(arrowPos);
     }
 }

@@ -4,9 +4,17 @@
 
 #pragma once
 
+#include "ArchiveID.h"
 #include "Rect.h"
+#include <glad/glad.h>
 #include <Point.h>
 #include <SDL.h>
+#include <memory>
+#include <vector>
+
+namespace libsiedler2 {
+class baseArchivItem_Bitmap;
+} // namespace libsiedler2
 
 /// Wraps a texture with RAII and provides draw methods.
 class Texture
@@ -22,12 +30,14 @@ public:
     Texture(const Texture&) = delete;
     Texture& operator=(const Texture&) = delete;
 
-    /// Load from a 32-bit or 8-bit paletted SDL surface.
-    /// For 8-bit surfaces, optional colorkey is respected (keyed pixels become transparent).
-    bool load(SDL_Surface* surface, bool filterLinear = false);
+    /// Load from a libsiedler2 bitmap (paletted or BGRA).
+    bool load(const libsiedler2::baseArchivItem_Bitmap& bitmap);
+
+    /// Load raw BGRA pixel data directly.
+    void load(const uint8_t* bgraPixels, Extent size);
 
     /// Create an empty texture of the given size (for use as a render-target).
-    void createEmpty(Extent size, bool filterLinear = false);
+    void createEmpty(Extent size);
 
     /// Upload new pixel data to an existing texture (glTexSubImage2D).
     void upload(const void* bgraPixels);
@@ -41,31 +51,41 @@ public:
     /// Tile the texture to fill the given rectangle.
     void drawTiled(const Rect& destRect) const;
 
-    /// Returns the raw GL texture name (for use with glBindTexture).
-    unsigned getHandle() const { return texture_; }
-
     /// Size in pixels.
     Extent getSize() const { return size_; }
+
+    /// Draw a sub-rect of the texture stretched to fill the given dest rect.
+    void draw(const Rect& destRect, const Rect& srcRect) const;
 
     /// Returns true if the texture has been created.
     bool isValid() const { return texture_ != 0; }
 
-private:
-    unsigned int texture_ = 0;
-    Extent size_;
+    /// Draw at native size at the given position adjusted by the sprite anchor.
+    void drawSprite(Position pos) const;
 
-    /// Internal: create or recreate texture from raw BGRA pixel data.
-    void load(const void* bgraPixels, Extent size, bool filterLinear);
+    /// Sprite anchor offset (set by getTexture).
+    Position anchor() const { return anchor_; }
+
+    /// Direct handle access for manual GL ops.
+    GLuint getHandle() const { return texture_; }
+
+    // Static bitmap-texture cache
+
+    /// Return (or create on first use) a cached GL texture from a typed archive.
+    static Texture& getTexture(ArchiveID archive, int index);
+
+private:
+    GLuint texture_ = 0;
+    Extent size_;
+    Position anchor_ = {0, 0}; // sprite anchor offset, set by getTexture
 };
 
 /// Draw a filled rectangle with a 32-bit ARGB colour.
 void drawRect(const Rect& rect, unsigned color);
 
 /// Draw a 3D-style button box: tiled background, 2px black frame (sunken if pressed, raised otherwise),
-/// and tiled foreground inset by 2px.
+/// and tiled foreground inset by 2px. All button textures from EDITIO.IDX.
 void drawButtonBox(const Rect& area, bool pressed, unsigned baseTex, unsigned faceTex);
 
-/// Get or create the cached OpenGL texture for a bitmap index.
-/// The texture is loaded from the SDL surface on first access.
-/// @param filterLinear Whether to use linear filtering (for scaled backgrounds).
-Texture& getBmpTexture(int idx, bool filterLinear = false);
+/// Get or create the cached OpenGL texture from a typed archive.
+Texture& getTexture(ArchiveID archive, int index);
