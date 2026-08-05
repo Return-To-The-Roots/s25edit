@@ -348,6 +348,8 @@ bool CFile::read_lbm(FILE* fp, const boost::filesystem::path& filepath)
     // skip unknown data (length - 20 x 1 Byte)
     // fseek(fp, length-20, SEEK_CUR);
 
+    const Uint16 tilesetSlot = static_cast<Uint16>(bmpArray - global::bmpArray.data());
+
     /* READ SECOND CHUNK "CMAP" */
 
     // chunk-identifier (4 Bytes)
@@ -392,7 +394,55 @@ bool CFile::read_lbm(FILE* fp, const boost::filesystem::path& filepath)
 
         if(strcmp(chunk_identifier.data(), "BODY") == 0)
             break;
-        else
+        else if(strcmp(chunk_identifier.data(), "CRNG") == 0)
+        {
+            Uint32 chunkLen;
+            CHECK_READ(libendian::be_read_ui(&chunkLen, fp));
+            if(chunkLen >= 8)
+            {
+                uint16_t padding, rate, flags;
+                CHECK_READ(libendian::be_read_us(&padding, fp));
+                CHECK_READ(libendian::be_read_us(&rate, fp));
+                CHECK_READ(libendian::be_read_us(&flags, fp));
+                uint8_t firstClr, lastClr;
+                CHECK_READ(libendian::read(&firstClr, 1, fp));
+                CHECK_READ(libendian::read(&lastClr, 1, fp));
+                // Only register valid animations: at least 2 colors and non-zero rate
+                if(rate > 0 && lastClr > firstClr)
+                {
+                    PaletteAnimation anim;
+                    anim.moveUp = (flags & 2) != 0;
+                    if(rate)
+                        anim.moveUp = true;
+                    anim.rate = rate;
+                    anim.firstClr = firstClr;
+                    anim.lastClr = lastClr;
+                    anim.currentOffset = 0;
+                    anim.lastAppliedOffset = 0;
+                    anim.lastUpdateTime = SDL_GetTicks();
+                    switch(tilesetSlot)
+                    {
+                        case TILESET_GREENLAND_8BPP: global::paletteAnimations[MAP_GREENLAND].push_back(anim); break;
+                        case TILESET_WASTELAND_8BPP: global::paletteAnimations[MAP_WASTELAND].push_back(anim); break;
+                        case TILESET_WINTERLAND_8BPP: global::paletteAnimations[MAP_WINTERLAND].push_back(anim); break;
+                        default: break;
+                    }
+                }
+                if(chunkLen > 8)
+                {
+                    uint32_t remaining = chunkLen - 8;
+                    if(remaining & 1)
+                        remaining++;
+                    fseek(fp, remaining, SEEK_CUR);
+                } else if(chunkLen & 1)
+                    fseek(fp, 1, SEEK_CUR);
+            } else
+            {
+                if(chunkLen & 1)
+                    chunkLen++;
+                fseek(fp, chunkLen, SEEK_CUR);
+            }
+        } else
         {
             Uint32 chunkLen;
             CHECK_READ(libendian::be_read_ui(&chunkLen, fp));

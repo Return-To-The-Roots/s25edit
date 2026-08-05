@@ -8,12 +8,14 @@
 #include "gameData/WorldDescription.h"
 #include <boost/filesystem/path.hpp>
 #include <SDL.h>
+#include <array>
 #include <vector>
 
 class CGame;
 struct bobBMP;
 struct bobSHADOW;
 struct bobPAL;
+struct PaletteAnimation;
 
 namespace global {
 // array for all pictures
@@ -22,6 +24,9 @@ extern std::vector<bobBMP> bmpArray;
 extern std::vector<bobSHADOW> shadowArray;
 // array for all palettes
 extern std::vector<bobPAL> palArray;
+// Palette animations per tileset, indexed by MapType (0=Greenland, 1=Wasteland, 2=Winterland).
+// Each entry is a list of CRNG chunk animations applied to the whole tileset palette.
+extern std::array<std::vector<PaletteAnimation>, 3> paletteAnimations;
 // the game object
 extern CGame* s2;
 // Path to game data (must not be empty!)

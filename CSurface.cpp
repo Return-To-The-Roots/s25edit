@@ -15,11 +15,14 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 
 // Disable SGE's internal surface locking once at startup; terrain drawing is
 // the only remaining consumer of SGE functions and the caller already handles
 // locking. Was originally called in CGame::Init().
 static bool sgeLockOff = (sge_Lock_OFF(), true);
+
+static unsigned tilesetIdxForMapType(MapType mapType, bool want32bit);
 
 namespace {
 const TerrainDesc* getTerrainDesc(const bobMAP& map, Uint8 rawTextureId)
@@ -623,11 +626,10 @@ bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap,
 }
 } // namespace
 
-void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, int texture_move,
-                                       Point16& upper, Point16& left, Point16& right, Point16& upper2, Point16& left2,
-                                       Point16& right2)
+void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType texture, bool isRSU, Point16& upper,
+                                       Point16& left, Point16& right, Point16& upper2, Point16& left2, Point16& right2)
 {
-    const auto animOffset = Point16(-texture_move, texture_move);
+    // Offset-shifting animation replaced by palette cycling animation (UpdatePaletteAnimations)
     switch(texture)
     {
             // in case of USD-Triangle "upper.x" and "upper.y" means "lowerX" and "lowerY"
@@ -657,14 +659,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
             {
                 if(isRSU)
                 {
-                    upper2 = Point16(231, 61) + animOffset;
-                    left2 = Point16(207, 62) + animOffset;
-                    right2 = Point16(223, 78) + animOffset;
+                    upper2 = Point16(231, 61);
+                    left2 = Point16(207, 62);
+                    right2 = Point16(223, 78);
                 } else
                 {
-                    upper2 = Point16(224, 79) + animOffset;
-                    left2 = Point16(232, 62) + animOffset;
-                    right2 = Point16(245, 76) + animOffset;
+                    upper2 = Point16(224, 79);
+                    left2 = Point16(232, 62);
+                    right2 = Point16(245, 76);
                 }
             }
             break;
@@ -676,14 +678,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
             {
                 if(isRSU)
                 {
-                    upper2 = Point16(231, 61) + animOffset;
-                    left2 = Point16(207, 62) + animOffset;
-                    right2 = Point16(223, 78) + animOffset;
+                    upper2 = Point16(231, 61);
+                    left2 = Point16(207, 62);
+                    right2 = Point16(223, 78);
                 } else
                 {
-                    upper2 = Point16(224, 79) + animOffset;
-                    left2 = Point16(232, 62) + animOffset;
-                    right2 = Point16(245, 76) + animOffset;
+                    upper2 = Point16(224, 79);
+                    left2 = Point16(232, 62);
+                    right2 = Point16(245, 76);
                 }
             }
             break;
@@ -700,14 +702,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
         case TRIANGLE_TEXTURE_WATER__:
             if(isRSU)
             {
-                upper = Point16(231, 61) + animOffset;
-                left = Point16(207, 62) + animOffset;
-                right = Point16(223, 78) + animOffset;
+                upper = Point16(231, 61);
+                left = Point16(207, 62);
+                right = Point16(223, 78);
             } else
             {
-                upper = Point16(224, 79) + animOffset;
-                left = Point16(232, 62) + animOffset;
-                right = Point16(245, 76) + animOffset;
+                upper = Point16(224, 79);
+                left = Point16(232, 62);
+                right = Point16(245, 76);
             }
             break;
         case TRIANGLE_TEXTURE_MEADOW1:
@@ -753,14 +755,14 @@ void CSurface::GetTerrainTextureCoords(MapType mapType, TriangleTerrainType text
         case TRIANGLE_TEXTURE_LAVA:
             if(isRSU)
             {
-                upper = Point16(231, 117) + animOffset;
-                left = Point16(207, 118) + animOffset;
-                right = Point16(223, 134) + animOffset;
+                upper = Point16(231, 117);
+                left = Point16(207, 118);
+                right = Point16(223, 134);
             } else
             {
-                upper = Point16(224, 135) + animOffset;
-                left = Point16(232, 118) + animOffset;
-                right = Point16(245, 132) + animOffset;
+                upper = Point16(224, 135);
+                left = Point16(232, 118);
+                right = Point16(245, 132);
             }
             break;
         case TRIANGLE_TEXTURE_MINING_MEADOW:
@@ -787,16 +789,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         return;
 
     // for moving water, lava, objects and so on
-    // This is very tricky: there are ice floes in the winterland and the water under this floes is moving.
-    // I don't know how this works in original settlers 2 but i solved it this way:
-    // i texture the triangle with normal water and then draw the floe over it. To Extract the floe
-    // from it's surrounded water, i use this color keys below. These are the color values for the water texture.
-    // I wrote a special SGE-Function that uses these color keys and ignores them in the Surf_Tileset.
-    static std::array<Uint32, 5> colorkeys = {14191, 14195, 13167, 13159, 11119};
-    static int texture_move = 0;
     static int roundCount = 0;
     static Uint32 roundTimeObjects = SDL_GetTicks();
-    static Uint32 roundTimeTextures = SDL_GetTicks();
     if(SDL_GetTicks() - roundTimeObjects > 30)
     {
         roundTimeObjects = SDL_GetTicks();
@@ -805,34 +799,10 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         else
             roundCount++;
     }
-    if(SDL_GetTicks() - roundTimeTextures > 170)
-    {
-        roundTimeTextures = SDL_GetTicks();
-        texture_move++;
-        if(texture_move > 14)
-            texture_move = 0;
-    }
 
     SDL_Surface* Surf_Tileset;
-    switch(type)
-    {
-        case MAP_GREENLAND:
-        default:
-            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_GREENLAND_8BPP :
-                                                                                              TILESET_GREENLAND_32BPP]
-                             .surface.get();
-            break;
-        case MAP_WASTELAND:
-            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WASTELAND_8BPP :
-                                                                                              TILESET_WASTELAND_32BPP]
-                             .surface.get();
-            break;
-        case MAP_WINTERLAND:
-            Surf_Tileset = global::bmpArray[global::s2->getMapObj()->getBitsPerPixel() == 8 ? TILESET_WINTERLAND_8BPP :
-                                                                                              TILESET_WINTERLAND_32BPP]
-                             .surface.get();
-            break;
-    }
+    const bool want32 = global::s2->getMapObj()->getBitsPerPixel() != 8;
+    Surf_Tileset = global::bmpArray[tilesetIdxForMapType(type, want32)].surface.get();
 
     bool const isRSU = p1.y < p2.y;
 
@@ -842,7 +812,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
         Point16 upper, left, right, upper2, left2, right2;
         auto const texture =
           TriangleTerrainType((isRSU ? P1.rsuTexture : P2.usdTexture) & ~0x40); // Mask out harbor bit
-        GetTerrainTextureCoords(type, texture, isRSU, texture_move, upper, left, right, upper2, left2, right2);
+        GetTerrainTextureCoords(type, texture, isRSU, upper, left, right, upper2, left2, right2);
 
         // draw the triangle
         // do not shade water and lava
@@ -852,30 +822,13 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                                left.y, right.x, right.y);
         else
         {
-            // draw special winterland textures with moving water (ice floe textures)
-            if(type == MAP_WINTERLAND && (texture == TRIANGLE_TEXTURE_SNOW || texture == TRIANGLE_TEXTURE_SWAMP))
-            {
-                sge_TexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper2.x, upper2.y,
-                                   left2.x, left2.y, right2.x, right2.y);
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset,
-                                                            upper.x, upper.y, left.x, left.y, right.x, right.y,
-                                                            P1.shading << 8, P2.shading << 8, P3.shading << 8,
-                                                            gouData[type], colorkeys.data(), colorkeys.size());
-                else
-                    sge_FadedTexturedTrigonColorKeys(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
-                                                     upper.y, left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i,
-                                                     colorkeys.data(), colorkeys.size());
-            } else
-            {
-                if(global::s2->getMapObj()->getBitsPerPixel() == 8)
-                    sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
-                                                   upper.y, left.x, left.y, right.x, right.y, P1.shading << 8,
-                                                   P2.shading << 8, P3.shading << 8, gouData[type]);
-                else
-                    sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
-                                            left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i);
-            }
+            if(global::s2->getMapObj()->getBitsPerPixel() == 8)
+                sge_PreCalcFadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x,
+                                               upper.y, left.x, left.y, right.x, right.y, P1.shading << 8,
+                                               P2.shading << 8, P3.shading << 8, gouData[type]);
+            else
+                sge_FadedTexturedTrigon(display, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, Surf_Tileset, upper.x, upper.y,
+                                        left.x, left.y, right.x, right.y, P1.i, P2.i, P3.i);
         }
         return;
     }
@@ -1533,4 +1486,97 @@ float CSurface::absf(float a)
         return a;
     else
         return a * (-1);
+}
+
+/// Map a MapType to the 8-bit or 32-bit tileset bmpArray slot
+static unsigned tilesetIdxForMapType(MapType mapType, bool want32bit)
+{
+    switch(mapType)
+    {
+        case MAP_GREENLAND:
+        default: return want32bit ? TILESET_GREENLAND_32BPP : TILESET_GREENLAND_8BPP;
+        case MAP_WASTELAND: return want32bit ? TILESET_WASTELAND_32BPP : TILESET_WASTELAND_8BPP;
+        case MAP_WINTERLAND: return want32bit ? TILESET_WINTERLAND_32BPP : TILESET_WINTERLAND_8BPP;
+    }
+}
+
+/// Apply a delta rotation to a single palette range
+static void rotatePaletteRange(SDL_Palette* pal, uint8_t firstClr, int colorCount, int deltaOffset, bool moveUp)
+{
+    std::array<SDL_Color, 256> rotated;
+    memcpy(rotated.data(), pal->colors, sizeof(SDL_Color) * 256);
+    for(int i = 0; i < colorCount; i++)
+    {
+        int srcIdx = moveUp ? (i - deltaOffset + colorCount) % colorCount : (i + deltaOffset) % colorCount;
+        rotated[firstClr + i] = pal->colors[firstClr + srcIdx];
+    }
+    SDL_SetPaletteColors(pal, rotated.data() + firstClr, firstClr, colorCount);
+}
+
+void CSurface::UpdatePaletteAnimations(MapType mapType)
+{
+    if(global::paletteAnimations[mapType].empty())
+        return;
+
+    const auto tilesetIdx8 = tilesetIdxForMapType(mapType, false);
+    auto* surf8 = global::bmpArray[tilesetIdx8].surface.get();
+    if(!surf8 || !surf8->format->palette)
+        return;
+
+    SDL_Palette* mapPal =
+      (global::s2 && global::s2->getMapObj()) ? global::s2->getMapObj()->getSurfacePalette() : nullptr;
+
+    // 32-bit tileset surface for blitting after palette updates
+    const auto tilesetIdx32 = tilesetIdxForMapType(mapType, true);
+    auto& surf32 = *global::bmpArray[tilesetIdx32].surface;
+
+    const unsigned now = SDL_GetTicks();
+    bool anyUpdate = false;
+
+    for(auto& anim : global::paletteAnimations[mapType])
+    {
+        if(anim.rate == 0)
+            continue;
+
+        const int colorCount = anim.lastClr - anim.firstClr + 1;
+        if(colorCount <= 1)
+            continue;
+
+        // Time per step: (8192/30) / rate seconds, converted to ms
+        const float intervalMs = (8192.0f / 30.0f) * 1000.0f / anim.rate;
+
+        const unsigned elapsed = now - anim.lastUpdateTime;
+        if(elapsed < static_cast<unsigned>(intervalMs))
+            continue;
+
+        int steps = static_cast<int>(elapsed / intervalMs);
+        anim.lastUpdateTime += static_cast<unsigned>(steps * intervalMs);
+
+        int newOffset = anim.moveUp ? (anim.currentOffset + steps) % colorCount :
+                                      (anim.currentOffset - steps + colorCount * steps) % colorCount;
+        int deltaOffset = (newOffset - anim.lastAppliedOffset + colorCount) % colorCount;
+        if(deltaOffset == 0)
+            continue;
+        anim.lastAppliedOffset = newOffset;
+        anim.currentOffset = newOffset;
+
+        rotatePaletteRange(surf8->format->palette, anim.firstClr, colorCount, deltaOffset, anim.moveUp);
+        if(mapPal)
+            rotatePaletteRange(mapPal, anim.firstClr, colorCount, deltaOffset, anim.moveUp);
+        anyUpdate = true;
+    }
+
+    if(!anyUpdate)
+        return;
+
+    // Blit 8-bit tileset to 32-bit so the rotated palette takes effect in 32bpp mode
+    if(SDL_MUSTLOCK(&surf32))
+        SDL_LockSurface(&surf32);
+    if(SDL_MUSTLOCK(surf8))
+        SDL_LockSurface(surf8);
+    SDL_BlitSurface(surf8, nullptr, &surf32, nullptr);
+    if(SDL_MUSTLOCK(surf8))
+        SDL_UnlockSurface(surf8);
+    if(SDL_MUSTLOCK(&surf32))
+        SDL_UnlockSurface(&surf32);
 }
