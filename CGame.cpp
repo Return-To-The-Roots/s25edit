@@ -175,7 +175,7 @@ void CGame::LoadSettings()
 {
     const bfs::path settingsPath = RTTRCONFIG.expandPath("<RTTR_USERDATA>/s25edit.ini");
     libsiedler2::Archiv settings;
-    if(libsiedler2::Load(settingsPath, settings) != 0)
+    if(libsiedler2::load(settingsPath, settings) != 0)
         return;
     const auto* ini = dynamic_cast<const libsiedler2::ArchivItem_Ini*>(settings.find("editor"));
     if(!ini)
