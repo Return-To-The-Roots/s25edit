@@ -55,7 +55,7 @@ void CWindow::setColor(int color)
 
 bool CWindow::hasActiveInputElement()
 {
-    return helpers::contains_if(getTextFields(), [](const auto& text) { return text->isActive(); });
+    return helpers::containsIf(getTextFields(), [](const auto& text) { return text->isActive(); });
 }
 
 void CWindow::setMouseData(SDL_MouseMotionEvent motion)
@@ -65,7 +65,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     const Position titleFrameRB =
       Position(pos_.x + static_cast<int>(size_.x) - global::bmpArray[WINDOW_RIGHT_UPPER_CORNER].w - 2,
                pos_.y + global::bmpArray[WINDOW_UPPER_FRAME].h - 4);
-    if(IsPointInRect(motion.x, motion.y, Rect(titleFrameLT, Extent(titleFrameRB - titleFrameLT))))
+    if(isPointInRect(motion.x, motion.y, Rect(titleFrameLT, Extent(titleFrameRB - titleFrameLT))))
     {
         // left button was pressed while moving
         if(clicked)
@@ -134,7 +134,7 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     }
 
     // deliver mouse data to the content objects of the window (if mouse cursor is inside the window)
-    if(IsPointInRect(motion.x, motion.y, Rect(getPos(), getSize())))
+    if(isPointInRect(motion.x, motion.y, Rect(getPos(), getSize())))
     {
         // IMPORTANT: we use the left upper corner of the window as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute -
@@ -174,7 +174,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
             clicked = true;
         }
         // pressed inside the window
-        if(button.state == SDL_PRESSED && IsPointInRect(button.x, button.y, Rect(pos_, size_)))
+        if(button.state == SDL_PRESSED && isPointInRect(button.x, button.y, Rect(pos_, size_)))
             marked = true;
         // else pressed outside of the window
         else if(button.state == SDL_PRESSED)
@@ -225,7 +225,7 @@ void CWindow::setMouseData(SDL_MouseButtonEvent button)
     }
 
     // deliver mouse data to the content objects of the window (if mouse cursor is inside the window)
-    if(IsPointInRect(button.x, button.y, Rect(getPos(), getSize())))
+    if(isPointInRect(button.x, button.y, Rect(getPos(), getSize())))
     {
         // IMPORTANT: we use the left upper corner of the window as (x,y)=(0,0), so we have to manipulate
         //           the motion-structure before give it to buttons, pictures....: x_absolute - x_window, y_absolute -

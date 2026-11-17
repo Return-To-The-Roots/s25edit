@@ -72,7 +72,7 @@ void CControlContainer::setKeyboardData(const SDL_KeyboardEvent& key)
 template<class T, class U>
 bool CControlContainer::eraseElement(T& collection, const U* element)
 {
-    const auto it = helpers::find_if(collection, [element](const auto& cur) { return cur.get() == element; });
+    const auto it = helpers::findIf(collection, [element](const auto& cur) { return cur.get() == element; });
     if(it != collection.end())
     {
         collection.erase(it);
@@ -137,7 +137,7 @@ bool CControlContainer::delStaticPicture(int picId)
     if(picId < 0)
         return false;
     const auto it =
-      helpers::find_if(static_pictures, [picId](const auto& pic) { return static_cast<unsigned>(picId) == pic.id; });
+      helpers::findIf(static_pictures, [picId](const auto& pic) { return static_cast<unsigned>(picId) == pic.id; });
     if(it != static_pictures.end())
     {
         static_pictures.erase(it);

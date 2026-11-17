@@ -2867,7 +2867,7 @@ void callback::MinimapMenu(int Param)
                 Position mouse;
                 if(SDL_GetMouseState(&mouse.x, &mouse.y) & SDL_BUTTON(1))
                 {
-                    if(IsPointInRect(
+                    if(isPointInRect(
                          mouse, Rect(WNDMinimap->getPos() + Position(6, 20), WNDMinimap->getSize() - Extent(12, 30))))
                     {
                         DisplayRectangle displayRect = MapObj->getDisplayRect();

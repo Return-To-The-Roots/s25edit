@@ -173,7 +173,7 @@ void CGame::enterEditor(const boost::filesystem::path& filepath)
 
 void CGame::LoadSettings()
 {
-    const bfs::path settingsPath = RTTRCONFIG.ExpandPath("<RTTR_USERDATA>/s25edit.ini");
+    const bfs::path settingsPath = RTTRCONFIG.expandPath("<RTTR_USERDATA>/s25edit.ini");
     libsiedler2::Archiv settings;
     if(libsiedler2::Load(settingsPath, settings) != 0)
         return;
@@ -193,7 +193,7 @@ void CGame::SaveSettings() const
     ini.setValue("width", GameResolution.x);
     ini.setValue("height", GameResolution.y);
     ini.setValue("fullscreen", static_cast<int>(fullscreen));
-    const bfs::path settingsPath = RTTRCONFIG.ExpandPath("<RTTR_USERDATA>/s25edit.ini");
+    const bfs::path settingsPath = RTTRCONFIG.expandPath("<RTTR_USERDATA>/s25edit.ini");
     libsiedler2::Write(settingsPath, settings);
 }
 
@@ -306,19 +306,19 @@ int main(int argc, char* argv[])
 {
     auto programOptions = parse_cmdline_args(argc, argv);
 
-    if(!RTTRCONFIG.Init())
+    if(!RTTRCONFIG.init())
     {
         std::cerr << "Failed to init program!" << std::endl;
         WaitForEnter();
         return 1;
     }
 
-    global::gameDataFilePath = RTTRCONFIG.ExpandPath("<RTTR_GAME>");
+    global::gameDataFilePath = RTTRCONFIG.expandPath("<RTTR_GAME>");
     // Prefer application folder over user folder
-    global::userMapsPath = RTTRCONFIG.ExpandPath("WORLDS");
+    global::userMapsPath = RTTRCONFIG.expandPath("WORLDS");
     if(!checkWriteable(global::userMapsPath))
     {
-        global::userMapsPath = RTTRCONFIG.ExpandPath(s25::folders::mapsOwn);
+        global::userMapsPath = RTTRCONFIG.expandPath(s25::folders::mapsOwn);
         if(!checkWriteable(global::userMapsPath))
         {
             std::cerr << "Could not find a writable folder for maps\nCheck " << global::userMapsPath << std::endl;

@@ -175,7 +175,7 @@ bool CGame::Init()
     SDL_GL_SwapWindow(window_.get());
 
     GameDataLoader gdLoader(global::worldDesc);
-    if(!gdLoader.Load())
+    if(!gdLoader.load())
     {
         std::cerr << "Failed to load game data!" << std::endl;
         return false;

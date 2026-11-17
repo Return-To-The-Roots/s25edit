@@ -47,7 +47,7 @@ void CFont::setMouseData(SDL_MouseButtonEvent button)
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
     {
-        if(IsPointInRect(button.x, button.y, Rect(pos_, size_)))
+        if(isPointInRect(button.x, button.y, Rect(pos_, size_)))
         {
             // if mouse button is pressed ON the text
             if(button.state == SDL_PRESSED && getColor() == initialColor_)

@@ -196,7 +196,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     if(!Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window or does the user move or resize the window?
-                        if(IsPointInRect(Event->motion.x, Event->motion.y, Rect(Window->getPos(), Window->getSize()))
+                        if(isPointInRect(Event->motion.x, Event->motion.y, Rect(Window->getPos(), Window->getSize()))
                            || Window->isMoving() || Window->isResizing())
                         {
                             // Windows[i]->setActive();
@@ -274,7 +274,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     if(!Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window?
-                        if(IsPointInRect(Event->button.x, Event->button.y, Rect(Window->getPos(), Window->getSize())))
+                        if(isPointInRect(Event->button.x, Event->button.y, Rect(Window->getPos(), Window->getSize())))
                         {
                             Window->setActive();
                             Window->setPriority(highestPriority + 1);
@@ -335,7 +335,7 @@ void CGame::EventHandling(SDL_Event* Event)
                     if(!Window->isWaste() && Window->getPriority() == actualPriority)
                     {
                         // is the cursor INSIDE the window?
-                        if(IsPointInRect(Event->button.x, Event->button.y, Rect(Window->getPos(), Window->getSize())))
+                        if(isPointInRect(Event->button.x, Event->button.y, Rect(Window->getPos(), Window->getSize())))
                         {
                             // Windows[i]->setActive();
                             // Windows[i]->setPriority(highestPriority+1);

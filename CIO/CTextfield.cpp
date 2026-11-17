@@ -122,7 +122,7 @@ void CTextfield::setMouseData(SDL_MouseButtonEvent button)
         // if mouse button is pressed ON the textfield, set active=true
         if(button.state == SDL_PRESSED)
         {
-            active = IsPointInRect(button.x, button.y, Rect(getPos(), size_));
+            active = isPointInRect(button.x, button.y, Rect(getPos(), size_));
         }
     }
 }

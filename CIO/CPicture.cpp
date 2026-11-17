@@ -27,7 +27,7 @@ CPicture::CPicture(void callback(int), int clickedParam, Position pos, int pictu
 void CPicture::setMouseData(const SDL_MouseMotionEvent& motion)
 {
     // cursor is on the picture
-    if(IsPointInRect(motion.x, motion.y, Rect(pos_, size_)))
+    if(isPointInRect(motion.x, motion.y, Rect(pos_, size_)))
     {
         if(motion.state == SDL_RELEASED)
         {
@@ -50,7 +50,7 @@ void CPicture::setMouseData(const SDL_MouseButtonEvent& button)
     if(button.button == SDL_BUTTON_LEFT)
     {
         // if mouse button is pressed ON the button, set marked=true
-        if(button.state == SDL_PRESSED && IsPointInRect(button.x, button.y, Rect(pos_, size_)))
+        if(button.state == SDL_PRESSED && isPointInRect(button.x, button.y, Rect(pos_, size_)))
         {
             marked = true;
             clicked = true;
