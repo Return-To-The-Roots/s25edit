@@ -12,6 +12,7 @@
 #include "globals.h"
 #include "s25util/file_handle.h"
 #include <libsiedler2/ArchivItem_Ini.h>
+#include <libsiedler2/ErrorCodes.h>
 #include <libsiedler2/libsiedler2.h>
 #include <glad/glad.h>
 #include <boost/filesystem.hpp>
@@ -194,7 +195,17 @@ void CGame::SaveSettings() const
     ini.setValue("height", GameResolution.y);
     ini.setValue("fullscreen", static_cast<int>(fullscreen));
     const bfs::path settingsPath = RTTRCONFIG.expandPath("<RTTR_USERDATA>/s25edit.ini");
-    libsiedler2::Write(settingsPath, settings);
+    // The user data directory does not exist if the game was never started
+    boost::system::error_code ec;
+    bfs::create_directories(settingsPath.parent_path(), ec);
+    if(ec)
+    {
+        std::cerr << "Could not create directory " << settingsPath.parent_path() << ": " << ec.message() << std::endl;
+        return;
+    }
+    if(const int result = libsiedler2::Write(settingsPath, settings))
+        std::cerr << "Could not save settings to " << settingsPath << ": " << libsiedler2::getErrorString(result)
+                  << std::endl;
 }
 
 void CGame::GameLoop()
