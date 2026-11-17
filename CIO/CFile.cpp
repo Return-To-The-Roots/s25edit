@@ -1014,7 +1014,7 @@ bool CFile::read_bob02(FILE* fp)
     if((bmpArray->surface = makePalSurface(bmpArray->w, bmpArray->h, palActual->colors)) == nullptr)
         return false;
     SDL_SetColorKey(bmpArray->surface.get(), SDL_TRUE, SDL_MapRGB(bmpArray->surface->format, 0, 0, 0));
-    // SDL_SetAlpha(bmpArray->surface, SDL_SRCALPHA, 128);
+    // SDL_setAlpha(bmpArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
     for(Position pos{0, 0}; pos.y < bmpArray->h; pos.y++)
@@ -1314,7 +1314,7 @@ bool CFile::read_bob07(FILE* fp)
     // now we are ready to read the picture lines and fill the surface, so lets create one
     if((shadowArray->surface = makePalSurface(shadowArray->w, shadowArray->h, palActual->colors)) == nullptr)
         return false;
-    // SDL_SetAlpha(shadowArray->surface, SDL_SRCALPHA, 128);
+    // SDL_setAlpha(shadowArray->surface, SDL_SRCALPHA, 128);
 
     // main loop for reading picture lines
     for(Position pos{0, 0}; pos.y < shadowArray->h; pos.y++)

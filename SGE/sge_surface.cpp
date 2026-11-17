@@ -562,7 +562,7 @@ int sge_BlitTransparent(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16
 
 //==================================================================================
 // Blit from one surface to another (not touching alpha or color key -
-// use SDL_SetColorKey and SDL_SetAlpha)
+// use SDL_SetColorKey and SDL_setAlpha)
 //==================================================================================
 int sge_Blit(SDL_Surface* Src, SDL_Surface* Dest, Sint16 SrcX, Sint16 SrcY, Sint16 DestX, Sint16 DestY, Sint16 W,
              Sint16 H)
