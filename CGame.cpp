@@ -204,8 +204,10 @@ void CGame::SaveSettings() const
         return;
     }
     if(const int result = libsiedler2::Write(settingsPath, settings))
+    {
         std::cerr << "Could not save settings to " << settingsPath << ": " << libsiedler2::getErrorString(result)
                   << std::endl;
+    }
 }
 
 void CGame::GameLoop()
