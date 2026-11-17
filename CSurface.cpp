@@ -18,7 +18,7 @@
 
 // Disable SGE's internal surface locking once at startup; terrain drawing is
 // the only remaining consumer of SGE functions and the caller already handles
-// locking. Was originally called in CGame::Init().
+// locking. Was originally called in CGame::init().
 static bool sgeLockOff = (sge_Lock_OFF(), true);
 
 namespace {

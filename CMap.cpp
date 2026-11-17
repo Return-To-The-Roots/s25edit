@@ -2010,7 +2010,7 @@ void CMap::modifyBuild(Position pos)
         mapVertices[i] = &map->getVertex(tempVertices[i]);
 
     // Determine building quality from terrain following s25client's BQCalculator:
-    // Check the 6 terrain triangles around the point (same layout as World::GetTerrainsAround):
+    // Check the 6 terrain triangles around the point (same layout as World::getTerrainsAround):
     //   {nwNode.t1, nwNode.t2, neNode.t1, curNode.t2, curNode.t1, wNode.t2}
     // where t1 = rsuTexture, t2 = usdTexture
     int buildingHits = 0, mineHits = 0, flagHits = 0;
