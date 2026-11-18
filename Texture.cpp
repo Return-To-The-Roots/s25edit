@@ -12,7 +12,9 @@
 
 Texture::~Texture()
 {
-    if(texture_)
+    // The texture only lives as long as the GL context. If the context is gone, it already freed
+    // the texture, and calling GL then would segfault.
+    if(texture_ && SDL_GL_GetCurrentContext())
         glDeleteTextures(1, &texture_);
 }
 
