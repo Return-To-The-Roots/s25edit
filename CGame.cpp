@@ -203,7 +203,7 @@ void CGame::SaveSettings() const
         std::cerr << "Could not create directory " << settingsPath.parent_path() << ": " << ec.message() << std::endl;
         return;
     }
-    if(const int result = libsiedler2::Write(settingsPath, settings))
+    if(const int result = libsiedler2::write(settingsPath, settings))
     {
         std::cerr << "Could not save settings to " << settingsPath << ": " << libsiedler2::getErrorString(result)
                   << std::endl;
