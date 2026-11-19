@@ -40,16 +40,15 @@ void CFont::setText(std::string text)
     size_ = Extent(getTextWidth(string_, fontsize_), getLineHeight(fontsize_));
 }
 
-void CFont::setMouseData(SDL_MouseButtonEvent button)
+void CFont::setMouseData(SDL_MouseButtonEvent button, const Rect& clickArea)
 {
     if(!callback)
         return;
     // left button is pressed
     if(button.button == SDL_BUTTON_LEFT)
     {
-        if(isPointInRect(button.x, button.y, Rect(pos_, size_)))
+        if(isPointInRect(button.x, button.y, clickArea))
         {
-            // if mouse button is pressed ON the text
             if(button.state == SDL_PRESSED && getColor() == initialColor_)
             {
                 const auto tmpInitialColor = initialColor_;

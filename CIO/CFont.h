@@ -45,7 +45,9 @@ public:
         callback = nullptr;
         clickedParam = 0;
     }
-    void setMouseData(SDL_MouseButtonEvent button);
+    void setMouseData(SDL_MouseButtonEvent button) { setMouseData(button, Rect(pos_, size_)); }
+    /// Handle a click with a custom clickable area (e.g. a whole row), in the same coordinates as the position
+    void setMouseData(SDL_MouseButtonEvent button, const Rect& clickArea);
 
     /// Draw this font's text at the given absolute position
     void draw(Position parentOrigin) const;

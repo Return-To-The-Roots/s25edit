@@ -61,6 +61,7 @@ public:
     void setTitle(const char* title);
     void setMouseData(SDL_MouseMotionEvent motion) final;
     void setMouseData(SDL_MouseButtonEvent button) final;
+    void setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mousePos) final;
     void setActive()
     {
         active = true;

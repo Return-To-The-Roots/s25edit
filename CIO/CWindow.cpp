@@ -145,6 +145,12 @@ void CWindow::setMouseData(SDL_MouseMotionEvent motion)
     }
 }
 
+void CWindow::setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mousePos)
+{
+    if(!minimized)
+        CControlContainer::setMouseWheel(wheel, mousePos);
+}
+
 void CWindow::setMouseData(SDL_MouseButtonEvent button)
 {
     // at first check if the right mouse button was pressed, cause in this case we will close the window
