@@ -55,6 +55,8 @@ void CGame::Render()
     // render the map if active
     if(MapObj && MapObj->isActive())
     {
+        if(MapObj->getMap())
+            CSurface::UpdatePaletteAnimations(MapObj->getMap()->type);
         if(auto* mapSurf = MapObj->getSurface())
         {
             std::array<char, 100> textBuffer;
