@@ -75,6 +75,7 @@ public:
     virtual void setMouseData(SDL_MouseMotionEvent motion);
     virtual void setMouseData(SDL_MouseButtonEvent button);
     void setKeyboardData(const SDL_KeyboardEvent& key);
+    virtual void setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mousePos);
     void setWaste() { waste = true; }
     bool isWaste() const { return waste; }
     // Methods

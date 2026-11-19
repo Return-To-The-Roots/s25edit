@@ -61,6 +61,12 @@ void CControlContainer::setMouseData(const SDL_MouseButtonEvent button)
     }
 }
 
+void CControlContainer::setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mousePos)
+{
+    for(const auto& selectbox : selectboxes)
+        selectbox->setMouseWheel(wheel, mousePos);
+}
+
 void CControlContainer::setKeyboardData(const SDL_KeyboardEvent& key)
 {
     for(const auto& textfield : textfields)

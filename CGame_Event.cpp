@@ -380,6 +380,29 @@ void CGame::EventHandling(SDL_Event* Event)
             break;
         }
 
+        case SDL_MOUSEWHEEL:
+        {
+            CWindow* wndAtCursor = nullptr;
+            for(auto& Window : Windows)
+            {
+                if(!Window->isWaste() && isPointInRect(Cursor.pos, Window->getRect())
+                   && (!wndAtCursor || Window->getPriority() > wndAtCursor->getPriority()))
+                    wndAtCursor = Window.get();
+            }
+            if(wndAtCursor)
+            {
+                // Positions of the controls are relative to the window
+                wndAtCursor->setMouseWheel(Event->wheel, Cursor.pos - wndAtCursor->getPos());
+                break;
+            }
+            for(auto& Menu : Menus)
+            {
+                if(Menu->isActive() && !Menu->isWaste())
+                    Menu->setMouseWheel(Event->wheel, Cursor.pos);
+            }
+            break;
+        }
+
         case SDL_WINDOWEVENT:
         {
             if(Event->window.event == SDL_WINDOWEVENT_RESIZED)

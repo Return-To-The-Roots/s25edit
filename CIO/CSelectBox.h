@@ -18,6 +18,13 @@ class CSelectBox
     friend class CDebug;
 
 private:
+    /// Width and height of the scroll buttons, also the width of the scrollbar
+    static constexpr int scrollButtonSize = 20;
+    /// Distance of the entries from the left and top border
+    static constexpr int textPadding = 10;
+    /// Minimum height of the scrollbar slider, so it stays grabbable with many entries
+    static constexpr int minSliderHeight = scrollButtonSize;
+
     std::vector<std::unique_ptr<CFont>> Entries;
     Position pos_;
     Extent size_;
@@ -27,7 +34,34 @@ private:
     FontColor text_color;
     std::unique_ptr<CButton> ScrollUpButton;
     std::unique_ptr<CButton> ScrollDownButton;
-    Uint16 last_text_pos_y = 10;
+    bool scrollUpButtonPressed_ = false;
+    bool scrollDownButtonPressed_ = false;
+    int scrollPos_ = 0; ///< Index of the first visible entry
+    // Scrollbar slider between the scroll buttons
+    bool sliderDragging_ = false;
+    int sliderPos_ = 0; ///< Position of the slider in the track while dragging
+    int dragStartSliderPos_ = 0;
+    int dragStartScrollPos_ = 0;
+    int dragStartMouseY_ = 0;
+
+    /// Number of fully visible entries
+    int getPageSize() const;
+    bool isEntryVisible(int index) const;
+    /// Largest valid scroll position, i.e. the index of the first visible entry when scrolled to the bottom
+    int getMaxScrollPos() const;
+    bool hasScrollbar() const;
+    /// Area between the scroll buttons, relative to the select box
+    Rect getScrollTrack() const;
+    /// Height of the slider: Proportional to the visible part of the entries, but at least minSliderHeight
+    int getSliderHeight() const;
+    /// Slider offset (from the track top) when the slider is at the bottom of the track
+    int getMaxSliderPos() const;
+    /// Slider offset (from the track top) for the current scroll position.
+    int getSliderPosFromScroll() const;
+    /// Clamp a slider offset (from the track top) so the slider stays within the track
+    int clampSliderPos(int sliderPos) const;
+    /// Pass the event (relative to the select box) to the entries, only the visible ones are clickable
+    void setEntriesMouseData(const SDL_MouseButtonEvent& button);
 
 public:
     CSelectBox(Position pos, Extent size, FontSize fontsize = FontSize::Large, FontColor text_color = FontColor::Yellow,
@@ -36,6 +70,9 @@ public:
     Extent getSize() const { return size_; }
     void setMouseData(SDL_MouseButtonEvent button);
     void setMouseData(SDL_MouseMotionEvent motion);
+    void setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mousePos);
+    /// Scroll by lineDelta entries (negative = up), clamped to the valid range
+    void scrollBy(int lineDelta);
     void draw(Position parentOrigin);
     void setColor(int color);
     void setTextColor(FontColor color) { text_color = color; }
