@@ -385,7 +385,7 @@ void CGame::EventHandling(SDL_Event* Event)
             CWindow* wndAtCursor = nullptr;
             for(auto& Window : Windows)
             {
-                if(!Window->isWaste() && isPointInRect(Cursor.pos, Rect(Window->getPos(), Window->getSize()))
+                if(!Window->isWaste() && isPointInRect(Cursor.pos, Window->getRect())
                    && (!wndAtCursor || Window->getPriority() > wndAtCursor->getPriority()))
                     wndAtCursor = Window.get();
             }

@@ -46,7 +46,7 @@ public:
         clickedParam = 0;
     }
     void setMouseData(SDL_MouseButtonEvent button) { setMouseData(button, Rect(pos_, size_)); }
-    /// Handle a click with a custom clickable area (e.g. a whole row), in the same coordinates as the position
+    /// Handle a click in a custom clickable area (e.g. a full row), in the same coordinate system as pos_
     void setMouseData(SDL_MouseButtonEvent button, const Rect& clickArea);
 
     /// Draw this font's text at the given absolute position

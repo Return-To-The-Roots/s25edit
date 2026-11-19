@@ -35,6 +35,7 @@ public:
     int getY() const { return pos_.y; };
     Position getPos() const { return pos_; }
     Extent getSize() const { return size_; };
+    Rect getRect() const { return Rect(pos_, size_); }
     void setX(int x) { pos_.x = x; };
     void setY(int y) { pos_.y = y; };
     void setButtonPicture(int picture);

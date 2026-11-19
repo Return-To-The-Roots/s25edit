@@ -12,6 +12,7 @@
 #include "CollisionDetection.h"
 #include <glad/glad.h>
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 
 CSelectBox::CSelectBox(Position pos, Extent size, FontSize fontsize, FontColor text_color, int bg_color)
@@ -91,11 +92,15 @@ bool CSelectBox::isEntryVisible(int index) const
     return index >= scrollPos_ && index < scrollPos_ + getPageSize();
 }
 
-void CSelectBox::scroll(int lines)
+int CSelectBox::getMaxScrollPos() const
+{
+    return std::max(0, static_cast<int>(Entries.size()) - getPageSize());
+}
+
+void CSelectBox::scrollBy(int lineDelta)
 {
     const auto rowHeight = static_cast<int>(getLineHeight(fontsize));
-    const int maxScrollPos = std::max(0, static_cast<int>(Entries.size()) - getPageSize());
-    const int newScrollPos = std::clamp(scrollPos_ + lines, 0, maxScrollPos);
+    const int newScrollPos = std::clamp(scrollPos_ + lineDelta, 0, getMaxScrollPos());
     const int offset = (scrollPos_ - newScrollPos) * rowHeight;
     scrollPos_ = newScrollPos;
     for(auto& entry : Entries)
@@ -116,23 +121,29 @@ Rect CSelectBox::getScrollTrack() const
 
 int CSelectBox::getSliderHeight() const
 {
-    const int range = static_cast<int>(Entries.size());
-    return std::max(1, static_cast<int>(getScrollTrack().getSize().y) * getPageSize() / range);
+    assert(!Entries.empty());
+    const int trackHeight = static_cast<int>(getScrollTrack().getSize().y);
+    const int proportionalHeight = trackHeight * getPageSize() / static_cast<int>(Entries.size());
+    return std::min(trackHeight, std::max(minSliderHeight, proportionalHeight));
+}
+
+int CSelectBox::getMaxSliderPos() const
+{
+    return std::max(0, static_cast<int>(getScrollTrack().getSize().y) - getSliderHeight());
 }
 
 int CSelectBox::getSliderPosFromScroll() const
 {
-    const int range = static_cast<int>(Entries.size());
-    const int trackHeight = static_cast<int>(getScrollTrack().getSize().y);
-    if(scrollPos_ + getPageSize() >= range)
-        return trackHeight - getSliderHeight();
-    return trackHeight * scrollPos_ / range;
+    // Map the scroll range onto the slider range, so the slider reaches both ends of the track exactly
+    const int maxScrollPos = getMaxScrollPos();
+    if(maxScrollPos == 0)
+        return 0;
+    return getMaxSliderPos() * scrollPos_ / maxScrollPos;
 }
 
 int CSelectBox::clampSliderPos(int sliderPos) const
 {
-    const int maxSliderPos = static_cast<int>(getScrollTrack().getSize().y) - getSliderHeight();
-    return std::clamp(sliderPos, 0, std::max(0, maxSliderPos));
+    return std::clamp(sliderPos, 0, getMaxSliderPos());
 }
 
 void CSelectBox::setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mousePos)
@@ -140,7 +151,7 @@ void CSelectBox::setMouseWheel(const SDL_MouseWheelEvent& wheel, Position mouseP
     if(!isPointInRect(mousePos, Rect(pos_, size_)))
         return;
     const int lines = (wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? wheel.y : -wheel.y;
-    scroll(lines);
+    scrollBy(lines);
 }
 
 void CSelectBox::setMouseData(SDL_MouseMotionEvent motion)
@@ -157,10 +168,13 @@ void CSelectBox::setMouseData(SDL_MouseMotionEvent motion)
         sliderPos_ = clampSliderPos(dragStartSliderPos_ + dy);
         // Derive the scroll position from the distance moved since grabbing the slider. Converting the slider position
         // back and forth would lose a line due to rounding as soon as the slider is grabbed.
-        const int trackHeight = std::max(1, static_cast<int>(getScrollTrack().getSize().y));
-        const auto lines =
-          static_cast<int>(std::lround(static_cast<double>(dy) * static_cast<double>(Entries.size()) / trackHeight));
-        scroll(dragStartScrollPos_ + lines - scrollPos_);
+        const int maxSliderPos = getMaxSliderPos();
+        if(maxSliderPos > 0)
+        {
+            const auto lines = static_cast<int>(
+              std::lround(static_cast<double>(dy) * static_cast<double>(getMaxScrollPos()) / maxSliderPos));
+            scrollBy(dragStartScrollPos_ + lines - scrollPos_);
+        }
     }
     if(!hasScrollbar())
         return;
@@ -191,9 +205,7 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
     button.y -= pos_.y;
     const Position mousePos(button.x, button.y);
     const bool scrollbar = hasScrollbar();
-    const auto isOnButton = [mousePos](const CButton& btn) {
-        return isPointInRect(mousePos, Rect(btn.getPos(), btn.getSize()));
-    };
+    const auto isOnButton = [mousePos](const CButton& btn) { return isPointInRect(mousePos, btn.getRect()); };
 
     if(button.state == SDL_PRESSED)
     {
@@ -210,9 +222,9 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
                 dragStartMouseY_ = mousePos.y;
             } else
             {
-                // Clicked above/below the slider -> Move half a slider height, i.e. half a page, up/down
+                // Above/below the slider: scroll up/down by half a page
                 const int halfPage = std::max(1, getPageSize() / 2);
-                scroll(y < sliderPos ? -halfPage : halfPage);
+                scrollBy(y < sliderPos ? -halfPage : halfPage);
             }
             return;
         }
@@ -222,9 +234,9 @@ void CSelectBox::setMouseData(SDL_MouseButtonEvent button)
     {
         sliderDragging_ = false;
         if(scrollUpButtonPressed_ && isOnButton(*ScrollUpButton))
-            scroll(-1);
+            scrollBy(-1);
         else if(scrollDownButtonPressed_ && isOnButton(*ScrollDownButton))
-            scroll(1);
+            scrollBy(1);
         scrollUpButtonPressed_ = scrollDownButtonPressed_ = false;
     }
 
@@ -246,9 +258,8 @@ void CSelectBox::setSize(Extent size)
         ScrollUpButton->setX(scrollButtonX);
         ScrollDownButton->setX(scrollButtonX);
         ScrollDownButton->setY(static_cast<int>(size_.y) - 1 - scrollButtonSize);
-        // scroll() keeps the scroll position in the valid range, so scrolling by 0 lines only corrects it for the new
-        // number of visible entries. E.g. a taller box can't stay scrolled as far down, else rows would stay empty.
-        scroll(0);
+        // Re-clamp the scroll position to the new page size (a taller box may not stay scrolled as far down)
+        scrollBy(0);
     }
 }
 
@@ -290,12 +301,16 @@ void CSelectBox::draw(Position parentOrigin)
     if(hasScrollbar())
     {
         const Rect track = getScrollTrack();
-        drawButtonBox(Rect(absPos + track.getOrigin(), track.getSize()), true, BUTTON_GREY_BACKGROUND,
-                      BUTTON_GREY_DARK);
-        const int sliderPos = sliderDragging_ ? sliderPos_ : getSliderPosFromScroll();
-        drawButtonBox(Rect(absPos + track.getOrigin() + Position(0, sliderPos),
-                           Extent(track.getSize().x, static_cast<unsigned>(getSliderHeight()))),
-                      false, BUTTON_GREY_BACKGROUND, BUTTON_GREY_DARK);
+        // Skip drawing the track and the slider if the track is shorter than the minimum slider height
+        if(static_cast<int>(track.getSize().y) >= minSliderHeight)
+        {
+            drawButtonBox(Rect(absPos + track.getOrigin(), track.getSize()), true, BUTTON_GREY_BACKGROUND,
+                          BUTTON_GREY_DARK);
+            const int sliderPos = sliderDragging_ ? sliderPos_ : getSliderPosFromScroll();
+            drawButtonBox(Rect(absPos + track.getOrigin() + Position(0, sliderPos),
+                               Extent(track.getSize().x, static_cast<unsigned>(getSliderHeight()))),
+                          false, BUTTON_GREY_BACKGROUND, BUTTON_GREY_DARK);
+        }
         ScrollUpButton->draw(absPos);
         ScrollDownButton->draw(absPos);
     }
