@@ -69,6 +69,13 @@ void bobMAP::updateVertexCoords()
     }
 }
 
+Point32 bobMAP::nearestCopy(Point32 pos, Point32 ref) const
+{
+    const Point32 size(width_pixel, height_pixel);
+    const Point32 offset = ref - pos + size / 2;
+    return pos + Point32(floorDiv(offset.x, size.x), floorDiv(offset.y, size.y)) * size;
+}
+
 CMap::CMap(const boost::filesystem::path& filepath)
 {
     constructMap(filepath);
@@ -147,7 +154,6 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
     RenderBuildHelp = false;
     RenderBorders = true;
     BitsPerPixel = 32;
-    MouseBlit = correctMouseBlit(Vertex_);
     ChangeSection_ = 1;
     lastChangeSection = ChangeSection_;
     ChangeSectionHexagonMode = true;
@@ -349,7 +355,6 @@ void CMap::rotateMap()
 
     // reset mouse and view position to prevent failures
     Vertex_ = {12, 12};
-    MouseBlit = correctMouseBlit(Vertex_);
     calculateVertices();
     displayRect.left = 0;
     displayRect.top = 0;
@@ -477,17 +482,7 @@ void CMap::unloadMapPics()
 
 void CMap::moveMap(Position offset)
 {
-    displayRect.setOrigin(displayRect.getOrigin() + offset);
-    // reset coords of displayRects when end of map is reached
-    if(displayRect.left >= map->width_pixel)
-        displayRect.move(Position(-map->width_pixel, 0));
-    else if(displayRect.left <= -static_cast<int>(displayRect.getSize().x))
-        displayRect.setOrigin(Position(map->width_pixel - displayRect.getSize().x, displayRect.top));
-
-    if(displayRect.top >= map->height_pixel)
-        displayRect.move(Position(0, -map->height_pixel));
-    else if(displayRect.top <= -static_cast<int>(displayRect.getSize().y))
-        displayRect.setOrigin(Position(displayRect.left, map->height_pixel - displayRect.getSize().y));
+    displayRect.move(offset);
 }
 
 void CMap::setMouseData(const SDL_MouseMotionEvent& motion)
@@ -983,84 +978,49 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
     }
 }
 
-namespace {
-constexpr int positiveModulo(int value, int divisor)
-{
-    // C++ % can be negative for negative inputs; this always returns [0, divisor-1]
-    return ((value % divisor) + divisor) % divisor;
-}
-} // namespace
-
 void CMap::storeVerticesFromMouse(Position mousePos, Uint8 /*MouseState*/)
 {
     // if user raises or reduces the height of a vertex, don't let the cursor jump to another vertex
     // if ( (MouseState == SDL_PRESSED) && (mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE) )
     // return;
 
-    int X = 0, Xeven = 0, Xodd = 0;
+    int X = 0, xInOddRows = 0, xInEvenRows = 0;
     int Y = 0, MousePosY = 0;
 
-    // get X
-    // following out commented lines are the correct ones, but for tolerance (to prevent to early jumps of the cursor)
-    // we subtract "triangleWidth/2"  Xeven = (mousePos.x + displayRect.left) / triangleWidth;
-    Xeven = positiveModulo((mousePos.x + displayRect.left - triangleWidth / 2) / triangleWidth, map->width);
-    // Add rows are already shifted by triangleWidth / 2
-    Xodd = positiveModulo((mousePos.x + displayRect.left) / triangleWidth, map->width - 1);
+    lastMousePos_ = mousePos;
+
+    // Columns of the nearest vertex in odd and even rows (odd rows are shifted by half a triangle to the right)
+    // Important: Divide AFTER positiveModulo, because dividing a negative value rounds towards 0 instead of down.
+    xInOddRows = positiveModulo(mousePos.x + displayRect.left - triangleWidth / 2, map->width_pixel) / triangleWidth;
+    xInEvenRows = positiveModulo(mousePos.x + displayRect.left, map->width_pixel) / triangleWidth;
 
     MousePosY = positiveModulo(mousePos.y + displayRect.top, map->height_pixel);
 
-    // get Y
-    for(int j = 0; j < map->height; j++)
+    // Lowering/raising terrain moves the last/first rows of the map copy above/below over the map edge: Check them too.
+    const int loweredTolerance = triangleIncrease * 0x0A;
+    for(int row = floorDiv(-loweredTolerance, triangleHeight) - 1;; row++)
     {
-        if(j % 2 == 0)
+        const int mapRow = positiveModulo(row, map->height);
+        const int column = mapRow % 2 == 0 ? xInEvenRows : xInOddRows;
+        const int vertexY = map->getVertex(column, mapRow).y + floorDiv(row, map->height) * map->height_pixel;
+        // At most half a row below this vertex: The next row is not closer
+        if(MousePosY - triangleHeight / 2 <= vertexY)
         {
-            // subtract "triangleHeight/2" is for tolerance, we did the same for X
-            if((MousePosY - triangleHeight / 2) > map->getVertex(Xeven, j).y)
-                Y++;
-            else
-            {
-                X = Xodd;
-                break;
-            }
-        } else
-        {
-            if((MousePosY - triangleHeight / 2) > map->getVertex(Xodd, j).y)
-                Y++;
-            else
-            {
-                X = Xeven;
-                break;
-            }
+            X = column;
+            Y = mapRow;
+            break;
         }
-    }
-    if(Y >= map->height)
-    {
-        Y -= map->height;
-        X = Y % 2 == 0 ? Xeven : Xodd;
     }
 
     Vertex_ = {X, Y};
 
-    MouseBlit = correctMouseBlit(Vertex_);
-
     calculateVertices();
 }
 
-Position CMap::correctMouseBlit(Position vertexPos) const
+Position CMap::vertexScreenPos(Position vertexPos) const
 {
     const auto& vertex = map->getVertex(vertexPos);
-    Position newBlit(vertex.x, vertex.y);
-    if(newBlit.x < displayRect.left)
-        newBlit.x += map->width_pixel;
-    else if(newBlit.x > displayRect.right)
-        newBlit.x -= map->width_pixel;
-    if(newBlit.y < displayRect.top)
-        newBlit.y += map->height_pixel;
-    else if(newBlit.y > displayRect.bottom)
-        newBlit.y -= map->height_pixel;
-    newBlit -= displayRect.getOrigin();
-
-    return newBlit;
+    return map->nearestCopy(Position(vertex.x, vertex.y) - displayRect.getOrigin(), lastMousePos_);
 }
 
 void CMap::render()
@@ -1071,6 +1031,9 @@ void CMap::render()
         displayRect.setSize(global::s2->GameResolution);
         Surf_Map.reset();
     }
+    // Move the view back into the map: As the map repeats, moving it by whole map sizes shows the same.
+    displayRect.setOrigin(
+      Position(positiveModulo(displayRect.left, map->width_pixel), positiveModulo(displayRect.top, map->height_pixel)));
 
     // if we need a new surface
     if(!Surf_Map)
@@ -1114,13 +1077,15 @@ void CMap::render()
         case EDITOR_MODE_ANIMAL: symbol_index = CURSOR_SYMBOL_ANIMAL; break;
         default: symbol_index = CURSOR_SYMBOL_ARROW_UP; break;
     }
+    // Positioned at draw time so that the symbols move with vertices being raised or lowered
     for(int i = 0; i < VertexCounter; i++)
     {
         if(Vertices[i].active)
         {
-            CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, Vertices[i].blit - Position::all(10));
+            const Position pos = vertexScreenPos(Vertices[i]);
+            CSurface::Draw(Surf_Map, global::bmpArray[symbol_index].surface, pos - Position::all(10));
             if(symbol_index2 >= 0)
-                CSurface::Draw(Surf_Map, global::bmpArray[symbol_index2].surface, Vertices[i].blit - Position(0, 7));
+                CSurface::Draw(Surf_Map, global::bmpArray[symbol_index2].surface, pos - Position(0, 7));
         }
     }
 
@@ -2351,7 +2316,6 @@ void CMap::calculateVertices()
                     Vertices[index].y += map->height;
                 else if(Vertices[index].y >= map->height)
                     Vertices[index].y -= map->height;
-                Vertices[index].blit = correctMouseBlit(Vertices[index]);
             }
         } else
         {
@@ -2366,7 +2330,6 @@ void CMap::calculateVertices()
                     Vertices[index].y += map->height;
                 else if(Vertices[index].y >= map->height)
                     Vertices[index].y -= map->height;
-                Vertices[index].blit = correctMouseBlit(Vertices[index]);
             }
         }
     }
