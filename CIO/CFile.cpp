@@ -817,7 +817,7 @@ bool CFile::save_wld(FILE* fp, void* data)
     {
         for(int i = 0; i < myMap->width; i++)
         {
-            temp = myMap->getVertex(i, j).z / 5 + 0x0A; //-V807
+            temp = myMap->getVertex(i, j).h; //-V807
             libendian::write(&temp, 1, fp);
         }
     }
