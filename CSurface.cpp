@@ -300,8 +300,8 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
         }
     }
     // Vertices are moved up by raised and down by lowered terrain
-    const int raisedTolerance = triangleIncrease * std::max(0, maxH - 0x0A);
-    const int loweredTolerance = triangleIncrease * 0x0A;
+    const int raisedTolerance = triangleIncrease * std::max(0, maxH - GROUND_VERTEX_HEIGHT);
+    const int loweredTolerance = triangleIncrease * GROUND_VERTEX_HEIGHT;
 
     // Vertices outside the map are the ones of the neighboring map copy
     const auto vertex = [&](int x, int y) {
@@ -323,8 +323,9 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
 
         for(int y = rowStart; y <= rowEnd; y++)
         {
-            // Odd rows are shifted right by half a triangle
-            const int shift = positiveModulo(y, height) % 2;
+            // The two vertices below vertex x are in columns x - 1 and x if this row is even, x and x + 1 if it is odd,
+            // because even rows are shifted half a triangle to the left
+            const int shift = positiveModulo(y, 2);
             for(int x = colStart; x <= colEnd; x++)
             {
                 // RightSideUp

@@ -131,6 +131,11 @@ struct MapHeaderItem
     Uint16 y;
     Uint32 area; // number of vertices this area has
 };
+
+/// Range of the vertex heights and the height of flat ground
+constexpr Uint8 MIN_VERTEX_HEIGHT = 0x00;
+constexpr Uint8 GROUND_VERTEX_HEIGHT = 0x0A;
+constexpr Uint8 MAX_VERTEX_HEIGHT = 0x3C;
 // point structure
 struct MapNode
 {

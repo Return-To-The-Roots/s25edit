@@ -13,37 +13,57 @@
 #include "globals.h"
 
 namespace {
-bool tryZoom(Position deltaTriangle, int deltaInc, CMap* mapObj)
+enum class ZoomDirection
 {
-    if(!mapObj || !mapObj->getMap())
-        return false;
-    const int newInc = triangleIncrease + deltaInc;
-    if(newInc < 1 || newInc > 10)
-        return false;
+    In,
+    Out
+};
+
+/// Set the zoom and keep the map point under the cursor in place
+void setZoom(CMap& mapObj, Position cursorPos, int width, int height, int increase)
+{
+    const Position vertex(mapObj.getVertexX(), mapObj.getVertexY());
+    const PointF mousePos(cursorPos);
+    const PointF oldVertexPos(mapObj.vertexScreenPos(vertex));
+    const PointF oldTriSize(triangleWidth, triangleHeight);
 
     callback::PleaseWait(INITIALIZING_CALL);
-    triangleWidth += deltaTriangle.x;
-    triangleHeight += deltaTriangle.y;
-    triangleIncrease += deltaInc;
-    bobMAP* myMap = mapObj->getMap();
+    triangleWidth = width;
+    triangleHeight = height;
+    triangleIncrease = increase;
+    bobMAP* myMap = mapObj.getMap();
     myMap->updateVertexCoords();
     CSurface::get_nodeVectors(*myMap);
     callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-    return true;
+
+    // The vertex under the cursor moves with the zoomed terrain height,
+    // the distance from the cursor to that vertex grows or shrinks with the triangles.
+    const PointF ratio = PointF(triangleWidth, triangleHeight) / oldTriSize;
+    const PointF newPointPos = PointF(mapObj.vertexScreenPos(vertex)) + (mousePos - oldVertexPos) * ratio;
+    DisplayRectangle dr = mapObj.getDisplayRect();
+    dr.setOrigin(dr.getOrigin() + Position(newPointPos - mousePos));
+    mapObj.setDisplayRect(dr);
 }
 
-void resetZoom(CMap* mapObj)
+/// Zoom one step in the given direction around the cursor, unless the zoom limit is reached
+void tryZoom(ZoomDirection zoomDirection, CMap* mapObj, Position cursorPos)
 {
     if(!mapObj || !mapObj->getMap())
         return;
-    callback::PleaseWait(INITIALIZING_CALL);
-    triangleWidth = TRIANGLE_WIDTH_DEFAULT;
-    triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
-    triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
-    bobMAP* myMap = mapObj->getMap();
-    myMap->updateVertexCoords();
-    CSurface::get_nodeVectors(*myMap);
-    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+    const int direction = (zoomDirection == ZoomDirection::In) ? 1 : -1;
+    const int newInc = triangleIncrease + direction * ZOOM_STEP_INCREASE;
+    if(newInc < ZOOM_INCREASE_MIN || newInc > ZOOM_INCREASE_MAX)
+        return;
+    setZoom(*mapObj, cursorPos, triangleWidth + direction * ZOOM_STEP_WIDTH,
+            triangleHeight + direction * ZOOM_STEP_HEIGHT, newInc);
+}
+
+/// Go back to the default zoom around the cursor
+void resetZoom(CMap* mapObj, Position cursorPos)
+{
+    if(!mapObj || !mapObj->getMap())
+        return;
+    setZoom(*mapObj, cursorPos, TRIANGLE_WIDTH_DEFAULT, TRIANGLE_HEIGHT_DEFAULT, TRIANGLE_INCREASE_DEFAULT);
 }
 } // namespace
 
@@ -120,13 +140,9 @@ void CGame::EventHandling(SDL_Event* Event)
                     break;
 #endif
                 // F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
-                case SDLK_F5:
-                    tryZoom(Position(ZOOM_STEP_WIDTH, ZOOM_STEP_HEIGHT), ZOOM_STEP_INCREASE, MapObj.get());
-                    break;
-                case SDLK_F6: resetZoom(MapObj.get()); break;
-                case SDLK_F7:
-                    tryZoom(Position(-ZOOM_STEP_WIDTH, -ZOOM_STEP_HEIGHT), -ZOOM_STEP_INCREASE, MapObj.get());
-                    break;
+                case SDLK_F5: tryZoom(ZoomDirection::In, MapObj.get(), Cursor.pos); break;
+                case SDLK_F6: resetZoom(MapObj.get(), Cursor.pos); break;
+                case SDLK_F7: tryZoom(ZoomDirection::Out, MapObj.get(), Cursor.pos); break;
 
                 default: break;
             }
@@ -405,26 +421,7 @@ void CGame::EventHandling(SDL_Event* Event)
                 if(y == 0)
                     break;
 
-                const Position deltaTri = (y > 0) ? Position(11, 5) : Position(-11, -5);
-                const int deltaInc = (y > 0) ? 1 : -1;
-
-                // Save values before zoom for cursor-centered adjustment
-                const PointF oldTriSize(triangleWidth, triangleHeight);
-                const PointF mousePos(Cursor.pos);
-
-                if(!tryZoom(deltaTri, deltaInc, MapObj.get()))
-                    break;
-
-                // Keep the map point under the cursor stable after zoom
-                DisplayRectangle dr = MapObj->getDisplayRect();
-                const PointF ratio(triangleWidth / oldTriSize.x, triangleHeight / oldTriSize.y);
-                const auto size = dr.getSize();
-                const PointF newOrigin = (PointF(dr.getOrigin()) + mousePos) * ratio - mousePos;
-                dr.left = static_cast<Sint32>(newOrigin.x);
-                dr.top = static_cast<Sint32>(newOrigin.y);
-                dr.right = dr.left + size.x;
-                dr.bottom = dr.top + size.y;
-                MapObj->setDisplayRect(dr);
+                tryZoom((y > 0) ? ZoomDirection::In : ZoomDirection::Out, MapObj.get(), Cursor.pos);
                 break;
             }
             for(auto& Menu : Menus)

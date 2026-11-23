@@ -61,8 +61,8 @@ void bobMAP::updateVertexCoords()
         {
             MapNode& curVertex = getVertex(i, j);
             curVertex.x = a;
-            curVertex.y = b - triangleIncrease * (curVertex.h - 0x0A);
-            curVertex.z = triangleIncrease * (curVertex.h - 0x0A);
+            curVertex.y = b - triangleIncrease * (curVertex.h - GROUND_VERTEX_HEIGHT);
+            curVertex.z = triangleIncrease * (curVertex.h - GROUND_VERTEX_HEIGHT);
             a += triangleWidth;
         }
         b += triangleHeight;
@@ -180,8 +180,8 @@ void CMap::constructMap(const boost::filesystem::path& filepath, int width, int 
     modeContent = 0x00;
     modeContent2 = 0x00;
     modify = false;
-    MaxRaiseHeight = 0x3C;
-    MinReduceHeight = 0x00;
+    MaxRaiseHeight = MAX_VERTEX_HEIGHT;
+    MinReduceHeight = MIN_VERTEX_HEIGHT;
     saveCurrentVertices = false;
     undoBuffer.clear();
     redoBuffer.clear();
@@ -268,7 +268,7 @@ std::unique_ptr<bobMAP> CMap::generateMap(int width, int height, MapType type, T
         for(int i = 0; i < myMap->width; i++)
         {
             MapNode& curVertex = myMap->getVertex(i, j);
-            curVertex.h = 0x0A;
+            curVertex.h = GROUND_VERTEX_HEIGHT;
 
             if((j < border || myMap->height - j <= border) || (i < border || myMap->width - i <= border))
             {
@@ -708,40 +708,40 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
             case SDLK_INSERT:
                 if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
                 {
-                    if(MaxRaiseHeight > 0x00)
+                    if(MaxRaiseHeight > MIN_VERTEX_HEIGHT)
                         MaxRaiseHeight--;
                 }
                 break;
             case SDLK_HOME:
                 if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
                 {
-                    MaxRaiseHeight = 0x3C;
+                    MaxRaiseHeight = MAX_VERTEX_HEIGHT;
                 }
                 break;
             case SDLK_PAGEUP:
                 if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
                 {
-                    if(MaxRaiseHeight < 0x3C)
+                    if(MaxRaiseHeight < MAX_VERTEX_HEIGHT)
                         MaxRaiseHeight++;
                 }
                 break;
             case SDLK_DELETE:
                 if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
                 {
-                    if(MinReduceHeight > 0x00)
+                    if(MinReduceHeight > MIN_VERTEX_HEIGHT)
                         MinReduceHeight--;
                 }
                 break;
             case SDLK_END:
                 if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
                 {
-                    MinReduceHeight = 0x00;
+                    MinReduceHeight = MIN_VERTEX_HEIGHT;
                 }
                 break;
             case SDLK_PAGEDOWN:
                 if(mode == EDITOR_MODE_HEIGHT_RAISE || mode == EDITOR_MODE_HEIGHT_REDUCE)
                 {
-                    if(MinReduceHeight < 0x3C)
+                    if(MinReduceHeight < MAX_VERTEX_HEIGHT)
                         MinReduceHeight++;
                 }
                 break;
@@ -989,7 +989,7 @@ void CMap::storeVerticesFromMouse(Position mousePos, Uint8 /*MouseState*/)
 
     lastMousePos_ = mousePos;
 
-    // Columns of the nearest vertex in odd and even rows (odd rows are shifted by half a triangle to the right)
+    // Columns of the nearest vertex in odd and even rows (even rows are shifted half a triangle to the left)
     // Important: Divide AFTER positiveModulo, because dividing a negative value rounds towards 0 instead of down.
     xInOddRows = positiveModulo(mousePos.x + displayRect.left - triangleWidth / 2, map->width_pixel) / triangleWidth;
     xInEvenRows = positiveModulo(mousePos.x + displayRect.left, map->width_pixel) / triangleWidth;
@@ -997,7 +997,7 @@ void CMap::storeVerticesFromMouse(Position mousePos, Uint8 /*MouseState*/)
     MousePosY = positiveModulo(mousePos.y + displayRect.top, map->height_pixel);
 
     // Lowering/raising terrain moves the last/first rows of the map copy above/below over the map edge: Check them too.
-    const int loweredTolerance = triangleIncrease * 0x0A;
+    const int loweredTolerance = triangleIncrease * GROUND_VERTEX_HEIGHT;
     for(int row = floorDiv(-loweredTolerance, triangleHeight) - 1;; row++)
     {
         const int mapRow = positiveModulo(row, map->height);
@@ -1436,10 +1436,10 @@ void CMap::modifyHeightRaise(Position pos)
         even = true;
 
     // DO IT
-    if(tempP->z >= triangleIncrease * (MaxRaiseHeight - 0x0A)) // user specified maximum reached
+    if(tempP->h >= MaxRaiseHeight) // user specified maximum reached
         return;
 
-    if(tempP->z >= triangleIncrease * (0x3C - 0x0A)) // maximum reached (0x3C is max)
+    if(tempP->h >= MAX_VERTEX_HEIGHT) // maximum reached
         return;
 
     tempP->y -= triangleIncrease;
@@ -1533,10 +1533,10 @@ void CMap::modifyHeightReduce(Position pos)
         even = true;
 
     // DO IT
-    if(tempP->z <= triangleIncrease * (MinReduceHeight - 0x0A)) // user specified minimum reached
+    if(tempP->h <= MinReduceHeight) // user specified minimum reached
         return;
 
-    if(tempP->z <= triangleIncrease * (0x00 - 0x0A)) // minimum reached (0x00 is min)
+    if(tempP->h <= MIN_VERTEX_HEIGHT) // minimum reached
         return;
 
     tempP->y += triangleIncrease;

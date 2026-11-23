@@ -126,6 +126,9 @@ public:
     bool isActive() const { return active; }
     int getVertexX() const { return Vertex_.x; }
     int getVertexY() const { return Vertex_.y; }
+    /// Returns the screen position of the vertex at its current height,
+    /// in the copy of the repeated map closest to the mouse.
+    Position vertexScreenPos(Position vertexPos) const;
     auto getMaxRaiseHeight() const { return MaxRaiseHeight; }
     auto getMinReduceHeight() const { return MinReduceHeight; }
     bool isHorizontalMovementLocked() const { return HorizontalMovementLocked; }
@@ -209,9 +212,6 @@ private:
     void calculateVerticesAround(std::array<Point32, T_size>& newVertices, Position pos);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
-    /// Returns the screen position of the vertex at its current height,
-    /// in the copy of the repeated map closest to the mouse.
-    Position vertexScreenPos(Position vertexPos) const;
     void modifyVertex();
     void modifyHeightRaise(Position pos);
     void modifyHeightReduce(Position pos);
