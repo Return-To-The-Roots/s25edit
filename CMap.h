@@ -69,8 +69,8 @@ private:
     std::list<SavedVertex> redoBuffer;
     // get the number of the triangle nearest to cursor and save it to VertexX and VertexY
     void storeVerticesFromMouse(Position mousePos, Uint8 MouseState);
-    // blitting coords for the mouse cursor
-    Position MouseBlit;
+    // last mouse position (display coordinates)
+    Position lastMousePos_ = Position(0, 0);
     // counts the distance from the cursor vertex to the farest vertex that can be involved in changes (0 - only cursor
     // vertex, 1 - six vertices around the cursor vertex ....) (editor mode)
     int ChangeSection_;
@@ -126,6 +126,9 @@ public:
     bool isActive() const { return active; }
     int getVertexX() const { return Vertex_.x; }
     int getVertexY() const { return Vertex_.y; }
+    /// Returns the screen position of the vertex at its current height,
+    /// in the copy of the repeated map closest to the mouse.
+    Position vertexScreenPos(Position vertexPos) const;
     auto getMaxRaiseHeight() const { return MaxRaiseHeight; }
     auto getMinReduceHeight() const { return MinReduceHeight; }
     bool isHorizontalMovementLocked() const { return HorizontalMovementLocked; }
@@ -209,7 +212,6 @@ private:
     void calculateVerticesAround(std::array<Point32, T_size>& newVertices, Position pos);
     // this will setup the 'active' variable of each vertices depending on 'ChangeSection'
     void setupVerticesActivity();
-    Position correctMouseBlit(Position vertexPos) const;
     void modifyVertex();
     void modifyHeightRaise(Position pos);
     void modifyHeightReduce(Position pos);

@@ -12,6 +12,61 @@
 #include "callbacks.h"
 #include "globals.h"
 
+namespace {
+enum class ZoomDirection
+{
+    In,
+    Out
+};
+
+/// Set the zoom and keep the map point under the cursor in place
+void setZoom(CMap& mapObj, Position cursorPos, int width, int height, int increase)
+{
+    const Position vertex(mapObj.getVertexX(), mapObj.getVertexY());
+    const PointF mousePos(cursorPos);
+    const PointF oldVertexPos(mapObj.vertexScreenPos(vertex));
+    const PointF oldTriSize(triangleWidth, triangleHeight);
+
+    callback::PleaseWait(INITIALIZING_CALL);
+    triangleWidth = width;
+    triangleHeight = height;
+    triangleIncrease = increase;
+    bobMAP* myMap = mapObj.getMap();
+    myMap->updateVertexCoords();
+    CSurface::get_nodeVectors(*myMap);
+    callback::PleaseWait(WINDOW_QUIT_MESSAGE);
+
+    // The vertex under the cursor moves with the zoomed terrain height,
+    // the distance from the cursor to that vertex grows or shrinks with the triangles.
+    const PointF ratio = PointF(triangleWidth, triangleHeight) / oldTriSize;
+    const PointF newPointPos = PointF(mapObj.vertexScreenPos(vertex)) + (mousePos - oldVertexPos) * ratio;
+    DisplayRectangle dr = mapObj.getDisplayRect();
+    dr.setOrigin(dr.getOrigin() + Position(newPointPos - mousePos));
+    mapObj.setDisplayRect(dr);
+}
+
+/// Zoom one step in the given direction around the cursor, unless the zoom limit is reached
+void tryZoom(ZoomDirection zoomDirection, CMap* mapObj, Position cursorPos)
+{
+    if(!mapObj || !mapObj->getMap())
+        return;
+    const int direction = (zoomDirection == ZoomDirection::In) ? 1 : -1;
+    const int newInc = triangleIncrease + direction * ZOOM_STEP_INCREASE;
+    if(newInc < ZOOM_INCREASE_MIN || newInc > ZOOM_INCREASE_MAX)
+        return;
+    setZoom(*mapObj, cursorPos, triangleWidth + direction * ZOOM_STEP_WIDTH,
+            triangleHeight + direction * ZOOM_STEP_HEIGHT, newInc);
+}
+
+/// Go back to the default zoom around the cursor
+void resetZoom(CMap* mapObj, Position cursorPos)
+{
+    if(!mapObj || !mapObj->getMap())
+        return;
+    setZoom(*mapObj, cursorPos, TRIANGLE_WIDTH_DEFAULT, TRIANGLE_HEIGHT_DEFAULT, TRIANGLE_INCREASE_DEFAULT);
+}
+} // namespace
+
 void CGame::EventHandling(SDL_Event* Event)
 {
     switch(Event->type)
@@ -85,47 +140,9 @@ void CGame::EventHandling(SDL_Event* Event)
                     break;
 #endif
                 // F5 - F7 is ZOOM, F5 = zoom in, F6 = normal view, F7 = zoom out
-                case SDLK_F5:
-                    if(triangleIncrease < ZOOM_INCREASE_MAX && MapObj->getMap())
-                    {
-                        callback::PleaseWait(INITIALIZING_CALL);
-                        triangleHeight += ZOOM_STEP_HEIGHT;
-                        triangleWidth += ZOOM_STEP_WIDTH;
-                        triangleIncrease += ZOOM_STEP_INCREASE;
-                        bobMAP* myMap = MapObj->getMap();
-                        myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(*myMap);
-                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-                    }
-                    break;
-                case SDLK_F6:
-                {
-                    if(MapObj->getMap())
-                    {
-                        callback::PleaseWait(INITIALIZING_CALL);
-                        triangleHeight = TRIANGLE_HEIGHT_DEFAULT;
-                        triangleWidth = TRIANGLE_WIDTH_DEFAULT;
-                        triangleIncrease = TRIANGLE_INCREASE_DEFAULT;
-                        bobMAP* myMap = MapObj->getMap();
-                        myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(*myMap);
-                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-                    }
-                }
-                break;
-                case SDLK_F7:
-                    if(triangleIncrease > ZOOM_INCREASE_MIN && MapObj->getMap())
-                    {
-                        callback::PleaseWait(INITIALIZING_CALL);
-                        triangleHeight -= ZOOM_STEP_HEIGHT;
-                        triangleWidth -= ZOOM_STEP_WIDTH;
-                        triangleIncrease -= ZOOM_STEP_INCREASE;
-                        bobMAP* myMap = MapObj->getMap();
-                        myMap->updateVertexCoords();
-                        CSurface::get_nodeVectors(*myMap);
-                        callback::PleaseWait(WINDOW_QUIT_MESSAGE);
-                    }
-                    break;
+                case SDLK_F5: tryZoom(ZoomDirection::In, MapObj.get(), Cursor.pos); break;
+                case SDLK_F6: resetZoom(MapObj.get(), Cursor.pos); break;
+                case SDLK_F7: tryZoom(ZoomDirection::Out, MapObj.get(), Cursor.pos); break;
 
                 default: break;
             }
@@ -144,17 +161,17 @@ void CGame::EventHandling(SDL_Event* Event)
 
         case SDL_MOUSEMOTION:
         {
-            // setup mouse cursor data
-            if(MapObj && MapObj->isActive())
+            // Avoid duplicate events especially when warping the mouse back during panning
             {
-                if((Event->motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) == 0)
-                {
-                    Cursor.pos = Position(Event->motion.x, Event->motion.y);
-                }
-            } else
-            {
-                Cursor.pos = Position(Event->motion.x, Event->motion.y);
+                static Position lastMousePos = Position::invalid();
+                const Position newPos(Event->motion.x, Event->motion.y);
+                if(newPos == lastMousePos)
+                    break;
+                lastMousePos = newPos;
             }
+
+            // setup mouse cursor data
+            Cursor.pos = Position(Event->motion.x, Event->motion.y);
             /*
                         //NOTE: we will now deliver the data to menus, windows, map etc., sometimes we have to break the
                switch and stop
@@ -393,6 +410,18 @@ void CGame::EventHandling(SDL_Event* Event)
             {
                 // Positions of the controls are relative to the window
                 wndAtCursor->setMouseWheel(Event->wheel, Cursor.pos - wndAtCursor->getPos());
+                break;
+            }
+            // Zoom the map if active
+            if(MapObj && MapObj->isActive())
+            {
+                int y = Event->wheel.y;
+                if(Event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                    y = -y;
+                if(y == 0)
+                    break;
+
+                tryZoom((y > 0) ? ZoomDirection::In : ZoomDirection::Out, MapObj.get(), Cursor.pos);
                 break;
             }
             for(auto& Menu : Menus)

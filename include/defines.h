@@ -20,6 +20,18 @@ using Point16 = Point<Sint16>;
 using Point32 = Point<Sint32>;
 using Extent16 = Point<Uint16>;
 
+constexpr int positiveModulo(int value, int divisor)
+{
+    // C++ % can be negative for negative inputs; this always returns [0, divisor-1]
+    return ((value % divisor) + divisor) % divisor;
+}
+
+/// Division rounding towards negative infinity (for positive divisors)
+constexpr int floorDiv(int value, int divisor)
+{
+    return (value - positiveModulo(value, divisor)) / divisor;
+}
+
 struct TerrainDesc;
 
 // define the mode to compile (if all is uncommented, the game will compile in normal mode
@@ -119,6 +131,11 @@ struct MapHeaderItem
     Uint16 y;
     Uint32 area; // number of vertices this area has
 };
+
+/// Range of the vertex heights and the height of flat ground
+constexpr Uint8 MIN_VERTEX_HEIGHT = 0x00;
+constexpr Uint8 GROUND_VERTEX_HEIGHT = 0x0A;
+constexpr Uint8 MAX_VERTEX_HEIGHT = 0x3C;
 // point structure
 struct MapNode
 {
@@ -188,6 +205,8 @@ struct bobMAP
     void initVertexCoords();
     /// Updates x,y,z positions (e.g. after height change)
     void updateVertexCoords();
+    /// Returns the position closest to `ref` that shows the same point of the repeated map as `pos`.
+    Point32 nearestCopy(Point32 pos, Point32 ref) const;
 
     const std::string& getName() const { return name; }
     const std::string& getAuthor() const { return author; }
@@ -201,7 +220,6 @@ private:
 // structure to save vertex coordinates
 struct cursorPoint : public Point32
 {
-    Position blit;
     bool active;
     bool fill_rsu;
     bool fill_usd;

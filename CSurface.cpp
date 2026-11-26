@@ -269,12 +269,18 @@ Uint32 CSurface::GetPixel(SDL_Surface* surface, Position pos)
     }
 }
 
+namespace {
+/// Object images (trees, stones, ...) reach at most this many screen pixels beyond their vertex, at every zoom level:
+/// The door image (DATA/MAP00.LST, slot 560) reaches the farthest, 79 pixels above its vertex. Also draw the objects
+/// of triangles this far around the view.
+constexpr int objectMarginPx = 79;
+} // namespace
+
 void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& displayRect, const bobMAP& myMap)
 {
     Uint16 width = myMap.width;
     Uint16 height = myMap.height;
     auto type = myMap.type;
-    MapNode tempP1, tempP2, tempP3;
 
     // min size to avoid underflows
     if(width < 8 || height < 8)
@@ -293,7 +299,21 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
             maxH = std::max(myMap.getVertex(x, y).h, maxH);
         }
     }
-    const int additionalRows = triangleIncrease * std::max(0, maxH - 0x0A) / triangleHeight;
+    // Vertices are moved up by raised and down by lowered terrain
+    const int raisedTolerance = triangleIncrease * std::max(0, maxH - GROUND_VERTEX_HEIGHT);
+    const int loweredTolerance = triangleIncrease * GROUND_VERTEX_HEIGHT;
+
+    // Vertices outside the map are the ones of the neighboring map copy
+    const auto vertex = [&](int x, int y) {
+        MapNode node = myMap.getVertex(positiveModulo(x, width), positiveModulo(y, height));
+        node.x += floorDiv(x, width) * myMap.width_pixel;
+        node.y += floorDiv(y, height) * myMap.height_pixel;
+        return node;
+    };
+    const int colStart = floorDiv(displayRect.left - objectMarginPx, triangleWidth) - 1;
+    const int colEnd = floorDiv(displayRect.right + objectMarginPx, triangleWidth) + 1;
+    const int rowStart = floorDiv(displayRect.top - loweredTolerance - objectMarginPx, triangleHeight) - 1;
+    const int rowEnd = floorDiv(displayRect.bottom + raisedTolerance + objectMarginPx, triangleHeight) + 1;
 
     // draw triangle field
     // NOTE: WE DO THIS TWICE, AT FIRST ONLY TRIANGLE-TEXTURES, AT SECOND THE TEXTURE-BORDERS AND OBJECTS
@@ -301,163 +321,21 @@ void CSurface::DrawTriangleField(SDL_Surface* display, const DisplayRectangle& d
     {
         drawTextures = (i == 0);
 
-        for(int k = 0; k < 4; k++)
+        for(int y = rowStart; y <= rowEnd; y++)
         {
-            // beware calling DrawTriangle for each triangle
-
-            // IMPORTANT: integer values like +8 or -1 are for tolerance to beware of high triangles are not shown
-
-            // at first call DrawTriangle for all triangles inside the map edges
-            int row_start = std::max(displayRect.top, 2 * triangleHeight) / triangleHeight - 2;
-            int row_end = (displayRect.bottom) / triangleHeight + additionalRows;
-            int col_start = std::max<int>(displayRect.left, triangleWidth) / triangleWidth - 1;
-            int col_end = (displayRect.right) / triangleWidth + 1;
-            bool view_outside_edges;
-
-            if(k > 0)
-            {
-                // now call DrawTriangle for all triangles outside the map edges
-                view_outside_edges = false;
-
-                if(k == 1 || k == 3)
-                {
-                    // at first call DrawTriangle for all triangles up or down outside
-                    if(displayRect.top < 0)
-                    {
-                        row_start = std::max(0, height - 1 - (-displayRect.top / triangleHeight) - 1);
-                        row_end = height - 1;
-                        view_outside_edges = true;
-                    } else if(displayRect.bottom > myMap.height_pixel)
-                    {
-                        row_start = 0;
-                        row_end = (displayRect.bottom - myMap.height_pixel) / triangleHeight + 8;
-                        view_outside_edges = true;
-                    } else if(displayRect.top <= 2 * triangleHeight)
-                    {
-                        // this is for draw triangles that are reduced under the lower map edge (have bigger y-coords as
-                        // myMap.height_pixel)
-                        row_start = height - 3;
-                        row_end = height - 1;
-                        view_outside_edges = true;
-                    } else if(displayRect.bottom >= (myMap.height_pixel - 8 * triangleHeight))
-                    {
-                        // this is for draw triangles that are raised over the upper map edge (have negative y-coords)
-                        row_start = 0;
-                        row_end = 8;
-                        view_outside_edges = true;
-                    }
-                }
-
-                if(k == 2 || k == 3)
-                {
-                    // now call DrawTriangle for all triangles left or right outside
-                    if(displayRect.left <= 0)
-                    {
-                        col_start = std::max(0, width - 1 - (-displayRect.left / triangleWidth) - 1);
-                        col_end = width - 1;
-                        view_outside_edges = true;
-                    } else if(displayRect.left < triangleWidth)
-                    {
-                        col_start = width - 2;
-                        col_end = width - 1;
-                        view_outside_edges = true;
-                    } else if(displayRect.right > myMap.width_pixel)
-                    {
-                        col_start = 0;
-                        col_end = (displayRect.right - myMap.width_pixel) / triangleWidth + 1;
-                        view_outside_edges = true;
-                    }
-                }
-
-                // if displayRect is not outside the map edges, there is nothing to do
-                if(!view_outside_edges)
-                    continue;
-            }
-
-            assert(col_start >= 0);
-            assert(row_start >= 0);
-            assert(col_start <= col_end);
-            assert(row_start <= row_end);
-
-            for(unsigned y = row_start; y < height - 1u && y <= static_cast<unsigned>(row_end); y++)
-            {
-                if(y % 2 == 0)
-                {
-                    // first RightSideUp
-                    tempP2 = myMap.getVertex(width - 1, y + 1);
-                    tempP2.x = 0;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(0, y), tempP2,
-                                 myMap.getVertex(0, y + 1));
-                    for(unsigned x = std::max(col_start, 1); x < width && x <= static_cast<unsigned>(col_end); x++)
-                    {
-                        // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
-                                     myMap.getVertex(x - 1, y + 1), myMap.getVertex(x, y + 1));
-                        // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x - 1, y + 1),
-                                     myMap.getVertex(x - 1, y), myMap.getVertex(x, y));
-                    }
-                    // last UpSideDown
-                    tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y + 1),
-                                 myMap.getVertex(width - 1, y), tempP3);
-                } else
-                {
-                    for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
-                    {
-                        // RightSideUp
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, y),
-                                     myMap.getVertex(x, y + 1), myMap.getVertex(x + 1, y + 1));
-                        // UpSideDown
-                        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x + 1, y + 1),
-                                     myMap.getVertex(x, y), myMap.getVertex(x + 1, y));
-                    }
-                    // last RightSideUp
-                    tempP3 = myMap.getVertex(0, y + 1);
-                    tempP3.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, y),
-                                 myMap.getVertex(width - 1, y + 1), tempP3);
-                    // last UpSideDown
-                    tempP1 = myMap.getVertex(0, y + 1);
-                    tempP1.x = myMap.getVertex(width - 1, y + 1).x + triangleWidth;
-                    tempP3 = myMap.getVertex(0, y);
-                    tempP3.x = myMap.getVertex(width - 1, y).x + triangleWidth;
-                    DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, y), tempP3);
-                }
-            }
-
-            // draw last line
-            for(unsigned x = col_start; x < width - 1u && x <= static_cast<unsigned>(col_end); x++)
+            // The two vertices below vertex x are in columns x - 1 and x if this row is even, x and x + 1 if it is odd,
+            // because even rows are shifted half a triangle to the left
+            const int shift = positiveModulo(y, 2);
+            for(int x = colStart; x <= colEnd; x++)
             {
                 // RightSideUp
-                tempP2 = myMap.getVertex(x, 0);
-                tempP2.y = height * triangleHeight + myMap.getVertex(x, 0).y;
-                tempP3 = myMap.getVertex(x + 1, 0);
-                tempP3.y = height * triangleHeight + myMap.getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(x, height - 1), tempP2, tempP3);
+                DrawTriangle(display, displayRect, myMap, type, vertex(x, y), vertex(x - 1 + shift, y + 1),
+                             vertex(x + shift, y + 1));
                 // UpSideDown
-                tempP1 = myMap.getVertex(x + 1, 0);
-                tempP1.y = height * triangleHeight + myMap.getVertex(x + 1, 0).y;
-                DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(x, height - 1),
-                             myMap.getVertex(x + 1, height - 1));
+                DrawTriangle(display, displayRect, myMap, type, vertex(x + shift, y + 1), vertex(x, y),
+                             vertex(x + 1, y));
             }
         }
-
-        // last RightSideUp
-        tempP2 = myMap.getVertex(width - 1, 0);
-        tempP2.y += height * triangleHeight;
-        tempP3 = myMap.getVertex(0, 0);
-        tempP3.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
-        tempP3.y += height * triangleHeight;
-        DrawTriangle(display, displayRect, myMap, type, myMap.getVertex(width - 1, height - 1), tempP2, tempP3);
-        // last UpSideDown
-        tempP1 = myMap.getVertex(0, 0);
-        tempP1.x = myMap.getVertex(width - 1, 0).x + triangleWidth;
-        tempP1.y += height * triangleHeight;
-        tempP3 = myMap.getVertex(0, height - 1);
-        tempP3.x = myMap.getVertex(width - 1, height - 1).x + triangleWidth;
-        DrawTriangle(display, displayRect, myMap, type, tempP1, myMap.getVertex(width - 1, height - 1), tempP3);
     }
 }
 
@@ -499,123 +377,15 @@ BorderPreference CalcBorders(const bobMAP& map, Uint8 s2Id1, Uint8 s2Id2, SDL_Re
     return BorderPreference::None;
 }
 
-template<typename T>
-constexpr bool isInRange(T val, T min, T max)
+/// Convert the points from map to display coordinates.
+/// Return true if the triangle is (partially) visible or at most `margin` away from the view
+bool GetAdjustedPoints(const DisplayRectangle& displayRect, int margin, Point32& p1, Point32& p2, Point32& p3)
 {
-    return val >= min && val <= max;
-}
-
-/// Return true if triangle is drawn
-bool GetAdjustedPoints(const DisplayRectangle& displayRect, const bobMAP& myMap, Point32& p1, Point32& p2, Point32& p3)
-{
-    if((!isInRange(p1.x, displayRect.left, displayRect.right) && !isInRange(p2.x, displayRect.left, displayRect.right)
-        && !isInRange(p3.x, displayRect.left, displayRect.right))
-       || (!isInRange(p1.y, displayRect.top, displayRect.bottom)
-           && !isInRange(p2.y, displayRect.top, displayRect.bottom)
-           && !isInRange(p3.y, displayRect.top, displayRect.bottom)))
-    {
-        bool triangle_shown = false;
-
-        if(displayRect.left <= 0)
-        {
-            int outside_left = displayRect.left;
-            int outside_right = 0;
-            if(isInRange(p1.x - myMap.width_pixel, outside_left, outside_right)
-               || isInRange(p2.x - myMap.width_pixel, outside_left, outside_right)
-               || isInRange(p3.x - myMap.width_pixel, outside_left, outside_right))
-            {
-                p1.x -= myMap.width_pixel;
-                p2.x -= myMap.width_pixel;
-                p3.x -= myMap.width_pixel;
-                triangle_shown = true;
-            }
-        } else if(displayRect.left < triangleWidth)
-        {
-            int outside_left = displayRect.left;
-            int outside_right = displayRect.left + triangleWidth;
-            if(isInRange(p1.x - myMap.width_pixel, outside_left, outside_right)
-               || isInRange(p2.x - myMap.width_pixel, outside_left, outside_right)
-               || isInRange(p3.x - myMap.width_pixel, outside_left, outside_right))
-            {
-                p1.x -= myMap.width_pixel;
-                p2.x -= myMap.width_pixel;
-                p3.x -= myMap.width_pixel;
-                triangle_shown = true;
-            }
-        } else if(displayRect.right > myMap.width_pixel)
-        {
-            int outside_left = myMap.width_pixel;
-            int outside_right = displayRect.right;
-            if(isInRange(p1.x + myMap.width_pixel, outside_left, outside_right)
-               || isInRange(p2.x + myMap.width_pixel, outside_left, outside_right)
-               || isInRange(p3.x + myMap.width_pixel, outside_left, outside_right))
-            {
-                p1.x += myMap.width_pixel;
-                p2.x += myMap.width_pixel;
-                p3.x += myMap.width_pixel;
-                triangle_shown = true;
-            }
-        }
-
-        if(displayRect.top < 0)
-        {
-            int outside_top = displayRect.top;
-            int outside_bottom = 0;
-            if(isInRange(p1.y - myMap.height_pixel, outside_top, outside_bottom)
-               || isInRange(p2.y - myMap.height_pixel, outside_top, outside_bottom)
-               || isInRange(p3.y - myMap.height_pixel, outside_top, outside_bottom))
-            {
-                p1.y -= myMap.height_pixel;
-                p2.y -= myMap.height_pixel;
-                p3.y -= myMap.height_pixel;
-                triangle_shown = true;
-            }
-        } else if(displayRect.bottom > myMap.height_pixel)
-        {
-            int outside_top = myMap.height_pixel;
-            int outside_bottom = displayRect.bottom;
-            if(isInRange(p1.y + myMap.height_pixel, outside_top, outside_bottom)
-               || isInRange(p2.y + myMap.height_pixel, outside_top, outside_bottom)
-               || isInRange(p3.y + myMap.height_pixel, outside_top, outside_bottom))
-            {
-                p1.y += myMap.height_pixel;
-                p2.y += myMap.height_pixel;
-                p3.y += myMap.height_pixel;
-                triangle_shown = true;
-            }
-        }
-
-        // now test if triangle has negative y-coords cause it's raised over the upper map edge
-        if(p1.y < 0 || p2.y < 0 || p3.y < 0)
-        {
-            if(isInRange(p1.y + myMap.height_pixel, displayRect.top, displayRect.bottom)
-               || isInRange(p2.y + myMap.height_pixel, displayRect.top, displayRect.bottom)
-               || isInRange(p3.y + myMap.height_pixel, displayRect.top, displayRect.bottom))
-            {
-                p1.y += myMap.height_pixel;
-                p2.y += myMap.height_pixel;
-                p3.y += myMap.height_pixel;
-                triangle_shown = true;
-            }
-        }
-
-        // now test if triangle has bigger y-coords as myMap.height_pixel cause it's reduced under the lower map edge
-        if(p1.y > myMap.height_pixel || p2.y > myMap.height_pixel || p3.y > myMap.height_pixel)
-        {
-            if(isInRange(p1.y - myMap.height_pixel, displayRect.top, displayRect.bottom)
-               || isInRange(p2.y - myMap.height_pixel, displayRect.top, displayRect.bottom)
-               || isInRange(p3.y - myMap.height_pixel, displayRect.top, displayRect.bottom))
-            {
-                p1.y -= myMap.height_pixel;
-                p2.y -= myMap.height_pixel;
-                p3.y -= myMap.height_pixel;
-                triangle_shown = true;
-            }
-        }
-
-        if(!triangle_shown)
-            return false;
-    }
+    if(std::max({p1.x, p2.x, p3.x}) < displayRect.left - margin
+       || std::min({p1.x, p2.x, p3.x}) > displayRect.right + margin
+       || std::max({p1.y, p2.y, p3.y}) < displayRect.top - margin
+       || std::min({p1.y, p2.y, p3.y}) > displayRect.bottom + margin)
+        return false;
     p1 -= displayRect.getOrigin();
     p2 -= displayRect.getOrigin();
     p3 -= displayRect.getOrigin();
@@ -782,8 +552,8 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
     Point32 p1(P1.x, P1.y);
     Point32 p2(P2.x, P2.y);
     Point32 p3(P3.x, P3.y);
-    // prevent drawing triangles that are not shown
-    if(!GetAdjustedPoints(displayRect, myMap, p1, p2, p3))
+    // prevent drawing triangles that are not shown, but draw objects reaching into the view
+    if(!GetAdjustedPoints(displayRect, drawTextures ? 0 : objectMarginPx, p1, p2, p3))
         return;
 
     // for moving water, lava, objects and so on
@@ -904,17 +674,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                 {
                     tmpP1 += Point16(1, 0);
                     tmpP2 += Point16(1, 0);
-                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
-                    // Shift it close to p1
-                    auto diff = thirdPt - p1;
-                    if(diff.x < -myMap.width_pixel / 2)
-                        thirdPt.x += myMap.width_pixel;
-                    else if(diff.x > myMap.width_pixel / 2)
-                        thirdPt.x -= myMap.width_pixel;
-                    if(diff.y < -myMap.height_pixel / 2)
-                        thirdPt.y += myMap.height_pixel;
-                    else if(diff.y > myMap.height_pixel / 2)
-                        thirdPt.y -= myMap.height_pixel;
+                    thirdPt = myMap.nearestCopy(Point32(tempP.x, tempP.y) - displayRect.getOrigin(), p1);
                 }
                 Point16 tipPt{(p1 + p2 + thirdPt) / 3};
 
@@ -946,17 +706,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                     tmpP2 -= Point16(1, 0);
                 } else
                 {
-                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
-                    // Shift it close to p1
-                    auto diff = thirdPt - p1;
-                    if(diff.x < -myMap.width_pixel / 2)
-                        thirdPt.x += myMap.width_pixel;
-                    else if(diff.x > myMap.width_pixel / 2)
-                        thirdPt.x -= myMap.width_pixel;
-                    if(diff.y < -myMap.height_pixel / 2)
-                        thirdPt.y += myMap.height_pixel;
-                    else if(diff.y > myMap.height_pixel / 2)
-                        thirdPt.y -= myMap.height_pixel;
+                    thirdPt = myMap.nearestCopy(Point32(tempP.x, tempP.y) - displayRect.getOrigin(), p1);
                 }
 
                 Point16 tipPt{(p1 + p2 + thirdPt) / 3};
@@ -981,17 +731,7 @@ void CSurface::DrawTriangle(SDL_Surface* display, const DisplayRectangle& displa
                     thirdPt = p1;
                 else
                 {
-                    thirdPt = Point32(tempP.x, tempP.y) - displayRect.getOrigin();
-                    // Shift it close to p2
-                    auto diff = thirdPt - p2;
-                    if(diff.x < -myMap.width_pixel / 2)
-                        thirdPt.x += myMap.width_pixel;
-                    else if(diff.x > myMap.width_pixel / 2)
-                        thirdPt.x -= myMap.width_pixel;
-                    if(diff.y < -myMap.height_pixel / 2)
-                        thirdPt.y += myMap.height_pixel;
-                    else if(diff.y > myMap.height_pixel / 2)
-                        thirdPt.y -= myMap.height_pixel;
+                    thirdPt = myMap.nearestCopy(Point32(tempP.x, tempP.y) - displayRect.getOrigin(), p2);
                 }
                 Point16 tipPt{(p2 + p3 + thirdPt) / 3};
 
