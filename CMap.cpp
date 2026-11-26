@@ -752,8 +752,11 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
                 }
                 break;
             case SDLK_LCTRL:
-                lastMode = mode;
-                mode = EDITOR_MODE_CUT;
+                if(!key.repeat)
+                {
+                    lastMode = mode;
+                    mode = EDITOR_MODE_CUT;
+                }
                 break;
             case SDLK_b:
                 if(mode != EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE && mode != EDITOR_MODE_TEXTURE_MAKE_HARBOUR)
@@ -971,7 +974,8 @@ void CMap::setKeyboardData(const SDL_KeyboardEvent& key)
                     mode = EDITOR_MODE_HEIGHT_RAISE;
                 break;
             case SDLK_LCTRL: // user probably released EDITOR_MODE_CUT
-                mode = lastMode;
+                if(mode == EDITOR_MODE_CUT)
+                    mode = lastMode;
                 break;
             case SDLK_b: // user probably released EDITOR_MODE_HEIGHT_MAKE_BIG_HOUSE
             case SDLK_h: // user probably released EDITOR_MODE_TEXTURE_MAKE_HARBOUR
